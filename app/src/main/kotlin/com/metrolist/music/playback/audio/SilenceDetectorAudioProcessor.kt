@@ -38,17 +38,6 @@ class SilenceDetectorAudioProcessor(
 
     private var notifiedThisSilence = false
 
-    /** When true, [consumeWindowPeak] and [referencePeak] are kept up to date for Automix. */
-    @Volatile
-    var levelTrackingEnabled = false
-
-    @Volatile
-    private var windowPeak = 0
-
-    @Volatile
-    var referencePeak = 0
-        private set
-
     override fun onConfigure(inputAudioFormat: AudioProcessor.AudioFormat): AudioProcessor.AudioFormat {
         if (inputAudioFormat.encoding != C.ENCODING_PCM_16BIT) {
             throw AudioProcessor.UnhandledAudioFormatException(inputAudioFormat)
@@ -66,8 +55,6 @@ class SilenceDetectorAudioProcessor(
         } else {
             clearSilenceState()
         }
-
-        if (levelTrackingEnabled) trackLevel(inputBuffer)
 
         replaceOutputBuffer(inputBuffer.remaining()).apply {
             put(inputBuffer)
@@ -103,32 +90,6 @@ class SilenceDetectorAudioProcessor(
         }
     }
 
-    // Samples every 8th value: a coarse level is enough and keeps the per-buffer cost negligible.
-    private fun trackLevel(inputBuffer: ByteBuffer) {
-        inputBuffer.order(ByteOrder.LITTLE_ENDIAN)
-        var peak = 0
-        var index = inputBuffer.position()
-        val end = inputBuffer.limit() - 1
-        while (index < end) {
-            peak = maxOf(peak, abs(inputBuffer.getShort(index).toInt()))
-            index += 16
-        }
-        if (peak > windowPeak) windowPeak = peak
-        if (peak > referencePeak) referencePeak = peak
-    }
-
-    /** Returns the loudest sampled value since the previous call, then starts a new window. */
-    fun consumeWindowPeak(): Int {
-        val peak = windowPeak
-        windowPeak = 0
-        return peak
-    }
-
-    private fun resetLevelState() {
-        windowPeak = 0
-        referencePeak = 0
-    }
-
     private fun clearSilenceState() {
         consecutiveSilentFrames = 0
         inSilence = false
@@ -139,15 +100,11 @@ class SilenceDetectorAudioProcessor(
 
     fun isCurrentlySilent(): Boolean = inSilence
 
-    override fun onFlush(streamMetadata: AudioProcessor.StreamMetadata) {
-        clearSilenceState()
-        resetLevelState()
-    }
+    override fun onFlush(streamMetadata: AudioProcessor.StreamMetadata) = clearSilenceState()
 
     override fun onReset() {
         sampleRate = 0
         channelCount = 0
         clearSilenceState()
-        resetLevelState()
     }
 }

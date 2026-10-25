@@ -25,6 +25,10 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.audiofx.AudioEffect
 import com.metrolist.music.playback.audio.VolumeNormalizationAudioProcessor
+import com.metrolist.music.playback.automix.AutomixAnalyzer
+import com.metrolist.music.playback.automix.MixPlan
+import com.metrolist.music.playback.automix.MixPlanner
+import kotlin.math.abs
 import com.metrolist.music.utils.safeDataStoreEdit
 import android.net.ConnectivityManager
 import android.os.Binder
@@ -261,12 +265,11 @@ import java.util.Collections
 private const val INSTANT_SILENCE_SKIP_STEP_MS = 15_000L
 private const val INSTANT_SILENCE_SKIP_SETTLE_MS = 350L
 
-// Automix: how far before the fixed crossfade point we start listening for a quiet outro,
-// how often we sample the output level, and what counts as "quiet" (fraction of the loudest peak).
-private const val AUTOMIX_WINDOW_MS = 20_000L
-private const val AUTOMIX_POLL_MS = 250L
-private const val AUTOMIX_QUIET_POLLS = 4
-private const val AUTOMIX_QUIET_RATIO = 0.1f
+// Automix: how long before the mix the next song is prepared, the earliest a plan may start
+// from now, and how long the next song's tempo takes to glide back to normal after the mix.
+private const val AUTOMIX_PREPARE_LEAD_MS = 8_000L
+private const val AUTOMIX_MIN_LEAD_MS = 3_000L
+private const val AUTOMIX_TEMPO_RAMP_MS = 8_000L
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -412,8 +415,21 @@ class MusicService :
     private var fadingPlayer: ExoPlayer? = null
     private var isCrossfading = false
     private var crossfadeJob: Job? = null
-    private var automixJob: Job? = null
     private var automixEnabled = false
+    private var mixPlan: MixPlan? = null
+    private var mixPlanJob: Job? = null
+    private var preparedMix: PreparedMix? = null
+    private var tempoRampJob: Job? = null
+    private val automixAnalyzer by lazy {
+        AutomixAnalyzer(createDataSourceFactory(VolumeNormalizationAudioProcessor()) { null })
+    }
+
+    /** The next song, already loaded (paused, silent) in [secondaryPlayer] and waiting for its mix. */
+    private class PreparedMix(
+        val targetIndex: Int,
+        val targetMediaId: String,
+        val itemCount: Int,
+    )
     private var taskCleared = false
     private var lastSavedPlayerState: PersistPlayerState? = null
     private var mediaSession: MediaLibrarySession? = null
@@ -1184,11 +1200,7 @@ class MusicService :
             .distinctUntilChanged()
             .collect(scope) { enabled ->
                 automixEnabled = enabled
-                playerSilenceProcessors.values.forEach { it.levelTrackingEnabled = enabled }
-                if (!enabled) {
-                    automixJob?.cancel()
-                    automixJob = null
-                }
+                if (!enabled) cancelMixPlanning()
             }
 
         // Observe and cache common preferences to avoid runBlocking reads in playback callbacks
@@ -1323,7 +1335,6 @@ class MusicService :
         val eqProcessor = CustomEqualizerAudioProcessor()
 
         val silenceProcessor = SilenceDetectorAudioProcessor { handleLongSilenceDetected() }
-        silenceProcessor.levelTrackingEnabled = automixEnabled
 
         // Set initial state — use pre-read prefs when available, otherwise fall back to DataStore
         val useAudioTrackPlaybackParams = if (prefs != null) {
@@ -4334,8 +4345,9 @@ class MusicService :
         mediaSession?.release()
         crossfadeMessage?.cancel()
         crossfadeMessage = null
-        automixJob?.cancel()
-        automixJob = null
+        cancelMixPlanning()
+        tempoRampJob?.cancel()
+        tempoRampJob = null
         crossfadeJob?.cancel()
         crossfadeJob = null
         secondaryPlayer?.let { pendingPlayer ->
@@ -4379,8 +4391,9 @@ class MusicService :
     fun stopOnTaskClear() {
         if (taskCleared) return
         taskCleared = true
-        automixJob?.cancel()
-        automixJob = null
+        cancelMixPlanning()
+        tempoRampJob?.cancel()
+        tempoRampJob = null
         crossfadeJob?.cancel()
         crossfadeJob = null
         crossfadeMessage?.cancel()
@@ -4851,8 +4864,7 @@ class MusicService :
     private fun scheduleCrossfade() {
         crossfadeMessage?.cancel()
         crossfadeMessage = null
-        automixJob?.cancel()
-        automixJob = null
+        cancelMixPlanning()
         mixZone.value = null
 
         val mediaCrossfadeDuration = crossfadeDuration.toLong()
@@ -4868,6 +4880,16 @@ class MusicService :
 
         val targetMediaId = player.currentMediaItem?.mediaId
 
+        scheduleCrossfadeMessage(triggerTime, targetMediaId)
+
+        if (automixEnabled) requestMixPlan(targetMediaId)
+    }
+
+    private fun scheduleCrossfadeMessage(
+        positionMs: Long,
+        targetMediaId: String?,
+    ) {
+        crossfadeMessage?.cancel()
         crossfadeMessage = player.createMessage { _, _ ->
             val timer = sleepTimer
             if (player.isPlaying && player.currentMediaItem?.mediaId == targetMediaId && (timer == null || !timer.pauseWhenSongEnd)) {
@@ -4875,55 +4897,83 @@ class MusicService :
             }
         }.apply {
             setLooper(Looper.getMainLooper())
-            setPosition(triggerTime)
+            setPosition(positionMs)
             send()
         }
+    }
 
-        if (automixEnabled) startAutomixWatch(targetMediaId, triggerTime)
+    private fun cancelMixPlanning() {
+        mixPlanJob?.cancel()
+        mixPlanJob = null
+        mixPlan = null
+        discardPreparedSecondary()
+    }
+
+    private fun discardPreparedSecondary() {
+        if (preparedMix == null) return
+        preparedMix = null
+        secondaryPlayer?.let { prepared ->
+            prepared.removeListener(secondaryPlayerListener)
+            prepared.stop()
+            prepared.clearMediaItems()
+            releaseExoPlayer(prepared)
+        }
+        secondaryPlayer = null
     }
 
     /**
-     * Automix: in the last seconds before the fixed crossfade point, watch the output level and
-     * begin the crossfade early once the outro has faded or gone quiet. If the song never gets
-     * quiet (hard ending), the fixed-time crossfade scheduled above still fires.
+     * Automix: analyses this song and the next one, then moves the crossfade to a spot where the music
+     * is still at full level, aligned to the beat and with the next song's tempo matched. Until the plan
+     * is ready (or if it fails) the plain fixed-time crossfade scheduled by the caller stays in place.
      */
-    private fun startAutomixWatch(
-        targetMediaId: String?,
-        fixedTriggerMs: Long,
-    ) {
-        val duration = player.duration.takeIf { it != C.TIME_UNSET && it > 0 } ?: return
-        val windowStartMs = maxOf(fixedTriggerMs - AUTOMIX_WINDOW_MS, duration / 2)
+    private fun requestMixPlan(currentMediaId: String?) {
+        val currentId = currentMediaId ?: return
+        val nextIndex =
+            if (player.repeatMode == REPEAT_MODE_ONE) player.currentMediaItemIndex else player.nextMediaItemIndex
+        if (nextIndex == C.INDEX_UNSET) return
+        val nextId = player.getMediaItemAt(nextIndex).mediaId
 
-        automixJob =
+        mixPlanJob =
             scope.launch {
-                var quietPolls = 0
-                while (isActive) {
-                    delay(AUTOMIX_POLL_MS)
-                    if (isCrossfading || player.currentMediaItem?.mediaId != targetMediaId) return@launch
+                val current = automixAnalyzer.analyze(currentId) ?: return@launch
+                val next = automixAnalyzer.analyze(nextId) ?: return@launch
+                if (player.currentMediaItem?.mediaId != currentId || isCrossfading) return@launch
 
-                    val processor = playerSilenceProcessors[player] ?: return@launch
-                    val peak = processor.consumeWindowPeak()
-                    val position = player.currentPosition
+                val duration = player.duration
+                val plan =
+                    MixPlanner.plan(
+                        current = current,
+                        next = next,
+                        desiredMixMs = crossfadeDuration.toLong(),
+                        earliestStartMs = player.currentPosition + AUTOMIX_MIN_LEAD_MS,
+                    ) ?: return@launch
+                if (duration == C.TIME_UNSET || plan.endMs > duration) return@launch
 
-                    if (position >= fixedTriggerMs) return@launch
-                    if (!player.isPlaying || position < windowStartMs) {
-                        quietPolls = 0
-                        continue
-                    }
+                Timber
+                    .tag(TAG)
+                    .d(
+                        "Automix plan: start=%d len=%d nextStart=%d speed=%.3f tempoMatched=%b",
+                        plan.startMs,
+                        plan.lengthMs,
+                        plan.nextStartMs,
+                        plan.nextSpeedFactor,
+                        plan.tempoMatched,
+                    )
+                mixPlan = plan
+                mixZone.value = plan.startMs..plan.endMs
+                scheduleCrossfadeMessage(plan.startMs, currentId)
 
-                    val reference = processor.referencePeak
-                    val isQuiet = reference > 0 && peak < reference * AUTOMIX_QUIET_RATIO
-                    quietPolls = if (isQuiet) quietPolls + 1 else 0
-
-                    if (quietPolls >= AUTOMIX_QUIET_POLLS) {
-                        val timer = sleepTimer
-                        if (timer == null || !timer.pauseWhenSongEnd) {
-                            Timber.tag(TAG).d("Automix: quiet outro detected, starting crossfade early")
-                            startCrossfade()
-                        }
-                        return@launch
-                    }
-                }
+                // Load the next song shortly before the mix so it starts exactly on the beat.
+                while (isActive && player.currentPosition < plan.startMs - AUTOMIX_PREPARE_LEAD_MS) delay(500)
+                if (player.currentMediaItem?.mediaId != currentId || isCrossfading || secondaryPlayer != null) return@launch
+                val prepared =
+                    buildSecondaryPlayer(
+                        targetIndex = nextIndex,
+                        startPositionMs = plan.nextStartMs,
+                        speedFactor = plan.nextSpeedFactor,
+                    ) ?: return@launch
+                secondaryPlayer = prepared
+                preparedMix = PreparedMix(nextIndex, nextId, player.mediaItemCount)
             }
     }
 
@@ -4950,42 +5000,72 @@ class MusicService :
             }
         if (targetIndex == C.INDEX_UNSET) return
 
-        secondaryPlayer = createExoPlayer()
-        val secPlayer = secondaryPlayer!!
+        val plan = mixPlan
+        val prepared = preparedMix
+        val preparedUsable =
+            prepared != null &&
+                secondaryPlayer != null &&
+                prepared.targetIndex == targetIndex &&
+                prepared.itemCount == player.mediaItemCount &&
+                player.getMediaItemAt(targetIndex).mediaId == prepared.targetMediaId
+
+        val secPlayer: ExoPlayer
+        if (preparedUsable) {
+            preparedMix = null
+            secPlayer = secondaryPlayer!!
+            secPlayer.repeatMode = repeatMode
+            secPlayer.shuffleModeEnabled = shuffleModeEnabled
+        } else {
+            discardPreparedSecondary()
+            secPlayer =
+                buildSecondaryPlayer(
+                    targetIndex = targetIndex,
+                    startPositionMs = plan?.nextStartMs ?: 0L,
+                    speedFactor = plan?.nextSpeedFactor ?: 1f,
+                ) ?: return
+            secondaryPlayer = secPlayer
+        }
+        secPlayer.playWhenReady = true
+
+        performCrossfadeSwap(plan)
+    }
+
+    private fun buildSecondaryPlayer(
+        targetIndex: Int,
+        startPositionMs: Long,
+        speedFactor: Float,
+    ): ExoPlayer? {
+        val secPlayer = createExoPlayer()
         secPlayer.addListener(secondaryPlayerListener)
 
-        val itemCount = player.mediaItemCount
         val items = mutableListOf<MediaItem>()
-        for (i in 0 until itemCount) {
+        for (i in 0 until player.mediaItemCount) {
             items.add(player.getMediaItemAt(i))
         }
 
         secPlayer.setMediaItems(items)
-        secPlayer.seekTo(targetIndex, 0)
+        secPlayer.seekTo(targetIndex, startPositionMs)
         secPlayer.volume = 0f
 
-        secPlayer.setPlaybackParameters(player.playbackParameters)
+        val base = player.playbackParameters
+        secPlayer.playbackParameters = PlaybackParameters(base.speed * speedFactor, base.pitch)
 
-        secPlayer.repeatMode = repeatMode
-        secPlayer.shuffleModeEnabled = shuffleModeEnabled
+        secPlayer.repeatMode = player.repeatMode
+        secPlayer.shuffleModeEnabled = player.shuffleModeEnabled
         secPlayer.setShuffleOrder(player.shuffleOrder)
-        secPlayer.playbackParameters = player.playbackParameters
 
-        try {
+        return try {
             secPlayer.prepare()
-            secPlayer.playWhenReady = true
+            secPlayer
         } catch (e: Exception) {
             Timber.tag(TAG).e(e, "Failed to prepare secondary player for crossfade")
             secPlayer.removeListener(secondaryPlayerListener)
             releaseExoPlayer(secPlayer)
-            secondaryPlayer = null
-            return
+            null
         }
-
-        performCrossfadeSwap()
     }
 
-    private fun performCrossfadeSwap() {
+    private fun performCrossfadeSwap(plan: MixPlan? = null) {
         isCrossfading = true
         isMixing.value = true
         val nextPlayer = secondaryPlayer ?: return
@@ -5048,8 +5128,8 @@ class MusicService :
         crossfadeJob =
             scope.launch {
                 val speed = fadingPlayer?.playbackParameters?.speed?.coerceAtLeast(0.01f) ?: 1f
-                val duration = (crossfadeDuration / speed).toLong()
-                val steps = 20
+                val duration = ((plan?.lengthMs?.toFloat() ?: crossfadeDuration) / speed).toLong()
+                val steps = if (plan != null) (duration / 50L).toInt().coerceIn(20, 400) else 20
                 val stepTime = duration / steps
                 val startVolume =
                     try {
@@ -5065,8 +5145,19 @@ class MusicService :
                     }
 
                     val progress = i / steps.toFloat()
-                    val fadeIn = 1.0f - (1.0f - progress) * (1.0f - progress)
-                    val fadeOut = (1.0f - progress) * (1.0f - progress)
+                    // Planned mixes overlap loud sections, so use equal-power curves to keep the level steady.
+                    val fadeIn =
+                        if (plan != null) {
+                            kotlin.math.sin(progress * Math.PI.toFloat() / 2f)
+                        } else {
+                            1.0f - (1.0f - progress) * (1.0f - progress)
+                        }
+                    val fadeOut =
+                        if (plan != null) {
+                            kotlin.math.cos(progress * Math.PI.toFloat() / 2f)
+                        } else {
+                            (1.0f - progress) * (1.0f - progress)
+                        }
 
                     try {
                         player.volume = startVolume * fadeIn
@@ -5085,6 +5176,29 @@ class MusicService :
                 }
 
                 cleanupCrossfade(fadingPlayerSessionId = previousAudioSessionId)
+
+                if (plan != null && plan.nextSpeedFactor != 1f) rampTempoBack(plan.nextSpeedFactor)
+            }
+    }
+
+    // The next song was sped up or slowed down to match the previous one; glide back to the user's speed.
+    private fun rampTempoBack(factor: Float) {
+        tempoRampJob?.cancel()
+        tempoRampJob =
+            scope.launch {
+                val rampPlayer = player
+                val params = rampPlayer.playbackParameters
+                val targetSpeed = params.speed / factor
+                val steps = 40
+                var lastSet = params.speed
+                for (i in 1..steps) {
+                    delay(AUTOMIX_TEMPO_RAMP_MS / steps)
+                    if (!isActive || player !== rampPlayer) return@launch
+                    // The user changed the speed meanwhile: leave their choice alone.
+                    if (abs(rampPlayer.playbackParameters.speed - lastSet) > 0.001f) return@launch
+                    lastSet = params.speed + (targetSpeed - params.speed) * i / steps
+                    rampPlayer.playbackParameters = PlaybackParameters(lastSet, params.pitch)
+                }
             }
     }
 
