@@ -112,6 +112,7 @@ import com.metrolist.music.constants.AutoDownloadOnLikeKey
 import com.metrolist.music.constants.AutoLoadMoreKey
 import com.metrolist.music.constants.AutoSkipNextOnErrorKey
 import com.metrolist.music.constants.AutoplayKey
+import com.metrolist.music.constants.AutomixEnabledKey
 import com.metrolist.music.constants.CrossfadeDurationKey
 import com.metrolist.music.constants.CrossfadeEnabledKey
 import com.metrolist.music.constants.CrossfadeGaplessKey
@@ -260,6 +261,13 @@ import java.util.Collections
 private const val INSTANT_SILENCE_SKIP_STEP_MS = 15_000L
 private const val INSTANT_SILENCE_SKIP_SETTLE_MS = 350L
 
+// Automix: how far before the fixed crossfade point we start listening for a quiet outro,
+// how often we sample the output level, and what counts as "quiet" (fraction of the loudest peak).
+private const val AUTOMIX_WINDOW_MS = 20_000L
+private const val AUTOMIX_POLL_MS = 250L
+private const val AUTOMIX_QUIET_POLLS = 4
+private const val AUTOMIX_QUIET_RATIO = 0.1f
+
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @androidx.annotation.OptIn(UnstableApi::class)
 @AndroidEntryPoint
@@ -404,6 +412,8 @@ class MusicService :
     private var fadingPlayer: ExoPlayer? = null
     private var isCrossfading = false
     private var crossfadeJob: Job? = null
+    private var automixJob: Job? = null
+    private var automixEnabled = false
     private var taskCleared = false
     private var lastSavedPlayerState: PersistPlayerState? = null
     private var mediaSession: MediaLibrarySession? = null
@@ -1163,6 +1173,18 @@ class MusicService :
                 crossfadeGapless = gapless
             }
 
+        dataStore.data
+            .map { it[AutomixEnabledKey] ?: false }
+            .distinctUntilChanged()
+            .collect(scope) { enabled ->
+                automixEnabled = enabled
+                playerSilenceProcessors.values.forEach { it.levelTrackingEnabled = enabled }
+                if (!enabled) {
+                    automixJob?.cancel()
+                    automixJob = null
+                }
+            }
+
         // Observe and cache common preferences to avoid runBlocking reads in playback callbacks
         scope.launch {
             dataStore.data.map { it[PersistentQueueKey] ?: true }.distinctUntilChanged().collect { cachedPersistentQueue = it }
@@ -1295,6 +1317,7 @@ class MusicService :
         val eqProcessor = CustomEqualizerAudioProcessor()
 
         val silenceProcessor = SilenceDetectorAudioProcessor { handleLongSilenceDetected() }
+        silenceProcessor.levelTrackingEnabled = automixEnabled
 
         // Set initial state — use pre-read prefs when available, otherwise fall back to DataStore
         val useAudioTrackPlaybackParams = if (prefs != null) {
@@ -4305,6 +4328,8 @@ class MusicService :
         mediaSession?.release()
         crossfadeMessage?.cancel()
         crossfadeMessage = null
+        automixJob?.cancel()
+        automixJob = null
         crossfadeJob?.cancel()
         crossfadeJob = null
         secondaryPlayer?.let { pendingPlayer ->
@@ -4348,6 +4373,8 @@ class MusicService :
     fun stopOnTaskClear() {
         if (taskCleared) return
         taskCleared = true
+        automixJob?.cancel()
+        automixJob = null
         crossfadeJob?.cancel()
         crossfadeJob = null
         crossfadeMessage?.cancel()
@@ -4818,7 +4845,9 @@ class MusicService :
     private fun scheduleCrossfade() {
         crossfadeMessage?.cancel()
         crossfadeMessage = null
-        
+        automixJob?.cancel()
+        automixJob = null
+
         val mediaCrossfadeDuration = crossfadeDuration.toLong()
 
         if (!crossfadeEnabled || crossfadeDuration <= 0f || player.duration == C.TIME_UNSET || player.duration <= mediaCrossfadeDuration) return
@@ -4841,6 +4870,53 @@ class MusicService :
             setPosition(triggerTime)
             send()
         }
+
+        if (automixEnabled) startAutomixWatch(targetMediaId, triggerTime)
+    }
+
+    /**
+     * Automix: in the last seconds before the fixed crossfade point, watch the output level and
+     * begin the crossfade early once the outro has faded or gone quiet. If the song never gets
+     * quiet (hard ending), the fixed-time crossfade scheduled above still fires.
+     */
+    private fun startAutomixWatch(
+        targetMediaId: String?,
+        fixedTriggerMs: Long,
+    ) {
+        val duration = player.duration.takeIf { it != C.TIME_UNSET && it > 0 } ?: return
+        val windowStartMs = maxOf(fixedTriggerMs - AUTOMIX_WINDOW_MS, duration / 2)
+
+        automixJob =
+            scope.launch {
+                var quietPolls = 0
+                while (isActive) {
+                    delay(AUTOMIX_POLL_MS)
+                    if (isCrossfading || player.currentMediaItem?.mediaId != targetMediaId) return@launch
+
+                    val processor = playerSilenceProcessors[player] ?: return@launch
+                    val peak = processor.consumeWindowPeak()
+                    val position = player.currentPosition
+
+                    if (position >= fixedTriggerMs) return@launch
+                    if (!player.isPlaying || position < windowStartMs) {
+                        quietPolls = 0
+                        continue
+                    }
+
+                    val reference = processor.referencePeak
+                    val isQuiet = reference > 0 && peak < reference * AUTOMIX_QUIET_RATIO
+                    quietPolls = if (isQuiet) quietPolls + 1 else 0
+
+                    if (quietPolls >= AUTOMIX_QUIET_POLLS) {
+                        val timer = sleepTimer
+                        if (timer == null || !timer.pauseWhenSongEnd) {
+                            Timber.tag(TAG).d("Automix: quiet outro detected, starting crossfade early")
+                            startCrossfade()
+                        }
+                        return@launch
+                    }
+                }
+            }
     }
 
     private fun isNextItemGapless(): Boolean {

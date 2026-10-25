@@ -353,6 +353,8 @@
     <string name="crossfade_duration">Crossfade duration</string>
     <string name="crossfade_gapless">Disable for gapless albums</string>
     <string name="crossfade_gapless_desc">Skip crossfade for albums designed to play without gaps</string>
+    <string name="automix">Automix</string>
+    <string name="automix_desc">Starts the next song early when the current one fades out or goes quiet</string>
 
     <!-- Romanization Settings -->
     <string name="lyrics_romanize_title">Romanization</string>
