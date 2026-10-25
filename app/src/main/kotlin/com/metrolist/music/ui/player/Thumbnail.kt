@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -125,13 +126,13 @@ private fun calculateThumbnailDimensions(
     val effectiveSize = if (isLandscape) {
         minOf(containerWidth, containerHeight) - (horizontalPadding * 2)
     } else {
-        containerWidth - (horizontalPadding * 2)
+        containerWidth
     }
     return ThumbnailDimensions(
         itemWidth = containerWidth,
         containerSize = containerWidth,
         thumbnailSize = effectiveSize,
-        cornerRadius = cornerRadius * 2
+        cornerRadius = if (isLandscape) cornerRadius * 2 else 0.dp
     )
 }
 
@@ -518,7 +519,7 @@ private fun ThumbnailItem(
                         .fillMaxSize()
                 }
             )
-            .padding(horizontal = PlayerHorizontalPadding)
+            .padding(horizontal = if (isLandscape) PlayerHorizontalPadding else 0.dp)
             .graphicsLayer {
                 // Render entire thumbnail item on separate hardware layer for smooth animations
                 compositingStrategy = CompositingStrategy.Offscreen
@@ -554,12 +555,16 @@ private fun ThumbnailItem(
                     }
                 )
             },
-        contentAlignment = Alignment.Center
+        contentAlignment = if (isLandscape) Alignment.Center else Alignment.TopCenter
     ) {
         Box(
-            modifier = Modifier
-                .size(dimensions.thumbnailSize)
+            modifier = (if (isLandscape) {
+                Modifier.size(dimensions.thumbnailSize)
+            } else {
+                Modifier.aspectRatio(1f)
+            })
                 .clip(RoundedCornerShape(dimensions.cornerRadius))
+                .then(if (isLandscape) Modifier else Modifier.fadeBottomEdge())
         ) {
             if (hidePlayerThumbnail) {
                 HiddenThumbnailPlaceholder(textBackgroundColor = textBackgroundColor)

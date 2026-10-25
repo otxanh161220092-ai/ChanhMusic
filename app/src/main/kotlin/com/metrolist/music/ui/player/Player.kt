@@ -56,6 +56,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ContainedLoadingIndicator
@@ -588,6 +589,22 @@ fun BottomSheetPlayer(
             }
         }
 
+    val useVibrantText = shouldUseDarkButtonColors
+    val useVibrant = shouldUseDarkButtonColors && playerButtonsStyle == PlayerButtonsStyle.DEFAULT
+    val glyphColor = if (playerButtonsStyle == PlayerButtonsStyle.DEFAULT) TextBackgroundColor else textButtonColor
+    val roundButtonContainerColor =
+        if (playerButtonsStyle == PlayerButtonsStyle.DEFAULT) {
+            if (shouldUseDarkButtonColors) Color.White.copy(alpha = 0.22f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+        } else {
+            textButtonColor
+        }
+    val roundButtonContentColor =
+        if (playerButtonsStyle == PlayerButtonsStyle.DEFAULT) {
+            if (shouldUseDarkButtonColors) Color.White else MaterialTheme.colorScheme.onSurface
+        } else {
+            iconButtonColor
+        }
+
     val download by LocalDownloadUtil.current
         .getDownload(mediaMetadata?.id ?: "")
         .collectAsStateWithLifecycle(initialValue = null)
@@ -875,7 +892,13 @@ fun BottomSheetPlayer(
                                         modifier =
                                             Modifier
                                                 .fillMaxSize()
-                                                .background(Color.Black.copy(alpha = 0.3f)),
+                                                .background(
+                                                    Brush.verticalGradient(
+                                                        0f to Color.Black.copy(alpha = 0.1f),
+                                                        0.55f to Color.Black.copy(alpha = 0.25f),
+                                                        1f to Color.Black.copy(alpha = 0.5f),
+                                                    ),
+                                                ),
                                     )
                                 }
                             }
@@ -910,7 +933,12 @@ fun BottomSheetPlayer(
                                         .fillMaxSize()
                                         .alpha(backgroundAlpha)
                                         .background(Brush.verticalGradient(colorStops = gradientColorStops))
-                                        .background(Color.Black.copy(alpha = 0.2f)),
+                                        .background(
+                                            Brush.verticalGradient(
+                                                0f to Color.Black.copy(alpha = 0.05f),
+                                                1f to Color.Black.copy(alpha = 0.35f),
+                                            ),
+                                        ),
                                 )
                             }
                         }
@@ -1007,6 +1035,7 @@ fun BottomSheetPlayer(
                         Text(
                             text = title,
                             style = MaterialTheme.typography.titleLarge,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -1050,7 +1079,7 @@ fun BottomSheetPlayer(
                                     mediaMetadata.artists.forEachIndexed { index, artist ->
                                         val tag = "artist_${artist.id.orEmpty()}"
                                         pushStringAnnotation(tag = tag, annotation = artist.id.orEmpty())
-                                        withStyle(SpanStyle(color = TextBackgroundColor, fontSize = 16.sp)) {
+                                        withStyle(SpanStyle(color = TextBackgroundColor.copy(alpha = 0.65f), fontSize = 16.sp)) {
                                             append(artist.name)
                                         }
                                         pop()
@@ -1063,6 +1092,7 @@ fun BottomSheetPlayer(
                                     Modifier
                                         .fillMaxWidth()
                                         .basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp)
+                                        .vibrant(useVibrantText)
                                         .padding(end = 12.dp),
                             ) {
                                 var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -1134,14 +1164,14 @@ fun BottomSheetPlayer(
                         RoundedCornerShape(
                             topStart = 50.dp,
                             bottomStart = 50.dp,
-                            topEnd = 3.dp,
-                            bottomEnd = 3.dp,
+                            topEnd = 50.dp,
+                            bottomEnd = 50.dp,
                         )
 
                     val favShape =
                         RoundedCornerShape(
-                            topStart = 3.dp,
-                            bottomStart = 3.dp,
+                            topStart = 50.dp,
+                            bottomStart = 50.dp,
                             topEnd = 50.dp,
                             bottomEnd = 50.dp,
                         )
@@ -1149,8 +1179,9 @@ fun BottomSheetPlayer(
                     val middleShape = RoundedCornerShape(3.dp)
 
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.vibrant(useVibrant, 0.9f),
                     ) {
                         AnimatedContent(targetState = showInlineLyrics, label = "ShareButton") { showLyrics ->
                             if (showLyrics) {
@@ -1159,10 +1190,10 @@ fun BottomSheetPlayer(
                                     shape = shareShape,
                                     colors =
                                         IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = textButtonColor,
-                                            contentColor = iconButtonColor,
+                                            containerColor = roundButtonContainerColor,
+                                            contentColor = roundButtonContentColor,
                                         ),
-                                    modifier = Modifier.size(42.dp),
+                                    modifier = Modifier.size(40.dp),
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.fullscreen),
@@ -1187,10 +1218,10 @@ fun BottomSheetPlayer(
                                     shape = shareShape,
                                     colors =
                                         IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = textButtonColor,
-                                            contentColor = iconButtonColor,
+                                            containerColor = roundButtonContainerColor,
+                                            contentColor = roundButtonContentColor,
                                         ),
-                                    modifier = Modifier.size(42.dp),
+                                    modifier = Modifier.size(40.dp),
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.share),
@@ -1225,10 +1256,10 @@ fun BottomSheetPlayer(
                                     shape = favShape,
                                     colors =
                                         IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = textButtonColor,
-                                            contentColor = iconButtonColor,
+                                            containerColor = roundButtonContainerColor,
+                                            contentColor = roundButtonContentColor,
                                         ),
-                                    modifier = Modifier.size(42.dp),
+                                    modifier = Modifier.size(40.dp),
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.more_horiz),
@@ -1245,10 +1276,10 @@ fun BottomSheetPlayer(
                                     shape = favShape,
                                     colors =
                                         IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = textButtonColor,
-                                            contentColor = iconButtonColor,
+                                            containerColor = roundButtonContainerColor,
+                                            contentColor = roundButtonContentColor,
                                         ),
-                                    modifier = Modifier.size(42.dp),
+                                    modifier = Modifier.size(40.dp),
                                 ) {
                                     Icon(
                                         painter =
@@ -1373,7 +1404,7 @@ fun BottomSheetPlayer(
 
             Spacer(Modifier.height(24.dp))
 
-            Box(contentAlignment = Alignment.Center) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText)) {
             when (sliderStyle) {
                 SliderStyle.DEFAULT -> {
                     Slider(
@@ -1399,7 +1430,14 @@ fun BottomSheetPlayer(
                             }
                         },
                         enabled = !isListenTogetherGuest,
-                        colors = PlayerSliderColors.getSliderColors(textButtonColor, playerBackground, useDarkTheme),
+                        thumb = { Spacer(modifier = Modifier.size(0.dp)) },
+                        track = { sliderState ->
+                            PlayerSliderTrack(
+                                sliderState = sliderState,
+                                colors = PlayerSliderColors.getSliderColors(textButtonColor, playerBackground, useDarkTheme),
+                                trackHeight = 4.dp,
+                            )
+                        },
                         modifier = Modifier.padding(horizontal = PlayerHorizontalPadding),
                     )
                 }
@@ -1488,6 +1526,7 @@ fun BottomSheetPlayer(
                             PlayerSliderTrack(
                                 sliderState = sliderState,
                                 colors = PlayerSliderColors.getSliderColors(textButtonColor, playerBackground, useDarkTheme),
+                                trackHeight = 4.dp,
                             )
                         },
                         modifier = Modifier.padding(horizontal = PlayerHorizontalPadding),
@@ -1497,7 +1536,7 @@ fun BottomSheetPlayer(
 
             val zone = mixZone
             if (zone != null && duration != C.TIME_UNSET && duration > 0L) {
-                val bandColor = textButtonColor.copy(alpha = 0.5f)
+                val bandColor = if (useVibrantText) Color.White.copy(alpha = 0.45f) else textButtonColor.copy(alpha = 0.5f)
                 Canvas(
                     Modifier
                         .matchParentSize()
@@ -1505,7 +1544,7 @@ fun BottomSheetPlayer(
                 ) {
                     val startX = size.width * (zone.first.toFloat() / duration).coerceIn(0f, 1f)
                     val endX = size.width * (zone.last.toFloat() / duration).coerceIn(0f, 1f)
-                    val bandHeight = 6.dp.toPx()
+                    val bandHeight = 4.dp.toPx()
                     if (endX > startX) {
                         drawRoundRect(
                             color = bandColor,
@@ -1526,12 +1565,14 @@ fun BottomSheetPlayer(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = PlayerHorizontalPadding + 4.dp),
+                        .vibrant(useVibrantText)
+                        .padding(horizontal = PlayerHorizontalPadding),
             ) {
                 Text(
                     text = makeTimeString(sliderPosition ?: effectivePosition),
                     style = MaterialTheme.typography.labelMedium,
-                    color = TextBackgroundColor,
+                    fontSize = 11.sp,
+                    color = TextBackgroundColor.copy(alpha = 0.6f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -1554,7 +1595,8 @@ fun BottomSheetPlayer(
                 Text(
                     text = if (duration != C.TIME_UNSET) makeTimeString(duration) else "",
                     style = MaterialTheme.typography.labelMedium,
-                    color = TextBackgroundColor,
+                    fontSize = 11.sp,
+                    color = TextBackgroundColor.copy(alpha = 0.6f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -1575,6 +1617,7 @@ fun BottomSheetPlayer(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
+                                    .vibrant(useVibrant)
                                     .padding(horizontal = PlayerHorizontalPadding),
                         ) {
                             val backInteractionSource = remember { MutableInteractionSource() }
@@ -1643,18 +1686,20 @@ fun BottomSheetPlayer(
                                 interactionSource = backInteractionSource,
                                 colors =
                                     IconButtonDefaults.filledIconButtonColors(
-                                        containerColor = sideButtonContainerColor,
-                                        contentColor = sideButtonContentColor,
+                                        containerColor = Color.Transparent,
+                                        contentColor = glyphColor,
+                                        disabledContainerColor = Color.Transparent,
+                                        disabledContentColor = glyphColor.copy(alpha = 0.38f),
                                     ),
                                 modifier =
                                     Modifier
-                                        .height(68.dp)
+                                        .height(76.dp)
                                         .weight(backButtonWeight),
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.skip_previous),
                                     contentDescription = null,
-                                    modifier = Modifier.size(32.dp),
+                                    modifier = Modifier.size(44.dp),
                                 )
                             }
 
@@ -1683,12 +1728,12 @@ fun BottomSheetPlayer(
                                 interactionSource = playPauseInteractionSource,
                                 colors =
                                     IconButtonDefaults.filledIconButtonColors(
-                                        containerColor = textButtonColor,
-                                        contentColor = iconButtonColor,
+                                        containerColor = Color.Transparent,
+                                        contentColor = glyphColor,
                                     ),
                                 modifier =
                                     Modifier
-                                        .height(68.dp)
+                                        .height(76.dp)
                                         .weight(playPauseWeight)
                                         .focusRequester(focusRequester),
                             ) {
@@ -1711,17 +1756,7 @@ fun BottomSheetPlayer(
                                             } else {
                                                 if (effectiveIsPlaying) stringResource(R.string.player_pause) else stringResource(R.string.play)
                                             },
-                                        modifier = Modifier.size(32.dp),
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text =
-                                            if (isListenTogetherGuest) {
-                                                if (isMuted) stringResource(R.string.unmute) else stringResource(R.string.mute)
-                                            } else {
-                                                if (effectiveIsPlaying) stringResource(R.string.player_pause) else stringResource(R.string.play)
-                                            },
-                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.size(56.dp),
                                     )
                                 }
                             }
@@ -1735,18 +1770,20 @@ fun BottomSheetPlayer(
                                 interactionSource = nextInteractionSource,
                                 colors =
                                     IconButtonDefaults.filledIconButtonColors(
-                                        containerColor = sideButtonContainerColor,
-                                        contentColor = sideButtonContentColor,
+                                        containerColor = Color.Transparent,
+                                        contentColor = glyphColor,
+                                        disabledContainerColor = Color.Transparent,
+                                        disabledContentColor = glyphColor.copy(alpha = 0.38f),
                                     ),
                                 modifier =
                                     Modifier
-                                        .height(68.dp)
+                                        .height(76.dp)
                                         .weight(nextButtonWeight),
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.skip_next),
                                     contentDescription = null,
-                                    modifier = Modifier.size(32.dp),
+                                    modifier = Modifier.size(44.dp),
                                 )
                             }
                         }
