@@ -29,6 +29,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -90,7 +91,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -321,6 +324,8 @@ fun BottomSheetPlayer(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val currentSong by playerConnection.currentSong.collectAsStateWithLifecycle(initialValue = null)
     val automix by playerConnection.service.automixItems.collectAsStateWithLifecycle()
+    val mixZone by playerConnection.service.mixZone.collectAsStateWithLifecycle()
+    val isMixing by playerConnection.service.isMixing.collectAsStateWithLifecycle()
     val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsStateWithLifecycle()
     val canSkipNext by playerConnection.canSkipNext.collectAsStateWithLifecycle()
@@ -1368,6 +1373,7 @@ fun BottomSheetPlayer(
 
             Spacer(Modifier.height(24.dp))
 
+            Box(contentAlignment = Alignment.Center) {
             when (sliderStyle) {
                 SliderStyle.DEFAULT -> {
                     Slider(
@@ -1489,6 +1495,29 @@ fun BottomSheetPlayer(
                 }
             }
 
+            val zone = mixZone
+            if (zone != null && duration != C.TIME_UNSET && duration > 0L) {
+                val bandColor = textButtonColor.copy(alpha = 0.5f)
+                Canvas(
+                    Modifier
+                        .matchParentSize()
+                        .padding(horizontal = PlayerHorizontalPadding),
+                ) {
+                    val startX = size.width * (zone.first.toFloat() / duration).coerceIn(0f, 1f)
+                    val endX = size.width * (zone.last.toFloat() / duration).coerceIn(0f, 1f)
+                    val bandHeight = 6.dp.toPx()
+                    if (endX > startX) {
+                        drawRoundRect(
+                            color = bandColor,
+                            topLeft = Offset(startX, (size.height - bandHeight) / 2f),
+                            size = Size(endX - startX, bandHeight),
+                            cornerRadius = CornerRadius(bandHeight / 2f),
+                        )
+                    }
+                }
+            }
+            }
+
             Spacer(Modifier.height(4.dp))
 
             Row(
@@ -1506,6 +1535,21 @@ fun BottomSheetPlayer(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+
+                AnimatedVisibility(visible = isMixing) {
+                    Text(
+                        text = stringResource(R.string.mixing),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = TextBackgroundColor,
+                        maxLines = 1,
+                        modifier =
+                            Modifier
+                                .background(
+                                    TextBackgroundColor.copy(alpha = 0.18f),
+                                    RoundedCornerShape(50),
+                                ).padding(horizontal = 8.dp, vertical = 2.dp),
+                    )
+                }
 
                 Text(
                     text = if (duration != C.TIME_UNSET) makeTimeString(duration) else "",

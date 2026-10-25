@@ -486,6 +486,12 @@ class MusicService :
 
     val automixItems = MutableStateFlow<List<MediaItem>>(emptyList())
 
+    /** Planned mix window (start..end in ms) of the current track, or null when none is planned. */
+    val mixZone = MutableStateFlow<LongRange?>(null)
+
+    /** True while two tracks are being blended. */
+    val isMixing = MutableStateFlow(false)
+
     // Tracks the original queue size to distinguish original items from auto-added ones
     private var originalQueueSize: Int = 0
 
@@ -4847,6 +4853,7 @@ class MusicService :
         crossfadeMessage = null
         automixJob?.cancel()
         automixJob = null
+        mixZone.value = null
 
         val mediaCrossfadeDuration = crossfadeDuration.toLong()
 
@@ -4855,6 +4862,7 @@ class MusicService :
         if (!player.hasNextMediaItem() && player.repeatMode != REPEAT_MODE_ONE) return
 
         val triggerTime = player.duration - mediaCrossfadeDuration
+        mixZone.value = triggerTime..player.duration
         val mediaTimeRemaining = triggerTime - player.currentPosition
         if (mediaTimeRemaining <= 0) return
 
@@ -4979,6 +4987,7 @@ class MusicService :
 
     private fun performCrossfadeSwap() {
         isCrossfading = true
+        isMixing.value = true
         val nextPlayer = secondaryPlayer ?: return
         val currentPlayer = player
 
@@ -5088,6 +5097,7 @@ class MusicService :
         fadingPlayer = null
         crossfadeJob = null
         isCrossfading = false
+        isMixing.value = false
         applyEffectiveVolume()
         sleepTimer?.notifySongTransition()
 

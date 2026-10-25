@@ -57,10 +57,18 @@ jobs:
           key: automix-release-keystore-v1
 
       - name: Build FOSS Release APK
-        run: ./gradlew --console=plain :app:assembleFossRelease -x lint -x lintVitalFossRelease --warning-mode summary
+        shell: bash
+        run: ./gradlew --console=plain :app:assembleFossRelease -x lint -x lintVitalFossRelease --warning-mode summary 2>&1 | tee build.log
         env:
           METROLIST_APPLICATION_ID: com.metrolist.music.automix
           METROLIST_APP_NAME: Metrolist Automix
+
+      - name: Report build errors
+        if: failure()
+        shell: bash
+        run: |
+          MSG=$(grep -n -E "^e: |error:|FAILED|What went wrong|Execution failed|Caused by|> " build.log | tail -n 40 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error title=Build log::$MSG"
 
       - name: Sign APK
         run: |
