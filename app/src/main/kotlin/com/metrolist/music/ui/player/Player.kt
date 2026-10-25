@@ -1406,42 +1406,6 @@ fun BottomSheetPlayer(
 
             Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText)) {
             when (sliderStyle) {
-                SliderStyle.DEFAULT -> {
-                    Slider(
-                        value = (sliderPosition ?: effectivePosition).toFloat(),
-                        valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()),
-                        onValueChange = {
-                            if (!isListenTogetherGuest) {
-                                sliderPosition = it.toLong()
-                            }
-                        },
-                        onValueChangeFinished = {
-                            if (!isListenTogetherGuest) {
-                                sliderPosition?.let {
-                                    if (isCasting) {
-                                        castHandler?.seekTo(it)
-                                        lastManualSeekTime = System.currentTimeMillis()
-                                    } else {
-                                        playerConnection.player.seekTo(it)
-                                    }
-                                    position = it
-                                }
-                                sliderPosition = null
-                            }
-                        },
-                        enabled = !isListenTogetherGuest,
-                        thumb = { Spacer(modifier = Modifier.size(0.dp)) },
-                        track = { sliderState ->
-                            PlayerSliderTrack(
-                                sliderState = sliderState,
-                                colors = PlayerSliderColors.getSliderColors(textButtonColor, playerBackground, useDarkTheme),
-                                trackHeight = 4.dp,
-                            )
-                        },
-                        modifier = Modifier.padding(horizontal = PlayerHorizontalPadding),
-                    )
-                }
-
                 SliderStyle.WAVY -> {
                     if (squigglySlider) {
                         SquigglySlider(
@@ -1492,7 +1456,7 @@ fun BottomSheetPlayer(
                     }
                 }
 
-                SliderStyle.SLIM -> {
+                SliderStyle.DEFAULT, SliderStyle.SLIM -> {
                     val sliderValue = (sliderPosition ?: effectivePosition).toFloat()
                     val sliderRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat())
                     val sliderState = remember(sliderRange) {
