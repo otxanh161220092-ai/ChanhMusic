@@ -12,7 +12,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v4
@@ -29,24 +29,55 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Create debug keystore
+      - name: Restore signing keystore
+        id: keystore_cache
+        uses: actions/cache/restore@v4
+        with:
+          path: automix-release.keystore
+          key: automix-release-keystore-v1
+
+      - name: Create signing keystore if missing
+        if: steps.keystore_cache.outputs.cache-hit != 'true'
         run: |
-          mkdir -p ~/.android
           keytool -genkeypair -v \
-            -keystore ~/.android/debug.keystore \
-            -storepass android \
-            -alias androiddebugkey \
-            -keypass android \
+            -keystore automix-release.keystore \
+            -storepass automixpass \
+            -alias automix \
+            -keypass automixpass \
             -keyalg RSA \
             -keysize 2048 \
             -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
+            -dname "CN=Metrolist Automix,O=Personal,C=VN"
 
-      - name: Build FOSS Debug APK
-        run: ./gradlew --console=plain :app:assembleFossDebug --warning-mode summary
+      - name: Save signing keystore
+        if: steps.keystore_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: automix-release.keystore
+          key: automix-release-keystore-v1
+
+      - name: Build FOSS Release APK
+        run: ./gradlew --console=plain :app:assembleFossRelease -x lint -x lintVitalFossRelease --warning-mode summary
+        env:
+          METROLIST_APPLICATION_ID: com.metrolist.music.automix
+          METROLIST_APP_NAME: Metrolist Automix
+
+      - name: Sign APK
+        run: |
+          UNSIGNED=$(find app/build/outputs/apk -name "*release*.apk" | head -n 1)
+          echo "Unsigned APK: $UNSIGNED"
+          BUILD_TOOLS=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)
+          mkdir -p signed
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" sign \
+            --ks automix-release.keystore \
+            --ks-pass pass:automixpass \
+            --key-pass pass:automixpass \
+            --ks-key-alias automix \
+            --out signed/metrolist-automix.apk \
+            "$UNSIGNED"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: metrolist-automix-apk
-          path: app/build/outputs/apk/**/*.apk
+          path: signed/metrolist-automix.apk
