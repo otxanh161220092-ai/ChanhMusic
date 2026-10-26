@@ -12,6 +12,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.metrolist.music.constants.ExperimentalLyricsKey
 import com.metrolist.music.ui.screens.settings.LyricsPosition
 import com.metrolist.music.utils.rememberPreference
+import androidx.compose.ui.graphics.Color
 import com.metrolist.music.viewmodels.LyricsViewModel
 
 @Composable
@@ -21,6 +22,7 @@ fun Lyrics(
     showLyrics: Boolean,
     textPositionOverride: LyricsPosition? = null,
     highlightActiveLine: Boolean = false,
+    accentOverride: Color? = null,
     lyricsViewModel: LyricsViewModel = hiltViewModel()
 ) {
     val (experimentalLyrics, _) = rememberPreference(key = ExperimentalLyricsKey, defaultValue = true)
@@ -32,6 +34,7 @@ fun Lyrics(
             showLyrics = showLyrics,
             textPositionOverride = textPositionOverride,
             highlightActiveLine = highlightActiveLine,
+            accentOverride = accentOverride,
             lyricsViewModel = lyricsViewModel
         )
     } else {

@@ -154,6 +154,7 @@ fun ExperimentalLyrics(
     showLyrics: Boolean,
     textPositionOverride: LyricsPosition? = null,
     highlightActiveLine: Boolean = false,
+    accentOverride: Color? = null,
     lyricsViewModel: LyricsViewModel = hiltViewModel()
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -301,7 +302,7 @@ fun ExperimentalLyrics(
         }
     }
 
-    val expressiveAccent = when (playerBackground) {
+    val expressiveAccent = accentOverride ?: when (playerBackground) {
         PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.primary
         PlayerBackgroundStyle.BLUR, PlayerBackgroundStyle.GRADIENT -> Color.White
     }
@@ -748,7 +749,7 @@ fun ExperimentalLyrics(
                                 val p = m.measure(c.copy(maxHeight = Constraints.Infinity))
                                 layout(p.width, 0) { p.place(0, 0) }
                             }.offset { IntOffset(0, (animatedOffset + userManualOffset).roundToInt()) }
-                            .then(if (highlighted) Modifier.padding(horizontal = 8.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f)) else Modifier)
+                            .then(if (highlighted) Modifier.padding(horizontal = 8.dp).clip(RoundedCornerShape(16.dp)).background(expressiveAccent.copy(alpha = 0.16f)) else Modifier)
                         ) {
                             when (listItem) {
                                 is LyricsListItem.Indicator -> {

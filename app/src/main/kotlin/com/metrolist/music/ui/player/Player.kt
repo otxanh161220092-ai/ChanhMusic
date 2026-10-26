@@ -2035,6 +2035,7 @@ fun BottomSheetPlayer(
                                     mediaMetadata = mediaMetadata,
                                     showLyrics = showLyrics,
                                     positionProvider = { effectivePosition },
+                                    accentOverride = TextBackgroundColor,
                                 )
                             } else {
                                 Thumbnail(
@@ -2098,6 +2099,7 @@ fun BottomSheetPlayer(
                                     mediaMetadata = mediaMetadata,
                                     showLyrics = showLyrics,
                                     positionProvider = { effectivePosition },
+                                    accentOverride = TextBackgroundColor,
                                 )
                             } else {
                                 Thumbnail(
@@ -2155,6 +2157,7 @@ fun InlineLyricsView(
     mediaMetadata: MediaMetadata?,
     showLyrics: Boolean,
     positionProvider: () -> Long,
+    accentOverride: Color? = null,
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val currentLyrics by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
@@ -2278,6 +2281,7 @@ fun InlineLyricsView(
                         showLyrics = showLyrics,
                         textPositionOverride = LyricsPosition.LEFT,
                         highlightActiveLine = true,
+                        accentOverride = accentOverride,
                     )
                 }
                 ProvideTextStyle(
