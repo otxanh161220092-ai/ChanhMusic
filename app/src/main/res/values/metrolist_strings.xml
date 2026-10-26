@@ -96,6 +96,8 @@
     <string name="follow_theme">Follow theme</string>
     <string name="gradient">Gradient</string>
     <string name="new_player_design">New player design</string>
+    <string name="apple_style_layout">Apple Music style layout</string>
+    <string name="apple_style_layout_desc">Rounded cards and floating navigation bar</string>
     <string name="new_mini_player_design">New mini-player design</string>
     <string name="player_background_blur">Blur</string>
     <string name="player_buttons_style">Player button colors</string>

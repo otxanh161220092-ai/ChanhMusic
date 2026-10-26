@@ -102,6 +102,7 @@ import com.metrolist.music.constants.SwipeThumbnailKey
 import com.metrolist.music.constants.SwipeToRemoveSongKey
 import com.metrolist.music.constants.SwipeToSongKey
 import com.metrolist.music.constants.UseNewMiniPlayerDesignKey
+import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.constants.UseNewPlayerDesignKey
 import com.metrolist.music.ui.component.DefaultDialog
 import com.metrolist.music.ui.component.EnumDialog
@@ -164,6 +165,11 @@ fun AppearanceSettings(
         rememberPreference(
             UseNewPlayerDesignKey,
             defaultValue = true,
+        )
+    val (useAppleStyleLayout, onUseAppleStyleLayoutChange) =
+        rememberPreference(
+            UseAppleStyleLayoutKey,
+            defaultValue = false,
         )
     val (miniPlayerBackground, onMiniPlayerBackgroundChange) =
         rememberEnumPreference(
@@ -1100,6 +1106,25 @@ fun AppearanceSettings(
                         ),
                     )
                 },
+        )
+
+        Material3SettingsGroup(
+            title = stringResource(R.string.apple_style_layout),
+            items =
+                listOf(
+                    Material3SettingsItem(
+                        icon = painterResource(R.drawable.palette),
+                        title = { Text(stringResource(R.string.apple_style_layout)) },
+                        description = { Text(stringResource(R.string.apple_style_layout_desc)) },
+                        trailingContent = {
+                            Switch(
+                                checked = useAppleStyleLayout,
+                                onCheckedChange = onUseAppleStyleLayoutChange,
+                            )
+                        },
+                        onClick = { onUseAppleStyleLayoutChange(!useAppleStyleLayout) },
+                    ),
+                ),
         )
 
         Spacer(modifier = Modifier.height(27.dp))
