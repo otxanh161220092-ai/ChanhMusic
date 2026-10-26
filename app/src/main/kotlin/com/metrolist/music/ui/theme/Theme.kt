@@ -32,6 +32,7 @@ fun MetrolistTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     pureBlack: Boolean = false,
     themeColor: Color = DefaultThemeColor,
+    neutralSurfaces: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
@@ -61,9 +62,14 @@ fun MetrolistTheme(
         }
     }
 
+    // Neutral surfaces: greys only, so backgrounds do not pick up wallpaper or album tints
+    val finalColorScheme = remember(colorScheme, neutralSurfaces, darkTheme) {
+        if (neutralSurfaces) colorScheme.withNeutralSurfaces(darkTheme) else colorScheme
+    }
+
     // Use standard MaterialTheme instead of MaterialExpressiveTheme
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = finalColorScheme,
         content = content,
     )
 }
@@ -96,3 +102,34 @@ val ColorSaver = object : Saver<Color, Int> {
     override fun restore(value: Int): Color = Color(value)
     override fun SaverScope.save(value: Color): Int = value.toArgb()
 }
+
+private fun ColorScheme.withNeutralSurfaces(dark: Boolean): ColorScheme =
+    if (dark) {
+        copy(
+            background = Color(0xFF121212),
+            onBackground = Color(0xFFF2F2F2),
+            surface = Color(0xFF161616),
+            onSurface = Color(0xFFF2F2F2),
+            surfaceVariant = Color(0xFF2A2A2A),
+            onSurfaceVariant = Color(0xFFA6A6A6),
+            surfaceContainerLowest = Color(0xFF0F0F0F),
+            surfaceContainerLow = Color(0xFF1A1A1A),
+            surfaceContainer = Color(0xFF1F1F1F),
+            surfaceContainerHigh = Color(0xFF262626),
+            surfaceContainerHighest = Color(0xFF303030),
+        )
+    } else {
+        copy(
+            background = Color(0xFFFFFFFF),
+            onBackground = Color(0xFF111111),
+            surface = Color(0xFFFFFFFF),
+            onSurface = Color(0xFF111111),
+            surfaceVariant = Color(0xFFEFEFEF),
+            onSurfaceVariant = Color(0xFF6B6B6B),
+            surfaceContainerLowest = Color(0xFFFFFFFF),
+            surfaceContainerLow = Color(0xFFF7F7F7),
+            surfaceContainer = Color(0xFFF2F2F2),
+            surfaceContainerHigh = Color(0xFFEBEBEB),
+            surfaceContainerHighest = Color(0xFFE3E3E3),
+        )
+    }
