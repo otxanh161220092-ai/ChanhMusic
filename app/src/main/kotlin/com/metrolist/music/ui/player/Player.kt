@@ -1725,7 +1725,7 @@ fun BottomSheetPlayer(
                                         .weight(1f),
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.skip_previous),
+                                    painter = painterResource(R.drawable.apple_rewind),
                                     contentDescription = null,
                                     modifier = Modifier.size(backSize),
                                 )
@@ -1771,7 +1771,7 @@ fun BottomSheetPlayer(
                                             } else if (!isCasting && playbackState == STATE_ENDED) {
                                                 R.drawable.replay
                                             } else {
-                                                if (effectiveIsPlaying) R.drawable.pause else R.drawable.play
+                                                if (effectiveIsPlaying) R.drawable.apple_pause else R.drawable.apple_play
                                             },
                                         ),
                                     contentDescription =
@@ -1802,7 +1802,7 @@ fun BottomSheetPlayer(
                                         .weight(1f),
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.skip_next),
+                                    painter = painterResource(R.drawable.apple_forward),
                                     contentDescription = null,
                                     modifier = Modifier.size(nextSize),
                                 )
