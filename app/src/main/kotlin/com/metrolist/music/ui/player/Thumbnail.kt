@@ -50,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
@@ -298,10 +299,6 @@ fun Thumbnail(
 
     Box(
         modifier = modifier
-            .graphicsLayer {
-                // Use hardware layer for entire Thumbnail to ensure smooth 120Hz animations
-                compositingStrategy = CompositingStrategy.Offscreen
-            }
     ) {
         // Error view
         AnimatedVisibility(
@@ -325,24 +322,13 @@ fun Thumbnail(
             visible = error == null,
             enter = fadeIn(),
             exit = fadeOut(),
-            modifier = Modifier
-                .fillMaxSize()
-                .then(if (!isLandscape) Modifier.statusBarsPadding() else Modifier),
+            modifier = Modifier.fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = if (isLandscape) Arrangement.Center else Arrangement.Top
             ) {
-                // Now Playing header - hide in landscape mode
-                if (!isLandscape) {
-                    ThumbnailHeader(
-                        queueTitle = queueTitle,
-                        albumTitle = mediaMetadata?.album?.title,
-                        textColor = textBackgroundColor
-                    )
-                }
-                
                 // Thumbnail content
                 BoxWithConstraints(
                     contentAlignment = Alignment.Center,
@@ -410,6 +396,19 @@ fun Thumbnail(
                     }
                 }
             }
+        }
+
+        // Portrait header floats over the artwork so the cover can reach the top edge
+        if (!isLandscape) {
+            ThumbnailHeader(
+                queueTitle = queueTitle,
+                albumTitle = mediaMetadata?.album?.title,
+                textColor = Color.White,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .statusBarsPadding()
+                    .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.45f), Color.Transparent))),
+            )
         }
 
         // Seek effect
@@ -520,10 +519,6 @@ private fun ThumbnailItem(
                 }
             )
             .padding(horizontal = if (isLandscape) PlayerHorizontalPadding else 0.dp)
-            .graphicsLayer {
-                // Render entire thumbnail item on separate hardware layer for smooth animations
-                compositingStrategy = CompositingStrategy.Offscreen
-            }
             .pointerInput(Unit) {
                 detectTapGestures(
                     onDoubleTap = { offset ->
