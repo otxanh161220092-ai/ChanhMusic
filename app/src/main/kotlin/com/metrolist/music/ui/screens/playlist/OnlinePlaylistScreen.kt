@@ -108,6 +108,11 @@ import com.metrolist.music.viewmodels.OnlinePlaylistViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.compose.ui.draw.blur
+import androidx.compose.foundation.layout.matchParentSize
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.background
+import com.metrolist.music.constants.UseAppleStyleLayoutKey
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -477,6 +482,49 @@ fun OnlinePlaylistScreen(
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
+}
+
+@Composable
+private fun OnlinePlaylistHeaderContent(
+    playlist: PlaylistItem,
+    songs: List<SongItem>,
+    dbPlaylist: Playlist?,
+    coroutineScope: CoroutineScope,
+    continuation: String?,
+    isPodcastPlaylist: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
+    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    if (!appleStyle) {
+        OnlinePlaylistHeaderContent(playlist, songs, dbPlaylist, coroutineScope, continuation, isPodcastPlaylist, modifier)
+        return
+    }
+    // Apple style hero: blurred artwork behind the header, fading into the page background
+    Box(modifier = modifier.fillMaxWidth()) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current).data(playlist.thumbnail?.resize(540, 540)).build(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize().blur(48.dp),
+        )
+        Box(
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.background.copy(alpha = 0.35f),
+                                MaterialTheme.colorScheme.background,
+                            ),
+                        ),
+                    ),
+        )
+        OnlinePlaylistHeaderContent(
+            playlist, songs, dbPlaylist, coroutineScope, continuation, isPodcastPlaylist,
+            Modifier.fillMaxWidth(),
         )
     }
 }
