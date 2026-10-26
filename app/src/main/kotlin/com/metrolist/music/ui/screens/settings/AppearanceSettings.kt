@@ -94,6 +94,7 @@ import com.metrolist.music.constants.ShowTopPlaylistKey
 import com.metrolist.music.constants.ShowUploadedPlaylistKey
 import com.metrolist.music.constants.SliderStyle
 import com.metrolist.music.constants.SliderStyleKey
+import com.metrolist.music.constants.FloatingNavBarKey
 import com.metrolist.music.constants.SlimNavBarKey
 import com.metrolist.music.constants.SquigglySliderKey
 import com.metrolist.music.constants.SwipeSensitivityKey
@@ -275,6 +276,11 @@ fun AppearanceSettings(
     val (slimNav, onSlimNavChange) =
         rememberPreference(
             SlimNavBarKey,
+            defaultValue = false,
+        )
+    val (floatingNav, onFloatingNavChange) =
+        rememberPreference(
+            FloatingNavBarKey,
             defaultValue = false,
         )
 
@@ -1674,6 +1680,27 @@ fun AppearanceSettings(
                             )
                         },
                         onClick = { onSlimNavChange(!slimNav) },
+                    ),
+                    Material3SettingsItem(
+                        icon = painterResource(R.drawable.nav_bar),
+                        title = { Text(stringResource(R.string.floating_navbar)) },
+                        trailingContent = {
+                            Switch(
+                                checked = floatingNav,
+                                onCheckedChange = onFloatingNavChange,
+                                thumbContent = {
+                                    Icon(
+                                        painter =
+                                            painterResource(
+                                                id = if (floatingNav) R.drawable.check else R.drawable.close,
+                                            ),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                                    )
+                                },
+                            )
+                        },
+                        onClick = { onFloatingNavChange(!floatingNav) },
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.group_outlined),

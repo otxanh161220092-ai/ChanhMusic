@@ -8,6 +8,8 @@ package com.metrolist.music.ui.component
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -22,6 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -29,6 +33,7 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.metrolist.music.ui.screens.Screens
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -136,6 +141,7 @@ fun AppNavigationBar(
     modifier: Modifier = Modifier,
     pureBlack: Boolean = false,
     slimNav: Boolean = false,
+    floating: Boolean = false,
     onSearchLongClick: (() -> Unit)? = null,
     onHomeLongHold: (() -> Unit)? = null,
 ) {
@@ -145,8 +151,16 @@ fun AppNavigationBar(
     val viewConfiguration = LocalViewConfiguration.current
 
     NavigationBar(
-        modifier = modifier,
-        containerColor = containerColor,
+        modifier =
+            if (floating) {
+                modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .shadow(12.dp, CircleShape, clip = false)
+                    .clip(CircleShape)
+            } else {
+                modifier
+            },
+        containerColor = if (floating) containerColor.copy(alpha = 0.92f) else containerColor,
         contentColor = contentColor
     ) {
         navigationItems.forEach { screen ->

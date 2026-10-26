@@ -165,6 +165,7 @@ import com.metrolist.music.constants.SelectedThemeColorKey
 import com.metrolist.music.constants.SimpMusicMigrationDoneKey
 import com.metrolist.music.constants.SlimNavBarHeight
 import com.metrolist.music.constants.SlimNavBarKey
+import com.metrolist.music.constants.FloatingNavBarKey
 import com.metrolist.music.constants.StopMusicOnTaskClearKey
 import com.metrolist.music.constants.UpdateNotificationsEnabledKey
 import com.metrolist.music.constants.UseNewMiniPlayerDesignKey
@@ -752,6 +753,7 @@ class MainActivity : FragmentActivity() {
                 }
                 val (forceBottomNav) = rememberPreference(ForceBottomNavBarKey, defaultValue = false)
                 val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
+                val (floatingNav) = rememberPreference(FloatingNavBarKey, defaultValue = false)
                 val (useNewMiniPlayerDesign) = rememberPreference(UseNewMiniPlayerDesignKey, defaultValue = true)
                 val (defaultOpenTabInt) = rememberPreference(DefaultOpenTabKey, defaultValue = NavigationTab.HOME.name)
                 val defaultOpenTab = remember(defaultOpenTabInt) {
@@ -1217,6 +1219,7 @@ class MainActivity : FragmentActivity() {
                                         onItemClick = onNavItemClick,
                                         pureBlack = pureBlack,
                                         slimNav = slimNav,
+                                        floating = floatingNav,
                                         onSearchLongClick = onSearchLongClick,
                                         onHomeLongHold = { showAccountDialog = true },
                                         modifier =
