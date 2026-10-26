@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 fun Modifier.blendOverlay(
     mode: BlendMode = BlendMode.Overlay,
     alpha: Float = 1f,
+    passes: Int = 1,
 ): Modifier =
     this.drawWithContent {
         drawIntoCanvas { canvas ->
@@ -31,20 +32,22 @@ fun Modifier.blendOverlay(
                     blendMode = mode
                     this.alpha = alpha
                 }
-            canvas.saveLayer(Rect(0f, 0f, size.width, size.height), paint)
-            drawContent()
-            canvas.restore()
+            repeat(passes) {
+                canvas.saveLayer(Rect(0f, 0f, size.width, size.height), paint)
+                drawContent()
+                canvas.restore()
+            }
         }
     }
 
 /**
- * Vibrant "plus lighter" like look for white elements. Screen keeps white elements highlighting
- * whatever is behind them on both dark and bright artwork, where Overlay would vanish on dark areas.
+ * Overlay highlight for white elements: they brighten whatever is behind them instead of being flat
+ * white. Two passes keep them visible on dark areas, where a single Overlay pass is faint.
  */
 fun Modifier.vibrant(
     enabled: Boolean,
     alpha: Float = 1f,
-): Modifier = if (enabled) blendOverlay(BlendMode.Screen, alpha) else this
+): Modifier = if (enabled) blendOverlay(BlendMode.Overlay, alpha, passes = 2) else this
 
 /** Fades the bottom [fraction] of the content to transparent, revealing the background behind it. */
 fun Modifier.fadeBottomEdge(fraction: Float = 0.4f): Modifier =

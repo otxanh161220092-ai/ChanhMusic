@@ -69,6 +69,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -172,6 +173,7 @@ import com.metrolist.music.ui.component.BottomSheet
 import com.metrolist.music.ui.component.BottomSheetState
 import com.metrolist.music.ui.component.LocalBottomSheetPageState
 import com.metrolist.music.ui.component.LocalMenuState
+import com.metrolist.music.ui.component.Material3MenuItemData
 import com.metrolist.music.ui.component.Lyrics
 import com.metrolist.music.ui.component.PlayerSliderTrack
 import com.metrolist.music.ui.component.ResizableIconButton
@@ -1160,141 +1162,233 @@ fun BottomSheetPlayer(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 if (useNewPlayerDesign) {
-                    val shareShape =
-                        RoundedCornerShape(
-                            topStart = 50.dp,
-                            bottomStart = 50.dp,
-                            topEnd = 50.dp,
-                            bottomEnd = 50.dp,
-                        )
-
-                    val favShape =
-                        RoundedCornerShape(
-                            topStart = 50.dp,
-                            bottomStart = 50.dp,
-                            topEnd = 50.dp,
-                            bottomEnd = 50.dp,
-                        )
-
-                    val middleShape = RoundedCornerShape(3.dp)
+                    // For episodes, show saved state (inLibrary); for songs, show liked state
+                    val isEpisode = currentSong?.song?.isEpisode == true
+                    val isFavorite = if (isEpisode) currentSong?.song?.inLibrary != null else currentSong?.song?.liked == true
+                    val likedCircleColor =
+                        if (playerButtonsStyle == PlayerButtonsStyle.DEFAULT) {
+                            if (shouldUseDarkButtonColors) Color.White else MaterialTheme.colorScheme.onSurface
+                        } else {
+                            textButtonColor
+                        }
+                    val likedStarColor =
+                        if (playerButtonsStyle == PlayerButtonsStyle.DEFAULT) {
+                            if (shouldUseDarkButtonColors) Color.Black.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surface
+                        } else {
+                            iconButtonColor
+                        }
 
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.vibrant(useVibrant, 0.9f),
                     ) {
-                        AnimatedContent(targetState = showInlineLyrics, label = "ShareButton") { showLyrics ->
-                            if (showLyrics) {
-                                FilledIconButton(
-                                    onClick = { isFullScreen = !isFullScreen },
-                                    shape = shareShape,
-                                    colors =
-                                        IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = roundButtonContainerColor,
-                                            contentColor = roundButtonContentColor,
-                                        ),
-                                    modifier = Modifier.size(40.dp),
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.fullscreen),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                }
-                            } else {
-                                FilledIconButton(
-                                    onClick = {
-                                        val intent =
-                                            Intent().apply {
-                                                action = Intent.ACTION_SEND
-                                                type = "text/plain"
-                                                putExtra(
-                                                    Intent.EXTRA_TEXT,
-                                                    "https://music.youtube.com/watch?v=${mediaMetadata.id}",
-                                                )
-                                            }
-                                        context.startActivity(Intent.createChooser(intent, null))
-                                    },
-                                    shape = shareShape,
-                                    colors =
-                                        IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = roundButtonContainerColor,
-                                            contentColor = roundButtonContentColor,
-                                        ),
-                                    modifier = Modifier.size(40.dp),
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.share),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                }
-                            }
+                        FilledIconButton(
+                            onClick = playerConnection::toggleLike,
+                            shape = CircleShape,
+                            colors =
+                                IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = if (isFavorite) likedCircleColor else roundButtonContainerColor,
+                                    contentColor = if (isFavorite) likedStarColor else roundButtonContentColor,
+                                ),
+                            modifier = Modifier.size(36.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(if (isFavorite) R.drawable.star_filled else R.drawable.star_outline),
+                                contentDescription = stringResource(R.string.like),
+                                modifier = Modifier.size(20.dp),
+                            )
                         }
 
-                        AnimatedContent(targetState = showInlineLyrics, label = "LikeButton") { showLyrics ->
-                            if (showLyrics) {
-                                val currentLyrics by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
-                                FilledIconButton(
-                                    onClick = {
-                                        menuState.show {
-                                            com.metrolist.music.ui.menu.LyricsMenu(
-                                                lyricsProvider = { currentLyrics },
-                                                songProvider = { currentSong?.song },
-                                                mediaMetadataProvider = { mediaMetadata },
-                                                onDismiss = menuState::dismiss,
-                                                onShowOffsetDialog = {
-                                                    bottomSheetPageState.show {
-                                                        ShowOffsetDialog(
-                                                            songProvider = { currentSong?.song },
-                                                        )
-                                                    }
-                                                },
-                                            )
-                                        }
-                                    },
-                                    shape = favShape,
-                                    colors =
-                                        IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = roundButtonContainerColor,
-                                            contentColor = roundButtonContentColor,
-                                        ),
-                                    modifier = Modifier.size(40.dp),
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.more_horiz),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
+                        FilledIconButton(
+                            onClick = {
+                                menuState.show {
+                                    PlayerMenu(
+                                        mediaMetadata = mediaMetadata,
+                                        playerBottomSheetState = state,
+                                        onShowDetailsDialog = {
+                                            mediaMetadata.id.let {
+                                                bottomSheetPageState.show {
+                                                    ShowMediaInfo(it)
+                                                }
+                                            }
+                                        },
+                                        onDismiss = menuState::dismiss,
+                                        extraItems = {
+                                            val menuShuffle by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
+                                            val menuRepeat by playerConnection.repeatMode.collectAsStateWithLifecycle()
+                                            val menuLyrics by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
+                                            buildList {
+                                                add(
+                                                    Material3MenuItemData(
+                                                        title = { Text(text = stringResource(R.string.share)) },
+                                                        icon = {
+                                                            Icon(
+                                                                painter = painterResource(R.drawable.share),
+                                                                contentDescription = null,
+                                                                modifier = Modifier.size(24.dp),
+                                                            )
+                                                        },
+                                                        onClick = {
+                                                            val intent =
+                                                                Intent().apply {
+                                                                    action = Intent.ACTION_SEND
+                                                                    type = "text/plain"
+                                                                    putExtra(
+                                                                        Intent.EXTRA_TEXT,
+                                                                        "https://music.youtube.com/watch?v=${mediaMetadata.id}",
+                                                                    )
+                                                                }
+                                                            context.startActivity(Intent.createChooser(intent, null))
+                                                            menuState.dismiss()
+                                                        },
+                                                    ),
+                                                )
+                                                if (!isListenTogetherGuest) {
+                                                    add(
+                                                        Material3MenuItemData(
+                                                            title = { Text(text = stringResource(R.string.shuffle)) },
+                                                            description = {
+                                                                Text(
+                                                                    text =
+                                                                        stringResource(
+                                                                            if (menuShuffle) R.string.player_state_on else R.string.player_state_off,
+                                                                        ),
+                                                                )
+                                                            },
+                                                            icon = {
+                                                                Icon(
+                                                                    painter = painterResource(R.drawable.shuffle),
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(24.dp),
+                                                                )
+                                                            },
+                                                            onClick = {
+                                                                playerConnection.player.shuffleModeEnabled = !menuShuffle
+                                                            },
+                                                        ),
+                                                    )
+                                                    add(
+                                                        Material3MenuItemData(
+                                                            title = { Text(text = stringResource(R.string.player_repeat)) },
+                                                            description = {
+                                                                Text(
+                                                                    text =
+                                                                        stringResource(
+                                                                            when (menuRepeat) {
+                                                                                Player.REPEAT_MODE_ALL -> R.string.repeat_mode_all
+                                                                                Player.REPEAT_MODE_ONE -> R.string.repeat_mode_one
+                                                                                else -> R.string.repeat_mode_off
+                                                                            },
+                                                                        ),
+                                                                )
+                                                            },
+                                                            icon = {
+                                                                Icon(
+                                                                    painter =
+                                                                        painterResource(
+                                                                            if (menuRepeat == Player.REPEAT_MODE_ONE) R.drawable.repeat_one else R.drawable.repeat,
+                                                                        ),
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(24.dp),
+                                                                )
+                                                            },
+                                                            onClick = {
+                                                                playerConnection.player.toggleRepeatMode()
+                                                            },
+                                                        ),
+                                                    )
+                                                    add(
+                                                        Material3MenuItemData(
+                                                            title = { Text(text = stringResource(R.string.sleep_timer)) },
+                                                            description = {
+                                                                if (sleepTimerEnabled) {
+                                                                    Text(text = makeTimeString(sleepTimerTimeLeft))
+                                                                }
+                                                            },
+                                                            icon = {
+                                                                Icon(
+                                                                    painter = painterResource(R.drawable.bedtime),
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(24.dp),
+                                                                )
+                                                            },
+                                                            onClick = {
+                                                                if (sleepTimerEnabled) {
+                                                                    playerConnection.service.sleepTimer?.clear()
+                                                                } else {
+                                                                    showSleepTimerDialog = true
+                                                                }
+                                                                menuState.dismiss()
+                                                            },
+                                                        ),
+                                                    )
+                                                }
+                                                if (showInlineLyrics) {
+                                                    add(
+                                                        Material3MenuItemData(
+                                                            title = { Text(text = stringResource(R.string.player_fullscreen_lyrics)) },
+                                                            icon = {
+                                                                Icon(
+                                                                    painter = painterResource(R.drawable.fullscreen),
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(24.dp),
+                                                                )
+                                                            },
+                                                            onClick = {
+                                                                isFullScreen = !isFullScreen
+                                                                menuState.dismiss()
+                                                            },
+                                                        ),
+                                                    )
+                                                    add(
+                                                        Material3MenuItemData(
+                                                            title = { Text(text = stringResource(R.string.player_lyrics_options)) },
+                                                            icon = {
+                                                                Icon(
+                                                                    painter = painterResource(R.drawable.lyrics),
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(24.dp),
+                                                                )
+                                                            },
+                                                            onClick = {
+                                                                menuState.show {
+                                                                    com.metrolist.music.ui.menu.LyricsMenu(
+                                                                        lyricsProvider = { menuLyrics },
+                                                                        songProvider = { currentSong?.song },
+                                                                        mediaMetadataProvider = { mediaMetadata },
+                                                                        onDismiss = menuState::dismiss,
+                                                                        onShowOffsetDialog = {
+                                                                            bottomSheetPageState.show {
+                                                                                ShowOffsetDialog(
+                                                                                    songProvider = { currentSong?.song },
+                                                                                )
+                                                                            }
+                                                                        },
+                                                                    )
+                                                                }
+                                                            },
+                                                        ),
+                                                    )
+                                                }
+                                            }
+                                        },
                                     )
                                 }
-                            } else {
-                                // For episodes, show saved state (inLibrary); for songs, show liked state
-                                val isEpisode = currentSong?.song?.isEpisode == true
-                                val isFavorite = if (isEpisode) currentSong?.song?.inLibrary != null else currentSong?.song?.liked == true
-                                FilledIconButton(
-                                    onClick = playerConnection::toggleLike,
-                                    shape = favShape,
-                                    colors =
-                                        IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = roundButtonContainerColor,
-                                            contentColor = roundButtonContentColor,
-                                        ),
-                                    modifier = Modifier.size(40.dp),
-                                ) {
-                                    Icon(
-                                        painter =
-                                            painterResource(
-                                                if (isFavorite) {
-                                                    R.drawable.favorite
-                                                } else {
-                                                    R.drawable.favorite_border
-                                                },
-                                            ),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                }
-                            }
+                            },
+                            shape = CircleShape,
+                            colors =
+                                IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = roundButtonContainerColor,
+                                    contentColor = roundButtonContentColor,
+                                ),
+                            modifier = Modifier.size(36.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.more_horiz),
+                                contentDescription = stringResource(R.string.more_options),
+                                modifier = Modifier.size(20.dp),
+                            )
                         }
                     }
                 } else {
@@ -1557,7 +1651,12 @@ fun BottomSheetPlayer(
                 }
 
                 Text(
-                    text = if (duration != C.TIME_UNSET) makeTimeString(duration) else "",
+                    text =
+                        if (duration != C.TIME_UNSET) {
+                            "-" + makeTimeString((duration - (sliderPosition ?: effectivePosition)).coerceAtLeast(0L))
+                        } else {
+                            ""
+                        },
                     style = MaterialTheme.typography.labelMedium,
                     fontSize = 11.sp,
                     color = TextBackgroundColor.copy(alpha = 0.6f),
@@ -1576,7 +1675,7 @@ fun BottomSheetPlayer(
                 Column {
                     if (useNewPlayerDesign) {
                         Row(
-                            horizontalArrangement = Arrangement.Center,
+                            horizontalArrangement = Arrangement.SpaceEvenly,
                             verticalAlignment = Alignment.CenterVertically,
                             modifier =
                                 Modifier
@@ -1592,55 +1691,20 @@ fun BottomSheetPlayer(
                             val isBackPressed by backInteractionSource.collectIsPressedAsState()
                             val isNextPressed by nextInteractionSource.collectIsPressedAsState()
 
-                            val playPauseWeight by animateFloatAsState(
-                                targetValue =
-                                    if (isPlayPausePressed) {
-                                        1.9f
-                                    } else if (isBackPressed || isNextPressed) {
-                                        1.1f
-                                    } else {
-                                        1.3f
-                                    },
-                                animationSpec =
-                                    spring(
-                                        dampingRatio = 0.6f,
-                                        stiffness = 500f,
-                                    ),
-                                label = "playPauseWeight",
+                            val playPauseSize by animateDpAsState(
+                                targetValue = if (isPlayPausePressed) 52.dp else 60.dp,
+                                animationSpec = spring(dampingRatio = 0.6f, stiffness = 500f),
+                                label = "playPauseSize",
                             )
-
-                            val backButtonWeight by animateFloatAsState(
-                                targetValue =
-                                    if (isBackPressed) {
-                                        0.65f
-                                    } else if (isPlayPausePressed) {
-                                        0.35f
-                                    } else {
-                                        0.45f
-                                    },
-                                animationSpec =
-                                    spring(
-                                        dampingRatio = 0.6f,
-                                        stiffness = 500f,
-                                    ),
-                                label = "backButtonWeight",
+                            val backSize by animateDpAsState(
+                                targetValue = if (isBackPressed) 38.dp else 46.dp,
+                                animationSpec = spring(dampingRatio = 0.6f, stiffness = 500f),
+                                label = "backSize",
                             )
-
-                            val nextButtonWeight by animateFloatAsState(
-                                targetValue =
-                                    if (isNextPressed) {
-                                        0.65f
-                                    } else if (isPlayPausePressed) {
-                                        0.35f
-                                    } else {
-                                        0.45f
-                                    },
-                                animationSpec =
-                                    spring(
-                                        dampingRatio = 0.6f,
-                                        stiffness = 500f,
-                                    ),
-                                label = "nextButtonWeight",
+                            val nextSize by animateDpAsState(
+                                targetValue = if (isNextPressed) 38.dp else 46.dp,
+                                animationSpec = spring(dampingRatio = 0.6f, stiffness = 500f),
+                                label = "nextSize",
                             )
 
                             FilledIconButton(
@@ -1658,16 +1722,14 @@ fun BottomSheetPlayer(
                                 modifier =
                                     Modifier
                                         .height(76.dp)
-                                        .weight(backButtonWeight),
+                                        .weight(1f),
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.skip_previous),
                                     contentDescription = null,
-                                    modifier = Modifier.size(44.dp),
+                                    modifier = Modifier.size(backSize),
                                 )
                             }
-
-                            Spacer(modifier = Modifier.width(8.dp))
 
                             FilledIconButton(
                                 onClick = {
@@ -1698,34 +1760,29 @@ fun BottomSheetPlayer(
                                 modifier =
                                     Modifier
                                         .height(76.dp)
-                                        .weight(playPauseWeight)
+                                        .weight(1f)
                                         .focusRequester(focusRequester),
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center,
-                                ) {
-                                    Icon(
-                                        painter =
-                                            painterResource(
-                                                if (isListenTogetherGuest) {
-                                                    if (isMuted) R.drawable.volume_off else R.drawable.volume_up
-                                                } else {
-                                                    if (effectiveIsPlaying) R.drawable.pause else R.drawable.play
-                                                },
-                                            ),
-                                        contentDescription =
+                                Icon(
+                                    painter =
+                                        painterResource(
                                             if (isListenTogetherGuest) {
-                                                if (isMuted) stringResource(R.string.unmute) else stringResource(R.string.mute)
+                                                if (isMuted) R.drawable.volume_off else R.drawable.volume_up
+                                            } else if (!isCasting && playbackState == STATE_ENDED) {
+                                                R.drawable.replay
                                             } else {
-                                                if (effectiveIsPlaying) stringResource(R.string.player_pause) else stringResource(R.string.play)
+                                                if (effectiveIsPlaying) R.drawable.pause else R.drawable.play
                                             },
-                                        modifier = Modifier.size(56.dp),
-                                    )
-                                }
+                                        ),
+                                    contentDescription =
+                                        if (isListenTogetherGuest) {
+                                            if (isMuted) stringResource(R.string.unmute) else stringResource(R.string.mute)
+                                        } else {
+                                            if (effectiveIsPlaying) stringResource(R.string.player_pause) else stringResource(R.string.play)
+                                        },
+                                    modifier = Modifier.size(playPauseSize),
+                                )
                             }
-
-                            Spacer(modifier = Modifier.width(8.dp))
 
                             FilledIconButton(
                                 onClick = playerConnection::seekToNext,
@@ -1742,15 +1799,26 @@ fun BottomSheetPlayer(
                                 modifier =
                                     Modifier
                                         .height(76.dp)
-                                        .weight(nextButtonWeight),
+                                        .weight(1f),
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.skip_next),
                                     contentDescription = null,
-                                    modifier = Modifier.size(44.dp),
+                                    modifier = Modifier.size(nextSize),
                                 )
                             }
                         }
+
+                        Spacer(Modifier.height(16.dp))
+
+                        PlayerVolumeRow(
+                            colors = PlayerSliderColors.getSliderColors(textButtonColor, playerBackground, useDarkTheme),
+                            tint = glyphColor,
+                            modifier =
+                                Modifier
+                                    .vibrant(useVibrant)
+                                    .padding(horizontal = PlayerHorizontalPadding),
+                        )
                     } else {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -2035,6 +2103,7 @@ fun BottomSheetPlayer(
                 onToggleLyrics = {
                     showInlineLyrics = !showInlineLyrics
                 },
+                useVibrant = useVibrant,
             )
         }
     }
@@ -2180,6 +2249,78 @@ fun InlineLyricsView(
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PlayerVolumeRow(
+    colors: SliderColors,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    val playerConnection = LocalPlayerConnection.current ?: return
+    val player = playerConnection.player
+    val maxVolume = remember(player) { runCatching { player.deviceInfo.maxVolume }.getOrDefault(0).coerceAtLeast(1) }
+    var level by remember(player) { mutableFloatStateOf(runCatching { player.deviceVolume }.getOrDefault(0).toFloat()) }
+
+    DisposableEffect(player) {
+        val listener =
+            object : Player.Listener {
+                override fun onDeviceVolumeChanged(
+                    volume: Int,
+                    muted: Boolean,
+                ) {
+                    level = if (muted) 0f else volume.toFloat()
+                }
+            }
+        player.addListener(listener)
+        onDispose { player.removeListener(listener) }
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.volume_mute),
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(18.dp),
+        )
+
+        val sliderRange = 0f..maxVolume.toFloat()
+        val sliderState =
+            remember(sliderRange) {
+                SliderState(value = level, trackRange = sliderRange)
+            }
+        sliderState.value = level
+        Slider(
+            state = sliderState,
+            onValueChange = {
+                level = it
+                runCatching { player.setDeviceVolume(it.roundToInt(), 0) }
+            },
+            thumb = { Spacer(modifier = Modifier.size(0.dp)) },
+            track = { sliderState ->
+                PlayerSliderTrack(
+                    sliderState = sliderState,
+                    colors = colors,
+                    trackHeight = 4.dp,
+                )
+            },
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .padding(horizontal = 10.dp),
+        )
+
+        Icon(
+            painter = painterResource(R.drawable.volume_up),
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(18.dp),
+        )
     }
 }
 

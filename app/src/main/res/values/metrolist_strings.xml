@@ -355,6 +355,11 @@
     <string name="crossfade_gapless_desc">Skip crossfade for albums designed to play without gaps</string>
     <string name="automix">Automix</string>
     <string name="mixing">Mixing</string>
+    <string name="player_state_on">On</string>
+    <string name="player_state_off">Off</string>
+    <string name="player_repeat">Repeat</string>
+    <string name="player_fullscreen_lyrics">Fullscreen lyrics</string>
+    <string name="player_lyrics_options">Lyrics options</string>
     <string name="automix_desc">Mixes into the next song while the music is still loud, matching tempo and beat when possible</string>
 
     <!-- Romanization Settings -->

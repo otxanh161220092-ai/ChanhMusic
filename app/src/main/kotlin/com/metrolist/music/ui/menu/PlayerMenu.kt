@@ -111,6 +111,7 @@ fun PlayerMenu(
     isQueueTrigger: Boolean? = false,
     onShowDetailsDialog: () -> Unit,
     onDismiss: () -> Unit,
+    extraItems: @Composable () -> List<Material3MenuItemData> = { emptyList() },
 ) {
     mediaMetadata ?: return
     val navController = LocalNavController.current
@@ -380,6 +381,16 @@ fun PlayerMenu(
                 columns = if (isListenTogetherGuest) 2 else 3,
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 16.dp),
             )
+        }
+
+        item {
+            val extra = extraItems()
+            if (extra.isNotEmpty()) {
+                Column {
+                    Material3MenuGroup(items = extra)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
         }
 
         item {
