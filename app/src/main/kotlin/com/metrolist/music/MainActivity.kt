@@ -1171,6 +1171,7 @@ class MainActivity : FragmentActivity() {
                                         pureBlack = pureBlack,
                                         slimNav = slimNav,
                                         floating = floatingNav || useAppleStyleLayout,
+                                        appleStyle = useAppleStyleLayout,
                                         onSearchLongClick = onSearchLongClick,
                                         onHomeLongHold = { showAccountDialog = true },
                                         modifier =

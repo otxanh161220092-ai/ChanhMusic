@@ -37,6 +37,20 @@ import androidx.compose.ui.unit.dp
 import com.metrolist.music.ui.screens.Screens
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.Alignment
 
 @Stable
 private fun isRouteSelected(currentRoute: String?, screenRoute: String, navigationItems: List<Screens>): Boolean {
@@ -144,7 +158,18 @@ fun AppNavigationBar(
     floating: Boolean = false,
     onSearchLongClick: (() -> Unit)? = null,
     onHomeLongHold: (() -> Unit)? = null,
+    appleStyle: Boolean = false,
 ) {
+    if (appleStyle) {
+        AppleStyleNavigationBar(
+            navigationItems = navigationItems,
+            currentRoute = currentRoute,
+            onItemClick = onItemClick,
+            modifier = modifier,
+            onSearchLongClick = onSearchLongClick,
+        )
+        return
+    }
     val containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
     val contentColor = if (pureBlack) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
     val haptics = LocalHapticFeedback.current
@@ -227,6 +252,100 @@ fun AppNavigationBar(
                     }
                 } else null
             )
+        }
+    }
+}
+
+/**
+ * Apple Music style bar: a white rounded pill with icons and labels, plus a separate round search button.
+ * The selected item uses the theme accent color.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun AppleStyleNavigationBar(
+    navigationItems: List<Screens>,
+    currentRoute: String?,
+    onItemClick: (Screens, Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    onSearchLongClick: (() -> Unit)? = null,
+) {
+    val isLightTheme = MaterialTheme.colorScheme.background.luminance() > 0.5f
+    val pillColor = if (isLightTheme) Color.White else MaterialTheme.colorScheme.surfaceContainerHigh
+    val iconColor = MaterialTheme.colorScheme.onSurface
+    val accent = MaterialTheme.colorScheme.primary
+    val searchScreen = navigationItems.firstOrNull { it == Screens.Search }
+    val mainItems = navigationItems.filter { it != Screens.Search }
+    val searchSelected = searchScreen?.let { isRouteSelected(currentRoute, it.route, navigationItems) } ?: false
+
+    Row(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .height(64.dp)
+                    .shadow(8.dp, CircleShape, clip = false)
+                    .clip(CircleShape)
+                    .background(pillColor),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            mainItems.forEach { screen ->
+                val isSelected = isRouteSelected(currentRoute, screen.route, navigationItems)
+                val tint = if (isSelected) accent else iconColor
+                Column(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                            ) { onItemClick(screen, isSelected) },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(id = if (isSelected) screen.iconIdActive else screen.iconIdInactive),
+                        contentDescription = stringResource(screen.titleId),
+                        tint = tint,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Text(
+                        text = stringResource(screen.titleId),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = tint,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+
+        if (searchScreen != null) {
+            Box(
+                modifier =
+                    Modifier
+                        .size(64.dp)
+                        .shadow(8.dp, CircleShape, clip = false)
+                        .clip(CircleShape)
+                        .background(pillColor)
+                        .combinedClickable(
+                            onClick = { onItemClick(searchScreen, searchSelected) },
+                            onLongClick = onSearchLongClick,
+                        ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(id = if (searchSelected) searchScreen.iconIdActive else searchScreen.iconIdInactive),
+                    contentDescription = stringResource(searchScreen.titleId),
+                    tint = if (searchSelected) accent else iconColor,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
         }
     }
 }
