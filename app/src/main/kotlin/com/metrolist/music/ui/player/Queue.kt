@@ -163,6 +163,8 @@ fun Queue(
     iconButtonColor: Color,
     pureBlack: Boolean,
     showInlineLyrics: Boolean,
+    controlsVisible: Boolean = true,
+    onControlsInteraction: () -> Unit = {},
     playerBackground: PlayerBackgroundStyle = PlayerBackgroundStyle.DEFAULT,
     onToggleLyrics: () -> Unit = {},
     useVibrant: Boolean = false,
@@ -273,15 +275,8 @@ fun Queue(
         collapsedContent = {
             if (useNewPlayerDesign) {
                 // New design: lyrics, route/cast and queue
-                var navVisible by remember { mutableStateOf(true) }
-                var navInteraction by remember { mutableLongStateOf(0L) }
-                LaunchedEffect(navInteraction) {
-                    navVisible = true
-                    delay(5_000L)
-                    navVisible = false
-                }
                 val navAlpha by animateFloatAsState(
-                    targetValue = if (navVisible) 1f else 0f,
+                    targetValue = if (controlsVisible || !showInlineLyrics) 1f else 0f,
                     animationSpec = tween(400),
                     label = "navAlpha",
                 )
@@ -292,11 +287,14 @@ fun Queue(
                         Modifier
                             .fillMaxWidth()
                             .graphicsLayer { alpha = navAlpha }
-                            .pointerInput(Unit) {
+                            .pointerInput(controlsVisible, showInlineLyrics) {
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent(PointerEventPass.Initial)
-                                        if (event.changes.any { it.pressed && !it.previousPressed }) navInteraction++
+                                        if (event.changes.any { it.pressed && !it.previousPressed }) {
+                                            if (!controlsVisible && showInlineLyrics) event.changes.forEach { it.consume() }
+                                            onControlsInteraction()
+                                        }
                                     }
                                 }
                             }

@@ -102,6 +102,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.awaitPointerEvent
+import androidx.compose.ui.input.pointer.awaitPointerEventScope
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -249,6 +254,16 @@ fun BottomSheetPlayer(
     val hasLyricsApiKey = if (aiProvider == "DeepL") deeplApiKey.isNotBlank() else openRouterApiKey.isNotBlank()
     val hasTranslations by LyricsTranslationHelper.hasActiveTranslations.collectAsStateWithLifecycle()
     val translateTargetLyrics by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
+    var controlsVisible by remember { mutableStateOf(true) }
+    var controlsInteraction by remember { mutableIntStateOf(0) }
+    LaunchedEffect(showInlineLyrics, controlsInteraction) {
+        controlsVisible = true
+        if (showInlineLyrics) {
+            delay(5_000L)
+            controlsVisible = false
+        }
+    }
+    val controlsVisibleNow by rememberUpdatedState(controlsVisible)
     var isFullScreen by rememberSaveable {
         mutableStateOf(false)
     }
@@ -1511,7 +1526,16 @@ fun BottomSheetPlayer(
 
             Spacer(Modifier.height(24.dp))
 
-            if (hasLyricsApiKey) {
+            AnimatedVisibility(
+                visible = controlsVisible,
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+            if (showInlineLyrics && hasLyricsApiKey) {
                 Row(
                     horizontalArrangement = Arrangement.End,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = PlayerHorizontalPadding),
@@ -1992,7 +2016,9 @@ fun BottomSheetPlayer(
                     }
                 }
             }
-        }
+                    }
+            }
+}
 
         when (LocalConfiguration.current.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
@@ -2079,7 +2105,19 @@ fun BottomSheetPlayer(
                         Modifier
                             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
                             .padding(bottom = bottomPadding)
-                            .animateContentSize(),
+                            .animateContentSize()
+                            .pointerInput(showInlineLyrics) {
+                                if (!showInlineLyrics) return@pointerInput
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                                        if (event.changes.any { it.pressed && !it.previousPressed }) {
+                                            if (!controlsVisibleNow) event.changes.forEach { it.consume() }
+                                            controlsInteraction++
+                                        }
+                                    }
+                                }
+                            },
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
@@ -2145,6 +2183,8 @@ fun BottomSheetPlayer(
                 onToggleLyrics = {
                     showInlineLyrics = !showInlineLyrics
                 },
+                controlsVisible = controlsVisible,
+                onControlsInteraction = { controlsInteraction++ },
                 useVibrant = useVibrant,
             )
         }
