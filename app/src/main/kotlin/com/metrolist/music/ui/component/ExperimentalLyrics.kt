@@ -100,6 +100,7 @@ import com.metrolist.music.constants.LyricsRomanizeAsMainKey
 import com.metrolist.music.constants.LyricsRomanizeCyrillicByLineKey
 import com.metrolist.music.constants.LyricsRomanizeList
 import com.metrolist.music.constants.LyricsTextPositionKey
+import com.metrolist.music.constants.LyricsTextSizeKey
 import com.metrolist.music.constants.OpenRouterApiKey
 import com.metrolist.music.constants.OpenRouterBaseUrlKey
 import com.metrolist.music.constants.OpenRouterDefaultBaseUrl
@@ -166,6 +167,7 @@ fun ExperimentalLyrics(
     val isGuest = listenTogetherManager?.isInRoom == true && !listenTogetherManager.isHost
 
     val lyricsTextPositionPref by rememberEnumPreference(LyricsTextPositionKey, LyricsPosition.CENTER)
+    val lyricsTextSizePref by rememberPreference(LyricsTextSizeKey, 24f)
     val lyricsTextPosition = textPositionOverride ?: lyricsTextPositionPref
     val changeLyrics by rememberPreference(LyricsClickKey, true)
     val romanizeLyricsList = rememberPreference(LyricsRomanizeList, "")
@@ -743,13 +745,11 @@ fun ExperimentalLyrics(
                             label = "lyricStaggeredOffset_$listIndex"
                         )
 
-                        val highlighted = highlightActiveLine && listItem is LyricsListItem.Line && activeLineIndices.contains(listItem.index)
                         Box(
                             modifier = Modifier.fillMaxWidth().layout { m, c -> 
                                 val p = m.measure(c.copy(maxHeight = Constraints.Infinity))
                                 layout(p.width, 0) { p.place(0, 0) }
                             }.offset { IntOffset(0, (animatedOffset + userManualOffset).roundToInt()) }
-                            .then(if (highlighted) Modifier.padding(horizontal = 8.dp).clip(RoundedCornerShape(16.dp)).background(expressiveAccent.copy(alpha = 0.16f)) else Modifier)
                         ) {
                             when (listItem) {
                                 is LyricsListItem.Indicator -> {
@@ -779,7 +779,7 @@ fun ExperimentalLyrics(
                                         bgVisible = bgVisible, isSelected = selectedIndices.contains(index),
                                         isSelectionModeActive = isSelectionModeActive, currentPositionState = currentPositionState,
                                         lyricsOffset = (currentSong?.song?.lyricsOffset ?: 0).toLong(),
-                                        playerConnection = playerConnection, lyricsTextSize = 36f, lyricsLineSpacing = 1.3f,
+                                        playerConnection = playerConnection, lyricsTextSize = lyricsTextSizePref, lyricsLineSpacing = 1.3f,
                                         expressiveAccent = expressiveAccent, lyricsTextPosition = lyricsTextPosition,
                                         respectAgentPositioning = respectAgentPositioning, isAutoScrollEnabled = isAutoScrollEnabled,
                                         displayedCurrentLineIndex = deferredCurrentLineIndex, romanizeAsMain = romanizeAsMain,

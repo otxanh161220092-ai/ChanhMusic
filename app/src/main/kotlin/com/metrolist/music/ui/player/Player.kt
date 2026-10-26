@@ -2309,7 +2309,8 @@ fun InlineLyricsView(
         modifier =
             Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(12.dp)),
+                .clip(RoundedCornerShape(12.dp))
+                .fadeVerticalEdges(),
         contentAlignment = Alignment.Center,
     ) {
         when {

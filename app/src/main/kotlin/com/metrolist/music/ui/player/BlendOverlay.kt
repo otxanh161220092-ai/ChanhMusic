@@ -65,3 +65,21 @@ fun Modifier.fadeBottomEdge(fraction: Float = 0.4f): Modifier =
                 blendMode = BlendMode.DstIn,
             )
         }
+
+/** Fades the top and bottom [fraction] of the content to transparent, so scrolled lines dissolve at the edges. */
+fun Modifier.fadeVerticalEdges(fraction: Float = 0.12f): Modifier =
+    this
+        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            drawRect(
+                brush =
+                    Brush.verticalGradient(
+                        0f to Color.Transparent,
+                        fraction to Color.Black,
+                        (1f - fraction) to Color.Black,
+                        1f to Color.Transparent,
+                    ),
+                blendMode = BlendMode.DstIn,
+            )
+        }
