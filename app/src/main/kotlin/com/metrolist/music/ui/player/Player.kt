@@ -998,13 +998,7 @@ fun BottomSheetPlayer(
             )
         },
     ) {
-        val controlsContent: @Composable ColumnScope.(MediaMetadata) -> Unit = { mediaMetadata ->
-            val playPauseRoundness by animateDpAsState(
-                targetValue = if (isPlaying) 24.dp else 36.dp,
-                animationSpec = tween(durationMillis = 90, easing = LinearEasing),
-                label = "playPauseRoundness",
-            )
-
+        val controlsTopRow: @Composable (MediaMetadata) -> Unit = { mediaMetadata ->
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -1522,6 +1516,19 @@ fun BottomSheetPlayer(
                         }
                     }
                 }
+            }
+        }
+
+        val controlsContent: @Composable ColumnScope.(MediaMetadata) -> Unit = { mediaMetadata ->
+            val playPauseRoundness by animateDpAsState(
+                targetValue = if (isPlaying) 24.dp else 36.dp,
+                animationSpec = tween(durationMillis = 90, easing = LinearEasing),
+                label = "playPauseRoundness",
+            )
+
+            // In portrait with lyrics open, the top row is drawn above the lyrics instead
+            if (!showInlineLyrics || LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                controlsTopRow(mediaMetadata)
             }
 
             Spacer(Modifier.height(24.dp))
@@ -2119,6 +2126,13 @@ fun BottomSheetPlayer(
                                 }
                             },
                 ) {
+                    if (showInlineLyrics) {
+                        mediaMetadata?.let {
+                            Box(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
+                                controlsTopRow(it)
+                            }
+                        }
+                    }
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier.weight(1f),
