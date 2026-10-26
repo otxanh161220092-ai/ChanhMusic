@@ -46,6 +46,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
@@ -1229,6 +1230,8 @@ fun YouTubeListItem(
     }
 }
 
+val LocalGridThumbnailCornerRadius = compositionLocalOf { ThumbnailCornerRadius }
+
 @Composable
 fun YouTubeGridItem(
     item: YTItem,
@@ -1306,7 +1309,7 @@ fun YouTubeGridItem(
             thumbnailUrl = item.thumbnail,
             isActive = isActive,
             isPlaying = isPlaying,
-            shape = if (item is ArtistItem) CircleShape else RoundedCornerShape(ThumbnailCornerRadius),
+            shape = if (item is ArtistItem) CircleShape else RoundedCornerShape(LocalGridThumbnailCornerRadius.current),
         )
 
         if (item is SongItem && !isActive) {

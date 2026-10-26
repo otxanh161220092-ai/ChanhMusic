@@ -86,6 +86,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.metrolist.music.LocalNavController
@@ -121,6 +122,7 @@ import com.metrolist.music.constants.ListThumbnailSize
 import com.metrolist.music.constants.RandomizeHomeOrderKey
 import com.metrolist.music.constants.SmallGridThumbnailHeight
 import com.metrolist.music.constants.ThumbnailCornerRadius
+import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.db.entities.Album
 import com.metrolist.music.db.entities.Artist
 import com.metrolist.music.db.entities.LocalItem
@@ -145,6 +147,7 @@ import com.metrolist.music.ui.component.RandomizeGridItem
 import com.metrolist.music.ui.component.SongGridItem
 import com.metrolist.music.ui.component.SongListItem
 import com.metrolist.music.ui.component.SpeedDialGridItem
+import com.metrolist.music.ui.component.LocalGridThumbnailCornerRadius
 import com.metrolist.music.ui.component.YouTubeGridItem
 import com.metrolist.music.ui.component.YouTubeListItem
 import com.metrolist.music.ui.component.shimmer.GridItemPlaceHolder
@@ -643,6 +646,8 @@ fun DailyDiscoverCard(
 }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+private val AppleHomeCardCornerRadius = 12.dp
+
 @Composable
 fun HomeScreen(
     snackbarHostState: SnackbarHostState,
@@ -694,6 +699,7 @@ fun HomeScreen(
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
     val (randomizeHomeOrder) = rememberPreference(RandomizeHomeOrderKey, true)
     val autoRadioQueue by rememberPreference(AutoRadioQueueKey, defaultValue = true)
+    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
 
     LaunchedEffect(Unit) { viewModel.loadHomeData() }
 
@@ -909,7 +915,7 @@ fun HomeScreen(
         }
     }
 
-    val ytGridItem: @Composable (YTItem) -> Unit = { item ->
+    val ytGridItemContent: @Composable (YTItem) -> Unit = { item ->
         YouTubeGridItem(
             item = item,
             isActive = item.id in listOf(mediaMetadata?.album?.id, mediaMetadata?.id),
@@ -1021,6 +1027,13 @@ fun HomeScreen(
                         },
                     ),
         )
+    }
+
+    val homeGridCorner = if (appleStyle) AppleHomeCardCornerRadius else ThumbnailCornerRadius
+    val ytGridItem: @Composable (YTItem) -> Unit = { item ->
+        CompositionLocalProvider(LocalGridThumbnailCornerRadius provides homeGridCorner) {
+            ytGridItemContent(item)
+        }
     }
 
     val homeSections =
