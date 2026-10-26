@@ -142,6 +142,11 @@ import com.metrolist.music.constants.SleepTimerFadeOutKey
 import com.metrolist.music.constants.SleepTimerStopAfterCurrentSongKey
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.material3.Button
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.graphicsLayer
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -268,12 +273,33 @@ fun Queue(
         collapsedContent = {
             if (useNewPlayerDesign) {
                 // New design: lyrics, route/cast and queue
+                var navVisible by remember { mutableStateOf(true) }
+                var navInteraction by remember { mutableLongStateOf(0L) }
+                LaunchedEffect(navInteraction) {
+                    navVisible = true
+                    delay(5_000L)
+                    navVisible = false
+                }
+                val navAlpha by animateFloatAsState(
+                    targetValue = if (navVisible) 1f else 0f,
+                    animationSpec = tween(400),
+                    label = "navAlpha",
+                )
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                     modifier =
                         Modifier
                             .fillMaxWidth()
+                            .graphicsLayer { alpha = navAlpha }
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                                        if (event.changes.any { it.pressed && !it.previousPressed }) navInteraction++
+                                    }
+                                }
+                            }
                             .padding(horizontal = 30.dp, vertical = 12.dp)
                             .windowInsetsPadding(
                                 WindowInsets.systemBars.only(

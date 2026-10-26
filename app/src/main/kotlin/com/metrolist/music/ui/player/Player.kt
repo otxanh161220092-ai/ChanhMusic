@@ -204,6 +204,12 @@ import com.metrolist.music.ui.component.Icon as MIcon
 import com.metrolist.music.constants.SleepTimerDefaultKey
 import com.metrolist.music.constants.SleepTimerFadeOutKey
 import com.metrolist.music.constants.SleepTimerStopAfterCurrentSongKey
+import androidx.compose.material3.IconButton
+import com.metrolist.music.lyrics.LyricsTranslationHelper
+import com.metrolist.music.constants.AiProviderKey
+import com.metrolist.music.constants.OpenRouterApiKey
+import com.metrolist.music.constants.DeeplApiKey
+import com.metrolist.music.ui.screens.settings.LyricsPosition
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -236,6 +242,13 @@ fun BottomSheetPlayer(
         mutableStateOf(false)
     }
 
+    val database = LocalDatabase.current
+    val aiProvider by rememberPreference(AiProviderKey, "OpenRouter")
+    val openRouterApiKey by rememberPreference(OpenRouterApiKey, "")
+    val deeplApiKey by rememberPreference(DeeplApiKey, "")
+    val hasLyricsApiKey = if (aiProvider == "DeepL") deeplApiKey.isNotBlank() else openRouterApiKey.isNotBlank()
+    val hasTranslations by LyricsTranslationHelper.hasActiveTranslations.collectAsStateWithLifecycle()
+    val translateTargetLyrics by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
     var isFullScreen by rememberSaveable {
         mutableStateOf(false)
     }
@@ -1498,6 +1511,33 @@ fun BottomSheetPlayer(
 
             Spacer(Modifier.height(24.dp))
 
+            if (hasLyricsApiKey) {
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = PlayerHorizontalPadding),
+                ) {
+                    IconButton(
+                        onClick = {
+                            if (hasTranslations) {
+                                translateTargetLyrics?.let { lyrics ->
+                                    val cleared = LyricsTranslationHelper.clearTranslations(lyrics)
+                                    database.query { upsert(cleared) }
+                                    LyricsTranslationHelper.triggerClearTranslations()
+                                }
+                            } else {
+                                LyricsTranslationHelper.triggerManualTranslation()
+                            }
+                        },
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.translate),
+                            contentDescription = stringResource(R.string.ai_lyrics_translation),
+                            tint = if (hasTranslations) textButtonColor else textButtonColor.copy(alpha = 0.6f),
+                        )
+                    }
+                }
+            }
+
             Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText)) {
             when (sliderStyle) {
                 SliderStyle.WAVY -> {
@@ -2236,6 +2276,8 @@ fun InlineLyricsView(
                         sliderPositionProvider = positionProvider,
                         modifier = Modifier.padding(horizontal = 24.dp),
                         showLyrics = showLyrics,
+                        textPositionOverride = LyricsPosition.LEFT,
+                        highlightActiveLine = true,
                     )
                 }
                 ProvideTextStyle(

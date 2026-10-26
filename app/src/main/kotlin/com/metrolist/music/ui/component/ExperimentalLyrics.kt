@@ -59,6 +59,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -82,6 +83,8 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.metrolist.music.LocalDatabase
@@ -149,6 +152,8 @@ fun ExperimentalLyrics(
     sliderPositionProvider: () -> Long?,
     modifier: Modifier = Modifier,
     showLyrics: Boolean,
+    textPositionOverride: LyricsPosition? = null,
+    highlightActiveLine: Boolean = false,
     lyricsViewModel: LyricsViewModel = hiltViewModel()
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -159,7 +164,8 @@ fun ExperimentalLyrics(
     val listenTogetherManager = LocalListenTogetherManager.current
     val isGuest = listenTogetherManager?.isInRoom == true && !listenTogetherManager.isHost
 
-    val lyricsTextPosition by rememberEnumPreference(LyricsTextPositionKey, LyricsPosition.CENTER)
+    val lyricsTextPositionPref by rememberEnumPreference(LyricsTextPositionKey, LyricsPosition.CENTER)
+    val lyricsTextPosition = textPositionOverride ?: lyricsTextPositionPref
     val changeLyrics by rememberPreference(LyricsClickKey, true)
     val romanizeLyricsList = rememberPreference(LyricsRomanizeList, "")
     val romanizeAsMain by rememberPreference(LyricsRomanizeAsMainKey, false)
@@ -736,11 +742,13 @@ fun ExperimentalLyrics(
                             label = "lyricStaggeredOffset_$listIndex"
                         )
 
+                        val highlighted = highlightActiveLine && listItem is LyricsListItem.Line && activeLineIndices.contains(listItem.index)
                         Box(
                             modifier = Modifier.fillMaxWidth().layout { m, c -> 
                                 val p = m.measure(c.copy(maxHeight = Constraints.Infinity))
                                 layout(p.width, 0) { p.place(0, 0) }
                             }.offset { IntOffset(0, (animatedOffset + userManualOffset).roundToInt()) }
+                            .then(if (highlighted) Modifier.padding(horizontal = 8.dp).clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.16f)) else Modifier)
                         ) {
                             when (listItem) {
                                 is LyricsListItem.Indicator -> {
