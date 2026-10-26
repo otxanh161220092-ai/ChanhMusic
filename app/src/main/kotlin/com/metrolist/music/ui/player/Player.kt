@@ -2127,7 +2127,7 @@ fun BottomSheetPlayer(
                 ) {
                     if (showInlineLyrics) {
                         mediaMetadata?.let {
-                            Box(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
+                            Box(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars).padding(top = 32.dp)) {
                                 controlsTopRow(it)
                             }
                         }
