@@ -75,12 +75,12 @@ fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
 fun Modifier.appleCollectionBackground(brush: Brush): Modifier =
     this.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }.background(brush)
 
-/** Screen-blends a white overlay over whatever is already drawn behind the control. */
+/** Overlay-blends a white layer over whatever is already drawn behind the control. */
 private fun Modifier.screenHighlight(alpha: Float): Modifier = this.drawBehind {
     drawRoundRect(
         color = Color.White.copy(alpha = alpha),
         cornerRadius = CornerRadius(size.minDimension / 2f),
-        blendMode = BlendMode.Screen,
+        blendMode = BlendMode.Overlay,
     )
 }
 
