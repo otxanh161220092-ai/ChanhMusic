@@ -30,8 +30,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -59,9 +61,15 @@ fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
     }
 }
 
+/** Highlight that brightens whatever is behind the control to about 80%, instead of painting it white. */
+private fun Modifier.screenHighlight(shape: Shape): Modifier = this.drawBehind {
+    val outline = shape.createOutline(size, layoutDirection, this)
+    drawOutline(outline = outline, color = Color(0xFFCCCCCC), blendMode = BlendMode.Screen)
+}
+
 /**
- * Apple Music style collection header (album, playlist): centered artwork,
- * white title and text, a white Play pill and round side buttons.
+ * Apple Music style collection header (album, playlist): edge-to-edge artwork,
+ * white text and highlight-style round buttons.
  */
 @Composable
 fun AppleCollectionHeader(
@@ -79,77 +87,111 @@ fun AppleCollectionHeader(
     val onColor = Color.White
 
     Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 20.dp),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Surface(
-            modifier =
-                Modifier
-                    .fillMaxWidth(0.8f)
-                    .aspectRatio(1f)
-                    .shadow(elevation = 24.dp, shape = RoundedCornerShape(8.dp)),
-            shape = RoundedCornerShape(8.dp),
-        ) {
-            AsyncImage(
-                model = thumbnailUrl?.resize(1080, 1080),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = onColor,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
+        AsyncImage(
+            model = thumbnailUrl?.resize(1080, 1080),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxWidth().aspectRatio(1f),
         )
 
-        if (!artistText.isNullOrBlank()) {
-            Text(
-                text = artistText,
-                style = MaterialTheme.typography.bodyLarge,
-                color = onColor.copy(alpha = 0.85f),
-                textAlign = TextAlign.Center,
-                modifier = if (onArtistClick != null) Modifier.clickable(onClick = onArtistClick) else Modifier,
-            )
-        }
-
-        if (!metaText.isNullOrBlank()) {
-            Text(
-                text = metaText,
-                style = MaterialTheme.typography.bodySmall,
-                color = onColor.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (onShuffle != null) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = onColor,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+
+            if (!artistText.isNullOrBlank()) {
+                Text(
+                    text = artistText,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = onColor.copy(alpha = 0.85f),
+                    textAlign = TextAlign.Center,
+                    modifier = if (onArtistClick != null) Modifier.clickable(onClick = onArtistClick) else Modifier,
+                )
+            }
+
+            if (!metaText.isNullOrBlank()) {
+                Text(
+                    text = metaText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = onColor.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (onShuffle != null) {
+                    Surface(
+                        onClick = onShuffle,
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        modifier = Modifier.size(52.dp).screenHighlight(CircleShape),
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            Icon(
+                                painter = painterResource(R.drawable.shuffle),
+                                contentDescription = stringResource(R.string.shuffle_home),
+                                tint = onColor,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
+                    }
+                }
+
                 Surface(
-                    onClick = onShuffle,
+                    onClick = onPlay,
                     shape = CircleShape,
-                    color = onColor.copy(alpha = 0.2f),
-                    modifier = Modifier.size(52.dp),
+                    color = Color.Transparent,
+                    modifier = Modifier.height(52.dp).width(148.dp).screenHighlight(CircleShape),
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.play),
+                            contentDescription = null,
+                            tint = onColor,
+                            modifier = Modifier.size(22.dp),
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.play),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = onColor,
+                        )
+                    }
+                }
+
+                Surface(
+                    onClick = onMore,
+                    shape = CircleShape,
+                    color = Color.Transparent,
+                    modifier = Modifier.size(52.dp).screenHighlight(CircleShape),
                 ) {
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                         Icon(
-                            painter = painterResource(R.drawable.shuffle),
-                            contentDescription = stringResource(R.string.shuffle_home),
+                            painter = painterResource(R.drawable.more_vert),
+                            contentDescription = null,
                             tint = onColor,
                             modifier = Modifier.size(24.dp),
                         )
@@ -157,57 +199,14 @@ fun AppleCollectionHeader(
                 }
             }
 
-            Surface(
-                onClick = onPlay,
-                shape = CircleShape,
-                color = onColor,
-                modifier = Modifier.height(52.dp).width(148.dp),
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.play),
-                        contentDescription = null,
-                        tint = Color(0xFF111111),
-                        modifier = Modifier.size(22.dp),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.play),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF111111),
-                    )
-                }
+            if (!description.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(20.dp))
+                ExpandableText(
+                    text = description,
+                    modifier = Modifier.fillMaxWidth(),
+                    collapsedMaxLines = 3,
+                )
             }
-
-            Surface(
-                onClick = onMore,
-                shape = CircleShape,
-                color = onColor.copy(alpha = 0.2f),
-                modifier = Modifier.size(52.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Icon(
-                        painter = painterResource(R.drawable.more_vert),
-                        contentDescription = null,
-                        tint = onColor,
-                        modifier = Modifier.size(24.dp),
-                    )
-                }
-            }
-        }
-
-        if (!description.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(20.dp))
-            ExpandableText(
-                text = description,
-                modifier = Modifier.fillMaxWidth(),
-                collapsedMaxLines = 3,
-            )
         }
     }
 }

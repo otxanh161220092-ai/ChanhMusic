@@ -1075,7 +1075,7 @@ fun LocalPlaylistHeader(
                     }
     }
     if (appleStyle) {
-        val totalDuration = songs.sumOf { it.song.duration }
+        val totalDuration = songs.sumOf { it.song.song.duration ?: 0 }
         val songCount = pluralStringResource(R.plurals.n_song, songs.size, songs.size)
         AppleCollectionHeader(
             title = playlist.playlist.name,
