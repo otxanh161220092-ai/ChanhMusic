@@ -278,7 +278,7 @@ private fun AppleStyleNavigationBar(
     val searchSelected = searchScreen?.let { isRouteSelected(currentRoute, it.route, navigationItems) } ?: false
 
     Row(
-        modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 20.dp),
+        modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 36.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
