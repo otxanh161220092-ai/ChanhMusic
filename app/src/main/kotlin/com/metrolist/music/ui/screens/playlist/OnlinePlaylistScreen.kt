@@ -96,8 +96,8 @@ import com.metrolist.music.db.entities.PlaylistSongMap
 import com.metrolist.music.models.toMediaMetadata
 import com.metrolist.music.playback.queues.YouTubePlaylistQueue
 import com.metrolist.music.ui.component.AppleCollectionHeader
-import com.metrolist.music.ui.component.appleCollectionBackground
-import com.metrolist.music.ui.component.rememberAppleCollectionBrush
+import com.metrolist.music.ui.component.AppleCollectionContainer
+import com.metrolist.music.ui.component.AppleCollectionContainer
 import com.metrolist.music.ui.component.ExpandableText
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.LocalMenuState
@@ -200,12 +200,9 @@ fun OnlinePlaylistScreen(
     }
 
     val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
-    val collectionBrush = rememberAppleCollectionBrush(playlist?.thumbnail)
-
-    Box(Modifier.fillMaxSize()) {
+    AppleCollectionContainer(thumbnailUrl = playlist?.thumbnail, enabled = appleStyle) {
         LazyColumn(
             state = lazyListState,
-            modifier = if (appleStyle) Modifier.appleCollectionBackground(collectionBrush) else Modifier,
             contentPadding = LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(),
         ) {
             if (playlist == null || songs.isEmpty()) {

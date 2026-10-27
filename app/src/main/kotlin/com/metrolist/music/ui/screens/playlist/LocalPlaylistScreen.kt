@@ -124,8 +124,8 @@ import com.metrolist.music.playback.ExoDownloadService
 import com.metrolist.music.playback.queues.ListQueue
 import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.ui.component.AppleCollectionHeader
-import com.metrolist.music.ui.component.appleCollectionBackground
-import com.metrolist.music.ui.component.rememberAppleCollectionBrush
+import com.metrolist.music.ui.component.AppleCollectionContainer
+import com.metrolist.music.ui.component.AppleCollectionContainer
 import com.metrolist.music.utils.makeTimeString
 import androidx.compose.foundation.background
 import com.metrolist.music.ui.component.ActionPromptDialog
@@ -481,10 +481,9 @@ fun LocalPlaylistScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         val appleStyleList by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
-        val collectionBrush = rememberAppleCollectionBrush(songs.firstOrNull()?.song?.thumbnailUrl)
+        AppleCollectionContainer(thumbnailUrl = songs.firstOrNull()?.song?.thumbnailUrl, enabled = appleStyleList) {
         LazyColumn(
             state = lazyListState,
-            modifier = if (appleStyleList) Modifier.appleCollectionBackground(collectionBrush) else Modifier,
             contentPadding = LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(),
         ) {
             playlist?.let { playlist ->
@@ -725,6 +724,7 @@ fun LocalPlaylistScreen(
                     }
                 }
             }
+        }
         }
 
         DraggableScrollbar(

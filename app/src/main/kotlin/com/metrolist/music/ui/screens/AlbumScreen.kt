@@ -82,8 +82,8 @@ import com.metrolist.music.constants.HideExplicitKey
 import com.metrolist.music.constants.HideVideoSongsKey
 import com.metrolist.music.db.entities.Album
 import com.metrolist.music.playback.queues.LocalAlbumRadio
-import com.metrolist.music.ui.component.appleCollectionBackground
-import com.metrolist.music.ui.component.rememberAppleCollectionBrush
+import com.metrolist.music.ui.component.AppleCollectionContainer
+import com.metrolist.music.ui.component.AppleCollectionContainer
 import com.metrolist.music.ui.component.AppleCollectionHeader
 import com.metrolist.music.ui.component.ClickableArtistText
 import com.metrolist.music.constants.UseAppleStyleLayoutKey
@@ -191,9 +191,8 @@ fun AlbumScreen(
         }
     }
 
-    val collectionBrush = rememberAppleCollectionBrush(albumWithSongs?.album?.thumbnailUrl)
+    AppleCollectionContainer(thumbnailUrl = albumWithSongs?.album?.thumbnailUrl, enabled = appleStyle) {
     LazyColumn(
-        modifier = if (appleStyle) Modifier.appleCollectionBackground(collectionBrush) else Modifier,
         contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
     ) {
         val albumWithSongs = albumWithSongs
@@ -562,6 +561,7 @@ fun AlbumScreen(
                 }
             }
         }
+    }
     }
 
     TopAppBar(

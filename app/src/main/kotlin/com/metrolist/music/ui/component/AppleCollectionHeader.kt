@@ -69,6 +69,24 @@ fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
 }
 
 /**
+ * Full-screen container for an Apple style collection: blurred artwork over the collection
+ * gradient, with [content] (usually the list) drawn on top in the same offscreen layer so
+ * highlight buttons blend with it.
+ */
+@Composable
+fun AppleCollectionContainer(
+    thumbnailUrl: String?,
+    enabled: Boolean,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    val brush = rememberAppleCollectionBrush(thumbnailUrl)
+    Box(modifier = Modifier.fillMaxSize().then(if (enabled) Modifier.appleCollectionBackground(brush) else Modifier)) {
+        if (enabled) AppleCollectionBackdrop(thumbnailUrl)
+        content()
+    }
+}
+
+/**
  * Background for an Apple style collection. The offscreen layer makes highlight buttons blend
  * with the artwork and gradient behind them instead of with the empty surface.
  */
@@ -84,9 +102,9 @@ private fun Modifier.screenHighlight(alpha: Float): Modifier = this.drawBehind {
     )
 }
 
-/** Blurred artwork that fades out toward the bottom of the header, revealing the collection background. */
+/** Blurred artwork covering the whole collection screen, fading out toward the bottom. */
 @Composable
-private fun BoxScope.AppleHeroBackdrop(thumbnailUrl: String?) {
+fun BoxScope.AppleCollectionBackdrop(thumbnailUrl: String?) {
     AsyncImage(
         model = thumbnailUrl?.resize(200, 200),
         contentDescription = null,
@@ -101,7 +119,7 @@ private fun BoxScope.AppleHeroBackdrop(thumbnailUrl: String?) {
                 drawRect(
                     brush = Brush.verticalGradient(
                         0f to Color.Black,
-                        0.3f to Color.Black,
+                        0.45f to Color.Black,
                         1f to Color.Transparent,
                     ),
                     blendMode = BlendMode.DstIn,
@@ -129,15 +147,13 @@ fun AppleCollectionHeader(
 ) {
     val heroColor by rememberArtworkColor(thumbnailUrl?.resize(100, 100))
     val onColor = Color.White
-    val playHighlightAlpha = 0.45f
+    val playHighlightAlpha = 0.6f
     val sideHighlightAlpha = 0.25f
     val heroLuminance = heroColor?.luminance() ?: 0f
     val onButton =
         if (heroLuminance + playHighlightAlpha * (1f - heroLuminance) > 0.6f) Color.Black else Color.White
 
     Box(modifier = modifier.fillMaxWidth()) {
-        AppleHeroBackdrop(thumbnailUrl)
-
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
