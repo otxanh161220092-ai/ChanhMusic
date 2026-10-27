@@ -232,8 +232,8 @@ fun AlbumScreen(
             }
         }
 
-        if (albumWithSongs != null && albumWithSongs.songs.isNotEmpty() && !appleStyle) {
-            item(key = "album_header") {
+        if (albumWithSongs != null && albumWithSongs.songs.isNotEmpty()) {
+            if (!appleStyle) item(key = "album_header") {
                 Column(
                     modifier =
                         Modifier

@@ -53,7 +53,7 @@ fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
     return remember(heroColor, pageColor) {
         Brush.verticalGradient(
             0f to heroColor,
-            0.55f to heroColor,
+            0.85f to heroColor,
             1f to pageColor,
         )
     }
