@@ -124,6 +124,7 @@ import com.metrolist.music.playback.ExoDownloadService
 import com.metrolist.music.playback.queues.ListQueue
 import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.ui.component.AppleCollectionHeader
+import com.metrolist.music.ui.component.appleCollectionBackground
 import com.metrolist.music.ui.component.rememberAppleCollectionBrush
 import com.metrolist.music.utils.makeTimeString
 import androidx.compose.foundation.background
@@ -483,7 +484,7 @@ fun LocalPlaylistScreen(
         val collectionBrush = rememberAppleCollectionBrush(songs.firstOrNull()?.song?.thumbnailUrl)
         LazyColumn(
             state = lazyListState,
-            modifier = if (appleStyleList) Modifier.background(collectionBrush) else Modifier,
+            modifier = if (appleStyleList) Modifier.appleCollectionBackground(collectionBrush) else Modifier,
             contentPadding = LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(),
         ) {
             playlist?.let { playlist ->
