@@ -81,7 +81,10 @@ import com.metrolist.music.constants.HideExplicitKey
 import com.metrolist.music.constants.HideVideoSongsKey
 import com.metrolist.music.db.entities.Album
 import com.metrolist.music.playback.queues.LocalAlbumRadio
+import com.metrolist.music.ui.component.AppleCollectionBackground
+import com.metrolist.music.ui.component.AppleCollectionHeader
 import com.metrolist.music.ui.component.ClickableArtistText
+import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.NavigationTitle
@@ -106,6 +109,7 @@ fun AlbumScreen(
     val context = LocalContext.current
     val menuState = LocalMenuState.current
     val database = LocalDatabase.current
+    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -189,7 +193,43 @@ fun AlbumScreen(
         contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
     ) {
         val albumWithSongs = albumWithSongs
-        if (albumWithSongs != null && albumWithSongs.songs.isNotEmpty()) {
+        if (albumWithSongs != null && albumWithSongs.songs.isNotEmpty() && appleStyle) {
+            item(key = "album_header_apple") {
+                val totalDuration = albumWithSongs.songs.sumOf { it.song.duration }
+                val songCount =
+                    pluralStringResource(
+                        R.plurals.n_song,
+                        albumWithSongs.songs.size,
+                        albumWithSongs.songs.size,
+                    )
+                val metaText =
+                    if (totalDuration > 0) "$songCount ${makeTimeString(totalDuration * 1000L)}" else songCount
+                AppleCollectionBackground(artworkUrl = albumWithSongs.album.thumbnailUrl) {
+                    AppleCollectionHeader(
+                        title = albumWithSongs.album.title,
+                        thumbnailUrl = albumWithSongs.album.thumbnailUrl,
+                        artistText = albumWithSongs.artists.joinToString(", ") { it.name },
+                        metaText = metaText,
+                        onPlay = {
+                            if (!isListenTogetherGuest) {
+                                playerConnection.service.getAutomix(playlistId)
+                                playerConnection.playQueue(LocalAlbumRadio(albumWithSongs))
+                            }
+                        },
+                        onMore = {
+                            menuState.show {
+                                AlbumMenu(
+                                    originalAlbum = Album(albumWithSongs.album, albumWithSongs.artists),
+                                    onDismiss = menuState::dismiss,
+                                )
+                            }
+                        },
+                    )
+                }
+            }
+        }
+
+        if (albumWithSongs != null && albumWithSongs.songs.isNotEmpty() && !appleStyle) {
             item(key = "album_header") {
                 Column(
                     modifier =
