@@ -96,6 +96,7 @@ import com.metrolist.music.playback.queues.YouTubePlaylistQueue
 import com.metrolist.music.ui.component.ExpandableText
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.LocalMenuState
+import com.metrolist.music.ui.component.rememberArtworkColor
 import com.metrolist.music.ui.component.YouTubeListItem
 import com.metrolist.music.ui.menu.YouTubePlaylistMenu
 import com.metrolist.music.ui.menu.YouTubeSelectionSongMenu
@@ -108,7 +109,6 @@ import com.metrolist.music.viewmodels.OnlinePlaylistViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.background
 import com.metrolist.music.constants.UseAppleStyleLayoutKey
@@ -500,27 +500,19 @@ private fun OnlinePlaylistHeaderContent(
         OnlinePlaylistHeaderContent(playlist, songs, dbPlaylist, coroutineScope, continuation, isPodcastPlaylist, modifier)
         return
     }
-    // Apple style hero: blurred artwork behind the header, fading into the page background
-    Box(modifier = modifier.fillMaxWidth()) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current).data(playlist.thumbnail?.resize(540, 540)).build(),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize().blur(48.dp),
-        )
-        Box(
-            modifier =
-                Modifier
-                    .matchParentSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.35f),
-                                MaterialTheme.colorScheme.background,
-                            ),
-                        ),
+    // Apple style hero: background gradient from the artwork's dominant color
+    val artColor by rememberArtworkColor(playlist.thumbnail?.resize(100, 100))
+    val heroColor = artColor ?: MaterialTheme.colorScheme.surfaceVariant
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(heroColor, MaterialTheme.colorScheme.background),
                     ),
-        )
+                ),
+    ) {
         OnlinePlaylistHeaderContent(
             playlist, songs, dbPlaylist, coroutineScope, continuation, isPodcastPlaylist,
             Modifier.fillMaxWidth(),
