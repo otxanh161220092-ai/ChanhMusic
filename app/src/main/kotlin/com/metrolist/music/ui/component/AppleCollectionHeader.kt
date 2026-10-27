@@ -38,7 +38,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -120,8 +119,10 @@ fun AppleCollectionHeader(
     val heroColor by rememberArtworkColor(thumbnailUrl?.resize(100, 100))
     val onColor = Color.White
     val smallHighlightAlpha = 0.3f
-    val playButtonColor = lerp(heroColor ?: Color.Gray, Color.White, 0.5f)
-    val onButton = if (playButtonColor.luminance() > 0.6f) Color.Black else Color.White
+    val playHighlightAlpha = 0.5f
+    val heroLuminance = heroColor?.luminance() ?: 0f
+    val highlightedLuminance = heroLuminance + playHighlightAlpha * (1f - heroLuminance)
+    val onButton = if (highlightedLuminance > 0.6f) Color.Black else Color.White
 
     Box(modifier = modifier.fillMaxWidth()) {
         AppleHeroBackdrop(thumbnailUrl)
@@ -198,8 +199,8 @@ fun AppleCollectionHeader(
                     Surface(
                         onClick = onPlay,
                         shape = CircleShape,
-                        color = playButtonColor,
-                        modifier = Modifier.height(52.dp).width(148.dp),
+                        color = Color.Transparent,
+                        modifier = Modifier.height(52.dp).width(148.dp).screenHighlight(playHighlightAlpha),
                     ) {
                         Row(
                             horizontalArrangement = Arrangement.Center,
