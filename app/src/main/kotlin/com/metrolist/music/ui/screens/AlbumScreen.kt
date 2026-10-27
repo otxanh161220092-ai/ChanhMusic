@@ -83,7 +83,6 @@ import com.metrolist.music.constants.HideVideoSongsKey
 import com.metrolist.music.db.entities.Album
 import com.metrolist.music.playback.queues.LocalAlbumRadio
 import com.metrolist.music.ui.component.AppleCollectionContainer
-import com.metrolist.music.ui.component.AppleCollectionContainer
 import com.metrolist.music.ui.component.AppleCollectionHeader
 import com.metrolist.music.ui.component.ClickableArtistText
 import com.metrolist.music.constants.UseAppleStyleLayoutKey

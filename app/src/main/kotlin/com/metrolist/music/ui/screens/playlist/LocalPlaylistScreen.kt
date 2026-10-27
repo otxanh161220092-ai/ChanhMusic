@@ -125,7 +125,6 @@ import com.metrolist.music.playback.queues.ListQueue
 import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.ui.component.AppleCollectionHeader
 import com.metrolist.music.ui.component.AppleCollectionContainer
-import com.metrolist.music.ui.component.AppleCollectionContainer
 import com.metrolist.music.utils.makeTimeString
 import androidx.compose.foundation.background
 import com.metrolist.music.ui.component.ActionPromptDialog
