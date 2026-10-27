@@ -61,7 +61,7 @@ jobs:
         run: ./gradlew --console=plain :app:assembleFossRelease -x lint -x lintFossRelease --warning-mode summary 2>&1 | tee build.log
         env:
           METROLIST_APPLICATION_ID: com.metrolist.music.automix
-          METROLIST_APP_NAME: Metrolist Automix
+          METROLIST_APP_NAME: "Cai's Nhac"
 
       - name: Report build errors
         if: failure()
