@@ -192,6 +192,7 @@ import com.metrolist.music.ui.component.shimmer.ShimmerTheme
 import com.metrolist.music.ui.menu.YouTubeSongMenu
 import com.metrolist.music.ui.player.BottomSheetPlayer
 import com.metrolist.music.ui.screens.Screens
+import com.metrolist.music.ui.screens.appleHomeShuffleAction
 import com.metrolist.music.ui.screens.navigationBuilder
 import com.metrolist.music.ui.screens.settings.ChangelogScreen
 import com.metrolist.music.ui.screens.settings.DarkMode
@@ -630,6 +631,7 @@ class MainActivity : FragmentActivity() {
         }
 
         val useAppleStyleLayout by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+        val homeShuffleAction by appleHomeShuffleAction.collectAsStateWithLifecycle()
         MetrolistTheme(
             darkTheme = useDarkTheme,
             pureBlack = pureBlack,
@@ -1172,6 +1174,7 @@ class MainActivity : FragmentActivity() {
                                         slimNav = slimNav,
                                         floating = floatingNav || useAppleStyleLayout,
                                         appleStyle = useAppleStyleLayout,
+                                        onShuffleClick = if (currentRoute == Screens.Home.route) homeShuffleAction else null,
                                         onSearchLongClick = onSearchLongClick,
                                         onHomeLongHold = { showAccountDialog = true },
                                         modifier =

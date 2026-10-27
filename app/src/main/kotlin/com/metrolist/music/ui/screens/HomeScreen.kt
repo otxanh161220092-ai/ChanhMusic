@@ -171,7 +171,10 @@ import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.viewmodels.CommunityPlaylistItem
 import com.metrolist.music.viewmodels.HomeViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.min
@@ -646,6 +649,9 @@ fun DailyDiscoverCard(
 }
 
 private val AppleHomeCardCornerRadius = 12.dp
+
+// Shuffle action shared with the Apple style navigation bar while Home is open
+val appleHomeShuffleAction = MutableStateFlow<(() -> Unit)?>(null)
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -2543,11 +2549,7 @@ fun HomeScreen(
                 }
             }
 
-            HideOnScrollFAB(
-                visible = allLocalItems.isNotEmpty() || allYtItems.isNotEmpty(),
-                lazyListState = lazylistState,
-                icon = R.drawable.shuffle,
-                onClick = {
+            val homeShuffle: () -> Unit = {
                     if (!isListenTogetherGuest) {
                         val local =
                             when {
@@ -2616,11 +2618,26 @@ fun HomeScreen(
                             }
                         }
                     }
-                },
-                onRecognitionClick = {
-                    navController.navigate("recognition")
-                },
-            )
+            }
+
+            SideEffect {
+                appleHomeShuffleAction.value = if (appleStyle) homeShuffle else null
+            }
+            DisposableEffect(Unit) {
+                onDispose { appleHomeShuffleAction.value = null }
+            }
+
+            if (!appleStyle) {
+                HideOnScrollFAB(
+                    visible = allLocalItems.isNotEmpty() || allYtItems.isNotEmpty(),
+                    lazyListState = lazylistState,
+                    icon = R.drawable.shuffle,
+                    onClick = homeShuffle,
+                    onRecognitionClick = {
+                        navController.navigate("recognition")
+                    },
+                )
+            }
         }
     }
 }

@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import com.metrolist.music.R
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.metrolist.music.ui.screens.Screens
@@ -159,6 +160,7 @@ fun AppNavigationBar(
     onSearchLongClick: (() -> Unit)? = null,
     onHomeLongHold: (() -> Unit)? = null,
     appleStyle: Boolean = false,
+    onShuffleClick: (() -> Unit)? = null,
 ) {
     if (appleStyle) {
         AppleStyleNavigationBar(
@@ -167,6 +169,7 @@ fun AppNavigationBar(
             onItemClick = onItemClick,
             modifier = modifier,
             onSearchLongClick = onSearchLongClick,
+            onShuffleClick = onShuffleClick,
         )
         return
     }
@@ -268,6 +271,7 @@ private fun AppleStyleNavigationBar(
     onItemClick: (Screens, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     onSearchLongClick: (() -> Unit)? = null,
+    onShuffleClick: (() -> Unit)? = null,
 ) {
     val isLightTheme = MaterialTheme.colorScheme.background.luminance() > 0.5f
     val pillColor = if (isLightTheme) Color.White else MaterialTheme.colorScheme.surfaceContainerHigh
@@ -318,6 +322,34 @@ private fun AppleStyleNavigationBar(
                         text = stringResource(screen.titleId),
                         style = MaterialTheme.typography.labelSmall,
                         color = tint,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            if (onShuffleClick != null) {
+                Column(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                            ) { onShuffleClick() },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.shuffle),
+                        contentDescription = stringResource(R.string.shuffle_home),
+                        tint = accent,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Text(
+                        text = stringResource(R.string.shuffle_home),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = accent,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
