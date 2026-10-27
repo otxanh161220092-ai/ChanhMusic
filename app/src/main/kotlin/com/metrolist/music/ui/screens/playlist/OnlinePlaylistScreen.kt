@@ -9,6 +9,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -253,7 +255,7 @@ fun OnlinePlaylistScreen(
                 playlist?.let { playlist ->
                     if (!isSearching) {
                         item(key = "playlist_header") {
-                            OnlinePlaylistHeader(
+                            OnlinePlaylistHeaderWithStyle(
                                 playlist = playlist,
                                 songs = songs,
                                 dbPlaylist = dbPlaylist,
@@ -486,7 +488,7 @@ fun OnlinePlaylistScreen(
 }
 
 @Composable
-private fun OnlinePlaylistHeaderContent(
+private fun OnlinePlaylistHeaderWithStyle(
     playlist: PlaylistItem,
     songs: List<SongItem>,
     dbPlaylist: Playlist?,
@@ -497,7 +499,7 @@ private fun OnlinePlaylistHeaderContent(
 ) {
     val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
     if (!appleStyle) {
-        OnlinePlaylistHeaderContent(playlist, songs, dbPlaylist, coroutineScope, continuation, isPodcastPlaylist, modifier)
+        OnlinePlaylistHeader(playlist, songs, dbPlaylist, coroutineScope, continuation, isPodcastPlaylist, modifier)
         return
     }
     // Apple style hero: background gradient from the artwork's dominant color
@@ -513,10 +515,203 @@ private fun OnlinePlaylistHeaderContent(
                     ),
                 ),
     ) {
-        OnlinePlaylistHeaderContent(
+        AppleOnlinePlaylistHeader(
             playlist, songs, dbPlaylist, coroutineScope, continuation, isPodcastPlaylist,
             Modifier.fillMaxWidth(),
         )
+    }
+}
+
+@Composable
+private fun AppleOnlinePlaylistHeader(
+    playlist: PlaylistItem,
+    songs: List<SongItem>,
+    dbPlaylist: Playlist?,
+    coroutineScope: CoroutineScope,
+    continuation: String?,
+    isPodcastPlaylist: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
+    val navController = LocalNavController.current
+    val playerConnection = LocalPlayerConnection.current ?: return
+    val listenTogetherManager = LocalListenTogetherManager.current
+    val isListenTogetherGuest = listenTogetherManager?.let { it.isInRoom && !it.isHost } ?: false
+    val menuState = LocalMenuState.current
+    val onColor = Color.White
+
+    Column(
+        modifier =
+            modifier
+                .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Surface(
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.62f)
+                    .aspectRatio(1f)
+                    .shadow(elevation = 24.dp, shape = RoundedCornerShape(8.dp)),
+            shape = RoundedCornerShape(8.dp),
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current).data(playlist.thumbnail?.resize(1080, 1080)).build(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = playlist.title,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = onColor,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        playlist.author?.let { author ->
+            Text(
+                text = author.name,
+                style = MaterialTheme.typography.bodyLarge,
+                color = onColor.copy(alpha = 0.85f),
+                textAlign = TextAlign.Center,
+                modifier =
+                    Modifier.combinedClickable(
+                        onClick = {
+                            if (author.id != null) {
+                                navController.navigate("artist/${author.id}")
+                            }
+                        },
+                    ),
+            )
+        }
+
+        val totalDuration = songs.sumOf { it.duration ?: 0 }
+        val nSongs = pluralStringResource(
+            if (isPodcastPlaylist) R.plurals.n_episode else R.plurals.n_song,
+            songs.size,
+            songs.size,
+        )
+        val durationText = if (totalDuration > 0) makeTimeString(totalDuration * 1000L) else null
+        Text(
+            text = listOfNotNull(nSongs, durationText).joinToString(" · "),
+            style = MaterialTheme.typography.bodySmall,
+            color = onColor.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center,
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                onClick = {
+                    if (!isListenTogetherGuest && songs.isNotEmpty()) {
+                        playerConnection.playQueue(
+                            YouTubePlaylistQueue(
+                                playlistId = playlist.id,
+                                playlistTitle = playlist.title,
+                                initialSongs = songs.shuffled(),
+                                initialContinuation = continuation,
+                            ),
+                        )
+                    }
+                },
+                shape = CircleShape,
+                color = onColor.copy(alpha = 0.2f),
+                modifier = Modifier.size(52.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    Icon(
+                        painter = painterResource(R.drawable.shuffle),
+                        contentDescription = null,
+                        tint = onColor,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            }
+
+            Surface(
+                onClick = {
+                    if (!isListenTogetherGuest && songs.isNotEmpty()) {
+                        playerConnection.playQueue(
+                            YouTubePlaylistQueue(
+                                playlistId = playlist.id,
+                                playlistTitle = playlist.title,
+                                initialSongs = songs,
+                                initialContinuation = continuation,
+                            ),
+                        )
+                    }
+                },
+                shape = CircleShape,
+                color = onColor,
+                modifier = Modifier.height(52.dp).width(148.dp),
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.play),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp),
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.play),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+
+            Surface(
+                onClick = {
+                    menuState.show {
+                        YouTubePlaylistMenu(
+                            playlist = playlist,
+                            songs = songs,
+                            coroutineScope = coroutineScope,
+                            onDismiss = menuState::dismiss,
+                        )
+                    }
+                },
+                shape = CircleShape,
+                color = onColor.copy(alpha = 0.2f),
+                modifier = Modifier.size(52.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    Icon(
+                        painter = painterResource(R.drawable.add),
+                        contentDescription = null,
+                        tint = onColor,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        val description = playlist.description
+        if (!description.isNullOrBlank()) {
+            ExpandableText(
+                text = description,
+                modifier = Modifier.fillMaxWidth(),
+                collapsedMaxLines = 3,
+            )
+        }
     }
 }
 
