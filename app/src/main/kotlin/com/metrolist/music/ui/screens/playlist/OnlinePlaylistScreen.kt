@@ -109,7 +109,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.ui.draw.blur
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.background
 import com.metrolist.music.constants.UseAppleStyleLayoutKey

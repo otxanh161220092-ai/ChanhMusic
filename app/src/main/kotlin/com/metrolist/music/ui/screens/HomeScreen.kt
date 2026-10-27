@@ -645,9 +645,9 @@ fun DailyDiscoverCard(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 private val AppleHomeCardCornerRadius = 12.dp
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeScreen(
     snackbarHostState: SnackbarHostState,
