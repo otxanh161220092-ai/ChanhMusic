@@ -26,6 +26,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -42,26 +44,18 @@ import com.metrolist.music.R
 import com.metrolist.music.ui.utils.resize
 import coil3.compose.AsyncImage
 
-/** Hero background: gradient from the artwork's dominant color into the page background. */
+/** Page background for Apple style collections: artwork color fading into the page background. */
 @Composable
-fun AppleCollectionBackground(
-    artworkUrl: String?,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
+fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
     val artColor by rememberArtworkColor(artworkUrl?.resize(100, 100))
     val heroColor = artColor ?: MaterialTheme.colorScheme.surfaceVariant
-    Box(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(heroColor, MaterialTheme.colorScheme.background),
-                    ),
-                ),
-    ) {
-        content()
+    val pageColor = MaterialTheme.colorScheme.background
+    return remember(heroColor, pageColor) {
+        Brush.verticalGradient(
+            0f to heroColor,
+            0.55f to heroColor,
+            1f to pageColor,
+        )
     }
 }
 

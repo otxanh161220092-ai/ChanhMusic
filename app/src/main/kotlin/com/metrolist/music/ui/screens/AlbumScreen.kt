@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -81,7 +82,7 @@ import com.metrolist.music.constants.HideExplicitKey
 import com.metrolist.music.constants.HideVideoSongsKey
 import com.metrolist.music.db.entities.Album
 import com.metrolist.music.playback.queues.LocalAlbumRadio
-import com.metrolist.music.ui.component.AppleCollectionBackground
+import com.metrolist.music.ui.component.rememberAppleCollectionBrush
 import com.metrolist.music.ui.component.AppleCollectionHeader
 import com.metrolist.music.ui.component.ClickableArtistText
 import com.metrolist.music.constants.UseAppleStyleLayoutKey
@@ -189,7 +190,9 @@ fun AlbumScreen(
         }
     }
 
+    val collectionBrush = rememberAppleCollectionBrush(albumWithSongs?.album?.thumbnailUrl)
     LazyColumn(
+        modifier = if (appleStyle) Modifier.background(collectionBrush) else Modifier,
         contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
     ) {
         val albumWithSongs = albumWithSongs
@@ -204,7 +207,7 @@ fun AlbumScreen(
                     )
                 val metaText =
                     if (totalDuration > 0) "$songCount ${makeTimeString(totalDuration * 1000L)}" else songCount
-                AppleCollectionBackground(artworkUrl = albumWithSongs.album.thumbnailUrl) {
+                run {
                     AppleCollectionHeader(
                         title = albumWithSongs.album.title,
                         thumbnailUrl = albumWithSongs.album.thumbnailUrl,
