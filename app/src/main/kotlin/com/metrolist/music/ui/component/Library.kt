@@ -17,6 +17,8 @@ import com.metrolist.innertube.models.PlaylistItem
 import com.metrolist.music.LocalNavController
 import com.metrolist.innertube.models.WatchEndpoint
 import com.metrolist.music.R
+import com.metrolist.music.constants.UseAppleStyleLayoutKey
+import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.db.entities.Album
 import com.metrolist.music.db.entities.Artist
 import com.metrolist.music.db.entities.Playlist
@@ -243,9 +245,11 @@ fun LibraryPlaylistGridItem(
     modifier: Modifier = Modifier
 ) {
     val navController = LocalNavController.current
+    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
     PlaylistGridItem(
     playlist = playlist,
     fillMaxWidth = true,
+    thumbnailShape = if (appleStyle) expressivePlaylistShape(playlist.id) else null,
     modifier = modifier
         .fillMaxWidth()
         .combinedClickable(

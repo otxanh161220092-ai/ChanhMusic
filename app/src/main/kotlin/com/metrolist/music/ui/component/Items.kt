@@ -994,6 +994,7 @@ fun PlaylistGridItem(
         Icon.Download(downloadState)
     },
     fillMaxWidth: Boolean = false,
+    thumbnailShape: Shape? = null,
 ) = GridItem(
     title = {
         Text(
@@ -1058,7 +1059,7 @@ fun PlaylistGridItem(
                     )
                 }
             },
-            shape = RoundedCornerShape(ThumbnailCornerRadius)
+            shape = thumbnailShape ?: RoundedCornerShape(ThumbnailCornerRadius)
         )
     },
     fillMaxWidth = fillMaxWidth,
