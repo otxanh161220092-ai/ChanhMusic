@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.drawscope.drawOutline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color

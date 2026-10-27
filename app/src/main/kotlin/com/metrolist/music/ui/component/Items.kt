@@ -350,12 +350,14 @@ fun ListItem(
     title: String,
     subtitle: AnnotatedString?,
     badges: @Composable RowScope.() -> Unit = {},
+    titleBadges: (@Composable RowScope.() -> Unit)? = null,
     thumbnailContent: @Composable () -> Unit,
     trailingContent: @Composable RowScope.() -> Unit = {},
     isSelected: Boolean? = false,
     isActive: Boolean = false,
 ) = ListItem(
     title = title,
+    titleBadges = titleBadges,
     subtitle = {
         badges()
         if (subtitle != null) {
@@ -381,12 +383,14 @@ fun ListItem(
     title: String,
     subtitle: String?,
     badges: @Composable RowScope.() -> Unit = {},
+    titleBadges: (@Composable RowScope.() -> Unit)? = null,
     thumbnailContent: @Composable () -> Unit,
     trailingContent: @Composable RowScope.() -> Unit = {},
     isSelected: Boolean? = false,
     isActive: Boolean = false,
 ) = ListItem(
     title = title,
+    titleBadges = titleBadges,
     subtitle = {
         badges()
 
@@ -524,13 +528,12 @@ fun SongListItem(
     val artistNameAliases = LocalArtistNameAliases.current
     val swipeEnabled by rememberPreference(SwipeToSongKey, defaultValue = false)
     val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val explicitTitleBadge: @Composable RowScope.() -> Unit = { Icon.Explicit() }
 
     val content: @Composable () -> Unit = {
          ListItem(
              title = song.song.title,
-             titleBadges = if (appleStyle && song.song.explicit) {
-                 { Icon.Explicit() }
-             } else null,
+             titleBadges = if (appleStyle && song.song.explicit) explicitTitleBadge else null,
              subtitle = {
                   badges()
                   if (subtitleOverride == null) {
@@ -1170,14 +1173,13 @@ fun YouTubeListItem(
 ) {
     val swipeEnabled by rememberPreference(SwipeToSongKey, defaultValue = false)
     val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val explicitTitleBadge: @Composable RowScope.() -> Unit = { Icon.Explicit() }
     val artistNameAliases = LocalArtistNameAliases.current
     val artistSeparator = " ${stringResource(R.string.and)} "
 
     val content: @Composable () -> Unit = {
         ListItem(
-            titleBadges = if (appleStyle && item.explicit) {
-                { Icon.Explicit() }
-            } else null,
+            titleBadges = if (appleStyle && item.explicit) explicitTitleBadge else null,
             title =
                 if (item is ArtistItem) {
                     ArtistNameAliases.resolve(artistNameAliases, item.id, item.title)
