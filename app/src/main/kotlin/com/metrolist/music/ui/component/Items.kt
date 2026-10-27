@@ -128,6 +128,7 @@ import com.metrolist.music.utils.makeTimeString
 import com.metrolist.music.utils.ArtistNameAliases
 import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.utils.rememberPreference
+import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.utils.reportException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -254,6 +255,7 @@ inline fun ListItem(
     modifier: Modifier = Modifier,
     title: String,
     noinline subtitle: (@Composable RowScope.() -> Unit)? = null,
+    noinline titleBadges: (@Composable RowScope.() -> Unit)? = null,
     thumbnailContent: @Composable () -> Unit,
     trailingContent: @Composable RowScope.() -> Unit = {},
     isSelected: Boolean? = false,
@@ -316,13 +318,20 @@ inline fun ListItem(
                 .weight(1f)
                 .padding(horizontal = 6.dp)
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                if (titleBadges != null) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    titleBadges()
+                }
+            }
 
             if (subtitle != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -493,7 +502,8 @@ fun SongListItem(
         if (showLikedIcon && song.song.liked) {
             Icon.Favorite()
         }
-        if (song.song.explicit) {
+        val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+        if (song.song.explicit && !appleStyle) {
             Icon.Explicit()
         }
         if (showInLibraryIcon && song.song.inLibrary != null) {
@@ -513,10 +523,14 @@ fun SongListItem(
 ) {
     val artistNameAliases = LocalArtistNameAliases.current
     val swipeEnabled by rememberPreference(SwipeToSongKey, defaultValue = false)
+    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
 
     val content: @Composable () -> Unit = {
          ListItem(
              title = song.song.title,
+             titleBadges = if (appleStyle && song.song.explicit) {
+                 { Icon.Explicit() }
+             } else null,
              subtitle = {
                   badges()
                   if (subtitleOverride == null) {
@@ -1143,7 +1157,8 @@ fun YouTubeListItem(
         ) {
             Icon.Favorite()
         }
-        if (item.explicit) Icon.Explicit()
+        val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+        if (item.explicit && !appleStyle) Icon.Explicit()
         // if (item is SongItem && song?.song?.inLibrary != null) {
         //     Icon.Library()
         // }
@@ -1154,11 +1169,15 @@ fun YouTubeListItem(
     },
 ) {
     val swipeEnabled by rememberPreference(SwipeToSongKey, defaultValue = false)
+    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
     val artistNameAliases = LocalArtistNameAliases.current
     val artistSeparator = " ${stringResource(R.string.and)} "
 
     val content: @Composable () -> Unit = {
         ListItem(
+            titleBadges = if (appleStyle && item.explicit) {
+                { Icon.Explicit() }
+            } else null,
             title =
                 if (item is ArtistItem) {
                     ArtistNameAliases.resolve(artistNameAliases, item.id, item.title)
