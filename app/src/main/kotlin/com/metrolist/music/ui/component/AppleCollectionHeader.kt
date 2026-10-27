@@ -151,7 +151,7 @@ fun AppleCollectionHeader(
     val sideHighlightAlpha = 0.25f
     val heroLuminance = heroColor?.luminance() ?: 0f
     val onButton =
-        if (heroLuminance + playHighlightAlpha * (1f - heroLuminance) > 0.6f) Color.Black else Color.White
+        if (heroLuminance + playHighlightAlpha * (1f - heroLuminance) > 0.75f) Color.Black else Color.White
 
     Box(modifier = modifier.fillMaxWidth()) {
         Column(
