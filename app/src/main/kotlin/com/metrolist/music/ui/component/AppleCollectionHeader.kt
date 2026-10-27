@@ -8,6 +8,7 @@ package com.metrolist.music.ui.component
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -98,9 +100,6 @@ private fun Modifier.screenHighlight(alpha: Float): Modifier = this.drawBehind {
     )
 }
 
-/** Luminance of a white screen blend of [alpha] over a base luminance. */
-private fun highlightedLuminance(base: Float, alpha: Float): Float = base + alpha * (1f - base)
-
 /**
  * Apple Music style collection header (album, playlist): edge-to-edge artwork over a blurred
  * backdrop, with highlight-style buttons whose icons flip between white and black.
@@ -120,11 +119,9 @@ fun AppleCollectionHeader(
 ) {
     val heroColor by rememberArtworkColor(thumbnailUrl?.resize(100, 100))
     val onColor = Color.White
-    val playHighlightAlpha = 0.5f
     val smallHighlightAlpha = 0.3f
-    val heroLuminance = heroColor?.luminance() ?: 0f
-    val onButton =
-        if (highlightedLuminance(heroLuminance, playHighlightAlpha) > 0.6f) Color.Black else Color.White
+    val playButtonColor = lerp(heroColor ?: Color.Gray, Color.White, 0.5f)
+    val onButton = if (playButtonColor.luminance() > 0.6f) Color.Black else Color.White
 
     Box(modifier = modifier.fillMaxWidth()) {
         AppleHeroBackdrop(thumbnailUrl)
@@ -201,8 +198,8 @@ fun AppleCollectionHeader(
                     Surface(
                         onClick = onPlay,
                         shape = CircleShape,
-                        color = Color.Transparent,
-                        modifier = Modifier.height(52.dp).width(148.dp).screenHighlight(playHighlightAlpha),
+                        color = playButtonColor,
+                        modifier = Modifier.height(52.dp).width(148.dp),
                     ) {
                         Row(
                             horizontalArrangement = Arrangement.Center,
