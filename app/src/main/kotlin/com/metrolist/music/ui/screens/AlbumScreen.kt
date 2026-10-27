@@ -83,6 +83,8 @@ import com.metrolist.music.constants.HideVideoSongsKey
 import com.metrolist.music.db.entities.Album
 import com.metrolist.music.playback.queues.LocalAlbumRadio
 import com.metrolist.music.ui.component.AppleCollectionContainer
+import com.metrolist.music.ui.component.appleCollectionContentPadding
+import com.metrolist.music.ui.component.appleTopBarColors
 import com.metrolist.music.ui.component.AppleCollectionHeader
 import com.metrolist.music.ui.component.ClickableArtistText
 import com.metrolist.music.constants.UseAppleStyleLayoutKey
@@ -192,7 +194,7 @@ fun AlbumScreen(
 
     AppleCollectionContainer(thumbnailUrl = albumWithSongs?.album?.thumbnailUrl, enabled = appleStyle) {
     LazyColumn(
-        contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
+        contentPadding = appleCollectionContentPadding(LocalPlayerAwareWindowInsets.current.asPaddingValues(), appleStyle),
     ) {
         val albumWithSongs = albumWithSongs
         if (albumWithSongs != null && albumWithSongs.songs.isNotEmpty() && appleStyle) {
@@ -631,5 +633,6 @@ fun AlbumScreen(
                 }
             }
         },
+        colors = appleTopBarColors(appleStyle),
     )
 }

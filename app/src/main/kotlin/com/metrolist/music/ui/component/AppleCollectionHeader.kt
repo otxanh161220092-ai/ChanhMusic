@@ -8,6 +8,7 @@ package com.metrolist.music.ui.component
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,6 +46,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.foundation.background
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +56,33 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.metrolist.music.R
 import com.metrolist.music.ui.utils.resize
+
+/** Transparent top bar with white content so the artwork shows behind it in Apple style. */
+@Composable
+fun appleTopBarColors(enabled: Boolean): TopAppBarColors =
+    if (enabled) {
+        TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            scrolledContainerColor = Color.Transparent,
+            navigationIconContentColor = Color.White,
+            titleContentColor = Color.White,
+            actionIconContentColor = Color.White,
+        )
+    } else {
+        TopAppBarDefaults.topAppBarColors()
+    }
+
+/** Drops the top inset in Apple style so the artwork runs under the status bar and top bar. */
+@Composable
+fun appleCollectionContentPadding(base: PaddingValues, enabled: Boolean): PaddingValues {
+    if (!enabled) return base
+    val direction = LocalLayoutDirection.current
+    return PaddingValues(
+        start = base.calculateStartPadding(direction),
+        end = base.calculateEndPadding(direction),
+        bottom = base.calculateBottomPadding(),
+    )
+}
 
 /** Page background for Apple style collections: artwork color fading into the page background. */
 @Composable
@@ -162,7 +193,21 @@ fun AppleCollectionHeader(
                 model = thumbnailUrl?.resize(1080, 1080),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().aspectRatio(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                    .drawWithContent {
+                        drawContent()
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                0f to Color.Black,
+                                0.55f to Color.Black,
+                                1f to Color.Transparent,
+                            ),
+                            blendMode = BlendMode.DstIn,
+                        )
+                    },
             )
 
             Column(

@@ -125,6 +125,8 @@ import com.metrolist.music.playback.queues.ListQueue
 import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.ui.component.AppleCollectionHeader
 import com.metrolist.music.ui.component.AppleCollectionContainer
+import com.metrolist.music.ui.component.appleCollectionContentPadding
+import com.metrolist.music.ui.component.appleTopBarColors
 import com.metrolist.music.utils.makeTimeString
 import androidx.compose.foundation.background
 import com.metrolist.music.ui.component.ActionPromptDialog
@@ -483,7 +485,7 @@ fun LocalPlaylistScreen(
         AppleCollectionContainer(thumbnailUrl = songs.firstOrNull()?.song?.thumbnailUrl, enabled = appleStyleList) {
         LazyColumn(
             state = lazyListState,
-            contentPadding = LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(),
+            contentPadding = appleCollectionContentPadding(LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(), appleStyleList),
         ) {
             playlist?.let { playlist ->
                 if (playlist.songCount == 0 && playlist.playlist.remoteSongCount == 0) {
@@ -852,6 +854,7 @@ fun LocalPlaylistScreen(
                     }
                 }
             },
+            colors = appleTopBarColors(appleStyleList),
         )
 
         SnackbarHost(

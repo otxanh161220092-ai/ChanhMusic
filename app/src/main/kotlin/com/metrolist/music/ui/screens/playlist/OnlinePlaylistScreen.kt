@@ -97,6 +97,8 @@ import com.metrolist.music.models.toMediaMetadata
 import com.metrolist.music.playback.queues.YouTubePlaylistQueue
 import com.metrolist.music.ui.component.AppleCollectionHeader
 import com.metrolist.music.ui.component.AppleCollectionContainer
+import com.metrolist.music.ui.component.appleCollectionContentPadding
+import com.metrolist.music.ui.component.appleTopBarColors
 import com.metrolist.music.ui.component.ExpandableText
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.LocalMenuState
@@ -202,7 +204,7 @@ fun OnlinePlaylistScreen(
     AppleCollectionContainer(thumbnailUrl = playlist?.thumbnail, enabled = appleStyle) {
         LazyColumn(
             state = lazyListState,
-            contentPadding = LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(),
+            contentPadding = appleCollectionContentPadding(LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(), appleStyle),
         ) {
             if (playlist == null || songs.isEmpty()) {
                 if (isLoading) {
@@ -481,6 +483,7 @@ fun OnlinePlaylistScreen(
                     }
                 }
             },
+            colors = appleTopBarColors(appleStyle),
         )
 
         SnackbarHost(
