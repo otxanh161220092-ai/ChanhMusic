@@ -32,8 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.drawscope.drawOutline
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -63,9 +62,12 @@ fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
 }
 
 /** Highlight that brightens whatever is behind the control to about 80%, instead of painting it white. */
-private fun Modifier.screenHighlight(shape: Shape): Modifier = this.drawBehind {
-    val outline = shape.createOutline(size, layoutDirection, this)
-    drawOutline(outline = outline, color = Color(0xFFCCCCCC), blendMode = BlendMode.Screen)
+private fun Modifier.screenHighlight(): Modifier = this.drawBehind {
+    drawRoundRect(
+        color = Color(0xFFCCCCCC),
+        cornerRadius = CornerRadius(size.minDimension / 2f),
+        blendMode = BlendMode.Screen,
+    )
 }
 
 /**
@@ -143,7 +145,7 @@ fun AppleCollectionHeader(
                         onClick = onShuffle,
                         shape = CircleShape,
                         color = Color.Transparent,
-                        modifier = Modifier.size(52.dp).screenHighlight(CircleShape),
+                        modifier = Modifier.size(52.dp).screenHighlight(),
                     ) {
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                             Icon(
@@ -160,7 +162,7 @@ fun AppleCollectionHeader(
                     onClick = onPlay,
                     shape = CircleShape,
                     color = Color.Transparent,
-                    modifier = Modifier.height(52.dp).width(148.dp).screenHighlight(CircleShape),
+                    modifier = Modifier.height(52.dp).width(148.dp).screenHighlight(),
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.Center,
@@ -187,7 +189,7 @@ fun AppleCollectionHeader(
                     onClick = onMore,
                     shape = CircleShape,
                     color = Color.Transparent,
-                    modifier = Modifier.size(52.dp).screenHighlight(CircleShape),
+                    modifier = Modifier.size(52.dp).screenHighlight(),
                 ) {
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                         Icon(
