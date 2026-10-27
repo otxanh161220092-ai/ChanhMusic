@@ -5,7 +5,6 @@
 
 package com.metrolist.music.ui.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,11 +28,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,9 +45,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.metrolist.music.R
 import com.metrolist.music.ui.utils.resize
-import coil3.compose.AsyncImage
 
 /** Page background for Apple style collections: artwork color fading into the page background. */
 @Composable
@@ -61,18 +64,46 @@ fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
     }
 }
 
-/** Highlight that brightens whatever is behind the control to about 80%, instead of painting it white. */
-private fun Modifier.screenHighlight(): Modifier = this.drawBehind {
+/** Blurred artwork that fades out toward the bottom of the header, revealing the collection background. */
+@Composable
+private fun BoxScope.AppleHeroBackdrop(thumbnailUrl: String?) {
+    AsyncImage(
+        model = thumbnailUrl?.resize(200, 200),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .matchParentSize()
+            .blur(48.dp)
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+            .drawWithContent {
+                drawContent()
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        0f to Color.Black,
+                        0.55f to Color.Black,
+                        1f to Color.Transparent,
+                    ),
+                    blendMode = BlendMode.DstIn,
+                )
+            },
+    )
+}
+
+/** Brightens whatever is behind the control by [alpha] using a white screen blend, leaving it translucent-free. */
+private fun Modifier.screenHighlight(alpha: Float): Modifier = this.drawBehind {
     drawRoundRect(
-        color = Color(0xFFCCCCCC),
+        color = Color.White.copy(alpha = alpha),
         cornerRadius = CornerRadius(size.minDimension / 2f),
         blendMode = BlendMode.Screen,
     )
 }
 
+/** Luminance of a white screen blend of [alpha] over a base luminance. */
+private fun highlightedLuminance(base: Float, alpha: Float): Float = base + alpha * (1f - base)
+
 /**
- * Apple Music style collection header (album, playlist): edge-to-edge artwork,
- * white text and highlight-style round buttons.
+ * Apple Music style collection header (album, playlist): edge-to-edge artwork over a blurred
+ * backdrop, with highlight-style buttons whose icons flip between white and black.
  */
 @Composable
 fun AppleCollectionHeader(
@@ -87,70 +118,123 @@ fun AppleCollectionHeader(
     onShuffle: (() -> Unit)? = null,
     onArtistClick: (() -> Unit)? = null,
 ) {
+    val heroColor by rememberArtworkColor(thumbnailUrl?.resize(100, 100))
     val onColor = Color.White
+    val playHighlightAlpha = 0.5f
+    val smallHighlightAlpha = 0.3f
+    val heroLuminance = heroColor?.luminance() ?: 0f
+    val onButton =
+        if (highlightedLuminance(heroLuminance, playHighlightAlpha) > 0.6f) Color.Black else Color.White
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        AsyncImage(
-            model = thumbnailUrl?.resize(1080, 1080),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth().aspectRatio(1f),
-        )
+    Box(modifier = modifier.fillMaxWidth()) {
+        AppleHeroBackdrop(thumbnailUrl)
 
         Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 20.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = onColor,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
+            AsyncImage(
+                model = thumbnailUrl?.resize(1080, 1080),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth().aspectRatio(1f),
             )
 
-            if (!artistText.isNullOrBlank()) {
-                Text(
-                    text = artistText,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = onColor.copy(alpha = 0.85f),
-                    textAlign = TextAlign.Center,
-                    modifier = if (onArtistClick != null) Modifier.clickable(onClick = onArtistClick) else Modifier,
-                )
-            }
-
-            if (!metaText.isNullOrBlank()) {
-                Text(
-                    text = metaText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = onColor.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if (onShuffle != null) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = onColor,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                if (!artistText.isNullOrBlank()) {
+                    Text(
+                        text = artistText,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = onColor.copy(alpha = 0.85f),
+                        textAlign = TextAlign.Center,
+                        modifier = if (onArtistClick != null) Modifier.clickable(onClick = onArtistClick) else Modifier,
+                    )
+                }
+
+                if (!metaText.isNullOrBlank()) {
+                    Text(
+                        text = metaText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = onColor.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (onShuffle != null) {
+                        Surface(
+                            onClick = onShuffle,
+                            shape = CircleShape,
+                            color = Color.Transparent,
+                            modifier = Modifier.size(52.dp).screenHighlight(smallHighlightAlpha),
+                        ) {
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                Icon(
+                                    painter = painterResource(R.drawable.shuffle),
+                                    contentDescription = stringResource(R.string.shuffle_home),
+                                    tint = onColor,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        }
+                    }
+
                     Surface(
-                        onClick = onShuffle,
+                        onClick = onPlay,
                         shape = CircleShape,
                         color = Color.Transparent,
-                        modifier = Modifier.size(52.dp).screenHighlight(),
+                        modifier = Modifier.height(52.dp).width(148.dp).screenHighlight(playHighlightAlpha),
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.play),
+                                contentDescription = null,
+                                tint = onButton,
+                                modifier = Modifier.size(22.dp),
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.play),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = onButton,
+                            )
+                        }
+                    }
+
+                    Surface(
+                        onClick = onMore,
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        modifier = Modifier.size(52.dp).screenHighlight(smallHighlightAlpha),
                     ) {
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                             Icon(
-                                painter = painterResource(R.drawable.shuffle),
-                                contentDescription = stringResource(R.string.shuffle_home),
+                                painter = painterResource(R.drawable.more_vert),
+                                contentDescription = null,
                                 tint = onColor,
                                 modifier = Modifier.size(24.dp),
                             )
@@ -158,57 +242,14 @@ fun AppleCollectionHeader(
                     }
                 }
 
-                Surface(
-                    onClick = onPlay,
-                    shape = CircleShape,
-                    color = Color.Transparent,
-                    modifier = Modifier.height(52.dp).width(148.dp).screenHighlight(),
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxSize(),
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.play),
-                            contentDescription = null,
-                            tint = onColor,
-                            modifier = Modifier.size(22.dp),
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.play),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = onColor,
-                        )
-                    }
+                if (!description.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    ExpandableText(
+                        text = description,
+                        modifier = Modifier.fillMaxWidth(),
+                        collapsedMaxLines = 3,
+                    )
                 }
-
-                Surface(
-                    onClick = onMore,
-                    shape = CircleShape,
-                    color = Color.Transparent,
-                    modifier = Modifier.size(52.dp).screenHighlight(),
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        Icon(
-                            painter = painterResource(R.drawable.more_vert),
-                            contentDescription = null,
-                            tint = onColor,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
-                }
-            }
-
-            if (!description.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(20.dp))
-                ExpandableText(
-                    text = description,
-                    modifier = Modifier.fillMaxWidth(),
-                    collapsedMaxLines = 3,
-                )
             }
         }
     }

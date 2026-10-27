@@ -17,7 +17,6 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
-import com.metrolist.music.ui.theme.rankedColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -48,7 +47,7 @@ fun rememberArtworkColor(thumbnailUrl: String?): State<Color?> {
                         .from(bitmap)
                         .maximumColorCount(8)
                         .generate()
-                Color(palette.rankedColors(1, fallback).first())
+                Color(palette.getVibrantColor(palette.getDominantColor(fallback)))
             }
         }
     }
