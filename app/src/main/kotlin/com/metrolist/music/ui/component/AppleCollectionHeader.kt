@@ -78,8 +78,8 @@ fun appleCollectionContentPadding(base: PaddingValues, enabled: Boolean): Paddin
     if (!enabled) return base
     val direction = LocalLayoutDirection.current
     return PaddingValues(
-        start = base.calculateStartPadding(direction),
-        end = base.calculateEndPadding(direction),
+        start = base.calculateLeftPadding(direction),
+        end = base.calculateRightPadding(direction),
         bottom = base.calculateBottomPadding(),
     )
 }
