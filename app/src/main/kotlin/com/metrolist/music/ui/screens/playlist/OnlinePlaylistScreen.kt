@@ -548,7 +548,7 @@ private fun AppleOnlinePlaylistHeader(
         Surface(
             modifier =
                 Modifier
-                    .fillMaxWidth(0.62f)
+                    .fillMaxWidth(0.8f)
                     .aspectRatio(1f)
                     .shadow(elevation = 24.dp, shape = RoundedCornerShape(8.dp)),
             shape = RoundedCornerShape(8.dp),

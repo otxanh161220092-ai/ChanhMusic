@@ -122,6 +122,11 @@ import com.metrolist.music.extensions.move
 import com.metrolist.music.extensions.toMediaItem
 import com.metrolist.music.playback.ExoDownloadService
 import com.metrolist.music.playback.queues.ListQueue
+import com.metrolist.music.constants.UseAppleStyleLayoutKey
+import com.metrolist.music.ui.component.AppleCollectionHeader
+import com.metrolist.music.ui.component.rememberAppleCollectionBrush
+import com.metrolist.music.utils.makeTimeString
+import androidx.compose.foundation.background
 import com.metrolist.music.ui.component.ActionPromptDialog
 import com.metrolist.music.ui.component.DefaultDialog
 import com.metrolist.music.ui.component.DraggableScrollbar
@@ -474,8 +479,11 @@ fun LocalPlaylistScreen(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
+        val appleStyleList by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+        val collectionBrush = rememberAppleCollectionBrush(songs.firstOrNull()?.song?.thumbnailUrl)
         LazyColumn(
             state = lazyListState,
+            modifier = if (appleStyleList) Modifier.background(collectionBrush) else Modifier,
             contentPadding = LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(),
         ) {
             playlist?.let { playlist ->
@@ -1012,6 +1020,90 @@ fun LocalPlaylistHeader(
         }
     }
 
+    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val openPlaylistMenu: () -> Unit = {
+                    menuState.show {
+                        LocalPlaylistMenu(
+                            playlist = playlist,
+                            songs = songs,
+                            context = context,
+                            downloadState = downloadState,
+                            onEdit = onShowEditDialog,
+                            onSync = {
+                                scope.launch(Dispatchers.IO) {
+                                    syncUtils.syncPlaylistSuspend(
+                                        playlist.playlist.browseId!!,
+                                        playlist.id,
+                                    )
+                                    withContext(Dispatchers.Main) {
+                                        snackbarHostState.showSnackbar(playlistSyncedStr)
+                                    }
+                                }
+                            },
+                            onDelete = onshowDeletePlaylistDialog,
+                            onDownload = {
+                                when (downloadState) {
+                                    Download.STATE_COMPLETED -> {
+                                        onShowRemoveDownloadDialog()
+                                    }
+
+                                    Download.STATE_DOWNLOADING -> {
+                                        songs.forEach { song ->
+                                            DownloadService.sendRemoveDownload(
+                                                context,
+                                                ExoDownloadService::class.java,
+                                                song.song.id,
+                                                false,
+                                            )
+                                        }
+                                    }
+
+                                    else -> {
+                                        songs.forEach { song ->
+                                            downloadUtil.download(song.song)
+                                        }
+                                    }
+                                }
+                            },
+                            onQueue = {
+                                playerConnection.addToQueue(
+                                    items = songs.map { it.song.toMediaItem() },
+                                )
+                            },
+                            onDismiss = { menuState.dismiss() },
+                        )
+                    }
+    }
+    if (appleStyle) {
+        val totalDuration = songs.sumOf { it.song.duration }
+        val songCount = pluralStringResource(R.plurals.n_song, songs.size, songs.size)
+        AppleCollectionHeader(
+            title = playlist.playlist.name,
+            thumbnailUrl = songs.firstOrNull()?.song?.thumbnailUrl,
+            artistText = null,
+            metaText = if (totalDuration > 0) "$songCount ${makeTimeString(totalDuration * 1000L)}" else songCount,
+            onPlay = {
+                playerConnection.playQueue(
+                    ListQueue(
+                        title = playlist.playlist.name,
+                        items = songs.map { it.song.toMediaItem() },
+                    ),
+                )
+            },
+            onShuffle = {
+                playerConnection.playQueue(
+                    ListQueue(
+                        title = playlist.playlist.name,
+                        items = songs.shuffled().map { it.song.toMediaItem() },
+                    ),
+                )
+            },
+            onMore = openPlaylistMenu,
+            modifier = modifier,
+        )
+        return
+    }
+
     Column(
         modifier =
             modifier
@@ -1376,57 +1468,8 @@ fun LocalPlaylistHeader(
             // Menu Button - Smaller secondary button
             Surface(
                 onClick = {
-                    menuState.show {
-                        LocalPlaylistMenu(
-                            playlist = playlist,
-                            songs = songs,
-                            context = context,
-                            downloadState = downloadState,
-                            onEdit = onShowEditDialog,
-                            onSync = {
-                                scope.launch(Dispatchers.IO) {
-                                    syncUtils.syncPlaylistSuspend(
-                                        playlist.playlist.browseId!!,
-                                        playlist.id,
-                                    )
-                                    withContext(Dispatchers.Main) {
-                                        snackbarHostState.showSnackbar(playlistSyncedStr)
-                                    }
-                                }
-                            },
-                            onDelete = onshowDeletePlaylistDialog,
-                            onDownload = {
-                                when (downloadState) {
-                                    Download.STATE_COMPLETED -> {
-                                        onShowRemoveDownloadDialog()
-                                    }
+                    openPlaylistMenu()
 
-                                    Download.STATE_DOWNLOADING -> {
-                                        songs.forEach { song ->
-                                            DownloadService.sendRemoveDownload(
-                                                context,
-                                                ExoDownloadService::class.java,
-                                                song.song.id,
-                                                false,
-                                            )
-                                        }
-                                    }
-
-                                    else -> {
-                                        songs.forEach { song ->
-                                            downloadUtil.download(song.song)
-                                        }
-                                    }
-                                }
-                            },
-                            onQueue = {
-                                playerConnection.addToQueue(
-                                    items = songs.map { it.song.toMediaItem() },
-                                )
-                            },
-                            onDismiss = { menuState.dismiss() },
-                        )
-                    }
                 },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceVariant,

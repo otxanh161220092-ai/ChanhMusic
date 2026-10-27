@@ -121,6 +121,10 @@ private fun ColorScheme.withNeutralSurfaces(dark: Boolean): ColorScheme =
             onPrimary = Color(0xFF111111),
             primaryContainer = Color(0x33FFFFFF),
             onPrimaryContainer = Color(0xFFF2F2F2),
+            secondary = Color(0xFFBDBDBD),
+            onSecondary = Color(0xFF111111),
+            secondaryContainer = Color(0x33FFFFFF),
+            onSecondaryContainer = Color(0xFFF2F2F2),
         )
     } else {
         copy(
@@ -139,5 +143,9 @@ private fun ColorScheme.withNeutralSurfaces(dark: Boolean): ColorScheme =
             onPrimary = Color(0xFFFFFFFF),
             primaryContainer = Color(0x14000000),
             onPrimaryContainer = Color(0xFF111111),
+            secondary = Color(0xFF6B6B6B),
+            onSecondary = Color(0xFFFFFFFF),
+            secondaryContainer = Color(0x14000000),
+            onSecondaryContainer = Color(0xFF111111),
         )
     }
