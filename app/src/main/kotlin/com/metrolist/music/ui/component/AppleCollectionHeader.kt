@@ -29,15 +29,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -74,7 +75,8 @@ private fun BoxScope.AppleHeroBackdrop(thumbnailUrl: String?) {
         contentScale = ContentScale.Crop,
         modifier = Modifier
             .matchParentSize()
-            .blur(48.dp)
+            .clipToBounds()
+            .blur(48.dp, BlurredEdgeTreatment.Unbounded)
             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
             .drawWithContent {
                 drawContent()
@@ -87,15 +89,6 @@ private fun BoxScope.AppleHeroBackdrop(thumbnailUrl: String?) {
                     blendMode = BlendMode.DstIn,
                 )
             },
-    )
-}
-
-/** Brightens whatever is behind the control by [alpha] using a white screen blend, leaving it translucent-free. */
-private fun Modifier.screenHighlight(alpha: Float): Modifier = this.drawBehind {
-    drawRoundRect(
-        color = Color.White.copy(alpha = alpha),
-        cornerRadius = CornerRadius(size.minDimension / 2f),
-        blendMode = BlendMode.Screen,
     )
 }
 
@@ -118,11 +111,10 @@ fun AppleCollectionHeader(
 ) {
     val heroColor by rememberArtworkColor(thumbnailUrl?.resize(100, 100))
     val onColor = Color.White
-    val smallHighlightAlpha = 0.3f
-    val playHighlightAlpha = 0.5f
-    val heroLuminance = heroColor?.luminance() ?: 0f
-    val highlightedLuminance = heroLuminance + playHighlightAlpha * (1f - heroLuminance)
-    val onButton = if (highlightedLuminance > 0.6f) Color.Black else Color.White
+    val baseColor = heroColor ?: MaterialTheme.colorScheme.surfaceVariant
+    val playFill = lerp(baseColor, Color.White, 0.3f)
+    val sideFill = lerp(baseColor, Color.White, 0.15f)
+    val onButton = if (playFill.luminance() > 0.6f) Color.Black else Color.White
 
     Box(modifier = modifier.fillMaxWidth()) {
         AppleHeroBackdrop(thumbnailUrl)
@@ -182,8 +174,8 @@ fun AppleCollectionHeader(
                         Surface(
                             onClick = onShuffle,
                             shape = CircleShape,
-                            color = Color.Transparent,
-                            modifier = Modifier.size(52.dp).screenHighlight(smallHighlightAlpha),
+                            color = sideFill,
+                            modifier = Modifier.size(52.dp),
                         ) {
                             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                                 Icon(
@@ -199,8 +191,8 @@ fun AppleCollectionHeader(
                     Surface(
                         onClick = onPlay,
                         shape = CircleShape,
-                        color = Color.Transparent,
-                        modifier = Modifier.height(52.dp).width(148.dp).screenHighlight(playHighlightAlpha),
+                        color = playFill,
+                        modifier = Modifier.height(52.dp).width(148.dp),
                     ) {
                         Row(
                             horizontalArrangement = Arrangement.Center,
@@ -226,8 +218,8 @@ fun AppleCollectionHeader(
                     Surface(
                         onClick = onMore,
                         shape = CircleShape,
-                        color = Color.Transparent,
-                        modifier = Modifier.size(52.dp).screenHighlight(smallHighlightAlpha),
+                        color = sideFill,
+                        modifier = Modifier.size(52.dp),
                     ) {
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                             Icon(
