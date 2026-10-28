@@ -1213,15 +1213,11 @@ fun HomeScreen(
                     TabHeader(title = stringResource(R.string.home))
                 }
 
-                item {
-                    ChipsRow(
-                        chips = homePage?.chips?.map { it to it.title } ?: emptyList(),
-                        currentValue = selectedChip,
-                        onValueUpdate = {
-                            viewModel.toggleChip(it)
-                        },
-                    )
-                }
+                appleHomeSections(
+                    quickPicks = quickPicks,
+                    recentlyPlayed = keepListening,
+                    recentlyPlayedItem = { localGridItem(it) },
+                )
 
                 if (isLoading && homePage?.chips.isNullOrEmpty()) {
                     item(key = "chips_shimmer") {
