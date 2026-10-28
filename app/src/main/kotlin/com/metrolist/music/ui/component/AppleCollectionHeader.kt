@@ -28,6 +28,9 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -57,20 +60,36 @@ import coil3.compose.AsyncImage
 import com.metrolist.music.R
 import com.metrolist.music.ui.utils.resize
 
-/** Transparent top bar with white content so the artwork shows behind it in Apple style. */
+/** Text and icon color for the Apple collection content; [Color.Unspecified] outside that layout. */
+val LocalAppleCollectionTextColor = compositionLocalOf { Color.Unspecified }
+
+/** Black over bright artwork, white over dark, so text and icons stay readable on the backdrop. */
 @Composable
-fun appleTopBarColors(enabled: Boolean): TopAppBarColors =
-    if (enabled) {
-        TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Transparent,
-            navigationIconContentColor = Color.White,
-            titleContentColor = Color.White,
-            actionIconContentColor = Color.White,
-        )
-    } else {
-        TopAppBarDefaults.topAppBarColors()
-    }
+fun rememberAppleTextColor(thumbnailUrl: String?): Color {
+    val artColor by rememberArtworkColor(thumbnailUrl?.resize(100, 100))
+    return if ((artColor?.luminance() ?: 0f) > 0.6f) Color.Black else Color.White
+}
+
+/** Secondary text color: the theme's secondary outside Apple collections, a softened text color inside. */
+@Composable
+fun appleSubtitleColor(): Color {
+    val text = LocalAppleCollectionTextColor.current
+    return if (text == Color.Unspecified) MaterialTheme.colorScheme.secondary else text.copy(alpha = 0.7f)
+}
+
+/** Transparent top bar whose content follows the artwork brightness in Apple style. */
+@Composable
+fun appleTopBarColors(enabled: Boolean, thumbnailUrl: String?): TopAppBarColors {
+    if (!enabled) return TopAppBarDefaults.topAppBarColors()
+    val textColor = rememberAppleTextColor(thumbnailUrl)
+    return TopAppBarDefaults.topAppBarColors(
+        containerColor = Color.Transparent,
+        scrolledContainerColor = Color.Transparent,
+        navigationIconContentColor = textColor,
+        titleContentColor = textColor,
+        actionIconContentColor = textColor,
+    )
+}
 
 /** Drops the top inset in Apple style so the artwork runs under the status bar and top bar. */
 @Composable
@@ -112,8 +131,18 @@ fun AppleCollectionContainer(
 ) {
     val brush = rememberAppleCollectionBrush(thumbnailUrl)
     Box(modifier = Modifier.fillMaxSize().then(if (enabled) Modifier.appleCollectionBackground(brush) else Modifier)) {
-        if (enabled) AppleCollectionBackdrop(thumbnailUrl)
-        content()
+        if (enabled) {
+            val textColor = rememberAppleTextColor(thumbnailUrl)
+            CompositionLocalProvider(
+                LocalAppleCollectionTextColor provides textColor,
+                LocalContentColor provides textColor,
+            ) {
+                AppleCollectionBackdrop(thumbnailUrl)
+                content()
+            }
+        } else {
+            content()
+        }
     }
 }
 
@@ -190,7 +219,7 @@ fun AppleCollectionHeader(
     onArtistClick: (() -> Unit)? = null,
 ) {
     val heroColor by rememberArtworkColor(thumbnailUrl?.resize(100, 100))
-    val onColor = Color.White
+    val onColor = LocalAppleCollectionTextColor.current.takeIf { it != Color.Unspecified } ?: Color.White
     val playHighlightAlpha = 0.6f
     val sideHighlightAlpha = 0.25f
     val heroLuminance = heroColor?.luminance() ?: 0f

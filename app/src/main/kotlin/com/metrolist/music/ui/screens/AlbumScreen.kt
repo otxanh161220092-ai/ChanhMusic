@@ -633,6 +633,6 @@ fun AlbumScreen(
                 }
             }
         },
-        colors = appleTopBarColors(appleStyle),
+        colors = appleTopBarColors(appleStyle, albumWithSongs?.album?.thumbnailUrl),
     )
 }

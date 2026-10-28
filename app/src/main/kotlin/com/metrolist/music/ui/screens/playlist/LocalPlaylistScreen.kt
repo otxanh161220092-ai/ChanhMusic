@@ -854,7 +854,7 @@ fun LocalPlaylistScreen(
                     }
                 }
             },
-            colors = appleTopBarColors(appleStyleList),
+            colors = appleTopBarColors(appleStyleList, songs.firstOrNull()?.song?.thumbnailUrl),
         )
 
         SnackbarHost(

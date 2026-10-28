@@ -483,7 +483,7 @@ fun OnlinePlaylistScreen(
                     }
                 }
             },
-            colors = appleTopBarColors(appleStyle),
+            colors = appleTopBarColors(appleStyle, playlist?.thumbnail),
         )
 
         SnackbarHost(
