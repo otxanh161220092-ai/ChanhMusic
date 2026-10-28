@@ -62,14 +62,21 @@ import androidx.compose.ui.unit.sp
 import com.metrolist.music.ui.theme.abrilFatface
 import com.metrolist.music.ui.theme.anton
 import com.metrolist.music.ui.theme.bbhBartle
+import com.metrolist.music.ui.theme.beVietnamPro
 import com.metrolist.music.ui.theme.bebasNeue
 import com.metrolist.music.ui.theme.bungee
 import com.metrolist.music.ui.theme.caveat
 import com.metrolist.music.ui.theme.cinzel
+import com.metrolist.music.ui.theme.dancingScript
+import com.metrolist.music.ui.theme.lora
+import com.metrolist.music.ui.theme.montserrat
+import com.metrolist.music.ui.theme.oswald
 import com.metrolist.music.ui.theme.orbitron
 import com.metrolist.music.ui.theme.pacifico
 import com.metrolist.music.ui.theme.playfairDisplay
+import com.metrolist.music.ui.theme.quicksand
 import com.metrolist.music.ui.theme.righteous
+import com.metrolist.music.ui.theme.vietnameseTitleFonts
 import coil3.compose.AsyncImage
 import com.metrolist.music.R
 import com.metrolist.music.ui.utils.resize
@@ -207,10 +214,10 @@ fun BoxScope.AppleCollectionBackdrop(thumbnailUrl: String?) {
 }
 
 /**
- * Picks a title font from the artwork's mood and the title length. Short titles use tall condensed
- * faces so they read big; longer titles use softer faces matched to the cover's mood.
+ * Picks a title font from the artwork's mood and the title length. Each mood has a short list of
+ * candidates; titles with Vietnamese diacritics skip any font whose glyphs don't cover them.
  */
-private fun albumTitleFontFamily(color: Color?, length: Int): FontFamily {
+private fun albumTitleFontFamily(color: Color?, title: String): FontFamily {
     if (color == null) return FontFamily.SansSerif
     val max = maxOf(color.red, color.green, color.blue)
     val min = minOf(color.red, color.green, color.blue)
@@ -224,25 +231,36 @@ private fun albumTitleFontFamily(color: Color?, length: Int): FontFamily {
         else -> 60f * ((color.red - color.green) / delta + 4f)
     }.let { (it + 360f) % 360f }
     val warm = hue < 70f || hue >= 300f
-    return when {
-        length <= 10 -> when {
-            lightness < 0.35f -> anton
-            saturation < 0.25f -> abrilFatface
-            warm -> bungee
-            else -> orbitron
-        }
-        saturation < 0.25f -> if (lightness > 0.6f) cinzel else playfairDisplay
-        lightness < 0.35f -> bebasNeue
-        lightness > 0.6f && saturation >= 0.5f && length <= 20 -> if (warm) pacifico else righteous
-        lightness > 0.6f && saturation < 0.5f -> caveat
-        lightness > 0.6f -> bbhBartle
-        else -> FontFamily.SansSerif
+    val short = title.length <= 10
+    val candidates = when {
+        short && lightness < 0.35f -> listOf(anton, bebasNeue, oswald)
+        short && saturation < 0.25f -> listOf(abrilFatface, playfairDisplay, lora)
+        short && warm -> listOf(bungee, pacifico, beVietnamPro)
+        short -> listOf(orbitron, quicksand, beVietnamPro)
+        saturation < 0.25f && lightness > 0.6f -> listOf(cinzel, lora, playfairDisplay)
+        saturation < 0.25f -> listOf(playfairDisplay, lora)
+        lightness < 0.35f -> listOf(bebasNeue, oswald)
+        lightness > 0.6f && saturation >= 0.5f && warm -> listOf(pacifico, dancingScript)
+        lightness > 0.6f && saturation >= 0.5f -> listOf(righteous, quicksand)
+        lightness > 0.6f && saturation < 0.5f -> listOf(caveat, dancingScript)
+        lightness > 0.6f -> listOf(bbhBartle, montserrat)
+        else -> listOf(montserrat, FontFamily.SansSerif)
     }
+    val needsVietnamese = title.any { it.code > 127 }
+    return candidates.firstOrNull { !needsVietnamese || it in vietnameseTitleFonts }
+        ?: FontFamily.SansSerif
 }
 
-/** Shorter titles get much larger type; long titles shrink toward a readable floor. */
-private fun albumTitleFontSize(length: Int): TextUnit =
-    (56f - (length - 8).coerceAtLeast(0) * 1.4f).coerceIn(26f, 56f).sp
+/**
+ * Bigger type for shorter titles, capped so the longest word still fits on one line. Breaking a word
+ * across lines reads as a bug, so the word length matters as much as the total length.
+ */
+private fun albumTitleFontSize(title: String): TextUnit {
+    val longestWord = title.split(' ').maxOfOrNull { it.length }?.coerceAtLeast(1) ?: 1
+    val byTotal = 56f - (title.length - 8).coerceAtLeast(0) * 1.4f
+    val byWord = 330f / (longestWord * 0.9f)
+    return minOf(byTotal, byWord).coerceIn(22f, 56f).sp
+}
 
 /**
  * Apple Music style collection header (album, playlist): edge-to-edge artwork over a blurred
@@ -268,8 +286,8 @@ fun AppleCollectionHeader(
     val heroLuminance = heroColor?.luminance() ?: 0f
     val onButton =
         if (heroLuminance + playHighlightAlpha * (1f - heroLuminance) > 0.75f) Color.Black else Color.White
-    val titleFontFamily = albumTitleFontFamily(heroColor, title.length)
-    val titleFontSize = albumTitleFontSize(title.length)
+    val titleFontFamily = albumTitleFontFamily(heroColor, title)
+    val titleFontSize = albumTitleFontSize(title)
 
     Box(modifier = modifier.fillMaxWidth()) {
         Column(

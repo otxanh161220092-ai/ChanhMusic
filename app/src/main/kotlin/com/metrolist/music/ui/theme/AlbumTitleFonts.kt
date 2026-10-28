@@ -24,7 +24,19 @@ val pacifico = staticFont(R.font.pacifico_regular)
 val abrilFatface = staticFont(R.font.abril_fatface_regular)
 val bungee = staticFont(R.font.bungee_regular)
 val righteous = staticFont(R.font.righteous_regular)
+val beVietnamPro = staticFont(R.font.be_viet_nam_pro_black)
 val playfairDisplay = variableFont(R.font.playfair_display)
 val orbitron = variableFont(R.font.orbitron)
 val cinzel = variableFont(R.font.cinzel)
 val caveat = variableFont(R.font.caveat)
+val oswald = variableFont(R.font.oswald)
+val lora = variableFont(R.font.lora)
+val dancingScript = variableFont(R.font.dancing_script)
+val quicksand = variableFont(R.font.quicksand)
+val montserrat = variableFont(R.font.montserrat)
+
+/** Fonts whose glyph set covers Vietnamese, so titles with diacritics never fall back to tofu boxes. */
+val vietnameseTitleFonts: Set<FontFamily> = setOf(
+    anton, pacifico, bungee, beVietnamPro, playfairDisplay, oswald, lora,
+    dancingScript, quicksand, montserrat,
+)
