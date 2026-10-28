@@ -931,6 +931,7 @@ class MainActivity : FragmentActivity() {
                             currentRoute == "listen_together_from_topbar"
                     shouldShowTopBar = currentRoute in topLevelScreens &&
                         currentRoute != "settings" &&
+                        currentRoute != Screens.Home.route &&
                         currentRoute != Screens.Library.route &&
                         !(isListenTogetherScreen && listenTogetherInTopBar)
                 }

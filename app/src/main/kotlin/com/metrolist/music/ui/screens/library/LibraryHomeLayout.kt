@@ -11,11 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,25 +22,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,15 +44,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
-import com.metrolist.music.BuildConfig
-import com.metrolist.music.LocalDatabase
-import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
 import com.metrolist.music.constants.LibraryFilter
-import com.metrolist.music.constants.PauseListenHistoryKey
-import com.metrolist.music.ui.component.AccountSettingsDialog
+import com.metrolist.music.ui.component.TabHeader
+import com.metrolist.music.ui.component.tabScreenContentPadding
 import com.metrolist.music.ui.utils.resize
-import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.viewmodels.LibraryMixViewModel
 import java.time.LocalDateTime
 
@@ -120,104 +105,9 @@ fun LibraryHomeLayout(
         }.sortedByDescending { it.addedAt ?: LocalDateTime.MIN }
     }
 
-    var showMenu by remember { mutableStateOf(false) }
-    var showAccountDialog by remember { mutableStateOf(false) }
-    val database = LocalDatabase.current
-    val pauseListenHistory by rememberPreference(PauseListenHistoryKey, defaultValue = false)
-    val eventCount by database.eventCount().collectAsStateWithLifecycle(initialValue = 0)
-    val showHistoryButton = !(pauseListenHistory && eventCount == 0)
-
-    // The top app bar is hidden on this screen, so only the status bar sits above the content.
-    val playerAwarePadding = LocalPlayerAwareWindowInsets.current.asPaddingValues()
-    val layoutDirection = LocalLayoutDirection.current
-    val contentPadding =
-        PaddingValues(
-            start = playerAwarePadding.calculateLeftPadding(layoutDirection),
-            end = playerAwarePadding.calculateRightPadding(layoutDirection),
-            top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
-            bottom = playerAwarePadding.calculateBottomPadding(),
-        )
-
-    if (showAccountDialog) {
-        AccountSettingsDialog(
-            onDismiss = { showAccountDialog = false },
-            latestVersionName = BuildConfig.BASE_VERSION_NAME,
-        )
-    }
-
-    LazyColumn(contentPadding = contentPadding) {
+    LazyColumn(contentPadding = tabScreenContentPadding()) {
         item(key = "header") {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.filter_library),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                )
-                Box(
-                    modifier =
-                        Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable { showAccountDialog = true },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.person),
-                        contentDescription = stringResource(R.string.account),
-                        modifier = Modifier.size(22.dp),
-                    )
-                }
-                Box {
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(
-                            painter = painterResource(R.drawable.more_horiz),
-                            contentDescription = null,
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false },
-                    ) {
-                        if (showHistoryButton) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.history)) },
-                                leadingIcon = {
-                                    Icon(painter = painterResource(R.drawable.history), contentDescription = null)
-                                },
-                                onClick = {
-                                    showMenu = false
-                                    navController.navigate("history")
-                                },
-                            )
-                        }
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.stats)) },
-                            leadingIcon = {
-                                Icon(painter = painterResource(R.drawable.stats), contentDescription = null)
-                            },
-                            onClick = {
-                                showMenu = false
-                                navController.navigate("stats")
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.together)) },
-                            leadingIcon = {
-                                Icon(painter = painterResource(R.drawable.group_outlined), contentDescription = null)
-                            },
-                            onClick = {
-                                showMenu = false
-                                navController.navigate("listen_together_from_topbar")
-                            },
-                        )
-                    }
-                }
-            }
+            TabHeader(title = stringResource(R.string.filter_library))
         }
 
         item(key = "grid") {
@@ -268,7 +158,7 @@ fun LibraryHomeLayout(
 
         item(key = "recent_row") {
             LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(recent.take(12), key = { it.route }) { collection ->
