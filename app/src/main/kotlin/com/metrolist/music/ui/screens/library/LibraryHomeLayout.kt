@@ -102,7 +102,8 @@ fun LibraryHomeLayout(
                     } else {
                         "local_playlist/${it.id}"
                     }
-                add(RecentCollection(it.playlist.name, it.playlist.thumbnailUrl, it.playlist.createdAt, route))
+                val thumbnail = it.playlist.thumbnailUrl ?: it.songThumbnails.firstOrNull { url -> url != null }
+                add(RecentCollection(it.playlist.name, thumbnail, it.playlist.createdAt, route))
             }
         }.sortedByDescending { it.addedAt ?: LocalDateTime.MIN }
     }
@@ -254,12 +255,21 @@ private fun RecentTile(
                     .clip(RoundedCornerShape(10.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
-            AsyncImage(
-                model = collection.thumbnail?.resize(400, 400),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-            )
+            if (collection.thumbnail != null) {
+                AsyncImage(
+                    model = collection.thumbnail.resize(400, 400),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.music_note),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.Center).size(40.dp),
+                )
+            }
         }
         Text(
             text = collection.title,
