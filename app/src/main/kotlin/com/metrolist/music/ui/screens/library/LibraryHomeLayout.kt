@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,11 +54,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.metrolist.music.BuildConfig
 import com.metrolist.music.LocalDatabase
 import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
 import com.metrolist.music.constants.LibraryFilter
 import com.metrolist.music.constants.PauseListenHistoryKey
+import com.metrolist.music.ui.component.AccountSettingsDialog
 import com.metrolist.music.ui.utils.resize
 import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.viewmodels.LibraryMixViewModel
@@ -116,12 +120,31 @@ fun LibraryHomeLayout(
     }
 
     var showMenu by remember { mutableStateOf(false) }
+    var showAccountDialog by remember { mutableStateOf(false) }
     val database = LocalDatabase.current
     val pauseListenHistory by rememberPreference(PauseListenHistoryKey, defaultValue = false)
     val eventCount by database.eventCount().collectAsStateWithLifecycle(initialValue = 0)
     val showHistoryButton = !(pauseListenHistory && eventCount == 0)
 
-    LazyColumn(contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues()) {
+    // The top app bar is hidden on this screen, so only the status bar sits above the content.
+    val playerAwarePadding = LocalPlayerAwareWindowInsets.current.asPaddingValues()
+    val layoutDirection = LocalLayoutDirection.current
+    val contentPadding =
+        PaddingValues(
+            start = playerAwarePadding.calculateLeftPadding(layoutDirection),
+            end = playerAwarePadding.calculateRightPadding(layoutDirection),
+            top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+            bottom = playerAwarePadding.calculateBottomPadding(),
+        )
+
+    if (showAccountDialog) {
+        AccountSettingsDialog(
+            onDismiss = { showAccountDialog = false },
+            latestVersionName = BuildConfig.BASE_VERSION_NAME,
+        )
+    }
+
+    LazyColumn(contentPadding = contentPadding) {
         item(key = "header") {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
@@ -139,7 +162,7 @@ fun LibraryHomeLayout(
                             .size(36.dp)
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable { navController.navigate("account") },
+                            .clickable { showAccountDialog = true },
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
