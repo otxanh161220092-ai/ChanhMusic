@@ -1852,6 +1852,7 @@ fun SwipeToSongBox(
     val scope = rememberCoroutineScope()
     val offset = remember { mutableFloatStateOf(0f) }
     val threshold = 300f
+    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
 
     val dragState = rememberDraggableState { delta ->
         offset.floatValue = (offset.floatValue + delta).coerceIn(-threshold, threshold)
@@ -1921,7 +1922,7 @@ fun SwipeToSongBox(
             modifier = Modifier
                 .offset { IntOffset(offset.floatValue.roundToInt(), 0) }
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface),
+                .background(if (appleStyle) Color.Transparent else MaterialTheme.colorScheme.surface),
             content = content
         )
     }
