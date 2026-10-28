@@ -97,11 +97,15 @@ import com.metrolist.music.constants.HideExplicitKey
 import com.metrolist.music.constants.ShowArtistDescriptionKey
 import com.metrolist.music.constants.ShowArtistSubscriberCountKey
 import com.metrolist.music.constants.ShowMonthlyListenersKey
+import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.extensions.toMediaItem
 import com.metrolist.music.models.toMediaMetadata
 import com.metrolist.music.playback.queues.ListQueue
 import com.metrolist.music.playback.queues.YouTubeQueue
 import com.metrolist.music.ui.component.AlbumGridItem
+import com.metrolist.music.ui.component.AppleCollectionContainer
+import com.metrolist.music.ui.component.appleCollectionContentPadding
+import com.metrolist.music.ui.component.appleTopBarColors
 import com.metrolist.music.ui.component.ExpandableText
 import com.metrolist.music.ui.component.HideOnScrollFAB
 import com.metrolist.music.ui.component.IconButton
@@ -194,12 +198,18 @@ fun ArtistScreen(
         showLocal = libraryArtist?.artist?.isLocal == true
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-    ) {
+    val artistThumbnail = artistPage?.artist?.thumbnail ?: libraryArtist?.artist?.thumbnailUrl
+    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val latestAlbum =
+        remember(artistPage?.sections) {
+            artistPage?.sections?.flatMap { it.items }?.filterIsInstance<AlbumItem>()?.maxByOrNull { it.year ?: Int.MIN_VALUE }
+        }
+    val playEndpoint = artistPage?.artist?.let { it.shuffleEndpoint ?: it.radioEndpoint }
+
+    AppleCollectionContainer(thumbnailUrl = artistThumbnail, enabled = appleStyle) {
         LazyColumn(
             state = lazyListState,
-            contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
+            contentPadding = appleCollectionContentPadding(LocalPlayerAwareWindowInsets.current.asPaddingValues(), appleStyle),
         ) {
             if (artistPage == null && !showLocal) {
                 item(key = "shimmer") {
@@ -292,6 +302,22 @@ fun ArtistScreen(
                             ListItemPlaceHolder()
                         }
                     }
+                }
+            } else if (appleStyle) {
+                item(key = "apple_header") {
+                    AppleArtistHeader(
+                        name = displayArtistName ?: "Unknown",
+                        thumbnailUrl = artistThumbnail,
+                        description = artistPage?.description,
+                        isSubscribed = isChannelSubscribed,
+                        latestAlbum = latestAlbum,
+                        onPlay =
+                            playEndpoint?.takeIf { !showLocal && !isGuest }?.let { endpoint ->
+                                { playerConnection.playQueue(YouTubeQueue(endpoint)) }
+                            },
+                        onToggleSubscribe = if (showLocal) null else ({ viewModel.toggleChannelSubscription() }),
+                        onLatestAlbumClick = { navController.navigate("album/${it.id}") },
+                    )
                 }
             } else {
                 item(key = "header") {
@@ -1043,10 +1069,10 @@ fun ArtistScreen(
             }
         },
         colors =
-            if (transparentAppBar) {
-                TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            } else {
-                TopAppBarDefaults.topAppBarColors()
+            when {
+                appleStyle -> appleTopBarColors(enabled = true, thumbnailUrl = artistThumbnail)
+                transparentAppBar -> TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                else -> TopAppBarDefaults.topAppBarColors()
             },
     )
 }
