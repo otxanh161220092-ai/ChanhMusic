@@ -52,10 +52,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.metrolist.music.ui.theme.bbhBartle
 import coil3.compose.AsyncImage
 import com.metrolist.music.R
 import com.metrolist.music.ui.utils.resize
@@ -205,6 +209,24 @@ fun BoxScope.AppleCollectionBackdrop(thumbnailUrl: String?) {
     )
 }
 
+/** Picks a title font from the artwork's mood: muted covers get serif, bright ones a playful display face. */
+private fun albumTitleFontFamily(color: Color?): FontFamily {
+    if (color == null) return FontFamily.SansSerif
+    val max = maxOf(color.red, color.green, color.blue)
+    val min = minOf(color.red, color.green, color.blue)
+    val lightness = (max + min) / 2f
+    val saturation = if (max == min) 0f else (max - min) / (1f - kotlin.math.abs(2f * lightness - 1f))
+    return when {
+        saturation < 0.25f -> FontFamily.Serif
+        lightness > 0.6f -> bbhBartle
+        else -> FontFamily.SansSerif
+    }
+}
+
+/** Shorter titles get larger type; long titles shrink toward a readable floor. */
+private fun albumTitleFontSize(length: Int): TextUnit =
+    (40f - (length - 8).coerceAtLeast(0) * 0.6f).coerceIn(22f, 40f).sp
+
 /**
  * Apple Music style collection header (album, playlist): edge-to-edge artwork over a blurred
  * backdrop, with highlight-style buttons whose icons flip between white and black.
@@ -229,6 +251,8 @@ fun AppleCollectionHeader(
     val heroLuminance = heroColor?.luminance() ?: 0f
     val onButton =
         if (heroLuminance + playHighlightAlpha * (1f - heroLuminance) > 0.75f) Color.Black else Color.White
+    val titleFontFamily = albumTitleFontFamily(heroColor)
+    val titleFontSize = albumTitleFontSize(title.length)
 
     Box(modifier = modifier.fillMaxWidth()) {
         Column(
@@ -262,7 +286,9 @@ fun AppleCollectionHeader(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.headlineSmall,
+                    fontFamily = titleFontFamily,
+                    fontSize = titleFontSize,
+                    lineHeight = titleFontSize * 1.15f,
                     fontWeight = FontWeight.Bold,
                     color = onColor,
                     textAlign = TextAlign.Center,
