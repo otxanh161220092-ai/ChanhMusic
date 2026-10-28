@@ -170,38 +170,25 @@ private fun Modifier.screenHighlight(alpha: Float): Modifier = this.drawBehind {
     )
 }
 
-/**
- * Full-screen backdrop: the sharp artwork fades out over a heavily blurred copy of itself, so the
- * top reads as the cover and the lower screen dissolves into its colors.
- */
+/** Blurred artwork covering the whole collection screen, fading out toward the bottom. */
 @Composable
 fun BoxScope.AppleCollectionBackdrop(thumbnailUrl: String?) {
-    val model = thumbnailUrl?.resize(200, 200)
     AsyncImage(
-        model = model,
+        model = thumbnailUrl?.resize(200, 200),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = Modifier
             .matchParentSize()
             .clipToBounds()
-            .blur(72.dp, BlurredEdgeTreatment.Unbounded)
-            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen },
-    )
-    AsyncImage(
-        model = model,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .matchParentSize()
-            .clipToBounds()
+            .blur(64.dp, BlurredEdgeTreatment.Unbounded)
             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
             .drawWithContent {
                 drawContent()
                 drawRect(
                     brush = Brush.verticalGradient(
                         0f to Color.Black,
-                        0.4f to Color.Black,
-                        0.8f to Color.Transparent,
+                        0.45f to Color.Black,
+                        1f to Color.Transparent,
                     ),
                     blendMode = BlendMode.DstIn,
                 )
