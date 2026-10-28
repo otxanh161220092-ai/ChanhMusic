@@ -59,11 +59,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.metrolist.music.ui.theme.abrilFatface
 import com.metrolist.music.ui.theme.anton
 import com.metrolist.music.ui.theme.bbhBartle
 import com.metrolist.music.ui.theme.bebasNeue
+import com.metrolist.music.ui.theme.bungee
+import com.metrolist.music.ui.theme.caveat
+import com.metrolist.music.ui.theme.cinzel
+import com.metrolist.music.ui.theme.orbitron
 import com.metrolist.music.ui.theme.pacifico
 import com.metrolist.music.ui.theme.playfairDisplay
+import com.metrolist.music.ui.theme.righteous
 import coil3.compose.AsyncImage
 import com.metrolist.music.R
 import com.metrolist.music.ui.utils.resize
@@ -208,20 +214,35 @@ private fun albumTitleFontFamily(color: Color?, length: Int): FontFamily {
     if (color == null) return FontFamily.SansSerif
     val max = maxOf(color.red, color.green, color.blue)
     val min = minOf(color.red, color.green, color.blue)
+    val delta = max - min
     val lightness = (max + min) / 2f
-    val saturation = if (max == min) 0f else (max - min) / (1f - kotlin.math.abs(2f * lightness - 1f))
+    val saturation = if (delta == 0f) 0f else delta / (1f - kotlin.math.abs(2f * lightness - 1f))
+    val hue = when {
+        delta == 0f -> 0f
+        max == color.red -> 60f * (((color.green - color.blue) / delta) % 6f)
+        max == color.green -> 60f * ((color.blue - color.red) / delta + 2f)
+        else -> 60f * ((color.red - color.green) / delta + 4f)
+    }.let { (it + 360f) % 360f }
+    val warm = hue < 70f || hue >= 300f
     return when {
-        length <= 10 -> if (lightness < 0.45f) anton else bebasNeue
-        saturation < 0.25f -> playfairDisplay
-        lightness > 0.6f && saturation >= 0.5f && length <= 20 -> pacifico
+        length <= 10 -> when {
+            lightness < 0.35f -> anton
+            saturation < 0.25f -> abrilFatface
+            warm -> bungee
+            else -> orbitron
+        }
+        saturation < 0.25f -> if (lightness > 0.6f) cinzel else playfairDisplay
+        lightness < 0.35f -> bebasNeue
+        lightness > 0.6f && saturation >= 0.5f && length <= 20 -> if (warm) pacifico else righteous
+        lightness > 0.6f && saturation < 0.5f -> caveat
         lightness > 0.6f -> bbhBartle
         else -> FontFamily.SansSerif
     }
 }
 
-/** Shorter titles get larger type; long titles shrink toward a readable floor. */
+/** Shorter titles get much larger type; long titles shrink toward a readable floor. */
 private fun albumTitleFontSize(length: Int): TextUnit =
-    (40f - (length - 8).coerceAtLeast(0) * 0.6f).coerceIn(22f, 40f).sp
+    (56f - (length - 8).coerceAtLeast(0) * 1.4f).coerceIn(26f, 56f).sp
 
 /**
  * Apple Music style collection header (album, playlist): edge-to-edge artwork over a blurred

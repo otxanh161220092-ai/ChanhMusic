@@ -11,21 +11,20 @@ import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import com.metrolist.music.R
 
-val bebasNeue = FontFamily(Font(R.font.bebas_neue_regular, FontWeight.Normal))
+private fun staticFont(resId: Int) = FontFamily(Font(resId, FontWeight.Normal))
 
-val anton = FontFamily(Font(R.font.anton_regular, FontWeight.Normal))
-
-val pacifico = FontFamily(Font(R.font.pacifico_regular, FontWeight.Normal))
-
-val playfairDisplay = FontFamily(
-    Font(
-        R.font.playfair_display,
-        FontWeight.Normal,
-        variationSettings = FontVariation.Settings(FontVariation.weight(400)),
-    ),
-    Font(
-        R.font.playfair_display,
-        FontWeight.Bold,
-        variationSettings = FontVariation.Settings(FontVariation.weight(700)),
-    ),
+private fun variableFont(resId: Int) = FontFamily(
+    Font(resId, FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),
+    Font(resId, FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),
 )
+
+val bebasNeue = staticFont(R.font.bebas_neue_regular)
+val anton = staticFont(R.font.anton_regular)
+val pacifico = staticFont(R.font.pacifico_regular)
+val abrilFatface = staticFont(R.font.abril_fatface_regular)
+val bungee = staticFont(R.font.bungee_regular)
+val righteous = staticFont(R.font.righteous_regular)
+val playfairDisplay = variableFont(R.font.playfair_display)
+val orbitron = variableFont(R.font.orbitron)
+val cinzel = variableFont(R.font.cinzel)
+val caveat = variableFont(R.font.caveat)
