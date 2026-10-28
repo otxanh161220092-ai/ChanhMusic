@@ -74,7 +74,11 @@ fun rememberAppleTextColor(thumbnailUrl: String?): Color {
 @Composable
 fun appleSubtitleColor(): Color {
     val text = LocalAppleCollectionTextColor.current
-    return if (text == Color.Unspecified) MaterialTheme.colorScheme.secondary else text.copy(alpha = 0.7f)
+    return if (text == Color.Unspecified || text == Color.White) {
+        MaterialTheme.colorScheme.secondary
+    } else {
+        text.copy(alpha = 0.7f)
+    }
 }
 
 /** Transparent top bar whose content follows the artwork brightness in Apple style. */
