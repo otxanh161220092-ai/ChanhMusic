@@ -143,7 +143,6 @@ import com.metrolist.music.constants.DismissedStandaloneUpdateKey
 import com.metrolist.music.constants.DensityScaleKey
 import com.metrolist.music.constants.DisableScreenshotKey
 import com.metrolist.music.constants.EnableHighRefreshRateKey
-import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.constants.EnableLandscapeScalingKey
 import com.metrolist.music.constants.ExperimentalLyricsKey
 import com.metrolist.music.constants.ForceBottomNavBarKey
@@ -630,7 +629,7 @@ class MainActivity : FragmentActivity() {
             themeColor = selectedThemeColor
         }
 
-        val useAppleStyleLayout by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+        val useAppleStyleLayout = true
         val homeShuffleAction by appleHomeShuffleAction.collectAsStateWithLifecycle()
         MetrolistTheme(
             darkTheme = useDarkTheme,

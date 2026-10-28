@@ -87,7 +87,6 @@ import com.metrolist.music.ui.component.appleCollectionContentPadding
 import com.metrolist.music.ui.component.appleTopBarColors
 import com.metrolist.music.ui.component.AppleCollectionHeader
 import com.metrolist.music.ui.component.ClickableArtistText
-import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.NavigationTitle
@@ -112,7 +111,7 @@ fun AlbumScreen(
     val context = LocalContext.current
     val menuState = LocalMenuState.current
     val database = LocalDatabase.current
-    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val appleStyle = true
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
     val playerConnection = LocalPlayerConnection.current ?: return

@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.metrolist.music.R
-import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.utils.rememberPreference
 import androidx.compose.runtime.getValue
 
@@ -47,7 +46,7 @@ fun NavigationTitle(
     onClick: (() -> Unit)? = null,
     onPlayAllClick: (() -> Unit)? = null,
 ) {
-    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val appleStyle = true
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),

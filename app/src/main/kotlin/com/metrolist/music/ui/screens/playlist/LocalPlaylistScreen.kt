@@ -122,7 +122,6 @@ import com.metrolist.music.extensions.move
 import com.metrolist.music.extensions.toMediaItem
 import com.metrolist.music.playback.ExoDownloadService
 import com.metrolist.music.playback.queues.ListQueue
-import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.ui.component.AppleCollectionHeader
 import com.metrolist.music.ui.component.AppleCollectionContainer
 import com.metrolist.music.ui.component.appleCollectionContentPadding
@@ -481,7 +480,7 @@ fun LocalPlaylistScreen(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        val appleStyleList by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+        val appleStyleList = true
         AppleCollectionContainer(thumbnailUrl = songs.firstOrNull()?.song?.thumbnailUrl, enabled = appleStyleList) {
         LazyColumn(
             state = lazyListState,
@@ -1023,7 +1022,7 @@ fun LocalPlaylistHeader(
         }
     }
 
-    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val appleStyle = true
     val openPlaylistMenu: () -> Unit = {
                     menuState.show {
                         LocalPlaylistMenu(

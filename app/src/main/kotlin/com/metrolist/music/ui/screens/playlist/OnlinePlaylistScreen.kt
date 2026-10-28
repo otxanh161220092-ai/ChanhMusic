@@ -117,7 +117,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.background
-import com.metrolist.music.constants.UseAppleStyleLayoutKey
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -200,7 +199,7 @@ fun OnlinePlaylistScreen(
         BackHandler(onBack = onExitSelectionMode)
     }
 
-    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val appleStyle = true
     AppleCollectionContainer(thumbnailUrl = playlist?.thumbnail, enabled = appleStyle) {
         LazyColumn(
             state = lazyListState,
@@ -503,7 +502,7 @@ private fun OnlinePlaylistHeaderWithStyle(
     isPodcastPlaylist: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val appleStyle = true
     if (!appleStyle) {
         OnlinePlaylistHeader(playlist, songs, dbPlaylist, coroutineScope, continuation, isPodcastPlaylist, modifier)
         return

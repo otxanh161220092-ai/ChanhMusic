@@ -97,7 +97,6 @@ import com.metrolist.music.constants.HideExplicitKey
 import com.metrolist.music.constants.ShowArtistDescriptionKey
 import com.metrolist.music.constants.ShowArtistSubscriberCountKey
 import com.metrolist.music.constants.ShowMonthlyListenersKey
-import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.extensions.toMediaItem
 import com.metrolist.music.models.toMediaMetadata
 import com.metrolist.music.playback.queues.ListQueue
@@ -199,7 +198,7 @@ fun ArtistScreen(
     }
 
     val artistThumbnail = artistPage?.artist?.thumbnail ?: libraryArtist?.artist?.thumbnailUrl
-    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val appleStyle = true
     val latestAlbum =
         remember(artistPage?.sections) {
             artistPage?.sections?.flatMap { it.items }?.filterIsInstance<AlbumItem>()?.maxByOrNull { it.year ?: Int.MIN_VALUE }

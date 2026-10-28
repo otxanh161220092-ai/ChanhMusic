@@ -128,7 +128,6 @@ import com.metrolist.music.utils.makeTimeString
 import com.metrolist.music.utils.ArtistNameAliases
 import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.utils.rememberPreference
-import com.metrolist.music.constants.UseAppleStyleLayoutKey
 import com.metrolist.music.utils.reportException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -507,7 +506,7 @@ fun SongListItem(
         if (showLikedIcon && song.song.liked) {
             Icon.Favorite()
         }
-        val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+        val appleStyle = true
         if (song.song.explicit && !appleStyle) {
             Icon.Explicit()
         }
@@ -528,7 +527,7 @@ fun SongListItem(
 ) {
     val artistNameAliases = LocalArtistNameAliases.current
     val swipeEnabled by rememberPreference(SwipeToSongKey, defaultValue = false)
-    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val appleStyle = true
     val explicitTitleBadge: @Composable RowScope.() -> Unit = { Icon.Explicit() }
 
     val content: @Composable () -> Unit = {
@@ -1161,7 +1160,7 @@ fun YouTubeListItem(
         ) {
             Icon.Favorite()
         }
-        val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+        val appleStyle = true
         if (item.explicit && !appleStyle) Icon.Explicit()
         // if (item is SongItem && song?.song?.inLibrary != null) {
         //     Icon.Library()
@@ -1173,7 +1172,7 @@ fun YouTubeListItem(
     },
 ) {
     val swipeEnabled by rememberPreference(SwipeToSongKey, defaultValue = false)
-    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val appleStyle = true
     val explicitTitleBadge: @Composable RowScope.() -> Unit = { Icon.Explicit() }
     val artistNameAliases = LocalArtistNameAliases.current
     val artistSeparator = " ${stringResource(R.string.and)} "
@@ -1853,7 +1852,7 @@ fun SwipeToSongBox(
     val scope = rememberCoroutineScope()
     val offset = remember { mutableFloatStateOf(0f) }
     val threshold = 300f
-    val appleStyle by rememberPreference(UseAppleStyleLayoutKey, defaultValue = false)
+    val appleStyle = true
 
     val dragState = rememberDraggableState { delta ->
         offset.floatValue = (offset.floatValue + delta).coerceIn(-threshold, threshold)
