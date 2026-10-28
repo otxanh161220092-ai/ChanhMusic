@@ -303,7 +303,8 @@ fun ArtistScreen(
                         }
                     }
                 }
-            } else if (appleStyle) {
+            } else {
+                if (appleStyle) {
                 item(key = "apple_header") {
                     AppleArtistHeader(
                         name = displayArtistName ?: "Unknown",
@@ -319,7 +320,7 @@ fun ArtistScreen(
                         onLatestAlbumClick = { navController.navigate("album/${it.id}") },
                     )
                 }
-            } else {
+                } else {
                 item(key = "header") {
                     val thumbnail = artistPage?.artist?.thumbnail ?: libraryArtist?.artist?.thumbnailUrl
 
@@ -476,6 +477,7 @@ fun ArtistScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
+                }
                 }
 
                 // About Artist Section
