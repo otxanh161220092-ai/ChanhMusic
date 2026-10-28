@@ -59,7 +59,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.metrolist.music.ui.theme.anton
 import com.metrolist.music.ui.theme.bbhBartle
+import com.metrolist.music.ui.theme.bebasNeue
+import com.metrolist.music.ui.theme.pacifico
+import com.metrolist.music.ui.theme.playfairDisplay
 import coil3.compose.AsyncImage
 import com.metrolist.music.R
 import com.metrolist.music.ui.utils.resize
@@ -196,15 +200,20 @@ fun BoxScope.AppleCollectionBackdrop(thumbnailUrl: String?) {
     )
 }
 
-/** Picks a title font from the artwork's mood: muted covers get serif, bright ones a playful display face. */
-private fun albumTitleFontFamily(color: Color?): FontFamily {
+/**
+ * Picks a title font from the artwork's mood and the title length. Short titles use tall condensed
+ * faces so they read big; longer titles use softer faces matched to the cover's mood.
+ */
+private fun albumTitleFontFamily(color: Color?, length: Int): FontFamily {
     if (color == null) return FontFamily.SansSerif
     val max = maxOf(color.red, color.green, color.blue)
     val min = minOf(color.red, color.green, color.blue)
     val lightness = (max + min) / 2f
     val saturation = if (max == min) 0f else (max - min) / (1f - kotlin.math.abs(2f * lightness - 1f))
     return when {
-        saturation < 0.25f -> FontFamily.Serif
+        length <= 10 -> if (lightness < 0.45f) anton else bebasNeue
+        saturation < 0.25f -> playfairDisplay
+        lightness > 0.6f && saturation >= 0.5f && length <= 20 -> pacifico
         lightness > 0.6f -> bbhBartle
         else -> FontFamily.SansSerif
     }
@@ -238,7 +247,7 @@ fun AppleCollectionHeader(
     val heroLuminance = heroColor?.luminance() ?: 0f
     val onButton =
         if (heroLuminance + playHighlightAlpha * (1f - heroLuminance) > 0.75f) Color.Black else Color.White
-    val titleFontFamily = albumTitleFontFamily(heroColor)
+    val titleFontFamily = albumTitleFontFamily(heroColor, title.length)
     val titleFontSize = albumTitleFontSize(title.length)
 
     Box(modifier = modifier.fillMaxWidth()) {
