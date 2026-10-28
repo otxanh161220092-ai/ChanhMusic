@@ -26,6 +26,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,7 +35,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,10 +52,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.metrolist.music.LocalDatabase
 import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
 import com.metrolist.music.constants.LibraryFilter
+import com.metrolist.music.constants.PauseListenHistoryKey
 import com.metrolist.music.ui.utils.resize
+import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.viewmodels.LibraryMixViewModel
 import java.time.LocalDateTime
 
@@ -108,6 +115,12 @@ fun LibraryHomeLayout(
         }.sortedByDescending { it.addedAt ?: LocalDateTime.MIN }
     }
 
+    var showMenu by remember { mutableStateOf(false) }
+    val database = LocalDatabase.current
+    val pauseListenHistory by rememberPreference(PauseListenHistoryKey, defaultValue = false)
+    val eventCount by database.eventCount().collectAsStateWithLifecycle(initialValue = 0)
+    val showHistoryButton = !(pauseListenHistory && eventCount == 0)
+
     LazyColumn(contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues()) {
         item(key = "header") {
             Row(
@@ -121,20 +134,64 @@ fun LibraryHomeLayout(
                     modifier = Modifier.weight(1f),
                 )
                 Box(
-                    modifier = Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant),
+                    modifier =
+                        Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .clickable { navController.navigate("account") },
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.person),
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.account),
                         modifier = Modifier.size(22.dp),
                     )
                 }
-                IconButton(onClick = {}) {
-                    Icon(
-                        painter = painterResource(R.drawable.more_horiz),
-                        contentDescription = null,
-                    )
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            painter = painterResource(R.drawable.more_horiz),
+                            contentDescription = null,
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                    ) {
+                        if (showHistoryButton) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.history)) },
+                                leadingIcon = {
+                                    Icon(painter = painterResource(R.drawable.history), contentDescription = null)
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    navController.navigate("history")
+                                },
+                            )
+                        }
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.stats)) },
+                            leadingIcon = {
+                                Icon(painter = painterResource(R.drawable.stats), contentDescription = null)
+                            },
+                            onClick = {
+                                showMenu = false
+                                navController.navigate("stats")
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.together)) },
+                            leadingIcon = {
+                                Icon(painter = painterResource(R.drawable.group_outlined), contentDescription = null)
+                            },
+                            onClick = {
+                                showMenu = false
+                                navController.navigate("listen_together_from_topbar")
+                            },
+                        )
+                    }
                 }
             }
         }
