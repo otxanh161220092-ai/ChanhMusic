@@ -105,7 +105,6 @@ import com.metrolist.music.LocalListenTogetherManager
 import com.metrolist.music.LocalPlayerConnection
 import com.metrolist.music.R
 import com.metrolist.music.constants.ListItemHeight
-import com.metrolist.music.ui.component.AppleCollectionContainer
 import com.metrolist.music.constants.PlayerBackgroundStyle
 import com.metrolist.music.constants.QueueEditLockKey
 import com.metrolist.music.constants.UseNewPlayerDesignKey
@@ -150,6 +149,10 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.graphicsLayer
 import coil3.compose.AsyncImage
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.foundation.layout.matchParentSize
 import com.metrolist.music.constants.AutomixEnabledKey
 import com.metrolist.music.constants.AutoRadioQueueKey
 import com.metrolist.music.ui.utils.resize
@@ -233,7 +236,7 @@ fun Queue(
         BackHandler(onBack = onExitSelectionMode)
     }
 
-    var locked by rememberPreference(QueueEditLockKey, defaultValue = true)
+    var locked by rememberPreference(QueueEditLockKey, defaultValue = false)
 
     val (useNewPlayerDesign, onUseNewPlayerDesignChange) =
         rememberPreference(
@@ -738,7 +741,17 @@ fun Queue(
             }
         }
 
-        AppleCollectionContainer(thumbnailUrl = mediaMetadata?.thumbnailUrl, enabled = true) {
+        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+            AsyncImage(
+                model = mediaMetadata?.thumbnailUrl?.resize(200, 200),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier =
+                    Modifier
+                        .matchParentSize()
+                        .clipToBounds()
+                        .blur(64.dp, BlurredEdgeTreatment.Unbounded),
+            )
             LazyColumn(
                 state = lazyListState,
                 contentPadding =
