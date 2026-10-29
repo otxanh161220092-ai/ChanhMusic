@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -66,6 +68,7 @@ fun tabScreenContentPadding(): PaddingValues {
 fun TabHeader(
     title: String,
     modifier: Modifier = Modifier,
+    logoRes: Int? = null,
 ) {
     val navController = LocalNavController.current
     val database = LocalDatabase.current
@@ -80,12 +83,21 @@ fun TabHeader(
         modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f),
-        )
+        if (logoRes != null) {
+            Image(
+                painter = painterResource(logoRes),
+                contentDescription = title,
+                modifier = Modifier.height(44.dp).weight(1f),
+                alignment = Alignment.CenterStart,
+            )
+        } else {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+            )
+        }
         Box(
             modifier =
                 Modifier

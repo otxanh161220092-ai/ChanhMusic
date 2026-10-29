@@ -700,6 +700,11 @@ fun HomeScreen(
 
     val quickPicksLazyGridState = rememberLazyGridState()
     var expandedRecent by rememberSaveable { mutableStateOf(false) }
+    val serverQuickPicks =
+        homePage?.sections?.let { sections ->
+            sections.firstOrNull { it.title.equals(stringResource(R.string.quick_picks), ignoreCase = true) }
+                ?: sections.firstOrNull { section -> section.items.isNotEmpty() && section.items.all { it is SongItem } }
+        }
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
     val accountName by viewModel.accountName.collectAsStateWithLifecycle()
@@ -1211,26 +1216,54 @@ fun HomeScreen(
                 contentPadding = tabScreenContentPadding(),
             ) {
                 item(key = "home_header") {
-                    TabHeader(title = stringResource(R.string.home))
+                    TabHeader(title = stringResource(R.string.home), logoRes = R.drawable.ic_home_logo)
                 }
 
+                val localPicks = quickPicks.orEmpty().distinctBy { it.id }
+                val topPicks =
+                    if (localPicks.isNotEmpty()) {
+                        localPicks.mapIndexed { index, song ->
+                            ApplePick(
+                                id = song.id,
+                                title = song.title,
+                                subtitle = song.artists.joinToString { it.name },
+                                thumbnail = song.thumbnailUrl,
+                                onPlay = {
+                                    if (!isListenTogetherGuest) {
+                                        playerConnection.playQueue(
+                                            ListQueue(
+                                                title = "Lựa chọn hay nè",
+                                                items = localPicks.map { it.toMediaItem() },
+                                                startIndex = index,
+                                            ),
+                                        )
+                                    }
+                                },
+                            )
+                        }
+                    } else {
+                        (serverQuickPicks?.items).orEmpty().filterIsInstance<SongItem>().distinctBy { it.id }.map { song ->
+                            ApplePick(
+                                id = song.id,
+                                title = song.title,
+                                subtitle = song.artists.joinToString { it.name },
+                                thumbnail = song.thumbnail,
+                                onPlay = {
+                                    if (!isListenTogetherGuest) {
+                                        playerConnection.playQueue(
+                                            YouTubeQueue(WatchEndpoint(videoId = song.id), song.toMediaMetadata()),
+                                        )
+                                    }
+                                },
+                            )
+                        }
+                    }
+
                 appleHomeSections(
-                    quickPicks = quickPicks,
+                    topPicks = topPicks,
                     recentlyPlayed = keepListening,
                     expandedRecent = expandedRecent,
                     onToggleRecent = { expandedRecent = !expandedRecent },
-                    onPlayTopPicks = { index ->
-                        if (!isListenTogetherGuest) {
-                            val picks = quickPicks.orEmpty().distinctBy { it.id }
-                            playerConnection.playQueue(
-                                ListQueue(
-                                    title = "Lựa chọn hay nè",
-                                    items = picks.map { it.toMediaItem() },
-                                    startIndex = index,
-                                ),
-                            )
-                        }
-                    },
                     recentlyPlayedItem = { localGridItem(it) },
                 )
 

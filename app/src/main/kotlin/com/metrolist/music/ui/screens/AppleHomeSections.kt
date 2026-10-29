@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -43,36 +42,41 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.metrolist.music.R
 import com.metrolist.music.db.entities.LocalItem
-import com.metrolist.music.db.entities.Song
 import com.metrolist.music.ui.utils.resize
+
+/** A card in the Top Picks row, already normalized from local songs or server song items. */
+data class ApplePick(
+    val id: String,
+    val title: String,
+    val subtitle: String,
+    val thumbnail: String?,
+    val onPlay: () -> Unit,
+)
 
 /**
  * Apple Music home layout: "Lựa chọn hay nè" cards in a row, then a "Recently Played" row of tiles
  * with a chevron that expands the tiles into a grid.
  */
 fun LazyListScope.appleHomeSections(
-    quickPicks: List<Song>?,
+    topPicks: List<ApplePick>,
     recentlyPlayed: List<LocalItem>?,
     expandedRecent: Boolean,
     onToggleRecent: () -> Unit,
-    onPlayTopPicks: (Int) -> Unit,
     recentlyPlayedItem: @Composable (LocalItem) -> Unit,
 ) {
-    val picks = quickPicks.orEmpty().distinctBy { it.id }
-    if (picks.isNotEmpty()) {
+    if (topPicks.isNotEmpty()) {
         item(key = "apple_top_picks_title") {
             SectionTitle(title = "Lựa chọn hay nè", onClick = null)
         }
         item(key = "apple_top_picks_list") {
             LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
                 itemsIndexed(
-                    items = picks,
-                    key = { _, song -> "apple_top_pick_${song.id}" },
-                ) { index, song ->
+                    items = topPicks,
+                    key = { _, pick -> "apple_top_pick_${pick.id}" },
+                ) { index, pick ->
                     TopPickCard(
-                        song = song,
+                        pick = pick,
                         colors = if (index % 2 == 0) PickRed else PickBlue,
-                        onClick = { onPlayTopPicks(index) },
                         modifier = Modifier.width(200.dp).height(260.dp).padding(end = 12.dp),
                     )
                 }
@@ -153,9 +157,8 @@ private val PickBlue = Brush.linearGradient(listOf(Color(0xFF5B8CF0), Color(0xFF
 
 @Composable
 private fun TopPickCard(
-    song: Song,
+    pick: ApplePick,
     colors: Brush,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -163,17 +166,17 @@ private fun TopPickCard(
             modifier
                 .clip(RoundedCornerShape(20.dp))
                 .background(colors)
-                .clickable(onClick = onClick),
+                .clickable(onClick = pick.onPlay),
     ) {
         AsyncImage(
-            model = song.thumbnailUrl?.resize(400, 400),
+            model = pick.thumbnail?.resize(400, 400),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
         )
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Text(
-                text = song.title,
+                text = pick.title,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -182,7 +185,7 @@ private fun TopPickCard(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = song.artists.joinToString { it.name },
+                text = pick.subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = 0.8f),
                 maxLines = 1,
