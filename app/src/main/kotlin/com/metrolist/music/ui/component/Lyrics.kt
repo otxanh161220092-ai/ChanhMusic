@@ -8,6 +8,9 @@ package com.metrolist.music.ui.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.metrolist.music.constants.ExperimentalLyricsKey
 import com.metrolist.music.ui.screens.settings.LyricsPosition
@@ -26,11 +29,15 @@ fun Lyrics(
     lyricsViewModel: LyricsViewModel = hiltViewModel()
 ) {
     val (experimentalLyrics, _) = rememberPreference(key = ExperimentalLyricsKey, defaultValue = true)
+    val lyricsModifier = modifier.graphicsLayer {
+        compositingStrategy = CompositingStrategy.Offscreen
+        blendMode = BlendMode.Overlay
+    }
 
     if (experimentalLyrics) {
         ExperimentalLyrics(
             sliderPositionProvider = sliderPositionProvider,
-            modifier = modifier,
+            modifier = lyricsModifier,
             showLyrics = showLyrics,
             textPositionOverride = textPositionOverride,
             highlightActiveLine = highlightActiveLine,
@@ -40,7 +47,7 @@ fun Lyrics(
     } else {
         OriginalLyrics(
             sliderPositionProvider = sliderPositionProvider,
-            modifier = modifier,
+            modifier = lyricsModifier,
             showLyrics = showLyrics
         )
     }

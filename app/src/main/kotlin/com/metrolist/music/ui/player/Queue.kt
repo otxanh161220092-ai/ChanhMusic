@@ -81,7 +81,6 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -750,13 +749,7 @@ fun Queue(
                                 bottom = ListItemHeight + 8.dp,
                             ),
                         ).asPaddingValues(),
-                modifier =
-                    Modifier
-                        .nestedScroll(state.preUpPostDownNestedScrollConnection)
-                        .graphicsLayer {
-                            compositingStrategy = CompositingStrategy.Offscreen
-                            blendMode = BlendMode.Overlay
-                        },
+                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
             ) {
                 item(key = "queue_top_spacer") {
                     Spacer(
@@ -1202,7 +1195,7 @@ private fun QueueControlPill(
         enabled = enabled,
         shape = RoundedCornerShape(26.dp),
         color = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-        modifier = modifier.height(52.dp),
+        modifier = modifier.height(52.dp).graphicsLayer { blendMode = BlendMode.Overlay },
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             Icon(
