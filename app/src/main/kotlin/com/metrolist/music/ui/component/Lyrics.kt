@@ -29,10 +29,7 @@ fun Lyrics(
     lyricsViewModel: LyricsViewModel = hiltViewModel()
 ) {
     val (experimentalLyrics, _) = rememberPreference(key = ExperimentalLyricsKey, defaultValue = true)
-    val lyricsModifier = modifier.graphicsLayer {
-        compositingStrategy = CompositingStrategy.Offscreen
-        blendMode = BlendMode.Overlay
-    }
+    val lyricsModifier = modifier
 
     if (experimentalLyrics) {
         ExperimentalLyrics(
