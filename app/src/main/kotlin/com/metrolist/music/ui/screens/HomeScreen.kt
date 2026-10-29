@@ -699,6 +699,7 @@ fun HomeScreen(
     val pullRefreshState = rememberPullToRefreshState()
 
     val quickPicksLazyGridState = rememberLazyGridState()
+    var expandedTopPicks by rememberSaveable { mutableStateOf(false) }
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
     val accountName by viewModel.accountName.collectAsStateWithLifecycle()
@@ -1216,6 +1217,20 @@ fun HomeScreen(
                 appleHomeSections(
                     quickPicks = quickPicks,
                     recentlyPlayed = keepListening,
+                    expandedTopPicks = expandedTopPicks,
+                    onToggleTopPicks = { expandedTopPicks = !expandedTopPicks },
+                    onPlayTopPicks = { index ->
+                        if (!isListenTogetherGuest) {
+                            val picks = quickPicks.orEmpty().distinctBy { it.id }
+                            playerConnection.playQueue(
+                                ListQueue(
+                                    title = "Lựa chọn hay nè",
+                                    items = picks.map { it.toMediaItem() },
+                                    startIndex = index,
+                                ),
+                            )
+                        }
+                    },
                     recentlyPlayedItem = { localGridItem(it) },
                 )
 
@@ -1455,7 +1470,7 @@ fun HomeScreen(
                     }
                 }
 
-                homeSections.forEach { section ->
+                homeSections.filter { it != HomeSection.QuickPicks && it != HomeSection.KeepListening }.forEach { section ->
                     when (section) {
                         HomeSection.SpeedDial -> {
                             speedDialItems.takeIf { it.isNotEmpty() }?.let { items ->
