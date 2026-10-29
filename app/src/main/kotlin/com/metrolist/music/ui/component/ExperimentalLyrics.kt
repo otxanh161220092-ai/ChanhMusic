@@ -509,7 +509,6 @@ fun ExperimentalLyrics(
         onDispose { activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
     }
 
-    var maskDebug by remember { mutableStateOf("mask: no thumbnail") }
     BoxWithConstraints(
         contentAlignment = Alignment.TopCenter,
         modifier = modifier.fillMaxSize().padding(bottom = 12.dp).graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
@@ -829,22 +828,22 @@ fun ExperimentalLyrics(
         }
 
         mediaMetadata?.thumbnailUrl?.let { thumb ->
-            AsyncImage(
-                model = thumb.resize(400, 400),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                colorFilter = ColorFilter.lighting(Color.White, Color(0xFF383838)),
-                onSuccess = { maskDebug = "mask ok" },
-                onError = { maskDebug = "mask err: ${it.result.throwable.message}" },
-                modifier = Modifier.matchParentSize().clipToBounds().blur(48.dp, BlurredEdgeTreatment.Unbounded).graphicsLayer { blendMode = BlendMode.SrcIn },
-            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen; blendMode = BlendMode.SrcIn },
+            ) {
+                AsyncImage(
+                    model = thumb.resize(400, 400),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.lighting(Color.White, Color(0xFF383838)),
+                    modifier = Modifier
+                        .matchParentSize()
+                        .blur(48.dp, BlurredEdgeTreatment.Unbounded),
+                )
+            }
         }
-        Text(
-            text = maskDebug,
-            fontSize = 10.sp,
-            color = Color.Red,
-            modifier = Modifier.align(Alignment.TopStart).padding(start = 8.dp, top = 120.dp),
-        )
 
         LyricsActionOverlay(
             modifier = Modifier.align(Alignment.BottomCenter),
