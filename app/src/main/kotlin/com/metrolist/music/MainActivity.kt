@@ -1175,7 +1175,7 @@ class MainActivity : FragmentActivity() {
                                         slimNav = slimNav,
                                         floating = floatingNav || useAppleStyleLayout,
                                         appleStyle = useAppleStyleLayout,
-                                        onShuffleClick = if (currentRoute == Screens.Home.route) homeShuffleAction else null,
+                                        onShuffleClick = if (currentRoute == Screens.Home.route || currentRoute == Screens.Library.route) homeShuffleAction else null,
                                         onSearchLongClick = onSearchLongClick,
                                         onHomeLongHold = { showAccountDialog = true },
                                         modifier =

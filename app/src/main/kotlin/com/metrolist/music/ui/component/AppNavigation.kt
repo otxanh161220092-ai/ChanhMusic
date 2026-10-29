@@ -290,7 +290,7 @@ private fun AppleStyleNavigationBar(
             modifier =
                 Modifier
                     .weight(1f)
-                    .height(64.dp)
+                    .height(72.dp)
                     .shadow(8.dp, CircleShape, clip = false)
                     .clip(CircleShape)
                     .background(pillColor),
@@ -361,7 +361,7 @@ private fun AppleStyleNavigationBar(
             Box(
                 modifier =
                     Modifier
-                        .size(64.dp)
+                        .size(72.dp)
                         .shadow(8.dp, CircleShape, clip = false)
                         .clip(CircleShape)
                         .background(pillColor)

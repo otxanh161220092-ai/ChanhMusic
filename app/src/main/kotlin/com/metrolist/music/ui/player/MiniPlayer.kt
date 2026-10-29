@@ -377,7 +377,7 @@ private fun NewMiniPlayer(
             modifier =
                 Modifier
                     .then(if (isTabletLandscape) Modifier.width(500.dp).align(Alignment.Center) else Modifier.fillMaxWidth())
-                    .height(64.dp)
+                    .height(56.dp)
                     .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
                     .clip(RoundedCornerShape(32.dp))
                     .background(color = backgroundColor)
