@@ -72,6 +72,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -156,6 +157,21 @@ private const val LYRICS_PREVIEW_TIME = 8000L
     ExperimentalMaterial3Api::class,
     ExperimentalMaterial3ExpressiveApi::class
 )
+private val lyricsFillMatrix: ColorMatrix =
+    ColorMatrix().apply {
+        setToSaturation(1.6f)
+        timesAssign(
+            ColorMatrix(
+                floatArrayOf(
+                    1f, 0f, 0f, 0f, 45f,
+                    0f, 1f, 0f, 0f, 45f,
+                    0f, 0f, 1f, 0f, 45f,
+                    0f, 0f, 0f, 1f, 0f,
+                ),
+            ),
+        )
+    }
+
 @SuppressLint("UnusedBoxWithConstraintsScope", "StringFormatInvalid")
 @Composable
 fun ExperimentalLyrics(
@@ -837,7 +853,7 @@ fun ExperimentalLyrics(
                     model = thumb.resize(400, 400),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.lighting(Color.White, Color(0xFF585858)),
+                    colorFilter = ColorFilter.colorMatrix(lyricsFillMatrix),
                     modifier = Modifier
                         .matchParentSize()
                         .blur(48.dp, BlurredEdgeTreatment.Unbounded),
