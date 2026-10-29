@@ -5,7 +5,6 @@
 
 package com.metrolist.music.ui.component
 
-import androidx.compose.foundation.layout.matchParentSize
 import com.metrolist.music.ui.utils.resize
 import coil3.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
