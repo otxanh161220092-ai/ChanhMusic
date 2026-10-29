@@ -5,7 +5,6 @@
 
 package com.metrolist.music.ui.component
 
-import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import com.metrolist.music.ui.utils.resize
 import coil3.compose.AsyncImage
@@ -833,7 +832,7 @@ fun ExperimentalLyrics(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 colorFilter = ColorFilter.lighting(Color.White, Color(0xFF383838)),
-                modifier = Modifier.matchParentSize().blur(48.dp, BlurredEdgeTreatment.Unbounded).graphicsLayer { blendMode = BlendMode.SrcIn },
+                modifier = Modifier.matchParentSize().clipToBounds().graphicsLayer { blendMode = BlendMode.SrcIn },
             )
         }
 
