@@ -7,6 +7,7 @@ package com.metrolist.music.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,57 +47,34 @@ import com.metrolist.music.db.entities.Song
 import com.metrolist.music.ui.utils.resize
 
 /**
- * Apple Music home layout: "Top Picks" cards (horizontal, or a grid when expanded), then a
- * "Recently Played" row of tiles with captions.
+ * Apple Music home layout: "Lựa chọn hay nè" cards in a row, then a "Recently Played" row of tiles
+ * with a chevron that expands the tiles into a grid.
  */
 fun LazyListScope.appleHomeSections(
     quickPicks: List<Song>?,
     recentlyPlayed: List<LocalItem>?,
-    expandedTopPicks: Boolean,
-    onToggleTopPicks: () -> Unit,
+    expandedRecent: Boolean,
+    onToggleRecent: () -> Unit,
     onPlayTopPicks: (Int) -> Unit,
     recentlyPlayedItem: @Composable (LocalItem) -> Unit,
 ) {
     val picks = quickPicks.orEmpty().distinctBy { it.id }
     if (picks.isNotEmpty()) {
         item(key = "apple_top_picks_title") {
-            SectionTitle(title = "Lựa chọn hay nè", onClick = onToggleTopPicks)
+            SectionTitle(title = "Lựa chọn hay nè", onClick = null)
         }
-        if (expandedTopPicks) {
-            picks.chunked(2).forEachIndexed { rowIndex, rowPicks ->
-                item(key = "apple_top_picks_grid_$rowIndex") {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
-                    ) {
-                        rowPicks.forEachIndexed { colIndex, song ->
-                            val index = rowIndex * 2 + colIndex
-                            TopPickCard(
-                                song = song,
-                                colors = if (index % 2 == 0) PickRed else PickBlue,
-                                onClick = { onPlayTopPicks(index) },
-                                modifier = Modifier.weight(1f).aspectRatio(0.8f).padding(bottom = 12.dp),
-                            )
-                        }
-                        if (rowPicks.size == 1) Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
-        } else {
-            item(key = "apple_top_picks_list") {
-                LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
-                    items(
-                        items = picks,
-                        key = { "apple_top_pick_${it.id}" },
-                    ) { song ->
-                        val index = picks.indexOf(song)
-                        TopPickCard(
-                            song = song,
-                            colors = if (index % 2 == 0) PickRed else PickBlue,
-                            onClick = { onPlayTopPicks(index) },
-                            modifier = Modifier.width(200.dp).height(260.dp).padding(end = 12.dp),
-                        )
-                    }
+        item(key = "apple_top_picks_list") {
+            LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
+                itemsIndexed(
+                    items = picks,
+                    key = { _, song -> "apple_top_pick_${song.id}" },
+                ) { index, song ->
+                    TopPickCard(
+                        song = song,
+                        colors = if (index % 2 == 0) PickRed else PickBlue,
+                        onClick = { onPlayTopPicks(index) },
+                        modifier = Modifier.width(200.dp).height(260.dp).padding(end = 12.dp),
+                    )
                 }
             }
         }
@@ -104,16 +83,34 @@ fun LazyListScope.appleHomeSections(
     val recent = recentlyPlayed.orEmpty().distinctBy { it.id }
     if (recent.isNotEmpty()) {
         item(key = "apple_recent_title") {
-            SectionTitle(title = "Recently Played", onClick = null)
+            SectionTitle(title = "Recently Played", onClick = onToggleRecent, expanded = expandedRecent)
         }
-        item(key = "apple_recent_list") {
-            LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
-                items(
-                    items = recent,
-                    key = { "apple_recent_${it.id}" },
-                ) { item ->
-                    Box(modifier = Modifier.width(150.dp).padding(end = 12.dp)) {
-                        recentlyPlayedItem(item)
+        if (expandedRecent) {
+            recent.chunked(2).forEachIndexed { rowIndex, rowItems ->
+                item(key = "apple_recent_grid_$rowIndex") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        rowItems.forEach { item ->
+                            Box(modifier = Modifier.weight(1f).padding(bottom = 12.dp)) {
+                                recentlyPlayedItem(item)
+                            }
+                        }
+                        if (rowItems.size == 1) Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        } else {
+            item(key = "apple_recent_list") {
+                LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
+                    items(
+                        items = recent,
+                        key = { "apple_recent_${it.id}" },
+                    ) { item ->
+                        Box(modifier = Modifier.width(150.dp).padding(end = 12.dp)) {
+                            recentlyPlayedItem(item)
+                        }
                     }
                 }
             }
@@ -125,6 +122,7 @@ fun LazyListScope.appleHomeSections(
 private fun SectionTitle(
     title: String,
     onClick: (() -> Unit)?,
+    expanded: Boolean = false,
 ) {
     Row(
         modifier =
@@ -142,7 +140,7 @@ private fun SectionTitle(
         if (onClick != null) {
             Spacer(modifier = Modifier.width(6.dp))
             Icon(
-                painter = painterResource(R.drawable.arrow_forward),
+                painter = painterResource(if (expanded) R.drawable.expand_less else R.drawable.arrow_forward),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
             )

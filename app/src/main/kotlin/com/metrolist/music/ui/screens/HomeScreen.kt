@@ -699,7 +699,7 @@ fun HomeScreen(
     val pullRefreshState = rememberPullToRefreshState()
 
     val quickPicksLazyGridState = rememberLazyGridState()
-    var expandedTopPicks by rememberSaveable { mutableStateOf(false) }
+    var expandedRecent by rememberSaveable { mutableStateOf(false) }
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
     val accountName by viewModel.accountName.collectAsStateWithLifecycle()
@@ -1217,8 +1217,8 @@ fun HomeScreen(
                 appleHomeSections(
                     quickPicks = quickPicks,
                     recentlyPlayed = keepListening,
-                    expandedTopPicks = expandedTopPicks,
-                    onToggleTopPicks = { expandedTopPicks = !expandedTopPicks },
+                    expandedRecent = expandedRecent,
+                    onToggleRecent = { expandedRecent = !expandedRecent },
                     onPlayTopPicks = { index ->
                         if (!isListenTogetherGuest) {
                             val picks = quickPicks.orEmpty().distinctBy { it.id }
