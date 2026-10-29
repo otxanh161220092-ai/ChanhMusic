@@ -705,6 +705,7 @@ fun HomeScreen(
             sections.firstOrNull { it.title.equals(stringResource(R.string.quick_picks), ignoreCase = true) }
                 ?: sections.firstOrNull { section -> section.items.isNotEmpty() && section.items.all { it is SongItem } }
         }
+    val serverQuickPicksIndex = homePage?.sections?.indexOfFirst { it === serverQuickPicks } ?: -1
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
     val accountName by viewModel.accountName.collectAsStateWithLifecycle()
@@ -1503,7 +1504,10 @@ fun HomeScreen(
                     }
                 }
 
-                homeSections.filter { it != HomeSection.QuickPicks && it != HomeSection.KeepListening }.forEach { section ->
+                homeSections
+                    .filter { it != HomeSection.QuickPicks && it != HomeSection.KeepListening }
+                    .filterNot { it is HomeSection.HomePageSection && it.index == serverQuickPicksIndex }
+                    .forEach { section ->
                     when (section) {
                         HomeSection.SpeedDial -> {
                             speedDialItems.takeIf { it.isNotEmpty() }?.let { items ->
