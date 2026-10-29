@@ -165,50 +165,6 @@ fun SettingsScreen(
         Material3SettingsGroup(
             title = stringResource(R.string.settings_section_system),
             items = buildList {
-                if (isAndroid12OrLater) {
-                    add(
-                        Material3SettingsItem(
-                            icon = painterResource(R.drawable.link),
-                            title = { Text(stringResource(R.string.default_links)) },
-                            onClick = {
-                                try {
-                                    val intent = Intent(
-                                        Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
-                                        "package:${context.packageName}".toUri()
-                                    )
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {
-                                    when (e) {
-                                        is ActivityNotFoundException -> {
-                                            Toast.makeText(
-                                                context,
-                                                R.string.open_app_settings_error,
-                                                Toast.LENGTH_LONG
-                                            ).show()
-                                        }
-
-                                        is SecurityException -> {
-                                            Toast.makeText(
-                                                context,
-                                                R.string.open_app_settings_error,
-                                                Toast.LENGTH_LONG
-                                            ).show()
-                                        }
-
-                                        else -> {
-                                            Toast.makeText(
-                                                context,
-                                                R.string.open_app_settings_error,
-                                                Toast.LENGTH_LONG
-                                            ).show()
-                                        }
-                                    }
-                                }
-                            }
-                        )
-                    )
-                }
                 if (BuildConfig.UPDATER_AVAILABLE) {
                     add(
                         Material3SettingsItem(
@@ -218,14 +174,6 @@ fun SettingsScreen(
                         )
                     )
                 }
-                val showChangelog = com.metrolist.music.LocalChangelogState.current
-                add(
-                    Material3SettingsItem(
-                        icon = painterResource(R.drawable.newspaper),
-                        title = { Text(stringResource(R.string.changelog)) },
-                        onClick = { showChangelog.value = true }
-                    )
-                )
                 add(
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.info),

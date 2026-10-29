@@ -700,9 +700,10 @@ fun HomeScreen(
 
     val quickPicksLazyGridState = rememberLazyGridState()
     var expandedRecent by rememberSaveable { mutableStateOf(false) }
+    val quickPicksTitles = listOf(stringResource(R.string.quick_picks), "Phát nhanh", "Quick picks")
     val serverQuickPicks =
         homePage?.sections?.let { sections ->
-            sections.firstOrNull { it.title.equals(stringResource(R.string.quick_picks), ignoreCase = true) }
+            sections.firstOrNull { section -> quickPicksTitles.any { section.title.equals(it, ignoreCase = true) } }
                 ?: sections.firstOrNull { section -> section.items.isNotEmpty() && section.items.all { it is SongItem } }
         }
     val serverQuickPicksIndex = homePage?.sections?.indexOfFirst { it === serverQuickPicks } ?: -1
@@ -1221,8 +1222,36 @@ fun HomeScreen(
                 }
 
                 val localPicks = quickPicks.orEmpty().distinctBy { it.id }
+                val serverPicks =
+                    (serverQuickPicks?.items).orEmpty().distinctBy { it.id }.mapNotNull { item ->
+                        when (item) {
+                            is SongItem ->
+                                ApplePick(
+                                    id = item.id,
+                                    title = item.title,
+                                    subtitle = item.artists.joinToString { it.name },
+                                    thumbnail = item.thumbnail,
+                                    onPlay = {
+                                        if (!isListenTogetherGuest) {
+                                            playerConnection.playQueue(
+                                                YouTubeQueue(WatchEndpoint(videoId = item.id), item.toMediaMetadata()),
+                                            )
+                                        }
+                                    },
+                                )
+                            is AlbumItem ->
+                                ApplePick(
+                                    id = item.id,
+                                    title = item.title,
+                                    subtitle = item.artists.orEmpty().joinToString { it.name },
+                                    thumbnail = item.thumbnail,
+                                    onPlay = { navController.navigate("album/${item.id}") },
+                                )
+                            else -> null
+                        }
+                    }
                 val topPicks =
-                    if (localPicks.isNotEmpty()) {
+                    serverPicks.ifEmpty {
                         localPicks.mapIndexed { index, song ->
                             ApplePick(
                                 id = song.id,
@@ -1237,22 +1266,6 @@ fun HomeScreen(
                                                 items = localPicks.map { it.toMediaItem() },
                                                 startIndex = index,
                                             ),
-                                        )
-                                    }
-                                },
-                            )
-                        }
-                    } else {
-                        (serverQuickPicks?.items).orEmpty().filterIsInstance<SongItem>().distinctBy { it.id }.map { song ->
-                            ApplePick(
-                                id = song.id,
-                                title = song.title,
-                                subtitle = song.artists.joinToString { it.name },
-                                thumbnail = song.thumbnail,
-                                onPlay = {
-                                    if (!isListenTogetherGuest) {
-                                        playerConnection.playQueue(
-                                            YouTubeQueue(WatchEndpoint(videoId = song.id), song.toMediaMetadata()),
                                         )
                                     }
                                 },

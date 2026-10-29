@@ -265,16 +265,18 @@ fun AboutScreen(
                 Spacer(Modifier.width(20.dp))
         
                 Column {
-                    val metrolistName = stringResource(R.string.metrolist)
-                        .lowercase(Locale.getDefault())
-                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                    Image(
+                        painter = painterResource(R.drawable.ic_home_logo),
+                        contentDescription = null,
+                        modifier = Modifier.height(56.dp),
+                        alignment = Alignment.CenterStart,
+                    )
 
                     Text(
-                        text = metrolistName,
-                        style = MaterialTheme.typography.headlineLarge,
+                        text = "Một Fork Của Metrolist",
+                        style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.onSurface,
-                        letterSpacing = (-0.5).sp
                     )
             
                     Spacer(Modifier.height(8.dp))
@@ -287,7 +289,7 @@ fun AboutScreen(
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                         ) {
                             Text(
-                                text = BuildConfig.VERSION_NAME,
+                                text = "1.0.0",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
@@ -375,7 +377,7 @@ fun AboutScreen(
                             letterSpacing = (-0.5).sp
                         )
                         Text(
-                            text = stringResource(R.string.credits_lead_developer),
+                            text = "Nhóm phát triển Metrolist",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold
@@ -404,88 +406,6 @@ fun AboutScreen(
                 }
             }
         }
-
-        Spacer(Modifier.height(32.dp))
-        
-        // Collaborators section - back to Material3SettingsGroup
-        Material3SettingsGroup(
-            title = stringResource(R.string.credits_collaborators_section),
-            items = collaborators.map { contributor ->
-                Material3SettingsItem(
-                    leadingContent = {
-                        var clickCount by remember(contributor.name) { mutableIntStateOf(0) }
-                        ContributorAvatar(
-                            avatarUrl = contributor.avatarUrl,
-                            sizeDp = 48,
-                            shape = contributor.polygon?.toShape() ?: CircleShape,
-                            contentDescription = contributor.name,
-                            onClick = {
-                                handleEasterEggClick(
-                                    clickCount = clickCount,
-                                    favoriteSongVideoId = contributor.favoriteSongVideoId,
-                                    coroutineScope = coroutineScope,
-                                    snackbarHostState = snackbarHostState,
-                                    playerConnection = playerConnection,
-                                    wannaPlayStr = wannaPlayStr,
-                                    yeahStr = yeahStr,
-                                    onCountUpdate = { clickCount = it }
-                                )
-                            }
-                        )
-                    },
-                    title = { Text(text = contributor.name, fontWeight = FontWeight.SemiBold) },
-                    description = { Text(stringResource(contributor.roleRes)) },
-                    trailingContent = {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (contributor.sponsorUrl != null) {
-                                Surface(
-                                    onClick = { uriHandler.openUri(contributor.sponsorUrl) },
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                                    modifier = Modifier.size(36.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.buymeacoffee),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(20.dp),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-                            Icon(
-                                painter = painterResource(R.drawable.github),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    },
-                    onClick = { uriHandler.openUri(contributor.githubUrl) }
-                )
-            }
-        )
-
-        Spacer(Modifier.height(32.dp))
-
-        // Community & Info using standard Group
-        Material3SettingsGroup(
-            title = stringResource(R.string.community_and_info),
-            items = communityLinks.map { link ->
-                Material3SettingsItem(
-                    icon = painterResource(link.iconRes),
-                    title = { Text(stringResource(link.labelRes), fontWeight = FontWeight.SemiBold) },
-                    description = if (link.labelRes == R.string.credits_license_name) {
-                        { Text(stringResource(R.string.credits_license_desc)) }
-                    } else null,
-                    onClick = { uriHandler.openUri(link.url) }
-                )
-            }
-        )
 
         Spacer(Modifier.height(48.dp))
         
