@@ -5,7 +5,6 @@
 
 package com.metrolist.music.ui.component
 
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import com.metrolist.music.ui.utils.resize
