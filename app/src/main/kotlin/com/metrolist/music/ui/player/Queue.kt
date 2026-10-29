@@ -147,6 +147,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.graphicsLayer
+import coil3.compose.AsyncImage
+import com.metrolist.music.constants.AutomixEnabledKey
+import com.metrolist.music.constants.AutoRadioQueueKey
+import com.metrolist.music.ui.utils.resize
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.Surface
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -755,6 +762,99 @@ fun Queue(
                     )
                 }
 
+                item(key = "queue_now_header") {
+                    val nowMeta = mediaMetadata
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+                        if (nowMeta != null) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                AsyncImage(
+                                    model = nowMeta.thumbnailUrl?.resize(160, 160),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.size(56.dp).clip(RoundedCornerShape(10.dp)),
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = nowMeta.title,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                    Text(
+                                        text = nowMeta.artists.joinToString { it.name },
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(20.dp))
+                        }
+                        Text(
+                            text = "Tiếp tục phát",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = "Từ hàng đợi hiện tại",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+
+                item(key = "queue_controls") {
+                    var automixEnabled by rememberPreference(AutomixEnabledKey, defaultValue = false)
+                    var autoRadioQueue by rememberPreference(AutoRadioQueueKey, defaultValue = true)
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        QueueControlPill(
+                            modifier = Modifier.weight(1f),
+                            iconRes = R.drawable.shuffle,
+                            active = shuffleModeEnabled,
+                            enabled = !isListenTogetherGuest,
+                            onClick = {
+                                coroutineScope
+                                    .launch {
+                                        lazyListState.animateScrollToItem(
+                                            if (playerConnection.player.shuffleModeEnabled) playerConnection.player.currentMediaItemIndex else 0,
+                                        )
+                                    }.invokeOnCompletion {
+                                        playerConnection.player.shuffleModeEnabled =
+                                            !playerConnection.player.shuffleModeEnabled
+                                    }
+                            },
+                        )
+                        QueueControlPill(
+                            modifier = Modifier.weight(1f),
+                            iconRes = if (repeatMode == Player.REPEAT_MODE_ONE) R.drawable.repeat_one else R.drawable.repeat,
+                            active = repeatMode != Player.REPEAT_MODE_OFF,
+                            enabled = !isListenTogetherGuest,
+                            onClick = playerConnection.player::toggleRepeatMode,
+                        )
+                        QueueControlPill(
+                            modifier = Modifier.weight(1f),
+                            iconRes = R.drawable.ic_infinity,
+                            active = autoRadioQueue,
+                            enabled = !isListenTogetherGuest,
+                            onClick = { autoRadioQueue = !autoRadioQueue },
+                        )
+                        QueueControlPill(
+                            modifier = Modifier.weight(1f),
+                            iconRes = R.drawable.ic_automix,
+                            active = automixEnabled,
+                            enabled = !isListenTogetherGuest,
+                            onClick = { automixEnabled = !automixEnabled },
+                        )
+                    }
+                }
+
                 itemsIndexed(
                     items = mutableQueueWindows,
                     key = { _, item -> item.uid.hashCode() },
@@ -1162,83 +1262,6 @@ fun Queue(
 
         val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
 
-        Box(
-            modifier =
-                Modifier
-                    .background(
-                        if (pureBlack) {
-                            Color.Black
-                        } else {
-                            MaterialTheme.colorScheme
-                                .secondaryContainer
-                                .copy(alpha = 0.90f)
-                        },
-                    ).fillMaxWidth()
-                    .height(
-                        ListItemHeight +
-                            WindowInsets.systemBars
-                                .asPaddingValues()
-                                .calculateBottomPadding(),
-                    ).align(Alignment.BottomCenter)
-                    .clickable {
-                        state.collapseSoft()
-                    }.windowInsetsPadding(
-                        WindowInsets.systemBars
-                            .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
-                    ).padding(12.dp),
-        ) {
-            IconButton(
-                enabled = !isListenTogetherGuest,
-                modifier = Modifier.align(Alignment.CenterStart),
-                onClick = {
-                    coroutineScope
-                        .launch {
-                            lazyListState.animateScrollToItem(
-                                if (playerConnection.player.shuffleModeEnabled) playerConnection.player.currentMediaItemIndex else 0,
-                            )
-                        }.invokeOnCompletion {
-                            playerConnection.player.shuffleModeEnabled =
-                                !playerConnection.player.shuffleModeEnabled
-                        }
-                },
-            ) {
-                val baseAlpha = if (shuffleModeEnabled) 1f else 0.5f
-                val finalAlpha = if (!isListenTogetherGuest) baseAlpha else 0.3f
-                Icon(
-                    painter = painterResource(R.drawable.shuffle),
-                    contentDescription = null,
-                    modifier = Modifier.alpha(finalAlpha),
-                )
-            }
-
-            Icon(
-                painter = painterResource(R.drawable.expand_more),
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.Center),
-            )
-
-            IconButton(
-                enabled = !isListenTogetherGuest,
-                modifier = Modifier.align(Alignment.CenterEnd),
-                onClick = playerConnection.player::toggleRepeatMode,
-            ) {
-                val baseAlpha = if (repeatMode == Player.REPEAT_MODE_OFF) 0.5f else 1f
-                val finalAlpha = if (!isListenTogetherGuest) baseAlpha else 0.3f
-                Icon(
-                    painter =
-                        painterResource(
-                            when (repeatMode) {
-                                Player.REPEAT_MODE_OFF, Player.REPEAT_MODE_ALL -> R.drawable.repeat
-                                Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
-                                else -> throw IllegalStateException()
-                            },
-                        ),
-                    contentDescription = null,
-                    modifier = Modifier.alpha(finalAlpha),
-                )
-            }
-        }
-
         SnackbarHost(
             hostState = snackbarHostState,
             modifier =
@@ -1328,6 +1351,33 @@ private fun PlayerQueueButton(
                 contentDescription = null,
                 modifier = Modifier.size(iconSize),
                 tint = finalTint,
+            )
+        }
+    }
+}
+
+@Composable
+private fun QueueControlPill(
+    iconRes: Int,
+    active: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val tint = if (active) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(26.dp),
+        color = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+        modifier = modifier.height(52.dp),
+    ) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                tint = if (enabled) tint else tint.copy(alpha = 0.3f),
+                modifier = Modifier.size(24.dp),
             )
         }
     }
