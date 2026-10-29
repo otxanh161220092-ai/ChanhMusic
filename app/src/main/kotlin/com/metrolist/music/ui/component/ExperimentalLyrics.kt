@@ -5,6 +5,9 @@
 
 package com.metrolist.music.ui.component
 
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.graphicsLayer
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
@@ -746,7 +749,7 @@ fun ExperimentalLyrics(
                         )
 
                         Box(
-                            modifier = Modifier.fillMaxWidth().layout { m, c -> 
+                            modifier = Modifier.fillMaxWidth().graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen; blendMode = BlendMode.Overlay }.layout { m, c ->
                                 val p = m.measure(c.copy(maxHeight = Constraints.Infinity))
                                 layout(p.width, 0) { p.place(0, 0) }
                             }.offset { IntOffset(0, (animatedOffset + userManualOffset).roundToInt()) }
