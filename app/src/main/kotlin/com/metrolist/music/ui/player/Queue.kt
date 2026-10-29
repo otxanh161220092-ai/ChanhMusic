@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.player
 
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.layout.statusBars
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -773,6 +775,17 @@ fun Queue(
                 }
 
                 stickyHeader(key = "queue_now_header") {
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .windowInsetsPadding(WindowInsets.statusBars)
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f), Color.Transparent),
+                                    ),
+                                ),
+                    ) {
                     val nowMeta = mediaMetadata
                     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
                         if (nowMeta != null) {
@@ -861,6 +874,7 @@ fun Queue(
                             enabled = !isListenTogetherGuest,
                             onClick = { automixEnabled = !automixEnabled },
                         )
+                    }
                     }
                 }
 
