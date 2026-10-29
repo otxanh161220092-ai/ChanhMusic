@@ -772,7 +772,7 @@ fun Queue(
                     )
                 }
 
-                item(key = "queue_now_header") {
+                stickyHeader(key = "queue_now_header") {
                     val nowMeta = mediaMetadata
                     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
                         if (nowMeta != null) {
@@ -814,9 +814,8 @@ fun Queue(
                             color = MaterialTheme.colorScheme.primary,
                         )
                     }
-                }
 
-                item(key = "queue_controls") {
+
                     var automixEnabled by rememberPreference(AutomixEnabledKey, defaultValue = false)
                     var autoRadioQueue by rememberPreference(AutoRadioQueueKey, defaultValue = true)
                     Row(
