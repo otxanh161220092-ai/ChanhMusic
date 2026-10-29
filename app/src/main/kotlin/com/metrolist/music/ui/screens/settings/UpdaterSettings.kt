@@ -119,7 +119,7 @@ fun UpdaterScreen(
                 listOf(
                     Material3SettingsItem(
                         title = {
-                            Text(stringResource(R.string.version_format, BuildConfig.VERSION_NAME))
+                            Text(stringResource(R.string.version_format, "1.0.0"))
                         },
                         description = {
                             val arch = BuildConfig.ARCHITECTURE

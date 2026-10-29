@@ -6,6 +6,8 @@
 package com.metrolist.music.ui.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -87,6 +89,7 @@ fun TabHeader(
             Image(
                 painter = painterResource(logoRes),
                 contentDescription = title,
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground, BlendMode.SrcIn),
                 modifier = Modifier.height(44.dp).weight(1f),
                 alignment = Alignment.CenterStart,
             )

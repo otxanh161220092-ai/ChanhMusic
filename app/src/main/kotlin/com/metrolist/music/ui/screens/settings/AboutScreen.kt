@@ -268,6 +268,7 @@ fun AboutScreen(
                     Image(
                         painter = painterResource(R.drawable.ic_home_logo),
                         contentDescription = null,
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface, BlendMode.SrcIn),
                         modifier = Modifier.height(56.dp),
                         alignment = Alignment.CenterStart,
                     )

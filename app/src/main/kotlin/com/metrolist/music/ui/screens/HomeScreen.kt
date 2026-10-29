@@ -29,10 +29,14 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -71,6 +75,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -699,7 +704,7 @@ fun HomeScreen(
     val pullRefreshState = rememberPullToRefreshState()
 
     val quickPicksLazyGridState = rememberLazyGridState()
-    var expandedRecent by rememberSaveable { mutableStateOf(false) }
+    var showRecentPage by rememberSaveable { mutableStateOf(false) }
     val quickPicksTitles = listOf(stringResource(R.string.quick_picks), "Phát nhanh", "Quick picks")
     val serverQuickPicks =
         homePage?.sections?.let { sections ->
@@ -1173,6 +1178,50 @@ fun HomeScreen(
         forgottenFavoritesLazyGridState.scrollToItem(0)
     }
 
+    if (showRecentPage) {
+        Dialog(
+            onDismissRequest = { showRecentPage = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .windowInsetsPadding(WindowInsets.systemBars),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
+                ) {
+                    IconButton(onClick = { showRecentPage = false }) {
+                        Icon(painter = painterResource(R.drawable.arrow_back), contentDescription = null)
+                    }
+                    Text(
+                        text = "Recently Played",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(
+                        items = keepListening.orEmpty().distinctBy { it.id },
+                        key = { "recent_page_${it.id}" },
+                    ) { item ->
+                        Box(modifier = Modifier.clip(RoundedCornerShape(18.dp))) {
+                            localGridItem(item)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     PullToRefreshBox(
         state = pullRefreshState,
         isRefreshing = isRefreshing,
@@ -1276,8 +1325,7 @@ fun HomeScreen(
                 appleHomeSections(
                     topPicks = topPicks,
                     recentlyPlayed = keepListening,
-                    expandedRecent = expandedRecent,
-                    onToggleRecent = { expandedRecent = !expandedRecent },
+                    onOpenRecent = { showRecentPage = true },
                     recentlyPlayedItem = { localGridItem(it) },
                 )
 

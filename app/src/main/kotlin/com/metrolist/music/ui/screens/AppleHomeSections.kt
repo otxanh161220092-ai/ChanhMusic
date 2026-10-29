@@ -7,7 +7,6 @@ package com.metrolist.music.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -60,8 +59,7 @@ data class ApplePick(
 fun LazyListScope.appleHomeSections(
     topPicks: List<ApplePick>,
     recentlyPlayed: List<LocalItem>?,
-    expandedRecent: Boolean,
-    onToggleRecent: () -> Unit,
+    onOpenRecent: () -> Unit,
     recentlyPlayedItem: @Composable (LocalItem) -> Unit,
 ) {
     if (topPicks.isNotEmpty()) {
@@ -87,34 +85,22 @@ fun LazyListScope.appleHomeSections(
     val recent = recentlyPlayed.orEmpty().distinctBy { it.id }
     if (recent.isNotEmpty()) {
         item(key = "apple_recent_title") {
-            SectionTitle(title = "Recently Played", onClick = onToggleRecent, expanded = expandedRecent)
+            SectionTitle(title = "Recently Played", onClick = onOpenRecent, expanded = false)
         }
-        if (expandedRecent) {
-            recent.chunked(2).forEachIndexed { rowIndex, rowItems ->
-                item(key = "apple_recent_grid_$rowIndex") {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        item(key = "apple_recent_list") {
+            LazyRow(contentPadding = PaddingValues(horizontal = 4.dp)) {
+                items(
+                    items = recent,
+                    key = { "apple_recent_${it.id}" },
+                ) { item ->
+                    Box(
+                        modifier =
+                            Modifier
+                                .width(150.dp)
+                                .padding(horizontal = 4.dp)
+                                .clip(RoundedCornerShape(18.dp)),
                     ) {
-                        rowItems.forEach { item ->
-                            Box(modifier = Modifier.weight(1f).padding(bottom = 12.dp)) {
-                                recentlyPlayedItem(item)
-                            }
-                        }
-                        if (rowItems.size == 1) Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
-        } else {
-            item(key = "apple_recent_list") {
-                LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
-                    items(
-                        items = recent,
-                        key = { "apple_recent_${it.id}" },
-                    ) { item ->
-                        Box(modifier = Modifier.width(150.dp).padding(end = 12.dp)) {
-                            recentlyPlayedItem(item)
-                        }
+                        recentlyPlayedItem(item)
                     }
                 }
             }
