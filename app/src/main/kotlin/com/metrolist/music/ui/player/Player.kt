@@ -2330,7 +2330,7 @@ fun InlineLyricsView(
                         showLyrics = showLyrics,
                         textPositionOverride = LyricsPosition.LEFT,
                         highlightActiveLine = true,
-                        accentOverride = accentOverride,
+                        accentOverride = accentOverride ?: TextBackgroundColor,
                     )
                 }
                 ProvideTextStyle(
