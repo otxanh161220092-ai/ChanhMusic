@@ -152,7 +152,6 @@ import coil3.compose.AsyncImage
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.BlurredEdgeTreatment
-import androidx.compose.foundation.layout.matchParentSize
 import com.metrolist.music.constants.AutomixEnabledKey
 import com.metrolist.music.constants.AutoRadioQueueKey
 import com.metrolist.music.ui.utils.resize
