@@ -5,6 +5,10 @@
 
 package com.metrolist.music.ui.component
 
+import androidx.compose.foundation.layout.matchParentSize
+import com.metrolist.music.ui.utils.resize
+import coil3.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.graphicsLayer
@@ -66,6 +70,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -505,7 +510,7 @@ fun ExperimentalLyrics(
 
     BoxWithConstraints(
         contentAlignment = Alignment.TopCenter,
-        modifier = modifier.fillMaxSize().padding(bottom = 12.dp)
+        modifier = modifier.fillMaxSize().padding(bottom = 12.dp).graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
     ) {
         val maxHeightPx = constraints.maxHeight.toFloat()
         val anchorY = maxHeightPx * LYRICS_ANCHOR_RATIO
@@ -819,6 +824,16 @@ fun ExperimentalLyrics(
                     }
                 }
             }
+        }
+
+        mediaMetadata?.thumbnailUrl?.let { thumb ->
+            AsyncImage(
+                model = thumb.resize(400, 400),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                colorFilter = ColorFilter.lighting(Color.White, Color(0xFF383838)),
+                modifier = Modifier.matchParentSize().graphicsLayer { blendMode = BlendMode.SrcIn },
+            )
         }
 
         LyricsActionOverlay(
