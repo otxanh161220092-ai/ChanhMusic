@@ -837,7 +837,7 @@ fun ExperimentalLyrics(
                     model = thumb.resize(400, 400),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.lighting(Color.White, Color(0xFF383838)),
+                    colorFilter = ColorFilter.lighting(Color.White, Color(0xFF585858)),
                     modifier = Modifier
                         .matchParentSize()
                         .blur(48.dp, BlurredEdgeTreatment.Unbounded),
