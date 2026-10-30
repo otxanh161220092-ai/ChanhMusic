@@ -775,7 +775,7 @@ fun Queue(
                 }
 
                 stickyHeader(key = "queue_now_header") {
-                    Box(modifier = Modifier.fillMaxWidth().clipToBounds()) {
+                    Box(modifier = Modifier.fillMaxWidth().clipToBounds().fadeBottomEdge(0.1f)) {
                         AsyncImage(
                             model = mediaMetadata?.thumbnailUrl?.resize(200, 200),
                             contentDescription = null,
