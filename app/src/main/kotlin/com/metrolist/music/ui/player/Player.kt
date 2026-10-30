@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.player
 
+import androidx.compose.ui.draw.clipToBounds
 import androidx.activity.compose.BackHandler
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -1541,6 +1542,8 @@ fun BottomSheetPlayer(
             Box(
                 modifier =
                     Modifier
+                        .clipToBounds()
+                        .then(if (controlsVisible) Modifier else Modifier.height(96.dp))
                         .graphicsLayer { alpha = controlsAlpha }
                         .pointerInput(Unit) {
                             awaitPointerEventScope {
