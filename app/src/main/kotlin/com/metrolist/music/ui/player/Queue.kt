@@ -762,9 +762,9 @@ fun Queue(
                 state = lazyListState,
                 contentPadding =
                     WindowInsets.systemBars
+                        .only(WindowInsetsSides.Bottom)
                         .add(
                             WindowInsets(
-                                top = 16.dp,
                                 bottom = ListItemHeight + 8.dp,
                             ),
                         ).asPaddingValues(),
