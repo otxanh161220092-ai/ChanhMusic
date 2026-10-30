@@ -775,20 +775,15 @@ fun Queue(
                 }
 
                 stickyHeader(key = "queue_now_header") {
+                    Box(modifier = Modifier.fillMaxWidth().clipToBounds()) {
+                        AsyncImage(
+                            model = mediaMetadata?.thumbnailUrl?.resize(200, 200),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.matchParentSize().blur(64.dp, BlurredEdgeTreatment.Unbounded),
+                        )
                     Column(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .windowInsetsPadding(WindowInsets.statusBars)
-                                .background(
-                                    Brush.verticalGradient(
-                                        *arrayOf(
-                                            0f to MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-                                            0.85f to MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-                                            1f to Color.Transparent,
-                                        ),
-                                    ),
-                                ),
+                        modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars),
                     ) {
                     val nowMeta = mediaMetadata
                     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
@@ -878,6 +873,7 @@ fun Queue(
                             enabled = !isListenTogetherGuest,
                             onClick = { automixEnabled = !automixEnabled },
                         )
+                    }
                     }
                     }
                 }
