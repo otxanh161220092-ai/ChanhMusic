@@ -159,13 +159,13 @@ private const val LYRICS_PREVIEW_TIME = 8000L
 )
 private val lyricsFillMatrix: ColorMatrix =
     ColorMatrix().apply {
-        setToSaturation(1.6f)
+        setToSaturation(1.9f)
         timesAssign(
             ColorMatrix(
                 floatArrayOf(
-                    1f, 0f, 0f, 0f, 45f,
-                    0f, 1f, 0f, 0f, 45f,
-                    0f, 0f, 1f, 0f, 45f,
+                    1f, 0f, 0f, 0f, 70f,
+                    0f, 1f, 0f, 0f, 70f,
+                    0f, 0f, 1f, 0f, 70f,
                     0f, 0f, 0f, 1f, 0f,
                 ),
             ),
@@ -856,7 +856,7 @@ fun ExperimentalLyrics(
                     colorFilter = ColorFilter.colorMatrix(lyricsFillMatrix),
                     modifier = Modifier
                         .matchParentSize()
-                        .blur(48.dp, BlurredEdgeTreatment.Unbounded),
+                        .blur(80.dp, BlurredEdgeTreatment.Unbounded),
                 )
             }
         }
