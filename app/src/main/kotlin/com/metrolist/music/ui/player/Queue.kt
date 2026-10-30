@@ -782,7 +782,7 @@ fun Queue(
                                 .windowInsetsPadding(WindowInsets.statusBars)
                                 .background(
                                     Brush.verticalGradient(
-                                        arrayOf(
+                                        *arrayOf(
                                             0f to MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
                                             0.85f to MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
                                             1f to Color.Transparent,
