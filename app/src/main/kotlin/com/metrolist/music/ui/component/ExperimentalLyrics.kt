@@ -7,6 +7,7 @@ package com.metrolist.music.ui.component
 
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import com.metrolist.music.ui.utils.resize
@@ -528,7 +529,6 @@ fun ExperimentalLyrics(
     }
 
     var rootWindowPos by remember { mutableStateOf(Offset.Zero) }
-    val configuration = LocalConfiguration.current
     BoxWithConstraints(
         contentAlignment = Alignment.TopCenter,
         modifier = modifier.fillMaxSize().padding(bottom = 12.dp).onGloballyPositioned { rootWindowPos = it.positionInWindow() }.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
