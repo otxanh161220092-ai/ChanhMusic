@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.player
 
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.ui.layout.onSizeChanged
@@ -746,6 +748,7 @@ fun Queue(
             }
         }
 
+        var queueHeaderHeightPx by remember { mutableIntStateOf(0) }
         var backdropSize by remember { mutableStateOf(IntSize.Zero) }
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).onSizeChanged { backdropSize = it }) {
             AsyncImage(
@@ -758,28 +761,14 @@ fun Queue(
                         .clipToBounds()
                         .blur(64.dp, BlurredEdgeTreatment.Unbounded),
             )
-            LazyColumn(
-                state = lazyListState,
-                contentPadding =
-                    WindowInsets.systemBars
-                        .only(WindowInsetsSides.Bottom)
-                        .add(
-                            WindowInsets(
-                                bottom = ListItemHeight + 8.dp,
-                            ),
-                        ).asPaddingValues(),
-                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                        .onSizeChanged { queueHeaderHeightPx = it.height }
+                        .zIndex(1f),
             ) {
-                item(key = "queue_top_spacer") {
-                    Spacer(
-                        modifier =
-                            Modifier
-                                .animateContentSize()
-                                .height(if (inSelectMode) 48.dp else 0.dp),
-                    )
-                }
-
-                stickyHeader(key = "queue_now_header") {
                     val headerDensity = LocalDensity.current
                     Box(modifier = Modifier.fillMaxWidth().clipToBounds().fadeBottomEdge(0.1f)) {
                         AsyncImage(
@@ -887,6 +876,28 @@ fun Queue(
                     }
                     }
                     }
+            }
+
+            LazyColumn(
+                state = lazyListState,
+                contentPadding =
+                    WindowInsets.systemBars
+                        .only(WindowInsetsSides.Bottom)
+                        .add(
+                            WindowInsets(
+                                top = with(LocalDensity.current) { queueHeaderHeightPx.toDp() },
+                                bottom = ListItemHeight + 8.dp,
+                            ),
+                        ).asPaddingValues(),
+                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+            ) {
+                item(key = "queue_top_spacer") {
+                    Spacer(
+                        modifier =
+                            Modifier
+                                .animateContentSize()
+                                .height(if (inSelectMode) 48.dp else 0.dp),
+                    )
                 }
 
                 itemsIndexed(
