@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.component
 
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import com.metrolist.music.ui.utils.resize
@@ -525,9 +527,11 @@ fun ExperimentalLyrics(
         onDispose { activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
     }
 
+    var rootWindowPos by remember { mutableStateOf(Offset.Zero) }
+    val configuration = LocalConfiguration.current
     BoxWithConstraints(
         contentAlignment = Alignment.TopCenter,
-        modifier = modifier.fillMaxSize().padding(bottom = 12.dp).graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        modifier = modifier.fillMaxSize().padding(bottom = 12.dp).onGloballyPositioned { rootWindowPos = it.positionInWindow() }.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
     ) {
         val maxHeightPx = constraints.maxHeight.toFloat()
         val anchorY = maxHeightPx * LYRICS_ANCHOR_RATIO
@@ -846,7 +850,8 @@ fun ExperimentalLyrics(
         mediaMetadata?.thumbnailUrl?.let { thumb ->
             Box(
                 modifier = Modifier
-                    .matchParentSize()
+                    .requiredSize(configuration.screenWidthDp.dp, configuration.screenHeightDp.dp)
+                    .offset { IntOffset(-rootWindowPos.x.roundToInt(), -rootWindowPos.y.roundToInt()) }
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen; blendMode = BlendMode.SrcIn },
             ) {
                 AsyncImage(

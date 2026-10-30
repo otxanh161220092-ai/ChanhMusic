@@ -208,7 +208,7 @@ internal fun LyricsLine(
                 val targetAlpha = if (!isSynced || item.isBackground || isActiveLine) {
                     activeAlpha
                 } else if (isAutoScrollEnabled && displayedCurrentLineIndex >= 0) {
-                    when (abs(index - displayedCurrentLineIndex)) {
+                    if (index < displayedCurrentLineIndex) 0.7f else when (abs(index - displayedCurrentLineIndex)) {
                         0 -> focusedAlpha
                         1 -> 0.4f; 2 -> 0.35f; 3 -> 0.3f; 4 -> 0.25f; else -> 0.2f
                     }
