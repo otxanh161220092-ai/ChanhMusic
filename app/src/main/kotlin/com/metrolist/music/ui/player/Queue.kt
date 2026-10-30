@@ -5,6 +5,10 @@
 
 package com.metrolist.music.ui.player
 
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.statusBars
 import android.annotation.SuppressLint
@@ -742,7 +746,8 @@ fun Queue(
             }
         }
 
-        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+        var backdropSize by remember { mutableStateOf(IntSize.Zero) }
+        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).onSizeChanged { backdropSize = it }) {
             AsyncImage(
                 model = mediaMetadata?.thumbnailUrl?.resize(200, 200),
                 contentDescription = null,
@@ -775,12 +780,18 @@ fun Queue(
                 }
 
                 stickyHeader(key = "queue_now_header") {
+                    val headerDensity = LocalDensity.current
                     Box(modifier = Modifier.fillMaxWidth().clipToBounds().fadeBottomEdge(0.1f)) {
                         AsyncImage(
-                            model = mediaMetadata?.thumbnailUrl?.resize(200, 200),
+                            model = mediaMetadata?.thumbnailUrl?.resize(400, 400),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.matchParentSize().blur(64.dp, BlurredEdgeTreatment.Unbounded),
+                            modifier =
+                                Modifier
+                                    .requiredSize(
+                                        with(headerDensity) { backdropSize.width.toDp() },
+                                        with(headerDensity) { backdropSize.height.toDp() },
+                                    ).blur(64.dp, BlurredEdgeTreatment.Unbounded),
                         )
                     Column(
                         modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars),
