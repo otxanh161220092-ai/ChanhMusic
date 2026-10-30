@@ -159,13 +159,13 @@ private const val LYRICS_PREVIEW_TIME = 8000L
 )
 private val lyricsFillMatrix: ColorMatrix =
     ColorMatrix().apply {
-        setToSaturation(1.9f)
+        setToSaturation(2.2f)
         timesAssign(
             ColorMatrix(
                 floatArrayOf(
-                    1f, 0f, 0f, 0f, 70f,
-                    0f, 1f, 0f, 0f, 70f,
-                    0f, 0f, 1f, 0f, 70f,
+                    1f, 0f, 0f, 0f, 110f,
+                    0f, 1f, 0f, 0f, 110f,
+                    0f, 0f, 1f, 0f, 110f,
                     0f, 0f, 0f, 1f, 0f,
                 ),
             ),
