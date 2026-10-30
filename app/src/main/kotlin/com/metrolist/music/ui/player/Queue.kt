@@ -815,16 +815,40 @@ fun Queue(
                             }
                             Spacer(modifier = Modifier.height(20.dp))
                         }
-                        Text(
-                            text = "Tiếp tục phát",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = "Từ hàng đợi hiện tại",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Playing Next",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    text = "Từ hàng đợi hiện tại",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            TextButton(
+                                onClick = {
+                                    val from = playerConnection.player.currentMediaItemIndex + 1
+                                    if (from < playerConnection.player.mediaItemCount) {
+                                        playerConnection.player.removeMediaItems(from, playerConnection.player.mediaItemCount)
+                                    }
+                                },
+                                enabled = !locked && !isListenTogetherGuest,
+                            ) {
+                                Text("Clear")
+                            }
+                            IconButton(onClick = { locked = !locked }) {
+                                Icon(
+                                    painter = painterResource(if (locked) R.drawable.lock else R.drawable.lock_open),
+                                    contentDescription = null,
+                                )
+                            }
+                        }
                     }
 
 
