@@ -99,6 +99,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -1532,10 +1533,26 @@ fun BottomSheetPlayer(
 
             Spacer(Modifier.height(24.dp))
 
-            AnimatedVisibility(
-                visible = controlsVisible,
-                enter = fadeIn(),
-                exit = fadeOut(),
+            val controlsAlpha by animateFloatAsState(
+                targetValue = if (controlsVisible) 1f else 0f,
+                animationSpec = tween(300),
+                label = "controlsAlpha",
+            )
+            Box(
+                modifier =
+                    Modifier
+                        .graphicsLayer { alpha = controlsAlpha }
+                        .pointerInput(Unit) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent(PointerEventPass.Initial)
+                                    if (event.changes.any { it.pressed && !it.previousPressed }) {
+                                        if (!controlsVisibleNow) event.changes.forEach { it.consume() }
+                                        controlsInteraction++
+                                    }
+                                }
+                            }
+                        },
             ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -1547,6 +1564,12 @@ fun BottomSheetPlayer(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = PlayerHorizontalPadding),
                 ) {
                     IconButton(
+                        modifier =
+                            Modifier
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(if (hasTranslations) textButtonColor.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.12f))
+                                .vibrant(hasTranslations),
                         onClick = {
                             if (hasTranslations) {
                                 translateTargetLyrics?.let { lyrics ->
@@ -2112,18 +2135,6 @@ fun BottomSheetPlayer(
                             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
                             .padding(bottom = bottomPadding)
                             .animateContentSize()
-                            .pointerInput(showInlineLyrics) {
-                                if (!showInlineLyrics) return@pointerInput
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val event = awaitPointerEvent(PointerEventPass.Initial)
-                                        if (event.changes.any { it.pressed && !it.previousPressed }) {
-                                            if (!controlsVisibleNow) event.changes.forEach { it.consume() }
-                                            controlsInteraction++
-                                        }
-                                    }
-                                }
-                            },
                 ) {
                     if (showInlineLyrics) {
                         mediaMetadata?.let {
