@@ -8,6 +8,7 @@ package com.metrolist.music.ui.component
 import androidx.compose.foundation.background
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,6 @@ fun Modifier.glassSurface(
                 blur(8f.dp.toPx())
                 lens(24f.dp.toPx(), 24f.dp.toPx())
             },
-            onDrawSurface = { drawRect(tint) },
+            onDrawSurface = { drawRect(tint, blendMode = BlendMode.Overlay) },
         )
     }
