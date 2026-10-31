@@ -117,7 +117,7 @@ fun AppleArtistHeader(
                         painter = painterResource(logoRes),
                         contentDescription = name,
                         colorFilter = ColorFilter.tint(onColor),
-                        modifier = Modifier.height(64.dp),
+                        modifier = Modifier.width(300.dp),
                     )
                 } else {
                 Text(
