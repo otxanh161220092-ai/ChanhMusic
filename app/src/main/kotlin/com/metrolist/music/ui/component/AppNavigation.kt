@@ -18,7 +18,7 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.rememberGraphicsLayer
+import com.kyant.backdrop.backdrops.LayerBackdrop
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -162,7 +162,7 @@ fun AppNavigationBar(
     onHomeLongHold: (() -> Unit)? = null,
     appleStyle: Boolean = false,
     onShuffleClick: (() -> Unit)? = null,
-    glassBackdrop: GlassBackdrop? = null,
+    glassBackdrop: LayerBackdrop? = null,
 ) {
     if (appleStyle) {
         AppleStyleNavigationBar(
@@ -275,9 +275,8 @@ private fun AppleStyleNavigationBar(
     modifier: Modifier = Modifier,
     onSearchLongClick: (() -> Unit)? = null,
     onShuffleClick: (() -> Unit)? = null,
-    glassBackdrop: GlassBackdrop? = null,
+    glassBackdrop: LayerBackdrop? = null,
 ) {
-    val pillLayer = rememberGraphicsLayer()
     val isLightTheme = MaterialTheme.colorScheme.background.luminance() > 0.5f
     val pillColor = if (isLightTheme) Color.White else MaterialTheme.colorScheme.surfaceContainerHigh
     val iconColor = MaterialTheme.colorScheme.onSurface
@@ -298,13 +297,7 @@ private fun AppleStyleNavigationBar(
                     .height(80.dp)
                     .shadow(8.dp, CircleShape, clip = false)
                     .clip(CircleShape)
-                    .then(
-                        if (glassBackdrop != null) {
-                            Modifier.glassSurface(glassBackdrop, pillLayer)
-                        } else {
-                            Modifier.background(pillColor)
-                        },
-                    ),
+                    .glassSurface(glassBackdrop, CircleShape, pillColor, Color.White.copy(alpha = 0.15f)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
