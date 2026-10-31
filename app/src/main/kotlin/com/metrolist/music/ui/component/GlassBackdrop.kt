@@ -35,6 +35,18 @@ uniform shader content;
 uniform float2 size;
 half4 main(float2 coord) {
     float2 uv = coord / size - 0.5;
+    float r = length(uv * float2(1.0, size.y / size.x));
+    float bulge = (1.0 - smoothstep(0.0, 0.5, r)) * 0.06;
+    half4 c = content.eval(coord - uv * size * bulge);
+    float rim = smoothstep(0.32, 0.5, r) * 0.35;
+    float3 glass = mix(c.rgb, float3(1.0), 0.12 + rim);
+    return half4(glass, 1.0);
+}
+"""
+uniform shader content;
+uniform float2 size;
+half4 main(float2 coord) {
+    float2 uv = coord / size - 0.5;
     float r = length(uv);
     float bulge = (1.0 - smoothstep(0.0, 0.5, r)) * 0.06;
     half4 c = content.eval(coord - uv * size * bulge);
