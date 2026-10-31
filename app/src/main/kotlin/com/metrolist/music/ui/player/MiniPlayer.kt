@@ -113,6 +113,7 @@ import com.metrolist.music.constants.MiniPlayerBackgroundStyle
 import com.metrolist.music.constants.MiniPlayerBackgroundStyleKey
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.platform.LocalContext
 import androidx.palette.graphics.Palette
 import coil3.imageLoader
@@ -382,6 +383,24 @@ private fun NewMiniPlayer(
                     .clip(RoundedCornerShape(32.dp))
                     .background(color = backgroundColor)
                     .border(1.dp, outlineColor.copy(alpha = 0.3f), RoundedCornerShape(32.dp))
+                    .drawWithContent {
+                        drawContent()
+                        val corner = CornerRadius(size.height / 2f)
+                        drawRoundRect(
+                            brush = Brush.verticalGradient(0f to Color.White.copy(alpha = 0.22f), 0.5f to Color.Transparent),
+                            cornerRadius = corner,
+                        )
+                        drawRoundRect(
+                            brush =
+                                Brush.linearGradient(
+                                    colors = listOf(Color.White.copy(alpha = 0.7f), Color.White.copy(alpha = 0.05f)),
+                                    start = Offset.Zero,
+                                    end = Offset(size.width, size.height),
+                                ),
+                            cornerRadius = corner,
+                            style = Stroke(width = 1.5.dp.toPx()),
+                        )
+                    }
                     .clickable(
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,
