@@ -104,7 +104,7 @@ fun AppleArtistHeader(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                    .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 56.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
