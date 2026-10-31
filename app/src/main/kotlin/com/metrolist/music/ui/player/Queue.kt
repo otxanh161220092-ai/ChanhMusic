@@ -8,8 +8,6 @@ package com.metrolist.music.ui.player
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.Brush
@@ -43,6 +41,7 @@ import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -760,22 +759,12 @@ fun Queue(
                         .onSizeChanged { queueHeaderHeightPx = it.height }
                         .zIndex(1f),
             ) {
-                    val headerDensity = LocalDensity.current
                     Box(modifier = Modifier.fillMaxWidth().clipToBounds().fadeBottomEdge(0.1f)) {
                         AsyncImage(
                             model = mediaMetadata?.thumbnailUrl?.resize(400, 400),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
-                            modifier =
-                                Modifier
-                                    .requiredSize(
-                                        with(headerDensity) { backdropSize.width.toDp() },
-                                        with(headerDensity) { backdropSize.height.toDp() },
-                                    ).blur(64.dp, BlurredEdgeTreatment.Unbounded)
-                                    .layout { m, c ->
-                                        val p = m.measure(c)
-                                        layout(p.width, 0) { p.place(0, 0) }
-                                    },
+                            modifier = Modifier.matchParentSize().blur(64.dp, BlurredEdgeTreatment.Unbounded),
                         )
                     Column(
                         modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars),
