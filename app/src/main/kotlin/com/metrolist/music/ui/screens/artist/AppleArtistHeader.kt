@@ -117,7 +117,7 @@ fun AppleArtistHeader(
                         painter = painterResource(logoRes),
                         contentDescription = name,
                         colorFilter = ColorFilter.tint(onColor),
-                        modifier = Modifier.width(if (logoRes == R.drawable.channel_logo_ereus) 390.dp else 300.dp),
+                        modifier = Modifier.width(if (logoRes == R.drawable.channel_logo_ereus) 520.dp else 300.dp),
                     )
                 } else {
                 Text(
@@ -294,12 +294,16 @@ private fun LatestAlbumCard(
     }
 }
 
-fun channelLogoFor(artistId: String?): Int? =
-    when (artistId) {
-        "UC9EnTDbvIsouypHkAhVRVmw" -> R.drawable.channel_logo_jasmine
-        "UCwHrSL1grR1vatPkF8MW1hQ" -> R.drawable.channel_logo_ereus
+fun channelLogoFor(artistId: String?, name: String?): Int? {
+    val id = artistId?.removePrefix("MPLA")
+    return when {
+        id == "UC9EnTDbvIsouypHkAhVRVmw" || name.equalsName("Jasmine Lemon") -> R.drawable.channel_logo_jasmine
+        id == "UCwHrSL1grR1vatPkF8MW1hQ" || name.equalsName("ereusmixes") -> R.drawable.channel_logo_ereus
         else -> null
     }
+}
+
+private fun String?.equalsName(other: String): Boolean = this?.trim()?.equals(other, ignoreCase = true) == true
 
 /** Overlay-blends a white layer over whatever is behind the control, like the Apple highlight. */
 private fun Modifier.highlight(alpha: Float): Modifier = this.drawBehind {
