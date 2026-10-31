@@ -36,11 +36,6 @@ private class OriginHolder {
 }
 
 /**
- * Single-pass port of the rounded-rect glass from iyinchao/liquid-glass-studio (MIT):
- * SDF edge depth, Snell-law refraction offset along the SDF normal, per-channel dispersion,
- * Fresnel rim and a glare term. Samples the blurred backdrop.
- */
-/**
  * Port of the LiquidGlass fragment shader by Sepehr Kalanaki (OverShifted/LiquidGlass, MIT):
  * a superellipse signed distance field drives the refraction, with a rim glow on the edges.
  */
@@ -130,12 +125,6 @@ private fun DrawScope.drawGlass(
     val w = size.width
     val h = size.height
     shader.setFloatUniform("size", w, h)
-    shader.setFloatUniform("radius", h / 2f)
-    shader.setFloatUniform("thickness", 24.dp.toPx())
-    shader.setFloatUniform("refFactor", 1.5f)
-    shader.setFloatUniform("refDistance", 14.dp.toPx())
-    shader.setFloatUniform("dispersion", 0.02f)
-    shader.setFloatUniform("tintAlpha", 0.12f)
     layer.renderEffect = effect
     val delta = origin - backdrop.origin
     layer.record(IntSize(w.roundToInt(), h.roundToInt())) {
