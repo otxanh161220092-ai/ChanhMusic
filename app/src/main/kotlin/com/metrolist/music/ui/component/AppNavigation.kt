@@ -297,7 +297,7 @@ private fun AppleStyleNavigationBar(
                     .height(80.dp)
                     .shadow(8.dp, CircleShape, clip = false)
                     .clip(CircleShape)
-                    .glassSurface(glassBackdrop, CircleShape, pillColor, Color.White.copy(alpha = 0.15f)),
+                    .glassSurface(glassBackdrop, CircleShape, pillColor, Color.White.copy(alpha = 0.5f)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {

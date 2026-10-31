@@ -251,7 +251,7 @@ configurations.configureEach {
 }
 
 dependencies {
-    implementation("io.github.kyant0:backdrop:1.0.6")
+    implementation("io.github.kyant0:backdrop:2.0.0")
     implementation(libs.guava)
     implementation(libs.coroutines.guava)
 
