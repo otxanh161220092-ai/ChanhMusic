@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.artist
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -109,6 +111,15 @@ fun AppleArtistHeader(
                     .offset(y = 64.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                val logo = channelLogoFor(name)
+                if (logo != null) {
+                    Image(
+                        painter = painterResource(logo),
+                        contentDescription = name,
+                        colorFilter = ColorFilter.tint(onColor),
+                        modifier = Modifier.height(64.dp),
+                    )
+                } else {
                 Text(
                     text = name,
                     fontSize = 40.sp,
@@ -119,6 +130,7 @@ fun AppleArtistHeader(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -281,6 +293,13 @@ private fun LatestAlbumCard(
         }
     }
 }
+
+private fun channelLogoFor(name: String): Int? =
+    when (name.trim().removePrefix("@").lowercase()) {
+        "jasminelemonofficial" -> R.drawable.channel_logo_jasmine
+        "ereusmix3s" -> R.drawable.channel_logo_ereus
+        else -> null
+    }
 
 /** Overlay-blends a white layer over whatever is behind the control, like the Apple highlight. */
 private fun Modifier.highlight(alpha: Float): Modifier = this.drawBehind {
