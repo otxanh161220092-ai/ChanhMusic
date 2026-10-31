@@ -890,13 +890,14 @@ fun Queue(
                 contentPadding =
                     WindowInsets.systemBars
                         .only(WindowInsetsSides.Bottom)
-                        .add(
-                            WindowInsets(
-                                top = with(LocalDensity.current) { queueHeaderHeightPx.toDp() },
-                                bottom = ListItemHeight + 8.dp,
-                            ),
-                        ).asPaddingValues(),
-                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+                        .add(WindowInsets(bottom = ListItemHeight + 8.dp))
+                        .asPaddingValues(),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(top = with(LocalDensity.current) { queueHeaderHeightPx.toDp() })
+                        .clipToBounds()
+                        .nestedScroll(state.preUpPostDownNestedScrollConnection),
             ) {
                 item(key = "queue_top_spacer") {
                     Spacer(
