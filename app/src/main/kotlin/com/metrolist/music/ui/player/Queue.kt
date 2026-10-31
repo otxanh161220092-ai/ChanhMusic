@@ -750,6 +750,12 @@ fun Queue(
         var queueHeaderHeightPx by remember { mutableIntStateOf(0) }
         var backdropSize by remember { mutableStateOf(IntSize.Zero) }
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).onSizeChanged { backdropSize = it }) {
+            AsyncImage(
+                model = mediaMetadata?.thumbnailUrl?.resize(200, 200),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize().clipToBounds().blur(64.dp, BlurredEdgeTreatment.Unbounded),
+            )
             Column(
                 modifier =
                     Modifier
