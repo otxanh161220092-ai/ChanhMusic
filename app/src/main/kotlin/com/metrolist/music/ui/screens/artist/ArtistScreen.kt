@@ -210,6 +210,7 @@ fun ArtistScreen(
                 songs.isNotEmpty() && songs.all { it.musicVideoType == "MUSIC_VIDEO_TYPE_UGC" }
             }
     val channelLatestVideo = if (isChannel) allSectionItems.filterIsInstance<SongItem>().firstOrNull() else null
+    val channelHasPlaylists = isChannel && artistPage?.sections?.any { it.items.firstOrNull() is PlaylistItem } == true
     val playEndpoint = artistPage?.artist?.let { it.shuffleEndpoint ?: it.radioEndpoint }
 
     AppleCollectionContainer(thumbnailUrl = artistThumbnail, enabled = appleStyle) {
@@ -709,6 +710,27 @@ fun ArtistScreen(
                     }
                 } else {
                     artistPage?.sections?.forEachIndexed { index, section ->
+                        if (isChannel && section.items.firstOrNull() is SongItem) {
+                            val videos = section.items.filterIsInstance<SongItem>()
+                            val playVideo: (SongItem) -> Unit = { video ->
+                                if (!isGuest) {
+                                    playerConnection.playQueue(
+                                        YouTubeQueue(WatchEndpoint(videoId = video.id), video.toMediaMetadata()),
+                                    )
+                                }
+                            }
+                            item(key = "channel_popular_${section.title}") {
+                                NavigationTitle(title = "Video phổ biến", modifier = Modifier.animateItem())
+                                ChannelVideoPager(videos = videos, onPlay = playVideo)
+                            }
+                            if (!channelHasPlaylists) {
+                                item(key = "channel_all_videos_${section.title}") {
+                                    NavigationTitle(title = "Video", modifier = Modifier.animateItem())
+                                    ChannelVideoCarousel(videos = videos, onPlay = playVideo)
+                                }
+                            }
+                            return@forEachIndexed
+                        }
                         if (section.items.isNotEmpty()) {
                             item(key = "section_${section.title}") {
                                 NavigationTitle(
