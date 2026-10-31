@@ -5,8 +5,6 @@
 
 package com.metrolist.music.ui.player
 
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalDensity
@@ -915,26 +913,7 @@ fun Queue(
                                 bottom = ListItemHeight + 8.dp,
                             ),
                         ).asPaddingValues(),
-                modifier =
-                    Modifier
-                        .nestedScroll(state.preUpPostDownNestedScrollConnection)
-                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                        .drawWithContent {
-                            drawContent()
-                            val top = queueHeaderHeightPx.toFloat()
-                            drawRect(
-                                brush =
-                                    Brush.verticalGradient(
-                                        *arrayOf(
-                                            0f to Color.Transparent,
-                                            top to Color.Transparent,
-                                            top + 40.dp.toPx() to Color.Black,
-                                            size.height to Color.Black,
-                                        ),
-                                    ),
-                                blendMode = BlendMode.DstIn,
-                            )
-                        },
+                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
             ) {
                 item(key = "queue_top_spacer") {
                     Spacer(
