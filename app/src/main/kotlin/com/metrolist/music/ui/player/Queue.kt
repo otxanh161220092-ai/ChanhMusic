@@ -751,7 +751,7 @@ fun Queue(
         var backdropSize by remember { mutableStateOf(IntSize.Zero) }
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).onSizeChanged { backdropSize = it }) {
             AsyncImage(
-                model = mediaMetadata?.thumbnailUrl?.resize(200, 200),
+                model = mediaMetadata?.thumbnailUrl?.resize(400, 400),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize().clipToBounds().blur(64.dp, BlurredEdgeTreatment.Unbounded),
@@ -764,13 +764,7 @@ fun Queue(
                         .onSizeChanged { queueHeaderHeightPx = it.height }
                         .zIndex(1f),
             ) {
-                    Box(modifier = Modifier.fillMaxWidth().clipToBounds().fadeBottomEdge(0.1f)) {
-                        AsyncImage(
-                            model = mediaMetadata?.thumbnailUrl?.resize(400, 400),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.matchParentSize().blur(64.dp, BlurredEdgeTreatment.Unbounded),
-                        )
+                    Box(modifier = Modifier.fillMaxWidth().clipToBounds()) {
                     Column(
                         modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars),
                     ) {
