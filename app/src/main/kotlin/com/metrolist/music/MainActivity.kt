@@ -1,7 +1,3 @@
-import com.metrolist.music.ui.component.LocalGlassBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import androidx.compose.runtime.CompositionLocalProvider
 /**
  * Metrolist Project (C) 2026
  * Licensed under GPL-3.0 | See git history for contributors
@@ -10,6 +6,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 package com.metrolist.music
 
 import android.Manifest
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.metrolist.music.ui.component.LocalGlassBackdrop
 import android.annotation.SuppressLint
 import android.app.ForegroundServiceStartNotAllowedException
 import android.app.PendingIntent
