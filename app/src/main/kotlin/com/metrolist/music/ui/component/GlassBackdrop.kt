@@ -40,57 +40,38 @@ private class OriginHolder {
  * SDF edge depth, Snell-law refraction offset along the SDF normal, per-channel dispersion,
  * Fresnel rim and a glare term. Samples the blurred backdrop.
  */
+/**
+ * Port of the LiquidGlass fragment shader by Sepehr Kalanaki (OverShifted/LiquidGlass, MIT):
+ * a superellipse signed distance field drives the refraction, with a rim glow on the edges.
+ */
 private val GlassSkSl =
     """
     uniform shader content;
     uniform float2 size;
-    uniform float radius;
-    uniform float thickness;
-    uniform float refFactor;
-    uniform float refDistance;
-    uniform float dispersion;
-    uniform float tintAlpha;
 
-    float sdRound(float2 p) {
-        float2 b = size * 0.5 - float2(radius);
-        float2 q = abs(p - size * 0.5) - b;
-        return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
+    float sdSuperellipse(float2 p, float n, float r) {
+        float2 pa = abs(p);
+        float num = pow(pa.x, n) + pow(pa.y, n) - pow(r, n);
+        float den = n * sqrt(pow(pa.x, 2.0 * n - 2.0) + pow(pa.y, 2.0 * n - 2.0)) + 0.00001;
+        return num / den;
+    }
+
+    float refractionCurve(float x) {
+        return 1.0 - 2.3 * pow(5.2 * 2.718281828, -6.9 * x - 0.7);
     }
 
     half4 main(float2 coord) {
-        float d = sdRound(coord);
-        float depth = -d;
-        if (depth <= 0.0) {
+        float2 hs = size * 0.5;
+        float2 p = (coord - hs) / hs;
+        float d = sdSuperellipse(p, 4.0, 1.0);
+        if (d > 0.0) {
             return content.eval(coord);
         }
-        float e = 1.0;
-        float2 g = float2(
-            sdRound(coord + float2(e, 0.0)) - sdRound(coord - float2(e, 0.0)),
-            sdRound(coord + float2(0.0, e)) - sdRound(coord - float2(0.0, e))
-        );
-        float2 n = normalize(g + 1e-6);
-
-        float t = clamp(depth / thickness, 0.0, 1.0);
-        float x = clamp(1.0 - depth / thickness, -1.0, 1.0);
-        float thI = asin(x * x);
-        float thT = asin(clamp(sin(thI) / refFactor, -1.0, 1.0));
-        float edge = -tan(thT - thI);
-        if (depth >= thickness) {
-            edge = 0.0;
-        }
-        float2 off = -n * edge * refDistance;
-
-        float r = content.eval(coord + off * (1.0 + dispersion)).r;
-        float gg = content.eval(coord + off).g;
-        float b = content.eval(coord + off * (1.0 - dispersion)).b;
-        float3 col = float3(r, gg, b);
-
-        float fresnel = pow(1.0 - t, 3.0);
-        col = mix(col, float3(1.0), tintAlpha + 0.35 * fresnel);
-
-        float glare = clamp(0.5 + 0.5 * dot(n, normalize(float2(-0.6, -0.8))), 0.0, 1.0) * (1.0 - t);
-        col = mix(col, float3(1.0), 0.3 * glare * glare);
-        return half4(col, 1.0);
+        float dist = -d;
+        float2 sampleP = p * pow(refractionCurve(dist), 3.0);
+        half4 c = content.eval(sampleP * hs + hs);
+        float glow = sin(atan(p.y, p.x) - 0.5) * 0.3 * smoothstep(0.06, 0.0, dist) + 1.0;
+        return half4(c.rgb * glow, 1.0);
     }
     """.trimIndent()
 
