@@ -913,23 +913,7 @@ fun Queue(
                                 bottom = ListItemHeight + 8.dp,
                             ),
                         ).asPaddingValues(),
-                modifier =
-                    Modifier
-                        .nestedScroll(state.preUpPostDownNestedScrollConnection)
-                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                        .drawWithContent {
-                            drawContent()
-                            val top = queueHeaderHeightPx.toFloat()
-                            drawRect(
-                                brush =
-                                    Brush.verticalGradient(
-                                        colors = listOf(Color.Transparent, Color.Black),
-                                        startY = top,
-                                        endY = top + 40.dp.toPx(),
-                                    ),
-                                blendMode = BlendMode.DstIn,
-                            )
-                        },
+                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
             ) {
                 item(key = "queue_top_spacer") {
                     Spacer(
