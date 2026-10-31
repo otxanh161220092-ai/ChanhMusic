@@ -36,8 +36,8 @@ fun Modifier.glassSurface(
             shape = { shape },
             effects = {
                 vibrancy()
-                blur(14f.dp.toPx())
-                lens(10f.dp.toPx(), 10f.dp.toPx())
+                blur(8f.dp.toPx())
+                lens(24f.dp.toPx(), 24f.dp.toPx())
             },
             onDrawSurface = { drawRect(tint, blendMode = BlendMode.Overlay) },
         )
