@@ -7,7 +7,7 @@ package com.metrolist.music
 
 import com.metrolist.music.ui.component.glassBackdropSource
 import com.metrolist.music.ui.component.GlassBackdrop
-import androidx.compose.ui.graphics.layer.rememberGraphicsLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ForegroundServiceStartNotAllowedException
