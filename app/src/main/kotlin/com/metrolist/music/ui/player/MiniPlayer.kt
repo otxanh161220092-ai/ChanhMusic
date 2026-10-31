@@ -1,5 +1,3 @@
-import com.metrolist.music.ui.component.LocalGlassBackdrop
-import com.metrolist.music.ui.component.glassSurface
 /**
  * Metrolist Project (C) 2026
  * Licensed under GPL-3.0 | See git history for contributors
@@ -10,6 +8,8 @@ import com.metrolist.music.ui.component.glassSurface
 package com.metrolist.music.ui.player
 
 import android.content.res.Configuration
+import com.metrolist.music.ui.component.LocalGlassBackdrop
+import com.metrolist.music.ui.component.glassSurface
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
