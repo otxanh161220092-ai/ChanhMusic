@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.Brush
@@ -770,7 +771,11 @@ fun Queue(
                                     .requiredSize(
                                         with(headerDensity) { backdropSize.width.toDp() },
                                         with(headerDensity) { backdropSize.height.toDp() },
-                                    ).blur(64.dp, BlurredEdgeTreatment.Unbounded),
+                                    ).blur(64.dp, BlurredEdgeTreatment.Unbounded)
+                                    .layout { m, c ->
+                                        val p = m.measure(c)
+                                        layout(p.width, 0) { p.place(0, 0) }
+                                    },
                         )
                     Column(
                         modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars),
