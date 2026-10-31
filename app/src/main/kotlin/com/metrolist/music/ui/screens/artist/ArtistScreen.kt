@@ -203,6 +203,13 @@ fun ArtistScreen(
         remember(artistPage?.sections) {
             artistPage?.sections?.flatMap { it.items }?.filterIsInstance<AlbumItem>()?.maxByOrNull { it.year ?: Int.MIN_VALUE }
         }
+    val allSectionItems = artistPage?.sections?.flatMap { it.items }.orEmpty()
+    val isChannel =
+        allSectionItems.none { it is AlbumItem } &&
+            allSectionItems.filterIsInstance<SongItem>().let { songs ->
+                songs.isNotEmpty() && songs.all { it.musicVideoType == "MUSIC_VIDEO_TYPE_UGC" }
+            }
+    val channelLatestVideo = if (isChannel) allSectionItems.filterIsInstance<SongItem>().firstOrNull() else null
     val playEndpoint = artistPage?.artist?.let { it.shuffleEndpoint ?: it.radioEndpoint }
 
     AppleCollectionContainer(thumbnailUrl = artistThumbnail, enabled = appleStyle) {
@@ -310,7 +317,8 @@ fun ArtistScreen(
                         thumbnailUrl = artistThumbnail,
                         description = artistPage?.description,
                         isSubscribed = isChannelSubscribed,
-                        latestAlbum = latestAlbum,
+                        latestAlbum = if (isChannel) null else latestAlbum,
+                        latestVideo = channelLatestVideo,
                         logoRes = channelLogoFor(viewModel.artistId, displayArtistName),
                         onPlay =
                             playEndpoint?.takeIf { !showLocal && !isGuest }?.let { endpoint ->
@@ -318,6 +326,13 @@ fun ArtistScreen(
                             },
                         onToggleSubscribe = if (showLocal) null else ({ viewModel.toggleChannelSubscription() }),
                         onLatestAlbumClick = { navController.navigate("album/${it.id}") },
+                        onLatestVideoClick = { video ->
+                            if (!isGuest) {
+                                playerConnection.playQueue(
+                                    YouTubeQueue(WatchEndpoint(videoId = video.id), video.toMediaMetadata()),
+                                )
+                            }
+                        },
                     )
                 }
                 } else {
@@ -697,7 +712,7 @@ fun ArtistScreen(
                         if (section.items.isNotEmpty()) {
                             item(key = "section_${section.title}") {
                                 NavigationTitle(
-                                    title = section.title,
+                                    title = if (isChannel) channelSectionTitle(section) else section.title,
                                     modifier = Modifier.animateItem(),
                                     onClick =
                                         section.moreEndpoint?.let {

@@ -58,6 +58,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.metrolist.innertube.models.AlbumItem
+import com.metrolist.innertube.models.PlaylistItem
+import com.metrolist.innertube.models.SongItem
+import com.metrolist.innertube.pages.ArtistSection
 import com.metrolist.music.R
 import com.metrolist.music.ui.component.LocalAppleCollectionTextColor
 import com.metrolist.music.ui.utils.resize
@@ -73,10 +76,12 @@ fun AppleArtistHeader(
     description: String?,
     isSubscribed: Boolean,
     latestAlbum: AlbumItem?,
+    latestVideo: SongItem?,
     logoRes: Int?,
     onPlay: (() -> Unit)?,
     onToggleSubscribe: (() -> Unit)?,
     onLatestAlbumClick: (AlbumItem) -> Unit,
+    onLatestVideoClick: (SongItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val onColor = LocalAppleCollectionTextColor.current.takeIf { it != Color.Unspecified } ?: Color.White
@@ -186,12 +191,24 @@ fun AppleArtistHeader(
 
         Spacer(modifier = Modifier.height(72.dp))
 
+        val cardModifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp)
         if (latestAlbum != null) {
-            LatestAlbumCard(
-                album = latestAlbum,
+            LatestCard(
+                label = latestAlbum.year?.toString(),
+                title = latestAlbum.title,
+                thumbnail = latestAlbum.thumbnail,
                 onColor = onColor,
                 onClick = { onLatestAlbumClick(latestAlbum) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
+                modifier = cardModifier,
+            )
+        } else if (latestVideo != null) {
+            LatestCard(
+                label = "Video mới nhất",
+                title = latestVideo.title,
+                thumbnail = latestVideo.thumbnail,
+                onColor = onColor,
+                onClick = { onLatestVideoClick(latestVideo) },
+                modifier = cardModifier,
             )
         }
     }
@@ -236,8 +253,10 @@ private fun RoundControl(
 }
 
 @Composable
-private fun LatestAlbumCard(
-    album: AlbumItem,
+private fun LatestCard(
+    label: String?,
+    title: String,
+    thumbnail: String?,
     onColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -253,22 +272,22 @@ private fun LatestAlbumCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AsyncImage(
-                model = album.thumbnail.resize(160, 160),
+                model = thumbnail?.resize(160, 160),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.size(56.dp).clip(RoundedCornerShape(6.dp)),
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                album.year?.let {
+                label?.let {
                     Text(
-                        text = it.toString(),
+                        text = it,
                         style = MaterialTheme.typography.bodySmall,
                         color = onColor.copy(alpha = 0.7f),
                     )
                 }
                 Text(
-                    text = album.title,
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = onColor,
@@ -294,6 +313,14 @@ private fun LatestAlbumCard(
         }
     }
 }
+
+/** Channel pages have no albums: their sections are relabelled as popular videos and playlists. */
+fun channelSectionTitle(section: ArtistSection): String =
+    when (section.items.firstOrNull()) {
+        is PlaylistItem -> "Playlist"
+        is SongItem -> "Video phổ biến"
+        else -> section.title
+    }
 
 fun channelLogoFor(artistId: String?, name: String?): Int? {
     val id = artistId?.removePrefix("MPLA")
