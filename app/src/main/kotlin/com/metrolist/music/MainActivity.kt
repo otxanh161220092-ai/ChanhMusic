@@ -5,6 +5,9 @@
 
 package com.metrolist.music
 
+import com.metrolist.music.ui.component.glassBackdropSource
+import com.metrolist.music.ui.component.GlassBackdrop
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ForegroundServiceStartNotAllowedException
@@ -1006,6 +1009,8 @@ class MainActivity : FragmentActivity() {
                         ChangelogScreen(onDismiss = { showChangelog.value = false })
                     }
 
+                    val glassLayer = rememberGraphicsLayer()
+                    val glassBackdrop = remember(glassLayer) { GlassBackdrop(glassLayer) }
                     Scaffold(
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                         topBar = {
@@ -1175,6 +1180,7 @@ class MainActivity : FragmentActivity() {
                                         slimNav = slimNav,
                                         floating = floatingNav || useAppleStyleLayout,
                                         appleStyle = useAppleStyleLayout,
+                                        glassBackdrop = if (useAppleStyleLayout) glassBackdrop else null,
                                         onShuffleClick = if (currentRoute == Screens.Home.route || currentRoute == Screens.Library.route) homeShuffleAction else null,
                                         onSearchLongClick = onSearchLongClick,
                                         onHomeLongHold = { showAccountDialog = true },
@@ -1297,7 +1303,7 @@ class MainActivity : FragmentActivity() {
                                     onHomeLongHold = { showAccountDialog = true },
                                 )
                             }
-                            Box(Modifier.weight(1f)) {
+                            Box(Modifier.weight(1f).glassBackdropSource(glassBackdrop)) {
                                 // NavHost with animations (Material 3 Expressive style)
                                 NavHost(
                                     navController = navController,
