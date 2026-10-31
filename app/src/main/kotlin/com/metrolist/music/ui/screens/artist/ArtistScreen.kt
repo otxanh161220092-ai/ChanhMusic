@@ -311,6 +311,7 @@ fun ArtistScreen(
                         description = artistPage?.description,
                         isSubscribed = isChannelSubscribed,
                         latestAlbum = latestAlbum,
+                        logoRes = channelLogoFor(viewModel.artistId),
                         onPlay =
                             playEndpoint?.takeIf { !showLocal && !isGuest }?.let { endpoint ->
                                 { playerConnection.playQueue(YouTubeQueue(endpoint)) }

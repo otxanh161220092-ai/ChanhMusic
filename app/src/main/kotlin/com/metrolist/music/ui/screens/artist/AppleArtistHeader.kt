@@ -72,6 +72,7 @@ fun AppleArtistHeader(
     description: String?,
     isSubscribed: Boolean,
     latestAlbum: AlbumItem?,
+    logoRes: Int?,
     onPlay: (() -> Unit)?,
     onToggleSubscribe: (() -> Unit)?,
     onLatestAlbumClick: (AlbumItem) -> Unit,
@@ -111,10 +112,9 @@ fun AppleArtistHeader(
                     .offset(y = 64.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                val logo = channelLogoFor(name)
-                if (logo != null) {
+                if (logoRes != null) {
                     Image(
-                        painter = painterResource(logo),
+                        painter = painterResource(logoRes),
                         contentDescription = name,
                         colorFilter = ColorFilter.tint(onColor),
                         modifier = Modifier.height(64.dp),
@@ -294,10 +294,10 @@ private fun LatestAlbumCard(
     }
 }
 
-private fun channelLogoFor(name: String): Int? =
-    when (name.trim().removePrefix("@").lowercase()) {
-        "jasminelemonofficial" -> R.drawable.channel_logo_jasmine
-        "ereusmix3s" -> R.drawable.channel_logo_ereus
+fun channelLogoFor(artistId: String?): Int? =
+    when (artistId) {
+        "UC9EnTDbvIsouypHkAhVRVmw" -> R.drawable.channel_logo_jasmine
+        "UCwHrSL1grR1vatPkF8MW1hQ" -> R.drawable.channel_logo_ereus
         else -> null
     }
 
