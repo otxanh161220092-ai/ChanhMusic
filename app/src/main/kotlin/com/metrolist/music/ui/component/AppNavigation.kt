@@ -281,19 +281,15 @@ private fun AppleStyleNavigationBar(
     val pillColor = if (isLightTheme) Color.White else MaterialTheme.colorScheme.surfaceContainerHigh
     val iconColor = MaterialTheme.colorScheme.onSurface
     val accent = MaterialTheme.colorScheme.primary
-    val searchScreen = navigationItems.firstOrNull { it == Screens.Search }
-    val mainItems = navigationItems.filter { it != Screens.Search }
-    val searchSelected = searchScreen?.let { isRouteSelected(currentRoute, it.route, navigationItems) } ?: false
 
     Row(
         modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 36.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(
             modifier =
                 Modifier
-                    .weight(1f)
+                    .fillMaxWidth()
                     .height(80.dp)
                     .shadow(8.dp, CircleShape, clip = false)
                     .clip(CircleShape)
@@ -301,18 +297,21 @@ private fun AppleStyleNavigationBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            mainItems.forEach { screen ->
+            navigationItems.forEach { screen ->
                 val isSelected = isRouteSelected(currentRoute, screen.route, navigationItems)
                 val tint = if (isSelected) accent else iconColor
+                val isSearch = screen == Screens.Search
                 Column(
                     modifier =
                         Modifier
                             .weight(1f)
                             .fillMaxHeight()
-                            .clickable(
+                            .combinedClickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
-                            ) { onItemClick(screen, isSelected) },
+                                onClick = { onItemClick(screen, isSelected) },
+                                onLongClick = if (isSearch) onSearchLongClick else null,
+                            ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
@@ -358,29 +357,6 @@ private fun AppleStyleNavigationBar(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-            }
-        }
-
-        if (searchScreen != null) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(80.dp)
-                        .shadow(8.dp, CircleShape, clip = false)
-                        .clip(CircleShape)
-                        .background(pillColor)
-                        .combinedClickable(
-                            onClick = { onItemClick(searchScreen, searchSelected) },
-                            onLongClick = onSearchLongClick,
-                        ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(id = if (searchSelected) searchScreen.iconIdActive else searchScreen.iconIdInactive),
-                    contentDescription = stringResource(searchScreen.titleId),
-                    tint = if (searchSelected) accent else iconColor,
-                    modifier = Modifier.size(24.dp),
-                )
             }
         }
     }
