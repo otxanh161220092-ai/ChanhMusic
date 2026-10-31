@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -117,7 +118,7 @@ fun AppleArtistHeader(
                         painter = painterResource(logoRes),
                         contentDescription = name,
                         colorFilter = ColorFilter.tint(onColor),
-                        modifier = Modifier.width(if (logoRes == R.drawable.channel_logo_ereus) 520.dp else 300.dp),
+                        modifier = Modifier.requiredWidth(if (logoRes == R.drawable.channel_logo_ereus) 520.dp else 300.dp),
                     )
                 } else {
                 Text(
