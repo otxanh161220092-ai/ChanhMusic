@@ -1,7 +1,3 @@
-import com.metrolist.music.ui.component.LocalGlassBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import androidx.compose.runtime.CompositionLocalProvider
 /**
  * Metrolist Project (C) 2026
  * Licensed under GPL-3.0 | See git history for contributors
@@ -9,6 +5,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 
 package com.metrolist.music
 
+import com.metrolist.music.ui.component.glassBackdropSource
+import com.metrolist.music.ui.component.GlassBackdrop
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ForegroundServiceStartNotAllowedException
@@ -474,8 +473,6 @@ class MainActivity : FragmentActivity() {
         }
 
         setContent {
-            val glassBackdropRoot = rememberLayerBackdrop()
-            CompositionLocalProvider(LocalGlassBackdrop provides glassBackdropRoot) {
             MetrolistApp(
                 latestVersionName = latestVersionName,
                 onLatestVersionNameChange = { latestVersionName = it },
@@ -484,8 +481,6 @@ class MainActivity : FragmentActivity() {
                 downloadUtil = downloadUtil,
                 syncUtils = syncUtils,
             )
-        
-            }
         }
     }
 
@@ -1014,7 +1009,8 @@ class MainActivity : FragmentActivity() {
                         ChangelogScreen(onDismiss = { showChangelog.value = false })
                     }
 
-                    val glassBackdrop = LocalGlassBackdrop.current
+                    val glassLayer = rememberGraphicsLayer()
+                    val glassBackdrop = remember(glassLayer) { GlassBackdrop(glassLayer) }
                     Scaffold(
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                         topBar = {
@@ -1307,7 +1303,7 @@ class MainActivity : FragmentActivity() {
                                     onHomeLongHold = { showAccountDialog = true },
                                 )
                             }
-                            Box(Modifier.weight(1f).then(glassBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)) {
+                            Box(Modifier.weight(1f).glassBackdropSource(glassBackdrop)) {
                                 // NavHost with animations (Material 3 Expressive style)
                                 NavHost(
                                     navController = navController,

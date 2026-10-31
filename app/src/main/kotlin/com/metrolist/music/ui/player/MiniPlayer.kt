@@ -1,5 +1,3 @@
-import com.metrolist.music.ui.component.LocalGlassBackdrop
-import com.metrolist.music.ui.component.glassSurface
 /**
  * Metrolist Project (C) 2026
  * Licensed under GPL-3.0 | See git history for contributors
@@ -182,7 +180,6 @@ private fun NewMiniPlayer(
     onClick: () -> Unit = {},
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
-    val glassBackdrop = LocalGlassBackdrop.current
 
     // Theme settings - these rarely change
     val miniPlayerBackground by rememberEnumPreference(
@@ -384,7 +381,7 @@ private fun NewMiniPlayer(
                     .height(56.dp)
                     .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
                     .clip(RoundedCornerShape(32.dp))
-                    .glassSurface(glassBackdrop, RoundedCornerShape(32.dp), backgroundColor, Color.White.copy(alpha = 0.15f))
+                    .background(color = backgroundColor)
                     .border(1.dp, outlineColor.copy(alpha = 0.3f), RoundedCornerShape(32.dp))
                     .drawWithContent {
                         drawContent()
