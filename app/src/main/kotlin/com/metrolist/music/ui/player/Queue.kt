@@ -5,8 +5,6 @@
 
 package com.metrolist.music.ui.player
 
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalDensity
@@ -927,7 +925,7 @@ fun Queue(
                                     Brush.verticalGradient(
                                         colors = listOf(Color.Transparent, Color.Black),
                                         startY = top,
-                                        endY = top + 40f * density,
+                                        endY = top + 40.dp.toPx(),
                                     ),
                                 blendMode = BlendMode.DstIn,
                             )
