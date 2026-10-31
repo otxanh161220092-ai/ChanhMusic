@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -104,7 +105,8 @@ fun AppleArtistHeader(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 56.dp),
+                    .padding(horizontal = 24.dp)
+                    .offset(y = 64.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -168,6 +170,8 @@ fun AppleArtistHeader(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(72.dp))
 
         if (latestAlbum != null) {
             LatestAlbumCard(
