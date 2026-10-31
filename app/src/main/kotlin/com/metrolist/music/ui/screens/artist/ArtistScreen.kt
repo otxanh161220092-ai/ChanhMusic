@@ -205,10 +205,9 @@ fun ArtistScreen(
         }
     val allSectionItems = artistPage?.sections?.flatMap { it.items }.orEmpty()
     val isChannel =
-        allSectionItems.none { it is AlbumItem } &&
-            allSectionItems.filterIsInstance<SongItem>().let { songs ->
-                songs.isNotEmpty() && songs.all { it.musicVideoType == "MUSIC_VIDEO_TYPE_UGC" }
-            }
+        allSectionItems.isNotEmpty() &&
+            allSectionItems.none { it is AlbumItem } &&
+            allSectionItems.filterIsInstance<SongItem>().all { it.musicVideoType == "MUSIC_VIDEO_TYPE_UGC" }
     val channelLatestVideo = if (isChannel) allSectionItems.filterIsInstance<SongItem>().firstOrNull() else null
     val channelHasPlaylists = isChannel && artistPage?.sections?.any { it.items.firstOrNull() is PlaylistItem } == true
     val playEndpoint = artistPage?.artist?.let { it.shuffleEndpoint ?: it.radioEndpoint }
@@ -719,13 +718,21 @@ fun ArtistScreen(
                                     )
                                 }
                             }
+                            val openVideos: (() -> Unit)? =
+                                section.moreEndpoint?.let { endpoint ->
+                                    {
+                                        navController.navigate(
+                                            "artist/${viewModel.artistId}/items?browseId=${endpoint.browseId}?params=${endpoint.params}",
+                                        )
+                                    }
+                                }
                             item(key = "channel_popular_${section.title}") {
-                                NavigationTitle(title = "Video phổ biến", modifier = Modifier.animateItem())
+                                NavigationTitle(title = "Video phổ biến", modifier = Modifier.animateItem(), onClick = openVideos)
                                 ChannelVideoPager(videos = videos, onPlay = playVideo)
                             }
                             if (!channelHasPlaylists) {
                                 item(key = "channel_all_videos_${section.title}") {
-                                    NavigationTitle(title = "Video", modifier = Modifier.animateItem())
+                                    NavigationTitle(title = "Video", modifier = Modifier.animateItem(), onClick = openVideos)
                                     ChannelVideoCarousel(videos = videos, onPlay = playVideo)
                                 }
                             }
