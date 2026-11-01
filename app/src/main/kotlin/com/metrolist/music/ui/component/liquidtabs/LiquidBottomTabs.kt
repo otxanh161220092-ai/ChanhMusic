@@ -4,10 +4,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.border
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import com.metrolist.music.R
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -71,12 +67,8 @@ fun LiquidBottomTabs(
     content: @Composable RowScope.() -> Unit
 ) {
     val isLightTheme = !isSystemInDarkTheme()
-    val accentColor =
-        if (isLightTheme) Color(0xFF0088FF)
-        else Color(0xFFFF375F)
-    val containerColor =
-        if (isLightTheme) Color(0xFFFAFAFA).copy(0.4f)
-        else Color(0xFF000000).copy(0.5f)
+    val accentColor = Color(0xFF0A60D8)
+    val containerColor = Color(0xFF9C9C9C).copy(0.72f)
 
     val tabsBackdrop = rememberLayerBackdrop()
 
@@ -195,10 +187,6 @@ fun LiquidBottomTabs(
                     ),
                     Capsule(),
                 )
-                .paint(
-                    painterResource(R.drawable.tab_bar_glass),
-                    contentScale = ContentScale.FillBounds,
-                )
                 .then(interactiveHighlight.modifier)
                 .height(barHeight)
                 .fillMaxWidth()
@@ -294,16 +282,11 @@ fun LiquidBottomTabs(
                     onDrawSurface = {
                         val progress = dampedDragAnimation.pressProgress
                         drawRect(
-                            if (isLightTheme) Color.Black.copy(0.1f)
-                            else Color.White.copy(0.1f),
+                            Color.Black.copy(0.12f),
                             alpha = 1f - progress
                         )
                         drawRect(Color.Black.copy(alpha = 0.03f * progress))
                     }
-                )
-                .paint(
-                    painterResource(R.drawable.tab_bar_selection),
-                    contentScale = ContentScale.FillBounds,
                 )
                 .height(56f.dp)
                 .fillMaxWidth(1f / tabsCount)
