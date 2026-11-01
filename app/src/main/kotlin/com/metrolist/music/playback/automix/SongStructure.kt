@@ -17,14 +17,17 @@ class SongStructure(
     val bpm: Float = 0f,
     val hasTempo: Boolean = false,
     val gridNear: (Long) -> BeatGrid? = { null },
+    /** Pauses between sung lines. Null when no lyrics are known; empty when the song is sung throughout. */
+    val vocalGaps: List<LongRange>? = null,
 )
 
 /** Builds a structure from analysis results using the heuristic segmenter. */
-fun TrackFeatures.toSongStructure(): SongStructure =
+fun TrackFeatures.toSongStructure(vocalGaps: List<LongRange>? = null): SongStructure =
     SongStructure(
         durationMs = durationMs,
         segments = HeuristicSegmenter.segment(durationMs, loudnessDb),
         bpm = bpm,
         hasTempo = hasTempo,
         gridNear = { positionMs -> if (hasTempo) gridNear(positionMs.toDouble()) else null },
+        vocalGaps = vocalGaps,
     )

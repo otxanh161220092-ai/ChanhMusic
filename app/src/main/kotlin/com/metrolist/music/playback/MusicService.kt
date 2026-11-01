@@ -29,6 +29,8 @@ import com.metrolist.music.playback.automix.AutomixAnalyzer
 import com.metrolist.music.playback.automix.AutomixPrescanner
 import com.metrolist.music.playback.automix.FileAutomixFeatureStore
 import com.metrolist.music.playback.automix.PhaseController
+import com.metrolist.music.playback.automix.TailFxAudioProcessor
+import com.metrolist.music.playback.automix.VocalGaps
 import com.metrolist.music.playback.automix.SmartTransitionCalculator
 import com.metrolist.music.playback.automix.TransitionPlan
 import com.metrolist.music.playback.automix.toSongStructure
@@ -179,6 +181,7 @@ import com.metrolist.music.db.MusicDatabase
 import com.metrolist.music.db.entities.Event
 import com.metrolist.music.db.entities.FormatEntity
 import com.metrolist.music.db.entities.LyricsEntity
+import com.metrolist.music.lyrics.LyricsUtils
 import com.metrolist.music.db.entities.PlaylistEntity
 import com.metrolist.music.db.entities.RelatedSongMap
 import com.metrolist.music.db.entities.Song
@@ -275,6 +278,7 @@ private const val INSTANT_SILENCE_SKIP_SETTLE_MS = 350L
 private const val AUTOMIX_PREPARE_LEAD_MS = 8_000L
 private const val AUTOMIX_MIN_LEAD_MS = 3_000L
 private const val AUTOMIX_TEMPO_RAMP_MS = 8_000L
+private const val AUTOMIX_QUICK_CUT = false
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -485,6 +489,7 @@ class MusicService :
     private val historyReporters = HashMap<Player, YouTubeHistoryReporter>()
     private val playerNormalizationProcessors = HashMap<Player, VolumeNormalizationAudioProcessor>()
     private val playerEqualizerProcessors = HashMap<Player, CustomEqualizerAudioProcessor>()
+    private val playerTailFxProcessors = HashMap<Player, TailFxAudioProcessor>()
 
     private var loudnessSetupJob: Job? = null
     private var loudnessSetupGeneration: Long = 0L
@@ -1364,6 +1369,7 @@ class MusicService :
         val eqProcessor = CustomEqualizerAudioProcessor()
 
         val silenceProcessor = SilenceDetectorAudioProcessor { handleLongSilenceDetected() }
+        val tailFxProcessor = TailFxAudioProcessor()
 
         // Set initial state — use pre-read prefs when available, otherwise fall back to DataStore
         val useAudioTrackPlaybackParams = if (prefs != null) {
@@ -1387,7 +1393,7 @@ class MusicService :
                 .setMediaSourceFactory(
                     createMediaSourceFactory(normalizationProcessor) { createdPlayer },
                 )
-                .setRenderersFactory(createRenderersFactory(normalizationProcessor, eqProcessor, silenceProcessor, useAudioTrackPlaybackParams))
+                .setRenderersFactory(createRenderersFactory(normalizationProcessor, eqProcessor, silenceProcessor, tailFxProcessor, useAudioTrackPlaybackParams))
                 .setLoadControl(
                     // Start playback once ~750ms is buffered (media3's default is 1000ms) so first
                     // audio is audible a touch sooner. min/max/after-rebuffer match the media3 1.x
@@ -1415,6 +1421,7 @@ class MusicService :
         playerNormalizationProcessors[player] = normalizationProcessor
         playerSilenceProcessors[player] = silenceProcessor
         playerEqualizerProcessors[player] = eqProcessor
+        playerTailFxProcessors[player] = tailFxProcessor
         equalizerService.addAudioProcessor(eqProcessor)
 
         if (prefs != null) {
@@ -4068,6 +4075,7 @@ class MusicService :
         normalizationProcessor: VolumeNormalizationAudioProcessor,
         eqProcessor: CustomEqualizerAudioProcessor,
         silenceProcessor: SilenceDetectorAudioProcessor,
+        tailFxProcessor: TailFxAudioProcessor,
         useAudioTrackPlaybackParams: Boolean,
     ) = object : DefaultRenderersFactory(this) {
         override fun buildAudioRenderers(
@@ -4128,6 +4136,7 @@ class MusicService :
                         normalizationProcessor,
                         eqProcessor,
                         silenceProcessor,
+                        tailFxProcessor,
                     ),
                     SilenceSkippingAudioProcessor(2_000_000, 20_000, 256),
                     SonicAudioProcessor(),
@@ -4971,10 +4980,11 @@ class MusicService :
                 val duration = player.duration
                 val plan =
                     SmartTransitionCalculator.calculateTransitionPlan(
-                        songA = featuresA.toSongStructure(),
-                        songB = featuresB.toSongStructure(),
+                        songA = featuresA.toSongStructure(vocalGapsFor(currentId, featuresA.durationMs)),
+                        songB = featuresB.toSongStructure(vocalGapsFor(nextId, featuresB.durationMs)),
                         earliestMixMs = player.currentPosition + AUTOMIX_MIN_LEAD_MS,
                         longFadeMs = crossfadeDuration.toLong(),
+                        quickCut = AUTOMIX_QUICK_CUT,
                     ) ?: return@launch
                 if (duration == C.TIME_UNSET || plan.handoverEndA > duration) return@launch
 
@@ -5008,6 +5018,18 @@ class MusicService :
                 secondaryPlayer = prepared
                 preparedMix = PreparedMix(nextIndex, nextId, player.mediaItemCount)
             }
+    }
+
+    /** Pauses between sung lines from the stored lyrics, or null when this song has no timed lyrics. */
+    private suspend fun vocalGapsFor(
+        mediaId: String,
+        durationMs: Long,
+    ): List<LongRange>? {
+        val lyrics = runCatching { database.lyrics(mediaId).first() }.getOrNull()?.lyrics ?: return null
+        if (lyrics == LyricsEntity.LYRICS_NOT_FOUND) return null
+        val starts = runCatching { LyricsUtils.parseLyrics(lyrics).map { it.time } }.getOrNull() ?: return null
+        if (starts.isEmpty()) return null
+        return VocalGaps.fromLineStarts(starts, durationMs)
     }
 
     private fun isNextItemGapless(): Boolean {
@@ -5105,6 +5127,9 @@ class MusicService :
         val currentPlayer = player
 
         fadingPlayer = currentPlayer
+        if (plan?.tailFxA == true) {
+            playerTailFxProcessors[currentPlayer]?.scheduleSweep(plan.mixOutPositionA, plan.fadeOutDurationA)
+        }
         player = nextPlayer
         _playerFlow.value = player
         secondaryPlayer = null
@@ -5182,7 +5207,7 @@ class MusicService :
                     val progress = i / steps.toFloat()
                     val (fadeOut, fadeIn) =
                         if (plan != null) {
-                            plan.gainsAt(progress * plan.windowMs)
+                            plan.gainsAt(progress.toDouble() * plan.windowMs)
                         } else {
                             val remaining = 1f - progress
                             (remaining * remaining) to (1f - remaining * remaining)
@@ -5280,6 +5305,7 @@ class MusicService :
         historyReporters.remove(player)?.close()
         playerNormalizationProcessors.remove(player)
         playerSilenceProcessors.remove(player)
+        playerTailFxProcessors.remove(player)
         playerEqualizerProcessors.remove(player)?.let(equalizerService::removeAudioProcessor)
         player.release()
     }

@@ -38,6 +38,8 @@ class TransitionPlan(
     val cost: Double,
     val gridA: BeatGrid?,
     val gridB: BeatGrid?,
+    /** Darken A's tail with a low-pass sweep while it is cut. */
+    val tailFxA: Boolean = false,
 ) {
     /**
      * Equal-power gains at [relMs] after the window opens: A's fade-out and B's fade-in, in that order.

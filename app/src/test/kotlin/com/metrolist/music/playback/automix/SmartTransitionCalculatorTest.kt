@@ -24,13 +24,30 @@ class SmartTransitionCalculatorTest {
         vararg segments: SongSegment,
         bpm: Float = 0f,
         grid: BeatGrid? = null,
+        vocal: List<LongRange>? = null,
     ) = SongStructure(
         durationMs = durationMs,
         segments = segments.toList(),
         bpm = bpm,
         hasTempo = bpm > 0f,
         gridNear = { grid },
+        vocalGaps = vocal?.let { sung -> complement(sung, durationMs) },
     )
+
+    /** Turns the sung ranges into the pauses between them, which is what [SongStructure.vocalGaps] holds. */
+    private fun complement(
+        sung: List<LongRange>,
+        durationMs: Long,
+    ): List<LongRange> {
+        val gaps = mutableListOf<LongRange>()
+        var cursor = 0L
+        for (r in sung.sortedBy { it.first }) {
+            if (r.first > cursor) gaps += cursor until r.first
+            cursor = maxOf(cursor, r.last + 1)
+        }
+        if (cursor < durationMs) gaps += cursor..durationMs
+        return gaps
+    }
 
     private fun plan(
         a: SongStructure,
@@ -182,5 +199,32 @@ class SmartTransitionCalculatorTest {
         assertEquals(1f, half.speedFactorB, 1e-4f)
         // Folded tempos do not share a beat, so phase tracking is off.
         assertNull(half.gridA)
+    }
+
+    @Test
+    fun `quick cut shortens A's fade to one beat on a drop and tails A with a low-pass`() {
+        val grid = BeatGrid(0.0, 500.0)
+        val a = song(200_000, seg(SegmentType.DROP, 100_000, 130_000), bpm = 120f, grid = grid)
+        val b = song(200_000, seg(SegmentType.INTRO, 0, 20_000), seg(SegmentType.VERSE, 20_000, 60_000), bpm = 120f, grid = grid)
+
+        val normal = SmartTransitionCalculator.calculateTransitionPlan(a, b)!!
+        val quick = SmartTransitionCalculator.calculateTransitionPlan(a, b, quickCut = true)!!
+
+        assertEquals(500L, quick.fadeOutDurationA)
+        assertTrue(normal.fadeOutDurationA > quick.fadeOutDurationA)
+        assertTrue(quick.tailFxA)
+    }
+
+    @Test
+    fun `a transition whose overlap sits on sung lines costs more than one in the pauses`() {
+        val a = song(200_000, seg(SegmentType.VERSE, 40_000, 80_000))
+        val b = song(200_000, seg(SegmentType.CHORUS, 60_000, 90_000))
+        val sungEverywhere = song(200_000, seg(SegmentType.VERSE, 40_000, 80_000), vocal = listOf(0L..200_000L))
+        val pausesInA = song(200_000, seg(SegmentType.VERSE, 40_000, 80_000), vocal = listOf(0L..30_000L, 100_000L..200_000L))
+
+        val sung = SmartTransitionCalculator.calculateTransitionPlan(sungEverywhere, b)!!
+        val paused = SmartTransitionCalculator.calculateTransitionPlan(pausesInA, b)!!
+
+        assertTrue(paused.cost < sung.cost)
     }
 }

@@ -32,6 +32,7 @@ object SmartTransitionCalculator {
     private const val MAX_TEMPO_DELTA = 0.08
     private const val SHORT_FADE_BEATS = 2.0
     private const val QUICK_FADE_BEATS = 1.0
+    private const val QUICK_CALM_BEATS = 4.0
     private const val FALLBACK_BEAT_MS = 500.0
 
     private const val WEIGHT_ENERGY = 2.0
@@ -40,10 +41,13 @@ object SmartTransitionCalculator {
     private const val WEIGHT_SKIP_B = 1.0
     private const val NO_TEMPO_COST = 1.0
     private const val UNMATCHABLE_TEMPO_COST = 3.0
+    private const val WEIGHT_VOCAL = 2.0
 
     /**
      * @param earliestMixMs the overlap may not open before this position in A.
      * @param longFadeMs the long fade, shortened to fit the sections involved.
+     * @param quickCut when true, the transition is a single-beat cut: A's fade is one beat on a drop,
+     * and four beats on a calm section instead of the long fade.
      * @return the best plan, or null when no pair of sections fits (the caller keeps a plain crossfade).
      */
     fun calculateTransitionPlan(
@@ -51,6 +55,7 @@ object SmartTransitionCalculator {
         songB: SongStructure,
         earliestMixMs: Long = 0L,
         longFadeMs: Long = DEFAULT_LONG_FADE_MS,
+        quickCut: Boolean = false,
     ): TransitionPlan? {
         if (songA.durationMs <= 0 || songB.durationMs <= 0) return null
         val tempo = matchTempo(songA, songB)
@@ -58,7 +63,7 @@ object SmartTransitionCalculator {
         var best: TransitionPlan? = null
         for (a in songA.segments) {
             for (b in songB.segments) {
-                val plan = candidate(a, b, songA, songB, tempo, earliestMixMs, longFadeMs) ?: continue
+                val plan = candidate(a, b, songA, songB, tempo, earliestMixMs, longFadeMs, quickCut) ?: continue
                 if (best == null || plan.cost < best.cost) best = plan
             }
         }
@@ -73,6 +78,7 @@ object SmartTransitionCalculator {
         tempo: TempoMatch,
         earliestMixMs: Long,
         longFadeMs: Long,
+        quickCut: Boolean,
     ): TransitionPlan? {
         val kind =
             when {
@@ -98,7 +104,7 @@ object SmartTransitionCalculator {
         val handoverB: Long
         when (kind) {
             TransitionKind.DROP_TO_CALM -> {
-                fadeOut = (SHORT_FADE_BEATS * beatA).roundToLong().coerceAtLeast(1L)
+                fadeOut = ((if (quickCut) QUICK_FADE_BEATS else SHORT_FADE_BEATS) * beatA).roundToLong().coerceAtLeast(1L)
                 val entry = barAlignedStart(b, gridB)
                 val room = minOf(longFadeMs, sectionA, ((b.endTimeMs - entry) / factor).toLong())
                 fadeIn = roundDownToBars(room, barA)
@@ -109,7 +115,8 @@ object SmartTransitionCalculator {
                 fadeIn = (QUICK_FADE_BEATS * beatA).roundToLong().coerceAtLeast(1L)
                 handoverB = gridB?.nearestBar(b.startTimeMs.toDouble())?.toLong()?.coerceAtLeast(0L) ?: b.startTimeMs
                 // B is pre-rolled before its chorus, so a chorus that comes early limits how long A can fade.
-                val room = minOf(longFadeMs, sectionA, (handoverB / factor).toLong())
+                val longCap = if (quickCut) (QUICK_CALM_BEATS * beatA).toLong() else longFadeMs
+                val room = minOf(longCap, sectionA, (handoverB / factor).toLong())
                 fadeOut = roundDownToBars(room, barA)
                 if (fadeOut < MIN_FADE_MS) return null
             }
@@ -128,11 +135,18 @@ object SmartTransitionCalculator {
         val contrast = if (kind == TransitionKind.DROP_TO_CALM) a.energy - b.energy else b.energy - a.energy
         val skipA = (songA.durationMs - handoverA).toDouble() / songA.durationMs
         val skipB = secondaryStartB.toDouble() / songB.durationMs
+        // Share of the overlap where a sung line would sit on top of the other song's vocal.
+        val sungA = VocalGaps.vocalFraction(songA.vocalGaps, mixOutA, handoverA)
+        val sungB = VocalGaps.vocalFraction(songB.vocalGaps, mixInB, handoverB)
+        val known = listOfNotNull(sungA, sungB)
+        val vocalCost = if (known.isEmpty()) 0.0 else known.average()
+
         val cost =
             WEIGHT_ENERGY * (1.0 - contrast) / 2.0 +
                 WEIGHT_TEMPO * tempo.cost +
                 WEIGHT_SKIP_A * skipA +
-                WEIGHT_SKIP_B * skipB
+                WEIGHT_SKIP_B * skipB +
+                WEIGHT_VOCAL * vocalCost
 
         // Beat phase is only meaningful when the two beats are the same musical beat, not a folded half/double.
         val trackPhase = tempo.matched && !tempo.octaveFolded
@@ -147,6 +161,7 @@ object SmartTransitionCalculator {
             cost = cost,
             gridA = if (trackPhase) gridA else null,
             gridB = if (trackPhase) gridB else null,
+            tailFxA = kind == TransitionKind.DROP_TO_CALM,
         )
     }
 
