@@ -1294,7 +1294,9 @@ class MainActivity : FragmentActivity() {
                                 }
 
                             // Pre-calculate values for graphicsLayer to avoid reading state during composition
-                            val navBarTotalHeight = bottomInset + NavigationBarHeight
+                            // Apple-style container is 116dp tall; slide the full container out of view
+                            // so no part of the bar remains visible when the player is expanded.
+                            val navBarTotalHeight = bottomInset + (if (useAppleStyleLayout) 116.dp else NavigationBarHeight)
 
                             if (!showRail && currentRoute != "wrapped") {
                                 Box {
