@@ -312,7 +312,7 @@ private fun NewMiniPlayer(
         modifier =
             modifier
                 .fillMaxWidth()
-                .height(84.dp)
+                .height(68.dp)
                 .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
                 .padding(horizontal = 12.dp)
                 .let { baseModifier ->
@@ -383,17 +383,17 @@ private fun NewMiniPlayer(
             modifier =
                 Modifier
                     .then(if (isTabletLandscape) Modifier.width(500.dp).align(Alignment.Center) else Modifier.fillMaxWidth())
-                    .height(76.dp)
+                    .height(60.dp)
                     .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                    .clip(RoundedCornerShape(38.dp))
+                    .clip(RoundedCornerShape(30.dp))
                     .glassSurface(
                         glassBackdrop,
-                        RoundedCornerShape(38.dp),
+                        RoundedCornerShape(30.dp),
                         backgroundColor,
                         if (lightGlass) Color.Transparent else Color.Black.copy(alpha = 0.45f),
                     )
                     .then(if (lightGlass) Modifier.background(Color.White.copy(alpha = 0.58f)) else Modifier)
-                    .border(1.dp, outlineColor.copy(alpha = 0.45f), RoundedCornerShape(38.dp))
+                    .border(1.dp, outlineColor.copy(alpha = 0.45f), RoundedCornerShape(30.dp))
                     .drawWithContent {
                         drawContent()
                         val corner = CornerRadius(size.height / 2f)
