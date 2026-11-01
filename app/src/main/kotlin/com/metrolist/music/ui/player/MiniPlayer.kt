@@ -28,6 +28,7 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -463,7 +464,7 @@ private fun NewMiniPlayer(
                     model = mediaMetadata?.thumbnailUrl?.resize(160, 160),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(56.dp),
+                    modifier = Modifier.size(56.dp).aspectRatio(1f).clip(RoundedCornerShape(10.dp)),
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
