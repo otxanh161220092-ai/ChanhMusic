@@ -38,10 +38,10 @@ class TrackFeatures(
     val loudnessDb: FloatArray,
     val bpm: Float,
     val bpmConfidence: Float,
-    private val onset: FloatArray,
-    private val lowOnset: FloatArray,
-    private val periodHops: Double,
-    private val hopMs: Double,
+    val onset: FloatArray,
+    val lowOnset: FloatArray,
+    val periodHops: Double,
+    val hopMs: Double,
 ) {
     val hasTempo: Boolean get() = bpm > 0f && bpmConfidence >= MIN_TEMPO_CONFIDENCE
 

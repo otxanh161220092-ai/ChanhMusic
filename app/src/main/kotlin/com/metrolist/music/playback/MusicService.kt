@@ -26,6 +26,8 @@ import android.media.AudioManager
 import android.media.audiofx.AudioEffect
 import com.metrolist.music.playback.audio.VolumeNormalizationAudioProcessor
 import com.metrolist.music.playback.automix.AutomixAnalyzer
+import com.metrolist.music.playback.automix.AutomixPrescanner
+import com.metrolist.music.playback.automix.FileAutomixFeatureStore
 import com.metrolist.music.playback.automix.MixPlan
 import com.metrolist.music.playback.automix.MixPlanner
 import kotlin.math.abs
@@ -255,6 +257,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import timber.log.Timber
+import java.io.File
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.time.LocalDateTime
@@ -421,7 +424,31 @@ class MusicService :
     private var preparedMix: PreparedMix? = null
     private var tempoRampJob: Job? = null
     private val automixAnalyzer by lazy {
-        AutomixAnalyzer(createDataSourceFactory(VolumeNormalizationAudioProcessor()) { null })
+        AutomixAnalyzer(
+            createDataSourceFactory(VolumeNormalizationAudioProcessor()) { null },
+            FileAutomixFeatureStore(File(cacheDir, "automix")),
+        )
+    }
+    private val automixPrescanner by lazy { AutomixPrescanner(automixAnalyzer, scope) }
+    private var prescanMessage: PlayerMessage? = null
+
+    /** Pre-analyzes the next queue item when the current song reaches its midpoint. */
+    private fun scheduleAutomixPrescan() {
+        prescanMessage?.cancel()
+        val currentIndex = player.currentMediaItemIndex
+        val duration = player.duration
+        if (duration == C.TIME_UNSET || duration <= 0) return
+        prescanMessage =
+            player.createMessage { _, _ ->
+                val nextIndex = player.nextMediaItemIndex
+                val nextId = if (nextIndex != C.INDEX_UNSET) player.getMediaItemAt(nextIndex).mediaId else null
+                automixPrescanner.onMidpoint(nextId)
+            }.apply {
+                setLooper(Looper.getMainLooper())
+                setPosition(currentIndex, duration / 2)
+                setDeleteAfterDelivery(true)
+                send()
+            }
     }
 
     /** The next song, already loaded (paused, silent) in [secondaryPlayer] and waiting for its mix. */
@@ -4962,6 +4989,7 @@ class MusicService :
                 mixPlan = plan
                 mixZone.value = plan.startMs..plan.endMs
                 scheduleCrossfadeMessage(plan.startMs, currentId)
+                scheduleAutomixPrescan()
 
                 // Load the next song shortly before the mix so it starts exactly on the beat.
                 while (isActive && player.currentPosition < plan.startMs - AUTOMIX_PREPARE_LEAD_MS) delay(500)

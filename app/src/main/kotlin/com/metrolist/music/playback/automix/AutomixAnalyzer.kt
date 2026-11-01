@@ -32,6 +32,7 @@ import kotlin.coroutines.coroutineContext
 @UnstableApi
 class AutomixAnalyzer(
     private val dataSourceFactory: DataSource.Factory,
+    private val store: AutomixFeatureStore? = null,
 ) {
     private val results =
         object : LinkedHashMap<String, TrackFeatures>(16, 0.75f, true) {
@@ -46,8 +47,12 @@ class AutomixAnalyzer(
 
         return mutex.withLock {
             val cached = synchronized(results) { results[mediaId] }
+            val stored = if (cached == null) store?.load(mediaId)?.features else null
             if (cached != null) {
                 cached
+            } else if (stored != null) {
+                synchronized(results) { results[mediaId] = stored }
+                stored
             } else {
                 val job = coroutineContext[Job]
                 val features =
@@ -64,6 +69,7 @@ class AutomixAnalyzer(
                     }
                 if (features != null) {
                     synchronized(results) { results[mediaId] = features }
+                    store?.save(mediaId, CachedAnalysis(features, emptyList()))
                 } else if (job?.isActive != false) {
                     synchronized(failed) { failed.add(mediaId) }
                 }
