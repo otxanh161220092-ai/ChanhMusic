@@ -12,7 +12,14 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -154,3 +161,18 @@ private fun DrawScope.drawHighlight(center: Offset, progress: Float) {
 
 private fun lerpFloat(start: Float, stop: Float, fraction: Float): Float =
     start + (stop - start) * fraction
+
+/** Fully rounded pill shape used by the tab bar and its selection capsule. */
+class Capsule : Shape {
+    override fun createOutline(
+        size: androidx.compose.ui.geometry.Size,
+        layoutDirection: LayoutDirection,
+        density: Density,
+    ): Outline =
+        Outline.Rounded(
+            RoundRect(
+                Rect(0f, 0f, size.width, size.height),
+                CornerRadius(minOf(size.width, size.height) / 2f),
+            ),
+        )
+}

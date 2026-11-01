@@ -3,6 +3,7 @@ package com.metrolist.music.ui.component.liquidtabs
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -49,7 +50,6 @@ import com.kyant.backdrop.effects.vibrancy
 import com.kyant.backdrop.highlight.Highlight
 import com.kyant.backdrop.shadow.InnerShadow
 import com.kyant.backdrop.shadow.Shadow
-import com.kyant.shapes.Capsule
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
@@ -179,6 +179,7 @@ fun LiquidBottomTabs(
                     },
                     onDrawSurface = { drawRect(containerColor) }
                 )
+                .border(1f.dp, Color.White.copy(alpha = 0.55f), Capsule())
                 .then(interactiveHighlight.modifier)
                 .height(64f.dp)
                 .fillMaxWidth()
