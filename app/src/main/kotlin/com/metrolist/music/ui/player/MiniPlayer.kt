@@ -312,7 +312,7 @@ private fun NewMiniPlayer(
         modifier =
             modifier
                 .fillMaxWidth()
-                .height(MiniPlayerHeight)
+                .height(84.dp)
                 .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
                 .padding(horizontal = 12.dp)
                 .let { baseModifier ->
@@ -383,17 +383,17 @@ private fun NewMiniPlayer(
             modifier =
                 Modifier
                     .then(if (isTabletLandscape) Modifier.width(500.dp).align(Alignment.Center) else Modifier.fillMaxWidth())
-                    .height(60.dp)
+                    .height(76.dp)
                     .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                    .clip(RoundedCornerShape(30.dp))
+                    .clip(RoundedCornerShape(38.dp))
                     .glassSurface(
                         glassBackdrop,
-                        RoundedCornerShape(30.dp),
+                        RoundedCornerShape(38.dp),
                         backgroundColor,
                         if (lightGlass) Color.Transparent else Color.Black.copy(alpha = 0.45f),
                     )
                     .then(if (lightGlass) Modifier.background(Color.White.copy(alpha = 0.58f)) else Modifier)
-                    .border(1.dp, outlineColor.copy(alpha = 0.45f), RoundedCornerShape(30.dp))
+                    .border(1.dp, outlineColor.copy(alpha = 0.45f), RoundedCornerShape(38.dp))
                     .drawWithContent {
                         drawContent()
                         val corner = CornerRadius(size.height / 2f)
@@ -463,7 +463,7 @@ private fun NewMiniPlayer(
                     model = mediaMetadata?.thumbnailUrl?.resize(160, 160),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)),
+                    modifier = Modifier.size(56.dp).clip(RoundedCornerShape(10.dp)),
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
