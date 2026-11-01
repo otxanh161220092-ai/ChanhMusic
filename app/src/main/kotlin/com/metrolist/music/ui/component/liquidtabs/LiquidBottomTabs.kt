@@ -189,6 +189,7 @@ fun LiquidBottomTabs(
                     ),
                     Capsule(),
                 )
+                .then(dampedDragAnimation.modifier)
                 .then(interactiveHighlight.modifier)
                 .height(64f.dp)
                 .fillMaxWidth()
