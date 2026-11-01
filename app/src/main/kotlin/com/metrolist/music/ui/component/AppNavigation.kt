@@ -9,6 +9,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import com.metrolist.music.ui.component.liquidtabs.LiquidBottomTabs
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -277,6 +280,17 @@ private fun AppleStyleNavigationBar(
     onShuffleClick: (() -> Unit)? = null,
     glassBackdrop: LayerBackdrop? = null,
 ) {
+    if (glassBackdrop != null) {
+        LiquidNavigationBar(
+            navigationItems = navigationItems,
+            currentRoute = currentRoute,
+            onItemClick = onItemClick,
+            backdrop = glassBackdrop,
+            onSearchLongClick = onSearchLongClick,
+            modifier = modifier,
+        )
+        return
+    }
     val isLightTheme = MaterialTheme.colorScheme.background.luminance() > 0.5f
     val pillColor = if (isLightTheme) Color.White else MaterialTheme.colorScheme.surfaceContainerHigh
     val iconColor = MaterialTheme.colorScheme.onSurface
@@ -357,6 +371,69 @@ private fun AppleStyleNavigationBar(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Liquid glass tab bar built on the Kyant0 LiquidBottomTabs pattern. Every tab, search included,
+ * lives in one pill. Dragging, tapping and the selection highlight come from LiquidBottomTabs.
+ */
+@Composable
+private fun LiquidNavigationBar(
+    navigationItems: List<Screens>,
+    currentRoute: String?,
+    onItemClick: (Screens, Boolean) -> Unit,
+    backdrop: LayerBackdrop,
+    modifier: Modifier = Modifier,
+    onSearchLongClick: (() -> Unit)? = null,
+) {
+    val selectedIndex = navigationItems
+        .indexOfFirst { isRouteSelected(currentRoute, it.route, navigationItems) }
+        .coerceAtLeast(0)
+    val tabsCount = navigationItems.size
+    val iconColor = MaterialTheme.colorScheme.onSurface
+
+    LiquidBottomTabs(
+        selectedTabIndex = { selectedIndex },
+        onTabSelected = { index ->
+            if (index != selectedIndex) onItemClick(navigationItems[index], false)
+        },
+        backdrop = backdrop,
+        tabsCount = tabsCount,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 36.dp)
+            .pointerInput(tabsCount, navigationItems) {
+                detectTapGestures { offset ->
+                    val index = (offset.x / (size.width.toFloat() / tabsCount))
+                        .toInt()
+                        .coerceIn(0, tabsCount - 1)
+                    val screen = navigationItems[index]
+                    onItemClick(screen, index == selectedIndex)
+                }
+            },
+    ) {
+        navigationItems.forEach { screen ->
+            Column(
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Icon(
+                    painter = painterResource(id = screen.iconIdInactive),
+                    contentDescription = stringResource(screen.titleId),
+                    tint = iconColor,
+                    modifier = Modifier.size(24.dp),
+                )
+                Text(
+                    text = stringResource(screen.titleId),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = iconColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }
