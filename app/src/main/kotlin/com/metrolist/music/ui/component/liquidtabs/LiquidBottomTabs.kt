@@ -21,7 +21,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,7 +96,9 @@ fun LiquidBottomTabs(
 
         val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
         val animationScope = rememberCoroutineScope()
-        var currentIndex by remember(selectedTabIndex) {
+        val selectedTabIndexState by rememberUpdatedState(selectedTabIndex)
+        val onTabSelectedState by rememberUpdatedState(onTabSelected)
+        var currentIndex by remember {
             mutableIntStateOf(selectedTabIndex())
         }
         val dampedDragAnimation = remember(animationScope) {
@@ -128,8 +132,8 @@ fun LiquidBottomTabs(
                 }
             )
         }
-        LaunchedEffect(selectedTabIndex) {
-            snapshotFlow { selectedTabIndex() }
+        LaunchedEffect(Unit) {
+            snapshotFlow { selectedTabIndexState() }
                 .collectLatest { index ->
                     currentIndex = index
                 }
@@ -139,7 +143,7 @@ fun LiquidBottomTabs(
                 .drop(1)
                 .collectLatest { index ->
                     dampedDragAnimation.animateToValue(index.toFloat())
-                    onTabSelected(index)
+                    onTabSelectedState(index)
                 }
         }
 
@@ -175,6 +179,7 @@ fun LiquidBottomTabs(
                     highlight = { Highlight.Default },
                     shadow = { Shadow(alpha = 0.2f) },
                     innerShadow = { InnerShadow(radius = 10f.dp, alpha = 0.3f) },
+                    onDrawSurface = { drawRect(Color.White.copy(alpha = 0.45f), blendMode = BlendMode.Overlay) },
                 )
                 .then(interactiveHighlight.modifier)
                 .height(barHeight)
@@ -232,6 +237,23 @@ fun LiquidBottomTabs(
                         if (isLtr) dampedDragAnimation.value * tabWidth + panelOffset
                         else size.width - (dampedDragAnimation.value + 1f) * tabWidth + panelOffset
                 }
+                .drawBackdrop(
+                    backdrop = backdrop,
+                    shape = { Capsule() },
+                    effects = { blur(14f.dp.toPx()) },
+                )
+                .height(64f.dp)
+                .fillMaxWidth(1f / tabsCount)
+        )
+
+        Box(
+            Modifier
+                .padding(horizontal = 4f.dp)
+                .graphicsLayer {
+                    translationX =
+                        if (isLtr) dampedDragAnimation.value * tabWidth + panelOffset
+                        else size.width - (dampedDragAnimation.value + 1f) * tabWidth + panelOffset
+                }
                 .then(interactiveHighlight.gestureModifier)
                 .then(dampedDragAnimation.modifier)
                 .drawBackdrop(
@@ -239,7 +261,6 @@ fun LiquidBottomTabs(
                     shape = { Capsule() },
                     effects = {
                         val progress = dampedDragAnimation.pressProgress
-                        blur(14f.dp.toPx())
                         lens(
                             10f.dp.toPx() * progress,
                             14f.dp.toPx() * progress,

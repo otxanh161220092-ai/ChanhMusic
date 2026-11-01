@@ -314,7 +314,7 @@ private fun NewMiniPlayer(
                 .fillMaxWidth()
                 .height(62.dp)
                 .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-                .padding(horizontal = 12.dp)
+                .padding(horizontal = 16.dp)
                 .let { baseModifier ->
                     if (swipeThumbnail) {
                         baseModifier.pointerInput(Unit) {
@@ -390,7 +390,7 @@ private fun NewMiniPlayer(
                         glassBackdrop,
                         RoundedCornerShape(27.dp),
                         backgroundColor,
-                        if (lightGlass) Color.Transparent else Color.Black.copy(alpha = 0.45f),
+                        if (lightGlass) Color.White.copy(alpha = 0.45f) else Color.Black.copy(alpha = 0.45f),
                     )
                     .border(1.dp, outlineColor.copy(alpha = 0.45f), RoundedCornerShape(27.dp))
                     .drawWithContent {
