@@ -84,8 +84,8 @@ fun LiquidBottomTabs(
         val tabWidth = with(density) {
             (constraints.maxWidth.toFloat() - 8f.dp.toPx()) / tabsCount
         }
-        // Figma tab bar: 720x124 px glass, selection 160x108 px. Height scales with width.
-        val barHeight = with(density) { (constraints.maxWidth * (124f / 720f)).toDp() }
+        // Figma "Tab Bar - iPhone": frame height 62, selection height 54.
+        val barHeight = 62f.dp
 
         val offsetAnimation = remember { Animatable(0f) }
         val panelOffset by remember(density) {
@@ -232,7 +232,7 @@ fun LiquidBottomTabs(
                         onDrawSurface = { drawRect(containerColor) }
                     )
                     .then(interactiveHighlight.modifier)
-                    .height(barHeight * (108f / 124f))
+                    .height(54f.dp)
                     .fillMaxWidth()
                     .padding(horizontal = 4f.dp)
                     .graphicsLayer(colorFilter = ColorFilter.tint(accentColor)),
@@ -294,7 +294,7 @@ fun LiquidBottomTabs(
                         drawRect(Color.Black.copy(alpha = 0.03f * progress))
                     }
                 )
-                .height(barHeight * (108f / 124f))
+                .height(54f.dp)
                 .fillMaxWidth(1f / tabsCount)
         )
     }
