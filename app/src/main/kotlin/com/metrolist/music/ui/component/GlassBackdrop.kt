@@ -38,7 +38,7 @@ fun Modifier.glassSurface(
             shape = { shape },
             effects = {
                 vibrancy()
-                blur(10f.dp.toPx())
+                blur(5f.dp.toPx())
                 lens(36f.dp.toPx(), 36f.dp.toPx(), chromaticAberration = true)
             },
             highlight = { Highlight.Default },

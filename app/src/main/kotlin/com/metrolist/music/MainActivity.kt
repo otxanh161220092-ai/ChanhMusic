@@ -793,7 +793,7 @@ class MainActivity : FragmentActivity() {
 
                 val navPadding =
                     if (shouldShowNavigationBar && !showRail) {
-                        if (useAppleStyleLayout) 124.dp else if (slimNav) SlimNavBarHeight else NavigationBarHeight
+                        if (useAppleStyleLayout) 116.dp else if (slimNav) SlimNavBarHeight else NavigationBarHeight
                     } else {
                         0.dp
                     }
