@@ -11,7 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import com.metrolist.music.ui.component.liquidtabs.Capsule
 import com.metrolist.music.ui.component.liquidtabs.LiquidBottomTabs
+import com.metrolist.music.ui.component.liquidtabs.LocalLiquidBottomTabScale
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -39,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import com.metrolist.music.R
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.metrolist.music.ui.screens.Screens
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -415,21 +419,30 @@ private fun LiquidNavigationBar(
                 }
             },
     ) {
+        val tabScale = LocalLiquidBottomTabScale.current
         navigationItems.forEach { screen ->
             Column(
-                modifier = Modifier.weight(1f).fillMaxHeight(),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clip(Capsule())
+                    .graphicsLayer {
+                        val scale = tabScale()
+                        scaleX = scale
+                        scaleY = scale
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
             ) {
                 Icon(
                     painter = painterResource(id = screen.iconIdInactive),
                     contentDescription = stringResource(screen.titleId),
                     tint = iconColor,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(28.dp),
                 )
                 Text(
                     text = stringResource(screen.titleId),
-                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 12.sp,
                     color = iconColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
