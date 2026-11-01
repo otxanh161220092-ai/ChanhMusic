@@ -150,6 +150,7 @@ import com.metrolist.music.constants.EnableLandscapeScalingKey
 import com.metrolist.music.constants.ExperimentalLyricsKey
 import com.metrolist.music.constants.ForceBottomNavBarKey
 import com.metrolist.music.constants.LastSeenVersionKey
+import com.metrolist.music.constants.GlassBlurKey
 import com.metrolist.music.constants.ListenTogetherInTopBarKey
 import com.metrolist.music.constants.ListenTogetherUsernameKey
 import com.metrolist.music.constants.LyricsProviderOrderKey
@@ -474,7 +475,11 @@ class MainActivity : FragmentActivity() {
 
         setContent {
             val glassBackdropRoot = rememberLayerBackdrop()
-            CompositionLocalProvider(LocalGlassBackdrop provides glassBackdropRoot) {
+            val (glassBlurDp) = rememberPreference(GlassBlurKey, defaultValue = 5f)
+            CompositionLocalProvider(
+                LocalGlassBackdrop provides glassBackdropRoot,
+                com.metrolist.music.ui.component.LocalGlassBlur provides glassBlurDp,
+            ) {
             MetrolistApp(
                 latestVersionName = latestVersionName,
                 onLatestVersionNameChange = { latestVersionName = it },
@@ -698,7 +703,7 @@ class MainActivity : FragmentActivity() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val (previousTab, setPreviousTab) = rememberSaveable { mutableStateOf("home") }
 
-                val (listenTogetherInTopBar) = rememberPreference(ListenTogetherInTopBarKey, defaultValue = false)
+                val listenTogetherInTopBar = false
                 val navigationItems =
                     remember(listenTogetherInTopBar) {
                         val base =

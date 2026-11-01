@@ -73,6 +73,7 @@ fun LiquidBottomTabs(
     val containerColor = Color.Transparent
 
     val tabsBackdrop = rememberLayerBackdrop()
+    val glassBlur = com.metrolist.music.ui.component.LocalGlassBlur.current
 
     BoxWithConstraints(
         modifier,
@@ -169,7 +170,7 @@ fun LiquidBottomTabs(
                     backdrop = backdrop,
                     shape = { Capsule() },
                     effects = {
-                        blur(5f.dp.toPx())
+                        blur(glassBlur.dp.toPx())
                         lens(
                             32f.dp.toPx(),
                             36f.dp.toPx(),
@@ -179,7 +180,10 @@ fun LiquidBottomTabs(
                     highlight = { Highlight.Default },
                     shadow = { Shadow(alpha = 0.2f) },
                     innerShadow = { InnerShadow(radius = 10f.dp, alpha = 0.3f) },
-                    onDrawSurface = { drawRect(Color.White.copy(alpha = 0.45f), blendMode = BlendMode.Overlay) },
+                    onDrawSurface = {
+                        drawRect(Color.White.copy(alpha = 0.45f), blendMode = BlendMode.Overlay)
+                        drawRect(Color.White.copy(alpha = 0.5f))
+                    },
                 )
                 .then(interactiveHighlight.modifier)
                 .height(barHeight)
@@ -240,7 +244,7 @@ fun LiquidBottomTabs(
                 .drawBackdrop(
                     backdrop = backdrop,
                     shape = { Capsule() },
-                    effects = { blur(14f.dp.toPx()) },
+                    effects = { blur((glassBlur * 2.8f).dp.toPx()) },
                 )
                 .height(64f.dp)
                 .fillMaxWidth(1f / tabsCount)

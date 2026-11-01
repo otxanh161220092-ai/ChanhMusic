@@ -8,6 +8,7 @@ package com.metrolist.music.ui.component
 import androidx.compose.foundation.background
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -23,13 +24,19 @@ import com.kyant.backdrop.shadow.Shadow
 /** Root layer that records the app content, so floating bars can render glass over it. */
 val LocalGlassBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
 
+/** User-adjustable blur radius (dp) shared by every liquid glass surface. */
+val LocalGlassBlur = staticCompositionLocalOf { 5f }
+
 /** Liquid glass surface over the recorded backdrop; plain [fallbackColor] when no backdrop is available. */
 fun Modifier.glassSurface(
     backdrop: LayerBackdrop?,
     shape: Shape,
     fallbackColor: Color,
     tint: Color,
+    mask: Color = Color.Transparent,
 ): Modifier =
+    composed {
+    val blurDp = LocalGlassBlur.current
     if (backdrop == null) {
         this.background(fallbackColor, shape)
     } else {
@@ -38,11 +45,15 @@ fun Modifier.glassSurface(
             shape = { shape },
             effects = {
                 vibrancy()
-                blur(5f.dp.toPx())
+                blur(blurDp.dp.toPx())
                 lens(36f.dp.toPx(), 36f.dp.toPx(), chromaticAberration = true)
             },
             highlight = { Highlight.Default },
             shadow = { Shadow(alpha = 0.2f) },
-            onDrawSurface = { drawRect(tint, blendMode = BlendMode.Overlay) },
+            onDrawSurface = {
+                drawRect(tint, blendMode = BlendMode.Overlay)
+                drawRect(mask)
+            },
         )
+    }
     }
