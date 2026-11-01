@@ -160,6 +160,8 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import com.metrolist.music.constants.AutomixEnabledKey
+import com.metrolist.music.constants.CrossfadeEnabledKey
+import com.metrolist.music.constants.TransitionPrefersAutomixKey
 import com.metrolist.music.constants.AutoRadioQueueKey
 import com.metrolist.music.ui.utils.resize
 import androidx.compose.ui.layout.ContentScale
@@ -836,6 +838,8 @@ fun Queue(
 
 
                     var automixEnabled by rememberPreference(AutomixEnabledKey, defaultValue = false)
+                    var crossfadeOn by rememberPreference(CrossfadeEnabledKey, defaultValue = false)
+                    var prefersAutomix by rememberPreference(TransitionPrefersAutomixKey, defaultValue = true)
                     var autoRadioQueue by rememberPreference(AutoRadioQueueKey, defaultValue = true)
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -878,7 +882,15 @@ fun Queue(
                             iconRes = R.drawable.ic_automix,
                             active = automixEnabled,
                             enabled = !isListenTogetherGuest,
-                            onClick = { automixEnabled = !automixEnabled },
+                            onClick = {
+                                // AutoMix and Crossfade are mutually exclusive.
+                                val turnOn = !automixEnabled
+                                automixEnabled = turnOn
+                                if (turnOn) {
+                                    crossfadeOn = false
+                                    prefersAutomix = true
+                                }
+                            },
                         )
                     }
                     }

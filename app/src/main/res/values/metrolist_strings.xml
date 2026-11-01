@@ -357,6 +357,14 @@
     <string name="crossfade_duration">Crossfade duration</string>
     <string name="crossfade_gapless">Disable for gapless albums</string>
     <string name="crossfade_gapless_desc">Skip crossfade for albums designed to play without gaps</string>
+    <string name="song_transitions">Song transitions</string>
+    <string name="song_transitions_desc">Blend one song into the next. Choose AutoMix or Crossfade, never both</string>
+    <string name="transition_automix">AutoMix</string>
+    <string name="transition_automix_desc">Picks the mix points, fades and tempo for each pair of songs</string>
+    <string name="transition_crossfade">Crossfade</string>
+    <string name="transition_crossfade_desc">Fixed-length fade at the end of every song</string>
+    <string name="creative_transitions">Creative transitions</string>
+    <string name="creative_transitions_desc">Adds a low-pass filter sweep to the song that is leaving</string>
     <string name="automix">Automix</string>
     <string name="mixing">Mixing</string>
     <string name="player_state_on">On</string>

@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -42,10 +43,12 @@ import com.metrolist.music.constants.AudioTrackPlaybackParamsKey
 import com.metrolist.music.constants.AudioQuality
 import com.metrolist.music.constants.AudioQualityKey
 import com.metrolist.music.constants.AutoDownloadOnLikeKey
+import com.metrolist.music.constants.AutomixCreativeKey
 import com.metrolist.music.constants.AutomixEnabledKey
 import com.metrolist.music.constants.CrossfadeDurationKey
 import com.metrolist.music.constants.CrossfadeEnabledKey
 import com.metrolist.music.constants.CrossfadeGaplessKey
+import com.metrolist.music.constants.TransitionPrefersAutomixKey
 import com.metrolist.music.constants.AutoLoadMoreKey
 import com.metrolist.music.constants.AutoRadioQueueKey
 import com.metrolist.music.constants.AutoSkipNextOnErrorKey
@@ -116,6 +119,29 @@ fun PlayerSettings(
         AutomixEnabledKey,
         defaultValue = false
     )
+    val (automixCreative, onAutomixCreativeChange) = rememberPreference(
+        AutomixCreativeKey,
+        defaultValue = true
+    )
+    val (preferAutomix, onPreferAutomixChange) = rememberPreference(
+        TransitionPrefersAutomixKey,
+        defaultValue = true
+    )
+    // AutoMix and Crossfade are independent engines; at most one of them is ever enabled.
+    val transitionsOn = automixEnabled || crossfadeEnabled
+    val onStyleChange: (Boolean) -> Unit = { automix ->
+        onPreferAutomixChange(automix)
+        onAutomixEnabledChange(automix)
+        onCrossfadeEnabledChange(!automix)
+    }
+    val onTransitionsChange: (Boolean) -> Unit = { on ->
+        if (on) {
+            onStyleChange(preferAutomix)
+        } else {
+            onAutomixEnabledChange(false)
+            onCrossfadeEnabledChange(false)
+        }
+    }
     val (persistentQueue, onPersistentQueueChange) = rememberPreference(
         PersistentQueueKey,
         defaultValue = true
@@ -307,25 +333,64 @@ fun PlayerSettings(
                 ))
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.linear_scale),
-                    title = { Text(stringResource(R.string.crossfade)) },
-                    description = { Text(stringResource(R.string.crossfade_desc)) },
+                    title = { Text(stringResource(R.string.song_transitions)) },
+                    description = { Text(stringResource(R.string.song_transitions_desc)) },
                     trailingContent = {
                         Switch(
-                            checked = crossfadeEnabled,
-                            onCheckedChange = onCrossfadeEnabledChange,
+                            checked = transitionsOn,
+                            onCheckedChange = onTransitionsChange,
                             thumbContent = {
                                 Icon(
-                                    painter = painterResource(
-                                        id = if (crossfadeEnabled) R.drawable.check else R.drawable.close
-                                    ),
+                                    painter = painterResource(id = if (transitionsOn) R.drawable.check else R.drawable.close),
                                     contentDescription = null,
                                     modifier = Modifier.size(SwitchDefaults.IconSize)
                                 )
                             }
                         )
                     },
-                    onClick = { onCrossfadeEnabledChange(!crossfadeEnabled) }
+                    onClick = { onTransitionsChange(!transitionsOn) }
                 ))
+                if (transitionsOn) {
+                    add(Material3SettingsItem(
+                        icon = painterResource(R.drawable.graphic_eq),
+                        title = { Text(stringResource(R.string.transition_automix)) },
+                        description = { Text(stringResource(R.string.transition_automix_desc)) },
+                        trailingContent = {
+                            RadioButton(selected = automixEnabled, onClick = { onStyleChange(true) })
+                        },
+                        onClick = { onStyleChange(true) }
+                    ))
+                    add(Material3SettingsItem(
+                        icon = painterResource(R.drawable.linear_scale),
+                        title = { Text(stringResource(R.string.transition_crossfade)) },
+                        description = { Text(stringResource(R.string.transition_crossfade_desc)) },
+                        trailingContent = {
+                            RadioButton(selected = crossfadeEnabled, onClick = { onStyleChange(false) })
+                        },
+                        onClick = { onStyleChange(false) }
+                    ))
+                }
+                if (automixEnabled) {
+                    add(Material3SettingsItem(
+                        icon = painterResource(R.drawable.graphic_eq),
+                        title = { Text(stringResource(R.string.creative_transitions)) },
+                        description = { Text(stringResource(R.string.creative_transitions_desc)) },
+                        trailingContent = {
+                            Switch(
+                            checked = automixCreative,
+                            onCheckedChange = onAutomixCreativeChange,
+                            thumbContent = {
+                                Icon(
+                                    painter = painterResource(id = if (automixCreative) R.drawable.check else R.drawable.close),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                                )
+                            }
+                        )
+                        },
+                        onClick = { onAutomixCreativeChange(!automixCreative) }
+                    ))
+                }
                 if (crossfadeEnabled) {
                     add(Material3SettingsItem(
                         icon = painterResource(R.drawable.timer),
@@ -348,41 +413,18 @@ fun PlayerSettings(
                         description = { Text(stringResource(R.string.crossfade_gapless_desc)) },
                         trailingContent = {
                             Switch(
-                                checked = crossfadeGapless,
-                                onCheckedChange = onCrossfadeGaplessChange,
-                                thumbContent = {
-                                    Icon(
-                                        painter = painterResource(
-                                            id = if (crossfadeGapless) R.drawable.check else R.drawable.close
-                                        ),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(SwitchDefaults.IconSize)
-                                    )
-                                }
-                            )
+                            checked = crossfadeGapless,
+                            onCheckedChange = onCrossfadeGaplessChange,
+                            thumbContent = {
+                                Icon(
+                                    painter = painterResource(id = if (crossfadeGapless) R.drawable.check else R.drawable.close),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                                )
+                            }
+                        )
                         },
                         onClick = { onCrossfadeGaplessChange(!crossfadeGapless) }
-                    ))
-                    add(Material3SettingsItem(
-                        icon = painterResource(R.drawable.graphic_eq),
-                        title = { Text(stringResource(R.string.automix)) },
-                        description = { Text(stringResource(R.string.automix_desc)) },
-                        trailingContent = {
-                            Switch(
-                                checked = automixEnabled,
-                                onCheckedChange = onAutomixEnabledChange,
-                                thumbContent = {
-                                    Icon(
-                                        painter = painterResource(
-                                            id = if (automixEnabled) R.drawable.check else R.drawable.close
-                                        ),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(SwitchDefaults.IconSize)
-                                    )
-                                }
-                            )
-                        },
-                        onClick = { onAutomixEnabledChange(!automixEnabled) }
                     ))
                 }
                 add(Material3SettingsItem(
@@ -477,19 +519,19 @@ fun PlayerSettings(
                     title = { Text(stringResource(R.string.audio_offload)) },
                     description = {
                         Text(
-                            if (crossfadeEnabled) stringResource(R.string.audio_offload_disabled_by_crossfade)
+                            if (transitionsOn) stringResource(R.string.audio_offload_disabled_by_crossfade)
                             else stringResource(R.string.audio_offload_description)
                         )
                     },
                     trailingContent = {
                         Switch(
-                            checked = if (crossfadeEnabled) false else audioOffload,
+                            checked = if (transitionsOn) false else audioOffload,
                             onCheckedChange = onAudioOffloadChange,
-                            enabled = !crossfadeEnabled,
+                            enabled = !transitionsOn,
                             thumbContent = {
                                 Icon(
                                     painter = painterResource(
-                                        id = if (!crossfadeEnabled && audioOffload) R.drawable.check else R.drawable.close
+                                        id = if (!transitionsOn && audioOffload) R.drawable.check else R.drawable.close
                                     ),
                                     contentDescription = null,
                                     modifier = Modifier.size(SwitchDefaults.IconSize)
@@ -497,7 +539,7 @@ fun PlayerSettings(
                             }
                         )
                     },
-                    onClick = { if (!crossfadeEnabled) onAudioOffloadChange(!audioOffload) }
+                    onClick = { if (!transitionsOn) onAudioOffloadChange(!audioOffload) }
                 ))
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.graphic_eq),
