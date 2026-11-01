@@ -4905,22 +4905,27 @@ class MusicService :
         cancelMixPlanning()
         mixZone.value = null
 
-        val mediaCrossfadeDuration = crossfadeDuration.toLong()
-
-        if (!crossfadeEnabled || crossfadeDuration <= 0f || player.duration == C.TIME_UNSET || player.duration <= mediaCrossfadeDuration) return
+        val fixedCrossfade = crossfadeEnabled && crossfadeDuration > 0f
+        if (!fixedCrossfade && !automixEnabled) return
+        if (player.duration == C.TIME_UNSET || player.duration <= 0) return
         if (crossfadeGapless && isNextItemGapless()) return
         if (!player.hasNextMediaItem() && player.repeatMode != REPEAT_MODE_ONE) return
+
+        val targetMediaId = player.currentMediaItem?.mediaId
+
+        // Automix plans its own transition and works without the fixed crossfade setting.
+        if (automixEnabled) requestMixPlan(targetMediaId)
+
+        if (!fixedCrossfade) return
+        val mediaCrossfadeDuration = crossfadeDuration.toLong()
+        if (player.duration <= mediaCrossfadeDuration) return
 
         val triggerTime = player.duration - mediaCrossfadeDuration
         mixZone.value = triggerTime..player.duration
         val mediaTimeRemaining = triggerTime - player.currentPosition
         if (mediaTimeRemaining <= 0) return
 
-        val targetMediaId = player.currentMediaItem?.mediaId
-
         scheduleCrossfadeMessage(triggerTime, targetMediaId)
-
-        if (automixEnabled) requestMixPlan(targetMediaId)
     }
 
     private fun scheduleCrossfadeMessage(
@@ -4983,7 +4988,7 @@ class MusicService :
                         songA = featuresA.toSongStructure(vocalGapsFor(currentId, featuresA.durationMs)),
                         songB = featuresB.toSongStructure(vocalGapsFor(nextId, featuresB.durationMs)),
                         earliestMixMs = player.currentPosition + AUTOMIX_MIN_LEAD_MS,
-                        longFadeMs = crossfadeDuration.toLong(),
+                        longFadeMs = if (crossfadeEnabled) crossfadeDuration.toLong() else SmartTransitionCalculator.DEFAULT_LONG_FADE_MS,
                         quickCut = AUTOMIX_QUICK_CUT,
                     ) ?: return@launch
                 if (duration == C.TIME_UNSET || plan.handoverEndA > duration) return@launch
