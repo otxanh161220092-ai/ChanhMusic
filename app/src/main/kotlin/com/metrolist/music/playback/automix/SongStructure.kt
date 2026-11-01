@@ -1,0 +1,30 @@
+/**
+ * Metrolist Project (C) 2026
+ * Licensed under GPL-3.0 | See git history for contributors
+ */
+
+package com.metrolist.music.playback.automix
+
+/**
+ * Everything the transition calculator needs to know about one song.
+ *
+ * @property gridNear measures the beat grid around a track position, or null when the song has no
+ * usable tempo. Positions are milliseconds of track time.
+ */
+class SongStructure(
+    val durationMs: Long,
+    val segments: List<SongSegment>,
+    val bpm: Float = 0f,
+    val hasTempo: Boolean = false,
+    val gridNear: (Long) -> BeatGrid? = { null },
+)
+
+/** Builds a structure from analysis results using the heuristic segmenter. */
+fun TrackFeatures.toSongStructure(): SongStructure =
+    SongStructure(
+        durationMs = durationMs,
+        segments = HeuristicSegmenter.segment(durationMs, loudnessDb),
+        bpm = bpm,
+        hasTempo = hasTempo,
+        gridNear = { positionMs -> if (hasTempo) gridNear(positionMs.toDouble()) else null },
+    )

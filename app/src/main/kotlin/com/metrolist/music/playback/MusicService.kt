@@ -28,8 +28,10 @@ import com.metrolist.music.playback.audio.VolumeNormalizationAudioProcessor
 import com.metrolist.music.playback.automix.AutomixAnalyzer
 import com.metrolist.music.playback.automix.AutomixPrescanner
 import com.metrolist.music.playback.automix.FileAutomixFeatureStore
-import com.metrolist.music.playback.automix.MixPlan
-import com.metrolist.music.playback.automix.MixPlanner
+import com.metrolist.music.playback.automix.PhaseController
+import com.metrolist.music.playback.automix.SmartTransitionCalculator
+import com.metrolist.music.playback.automix.TransitionPlan
+import com.metrolist.music.playback.automix.toSongStructure
 import kotlin.math.abs
 import com.metrolist.music.utils.safeDataStoreEdit
 import android.net.ConnectivityManager
@@ -419,7 +421,7 @@ class MusicService :
     private var isCrossfading = false
     private var crossfadeJob: Job? = null
     private var automixEnabled = false
-    private var mixPlan: MixPlan? = null
+    private var mixPlan: TransitionPlan? = null
     private var mixPlanJob: Job? = null
     private var preparedMix: PreparedMix? = null
     private var tempoRampJob: Job? = null
@@ -4962,43 +4964,46 @@ class MusicService :
 
         mixPlanJob =
             scope.launch {
-                val current = automixAnalyzer.analyze(currentId) ?: return@launch
-                val next = automixAnalyzer.analyze(nextId) ?: return@launch
+                val featuresA = automixAnalyzer.analyze(currentId) ?: return@launch
+                val featuresB = automixAnalyzer.analyze(nextId) ?: return@launch
                 if (player.currentMediaItem?.mediaId != currentId || isCrossfading) return@launch
 
                 val duration = player.duration
                 val plan =
-                    MixPlanner.plan(
-                        current = current,
-                        next = next,
-                        desiredMixMs = crossfadeDuration.toLong(),
-                        earliestStartMs = player.currentPosition + AUTOMIX_MIN_LEAD_MS,
+                    SmartTransitionCalculator.calculateTransitionPlan(
+                        songA = featuresA.toSongStructure(),
+                        songB = featuresB.toSongStructure(),
+                        earliestMixMs = player.currentPosition + AUTOMIX_MIN_LEAD_MS,
+                        longFadeMs = crossfadeDuration.toLong(),
                     ) ?: return@launch
-                if (duration == C.TIME_UNSET || plan.endMs > duration) return@launch
+                if (duration == C.TIME_UNSET || plan.handoverEndA > duration) return@launch
 
                 Timber
                     .tag(TAG)
                     .d(
-                        "Automix plan: start=%d len=%d nextStart=%d speed=%.3f tempoMatched=%b",
-                        plan.startMs,
-                        plan.lengthMs,
-                        plan.nextStartMs,
-                        plan.nextSpeedFactor,
+                        "Transition %s: fadeOut A at %d (%d ms), fadeIn B at %d (%d ms), B start %d, speed %.3f, matched=%b",
+                        plan.kind,
+                        plan.mixOutPositionA,
+                        plan.fadeOutDurationA,
+                        plan.mixInPositionB,
+                        plan.fadeInDurationB,
+                        plan.secondaryStartPositionMs,
+                        plan.speedFactorB,
                         plan.tempoMatched,
                     )
                 mixPlan = plan
-                mixZone.value = plan.startMs..plan.endMs
-                scheduleCrossfadeMessage(plan.startMs, currentId)
+                mixZone.value = plan.startA..plan.handoverEndA
+                scheduleCrossfadeMessage(plan.startA, currentId)
                 scheduleAutomixPrescan()
 
                 // Load the next song shortly before the mix so it starts exactly on the beat.
-                while (isActive && player.currentPosition < plan.startMs - AUTOMIX_PREPARE_LEAD_MS) delay(500)
+                while (isActive && player.currentPosition < plan.startA - AUTOMIX_PREPARE_LEAD_MS) delay(500)
                 if (player.currentMediaItem?.mediaId != currentId || isCrossfading || secondaryPlayer != null) return@launch
                 val prepared =
                     buildSecondaryPlayer(
                         targetIndex = nextIndex,
-                        startPositionMs = plan.nextStartMs,
-                        speedFactor = plan.nextSpeedFactor,
+                        startPositionMs = plan.secondaryStartPositionMs,
+                        speedFactor = plan.speedFactorB,
                     ) ?: return@launch
                 secondaryPlayer = prepared
                 preparedMix = PreparedMix(nextIndex, nextId, player.mediaItemCount)
@@ -5048,8 +5053,8 @@ class MusicService :
             secPlayer =
                 buildSecondaryPlayer(
                     targetIndex = targetIndex,
-                    startPositionMs = plan?.nextStartMs ?: 0L,
-                    speedFactor = plan?.nextSpeedFactor ?: 1f,
+                    startPositionMs = plan?.secondaryStartPositionMs ?: 0L,
+                    speedFactor = plan?.speedFactorB ?: 1f,
                 ) ?: return
             secondaryPlayer = secPlayer
         }
@@ -5093,7 +5098,7 @@ class MusicService :
         }
     }
 
-    private fun performCrossfadeSwap(plan: MixPlan? = null) {
+    private fun performCrossfadeSwap(plan: TransitionPlan? = null) {
         isCrossfading = true
         isMixing.value = true
         val nextPlayer = secondaryPlayer ?: return
@@ -5156,7 +5161,8 @@ class MusicService :
         crossfadeJob =
             scope.launch {
                 val speed = fadingPlayer?.playbackParameters?.speed?.coerceAtLeast(0.01f) ?: 1f
-                val duration = ((plan?.lengthMs?.toFloat() ?: crossfadeDuration) / speed).toLong()
+                val windowMs = plan?.windowMs?.toFloat() ?: crossfadeDuration
+                val duration = (windowMs / speed).toLong()
                 val steps = if (plan != null) (duration / 50L).toInt().coerceIn(20, 400) else 20
                 val stepTime = duration / steps
                 val startVolume =
@@ -5165,6 +5171,7 @@ class MusicService :
                     } catch (e: Exception) {
                         1f
                     }
+                val targetSpeedB = player.playbackParameters.speed
 
                 for (i in 0..steps) {
                     if (!isActive) break
@@ -5173,18 +5180,12 @@ class MusicService :
                     }
 
                     val progress = i / steps.toFloat()
-                    // Planned mixes overlap loud sections, so use equal-power curves to keep the level steady.
-                    val fadeIn =
+                    val (fadeOut, fadeIn) =
                         if (plan != null) {
-                            kotlin.math.sin(progress * Math.PI.toFloat() / 2f)
+                            plan.gainsAt(progress * plan.windowMs)
                         } else {
-                            1.0f - (1.0f - progress) * (1.0f - progress)
-                        }
-                    val fadeOut =
-                        if (plan != null) {
-                            kotlin.math.cos(progress * Math.PI.toFloat() / 2f)
-                        } else {
-                            (1.0f - progress) * (1.0f - progress)
+                            val remaining = 1f - progress
+                            (remaining * remaining) to (1f - remaining * remaining)
                         }
 
                     try {
@@ -5194,19 +5195,44 @@ class MusicService :
                         break
                     }
 
+                    if (plan != null && plan.canTrackPhase) {
+                        correctBeatPhase(plan, first = i == 0, last = i == steps, targetSpeedB = targetSpeedB)
+                    }
                     delay(stepTime)
                 }
 
                 try {
                     fadingPlayer?.volume = 0f
                     player.volume = startVolume
+                    player.playbackParameters = PlaybackParameters(targetSpeedB, player.playbackParameters.pitch)
                 } catch (e: Exception) {
                 }
 
                 cleanupCrossfade(fadingPlayerSessionId = previousAudioSessionId)
 
-                if (plan != null && plan.nextSpeedFactor != 1f) rampTempoBack(plan.nextSpeedFactor)
+                if (plan != null && plan.speedFactorB != 1f) rampTempoBack(plan.speedFactorB)
             }
+    }
+
+    /**
+     * Measures how far B's beat is from A's beat during the overlap and nudges B's tempo to close the
+     * gap. Logs the error at the first and last step so the result can be checked on a real device.
+     */
+    private fun correctBeatPhase(
+        plan: TransitionPlan,
+        first: Boolean,
+        last: Boolean,
+        targetSpeedB: Float,
+    ) {
+        val positionA = fadingPlayer?.currentPosition ?: return
+        val positionB = player.currentPosition
+        val errorMs = plan.phaseErrorMs(positionA, positionB) ?: return
+        val predicted = plan.predictedPhaseErrorMs()
+        if (first) Timber.tag(TAG).i("Beat phase at start: %.1f ms (predicted %.1f ms)", errorMs, predicted?.first ?: 0.0)
+        if (last) Timber.tag(TAG).i("Beat phase at end: %.1f ms (predicted %.1f ms)", errorMs, predicted?.second ?: 0.0)
+        val multiplier =
+            if (last) 1.0 else PhaseController.speedMultiplier(plan.phaseErrorBeats(positionA, positionB) ?: 0.0, plan.gridA?.beatMs ?: return)
+        player.playbackParameters = PlaybackParameters(targetSpeedB * multiplier.toFloat(), player.playbackParameters.pitch)
     }
 
     // The next song was sped up or slowed down to match the previous one; glide back to the user's speed.

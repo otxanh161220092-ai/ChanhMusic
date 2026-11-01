@@ -5,83 +5,202 @@
 
 package com.metrolist.music.playback.automix
 
-/**
- * Where a transition happens.
- *
- * @property mixOutPositionA track-A position where its fade-out starts.
- * @property mixInPositionB track-B position that starts playing when the fade starts.
- * @property fadeDurationMs length of the overlap between the two tracks.
- */
-data class SmartTransition(
-    val mixOutPositionA: Long,
-    val mixInPositionB: Long,
-    val fadeDurationMs: Long,
-)
+import kotlin.math.abs
+import kotlin.math.floor
+import kotlin.math.roundToLong
 
 /**
- * Chooses the mix points from the structure of two songs. The cut can land anywhere in A, not only
- * at its end: the first usable section of A (after [calculate]'s `earliestMixMs`) decides the case.
+ * Plans a transition from song A to song B by looking at both songs together.
  *
- * - Case 1, A section is high energy (Drop/Chorus): the fade runs inside that section and finishes
- *   exactly where the section ends, so the listener hears the whole drop. B enters on a calm part
- *   (Intro/Verse).
- * - Case 2, A section is calm (Intro/Verse/Outro): the fade finishes exactly where that section ends,
- *   and B is pre-rolled so that its Chorus/Drop lands at that moment.
+ * Every pair (section of A, section of B) that follows the energy rule is a candidate:
+ * - A's section is high energy (Drop/Chorus) and B enters on a calm part (Intro/Verse): A keeps its
+ *   energy up to the end of the section and is cut short, while B fades in over a long time, starting
+ *   before the section ends. The handover completes exactly where A's section ends.
+ * - A's section is calm and B has a high-energy part (Chorus/Drop): A fades out slowly through its
+ *   calm section, and B comes in for a single beat so that its chorus lands exactly when the handover
+ *   completes. B is pre-rolled, so it starts wherever its structure requires, not at 0:00.
  *
- * Without usable structure it falls back to a fixed crossfade at the end of A.
+ * Each candidate is scored on how well the energies contrast, how far the tempos are apart, and how
+ * much of each song would be skipped, so the best mix point in A changes with every B.
+ *
  * Pure Kotlin with no Android types, so it can be unit tested on the JVM.
  */
 object SmartTransitionCalculator {
-    const val DEFAULT_FADE_MS = 6_000L
     const val MIN_FADE_MS = 4_000L
-    const val MAX_FADE_MS = 16_000L
+    const val DEFAULT_LONG_FADE_MS = 12_000L
 
-    fun calculate(
-        outgoing: List<SongSegment>,
-        outgoingDurationMs: Long,
-        incoming: List<SongSegment>,
+    private const val MAX_TEMPO_DELTA = 0.08
+    private const val SHORT_FADE_BEATS = 2.0
+    private const val QUICK_FADE_BEATS = 1.0
+    private const val FALLBACK_BEAT_MS = 500.0
+
+    private const val WEIGHT_ENERGY = 2.0
+    private const val WEIGHT_TEMPO = 1.5
+    private const val WEIGHT_SKIP_A = 1.5
+    private const val WEIGHT_SKIP_B = 1.0
+    private const val NO_TEMPO_COST = 1.0
+    private const val UNMATCHABLE_TEMPO_COST = 3.0
+
+    /**
+     * @param earliestMixMs the overlap may not open before this position in A.
+     * @param longFadeMs the long fade, shortened to fit the sections involved.
+     * @return the best plan, or null when no pair of sections fits (the caller keeps a plain crossfade).
+     */
+    fun calculateTransitionPlan(
+        songA: SongStructure,
+        songB: SongStructure,
         earliestMixMs: Long = 0L,
-    ): SmartTransition {
-        require(outgoingDurationMs > 0) { "outgoingDurationMs must be > 0" }
+        longFadeMs: Long = DEFAULT_LONG_FADE_MS,
+    ): TransitionPlan? {
+        if (songA.durationMs <= 0 || songB.durationMs <= 0) return null
+        val tempo = matchTempo(songA, songB)
 
-        val calmEntryB = incoming.filter { it.isCalmEntry }.minByOrNull { it.startTimeMs }
-        val highEntryB = incoming.filter { it.isHighEnergy }.minByOrNull { it.startTimeMs }
+        var best: TransitionPlan? = null
+        for (a in songA.segments) {
+            for (b in songB.segments) {
+                val plan = candidate(a, b, songA, songB, tempo, earliestMixMs, longFadeMs) ?: continue
+                if (best == null || plan.cost < best.cost) best = plan
+            }
+        }
+        return best
+    }
 
-        val anchors =
-            outgoing
-                .filter { it.durationMs >= MIN_FADE_MS && it.endTimeMs <= outgoingDurationMs }
-                .sortedBy { it.startTimeMs }
-
-        for (anchor in anchors) {
-            var fade = minOf(anchor.durationMs, MAX_FADE_MS)
-            if (anchor.endTimeMs - fade < earliestMixMs) continue
-
-            if (anchor.isHighEnergy) {
-                if (calmEntryB == null) continue
-                return SmartTransition(anchor.endTimeMs - fade, calmEntryB.startTimeMs, fade)
+    private fun candidate(
+        a: SongSegment,
+        b: SongSegment,
+        songA: SongStructure,
+        songB: SongStructure,
+        tempo: TempoMatch,
+        earliestMixMs: Long,
+        longFadeMs: Long,
+    ): TransitionPlan? {
+        val kind =
+            when {
+                a.isHighEnergy && b.isCalmEntry -> TransitionKind.DROP_TO_CALM
+                !a.isHighEnergy && b.isHighEnergy -> TransitionKind.CALM_TO_HIGH
+                else -> return null
             }
 
-            if (highEntryB == null) continue
-            // Pre-roll B so that its high-energy section starts exactly when the fade ends.
-            var mixIn = highEntryB.startTimeMs - fade
-            if (mixIn < 0) {
-                // B's high section comes sooner than a full fade: shorten the fade if still long enough.
-                if (highEntryB.startTimeMs >= MIN_FADE_MS) fade = highEntryB.startTimeMs
-                mixIn = 0L
+        val factor = tempo.factor.toDouble()
+        val gridA = songA.gridNear(a.endTimeMs)
+        val gridB = songB.gridNear(b.startTimeMs)
+        val barA = gridA?.barMs ?: 0.0
+        val beatA =
+            gridA?.beatMs ?: if (songA.hasTempo && songA.bpm > 0f) 60_000.0 / songA.bpm else FALLBACK_BEAT_MS
+
+        // The handover completes at a bar line at or before the end of A's section.
+        val handoverA = minOf(floorToBar(a.endTimeMs, gridA), songA.durationMs)
+        val sectionA = handoverA - a.startTimeMs
+        if (sectionA < MIN_FADE_MS) return null
+
+        val fadeOut: Long
+        val fadeIn: Long
+        val handoverB: Long
+        when (kind) {
+            TransitionKind.DROP_TO_CALM -> {
+                fadeOut = (SHORT_FADE_BEATS * beatA).roundToLong().coerceAtLeast(1L)
+                val entry = barAlignedStart(b, gridB)
+                val room = minOf(longFadeMs, sectionA, ((b.endTimeMs - entry) / factor).toLong())
+                fadeIn = roundDownToBars(room, barA)
+                if (fadeIn < MIN_FADE_MS) return null
+                handoverB = entry + (fadeIn * factor).toLong()
             }
-            val mixOut = anchor.endTimeMs - fade
-            if (mixOut < earliestMixMs) continue
-            return SmartTransition(mixOut, mixIn, fade)
+            TransitionKind.CALM_TO_HIGH -> {
+                fadeIn = (QUICK_FADE_BEATS * beatA).roundToLong().coerceAtLeast(1L)
+                handoverB = gridB?.nearestBar(b.startTimeMs.toDouble())?.toLong()?.coerceAtLeast(0L) ?: b.startTimeMs
+                // B is pre-rolled before its chorus, so a chorus that comes early limits how long A can fade.
+                val room = minOf(longFadeMs, sectionA, (handoverB / factor).toLong())
+                fadeOut = roundDownToBars(room, barA)
+                if (fadeOut < MIN_FADE_MS) return null
+            }
         }
 
-        return fallback(outgoingDurationMs)
+        val mixOutA = handoverA - fadeOut
+        val mixInB = handoverB - (fadeIn * factor).toLong()
+        val bFadeInStartA = handoverA - fadeIn
+        val startA = minOf(mixOutA, bFadeInStartA)
+        // B starts when the window opens; if its fade is shorter it plays silently until the fade begins.
+        val secondaryStartB = mixInB - ((bFadeInStartA - startA) * factor).toLong()
+
+        if (startA < earliestMixMs || startA < 0) return null
+        if (secondaryStartB < 0 || handoverB > songB.durationMs) return null
+
+        val contrast = if (kind == TransitionKind.DROP_TO_CALM) a.energy - b.energy else b.energy - a.energy
+        val skipA = (songA.durationMs - handoverA).toDouble() / songA.durationMs
+        val skipB = secondaryStartB.toDouble() / songB.durationMs
+        val cost =
+            WEIGHT_ENERGY * (1.0 - contrast) / 2.0 +
+                WEIGHT_TEMPO * tempo.cost +
+                WEIGHT_SKIP_A * skipA +
+                WEIGHT_SKIP_B * skipB
+
+        // Beat phase is only meaningful when the two beats are the same musical beat, not a folded half/double.
+        val trackPhase = tempo.matched && !tempo.octaveFolded
+        return TransitionPlan(
+            kind = kind,
+            mixOutPositionA = mixOutA,
+            fadeOutDurationA = fadeOut,
+            mixInPositionB = mixInB,
+            fadeInDurationB = fadeIn,
+            speedFactorB = tempo.factor,
+            tempoMatched = tempo.matched,
+            cost = cost,
+            gridA = if (trackPhase) gridA else null,
+            gridB = if (trackPhase) gridB else null,
+        )
     }
 
     private val SongSegment.isCalmEntry: Boolean
         get() = type == SegmentType.INTRO || type == SegmentType.VERSE
 
-    private fun fallback(outgoingDurationMs: Long): SmartTransition {
-        val fade = minOf(DEFAULT_FADE_MS, outgoingDurationMs)
-        return SmartTransition(outgoingDurationMs - fade, 0L, fade)
+    private class TempoMatch(
+        val factor: Float,
+        val matched: Boolean,
+        val octaveFolded: Boolean,
+        val cost: Double,
+    )
+
+    /** Factor to apply to B so its tempo equals A's, folding half/double tempo errors first. */
+    private fun matchTempo(
+        songA: SongStructure,
+        songB: SongStructure,
+    ): TempoMatch {
+        if (!songA.hasTempo || !songB.hasTempo || songA.bpm <= 0f || songB.bpm <= 0f) {
+            return TempoMatch(1f, false, false, NO_TEMPO_COST)
+        }
+        val raw = songA.bpm.toDouble() / songB.bpm
+        var ratio = raw
+        while (ratio > 1.4142) ratio /= 2.0
+        while (ratio < 0.7071) ratio *= 2.0
+        val folded = abs(raw - ratio) > 1e-6
+        val delta = abs(ratio - 1.0)
+        return if (delta <= MAX_TEMPO_DELTA) {
+            TempoMatch(ratio.toFloat(), true, folded, delta / MAX_TEMPO_DELTA)
+        } else {
+            TempoMatch(1f, false, false, UNMATCHABLE_TEMPO_COST)
+        }
     }
+
+    private fun floorToBar(
+        timeMs: Long,
+        grid: BeatGrid?,
+    ): Long {
+        if (grid == null) return timeMs
+        val bars = floor((timeMs - grid.downbeatMs) / grid.barMs)
+        return (grid.downbeatMs + bars * grid.barMs).toLong()
+    }
+
+    /** A calm section starts on the first bar line inside it, so B does not enter mid-bar. */
+    private fun barAlignedStart(
+        segment: SongSegment,
+        grid: BeatGrid?,
+    ): Long {
+        val aligned = grid?.firstBarAtOrAfter(segment.startTimeMs.toDouble())?.toLong() ?: return segment.startTimeMs
+        return if (aligned < segment.endTimeMs - MIN_FADE_MS) aligned else segment.startTimeMs
+    }
+
+    private fun roundDownToBars(
+        durationMs: Long,
+        barMs: Double,
+    ): Long = if (barMs <= 0.0) durationMs else (floor(durationMs / barMs) * barMs).toLong()
 }
