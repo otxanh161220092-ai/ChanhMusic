@@ -19,84 +19,69 @@ data class SmartTransition(
 )
 
 /**
- * Chooses the mix points from the structure of two songs.
+ * Chooses the mix points from the structure of two songs. The cut can land anywhere in A, not only
+ * at its end: the first usable section of A (after [calculate]'s `earliestMixMs`) decides the case.
  *
- * Rules:
- * - A ends on a high-energy part (Drop/Chorus): the mix starts at that part and B enters on a calmer
- *   part (Verse, else Intro) to close the cycle.
- * - A ends on a calm part (Intro/Verse/Outro): A fades out over its last calm part and B jumps straight
- *   into its first high-energy part (Chorus/Drop, else Drop/Chorus of any position), keeping the build.
- * - Missing structure falls back to a plain fixed crossfade at the end of A.
+ * - Case 1, A section is high energy (Drop/Chorus): the fade runs inside that section and finishes
+ *   exactly where the section ends, so the listener hears the whole drop. B enters on a calm part
+ *   (Intro/Verse).
+ * - Case 2, A section is calm (Intro/Verse/Outro): the fade finishes exactly where that section ends,
+ *   and B is pre-rolled so that its Chorus/Drop lands at that moment.
  *
+ * Without usable structure it falls back to a fixed crossfade at the end of A.
  * Pure Kotlin with no Android types, so it can be unit tested on the JVM.
  */
 object SmartTransitionCalculator {
     const val DEFAULT_FADE_MS = 6_000L
     const val MIN_FADE_MS = 4_000L
-    const val MAX_HIGH_ENERGY_FADE_MS = 16_000L
-    const val MAX_BUILD_FADE_MS = 8_000L
+    const val MAX_FADE_MS = 16_000L
 
     fun calculate(
         outgoing: List<SongSegment>,
         outgoingDurationMs: Long,
         incoming: List<SongSegment>,
+        earliestMixMs: Long = 0L,
     ): SmartTransition {
         require(outgoingDurationMs > 0) { "outgoingDurationMs must be > 0" }
 
-        val tailA = outgoing.maxByOrNull { it.startTimeMs }
-            ?: return fallback(outgoingDurationMs)
+        val calmEntryB = incoming.filter { it.isCalmEntry }.minByOrNull { it.startTimeMs }
+        val highEntryB = incoming.filter { it.isHighEnergy }.minByOrNull { it.startTimeMs }
 
-        val (mixOut, fade) =
-            if (tailA.isHighEnergy) {
-                // Start the fade at the drop/chorus and let it run through that section.
-                val desired = tailA.durationMs.coerceIn(MIN_FADE_MS, MAX_HIGH_ENERGY_FADE_MS)
-                tailA.startTimeMs to clampFade(tailA.startTimeMs, desired, outgoingDurationMs)
-            } else {
-                // Fade out over the calm section so it finishes right when B's high part arrives.
-                val desired = tailA.durationMs.coerceIn(MIN_FADE_MS, MAX_BUILD_FADE_MS)
-                val start = (tailA.endTimeMs - desired).coerceAtLeast(tailA.startTimeMs)
-                start to clampFade(start, desired, outgoingDurationMs)
+        val anchors =
+            outgoing
+                .filter { it.durationMs >= MIN_FADE_MS && it.endTimeMs <= outgoingDurationMs }
+                .sortedBy { it.startTimeMs }
+
+        for (anchor in anchors) {
+            var fade = minOf(anchor.durationMs, MAX_FADE_MS)
+            if (anchor.endTimeMs - fade < earliestMixMs) continue
+
+            if (anchor.isHighEnergy) {
+                if (calmEntryB == null) continue
+                return SmartTransition(anchor.endTimeMs - fade, calmEntryB.startTimeMs, fade)
             }
 
-        val mixIn =
-            if (tailA.isHighEnergy) {
-                // Drop/Chorus (A) -> Verse/Intro (B)
-                findFirst(incoming, SegmentType.VERSE)?.startTimeMs
-                    ?: findFirst(incoming, SegmentType.INTRO)?.startTimeMs
-                    ?: 0L
-            } else {
-                // Verse/Intro/Outro (A) -> Chorus/Drop (B)
-                findFirstHighEnergy(incoming)?.startTimeMs ?: 0L
+            if (highEntryB == null) continue
+            // Pre-roll B so that its high-energy section starts exactly when the fade ends.
+            var mixIn = highEntryB.startTimeMs - fade
+            if (mixIn < 0) {
+                // B's high section comes sooner than a full fade: shorten the fade if still long enough.
+                if (highEntryB.startTimeMs >= MIN_FADE_MS) fade = highEntryB.startTimeMs
+                mixIn = 0L
             }
+            val mixOut = anchor.endTimeMs - fade
+            if (mixOut < earliestMixMs) continue
+            return SmartTransition(mixOut, mixIn, fade)
+        }
 
-        return SmartTransition(
-            mixOutPositionA = mixOut,
-            mixInPositionB = mixIn,
-            fadeDurationMs = fade,
-        )
+        return fallback(outgoingDurationMs)
     }
+
+    private val SongSegment.isCalmEntry: Boolean
+        get() = type == SegmentType.INTRO || type == SegmentType.VERSE
 
     private fun fallback(outgoingDurationMs: Long): SmartTransition {
-        val fade = clampFade(0L, DEFAULT_FADE_MS, outgoingDurationMs)
-        return SmartTransition(
-            mixOutPositionA = (outgoingDurationMs - fade).coerceAtLeast(0L),
-            mixInPositionB = 0L,
-            fadeDurationMs = fade,
-        )
+        val fade = minOf(DEFAULT_FADE_MS, outgoingDurationMs)
+        return SmartTransition(outgoingDurationMs - fade, 0L, fade)
     }
-
-    /** Keeps the fade inside the track: it may not run past the end of A. */
-    private fun clampFade(
-        mixOut: Long,
-        desiredMs: Long,
-        outgoingDurationMs: Long,
-    ): Long = minOf(desiredMs, (outgoingDurationMs - mixOut).coerceAtLeast(0L))
-
-    private fun findFirst(
-        segments: List<SongSegment>,
-        type: SegmentType,
-    ): SongSegment? = segments.filter { it.type == type }.minByOrNull { it.startTimeMs }
-
-    private fun findFirstHighEnergy(segments: List<SongSegment>): SongSegment? =
-        segments.filter { it.isHighEnergy }.minByOrNull { it.startTimeMs }
 }

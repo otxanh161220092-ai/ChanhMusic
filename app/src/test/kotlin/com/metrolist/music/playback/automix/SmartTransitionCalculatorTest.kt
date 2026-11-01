@@ -17,54 +17,74 @@ class SmartTransitionCalculatorTest {
         end: Long,
     ) = SongSegment(type, start, end)
 
+    private val songB =
+        listOf(
+            seg(SegmentType.INTRO, 0, 8_000),
+            seg(SegmentType.VERSE, 8_000, 30_000),
+            seg(SegmentType.CHORUS, 30_000, 50_000),
+        )
+
     @Test
-    fun `drop at end of A mixes into verse of B`() {
+    fun `case 1 drop in the middle of A finishes exactly where the drop ends and B enters calm`() {
         val a =
             listOf(
                 seg(SegmentType.INTRO, 0, 10_000),
-                seg(SegmentType.VERSE, 10_000, 40_000),
                 seg(SegmentType.DROP, 40_000, 60_000),
-            )
-        val b =
-            listOf(
-                seg(SegmentType.INTRO, 0, 8_000),
-                seg(SegmentType.VERSE, 8_000, 30_000),
-                seg(SegmentType.CHORUS, 30_000, 50_000),
+                seg(SegmentType.VERSE, 60_000, 120_000),
             )
 
-        val t = SmartTransitionCalculator.calculate(a, 60_000, b)
+        val t = SmartTransitionCalculator.calculate(a, 120_000, songB, earliestMixMs = 30_000)
 
-        assertEquals(40_000L, t.mixOutPositionA)
-        assertEquals(8_000L, t.mixInPositionB)
+        assertEquals(60_000L, t.mixOutPositionA + t.fadeDurationMs)
+        assertEquals(16_000L, t.fadeDurationMs)
+        assertEquals(44_000L, t.mixOutPositionA)
+        assertEquals(0L, t.mixInPositionB)
+    }
+
+    @Test
+    fun `case 2 calm part of A pre-rolls B so its chorus lands when the fade ends`() {
+        val a = listOf(seg(SegmentType.VERSE, 10_000, 50_000))
+
+        val t = SmartTransitionCalculator.calculate(a, 100_000, songB)
+
+        assertEquals(50_000L, t.mixOutPositionA + t.fadeDurationMs)
+        assertEquals(30_000L, t.mixInPositionB + t.fadeDurationMs)
         assertEquals(16_000L, t.fadeDurationMs)
     }
 
     @Test
-    fun `verse at end of A mixes into chorus of B`() {
+    fun `case 2 shortens the fade when B chorus comes too soon`() {
+        val b = listOf(seg(SegmentType.INTRO, 0, 5_000), seg(SegmentType.CHORUS, 5_000, 30_000))
+        val a = listOf(seg(SegmentType.VERSE, 10_000, 50_000))
+
+        val t = SmartTransitionCalculator.calculate(a, 100_000, b)
+
+        assertEquals(0L, t.mixInPositionB)
+        assertEquals(5_000L, t.fadeDurationMs)
+        assertEquals(50_000L, t.mixOutPositionA + t.fadeDurationMs)
+    }
+
+    @Test
+    fun `mix point respects earliest allowed position`() {
         val a =
             listOf(
-                seg(SegmentType.INTRO, 0, 10_000),
-                seg(SegmentType.VERSE, 10_000, 50_000),
-            )
-        val b =
-            listOf(
-                seg(SegmentType.INTRO, 0, 12_000),
-                seg(SegmentType.CHORUS, 12_000, 40_000),
+                seg(SegmentType.VERSE, 0, 20_000),
+                seg(SegmentType.DROP, 60_000, 80_000),
             )
 
-        val t = SmartTransitionCalculator.calculate(a, 50_000, b)
+        val t = SmartTransitionCalculator.calculate(a, 100_000, songB, earliestMixMs = 50_000)
 
-        assertEquals(12_000L, t.mixInPositionB)
-        assertEquals(50_000L - 8_000L, t.mixOutPositionA)
-        assertEquals(8_000L, t.fadeDurationMs)
+        assertTrue(t.mixOutPositionA >= 50_000L)
+        assertEquals(80_000L, t.mixOutPositionA + t.fadeDurationMs)
     }
 
     @Test
     fun `fade never runs past end of A`() {
-        val a = listOf(seg(SegmentType.OUTRO, 0, 3_000))
-        val t = SmartTransitionCalculator.calculate(a, 3_000, listOf(seg(SegmentType.DROP, 0, 5_000)))
+        val a = listOf(seg(SegmentType.OUTRO, 0, 5_000))
 
-        assertTrue(t.mixOutPositionA + t.fadeDurationMs <= 3_000L)
+        val t = SmartTransitionCalculator.calculate(a, 5_000, songB)
+
+        assertTrue(t.mixOutPositionA + t.fadeDurationMs <= 5_000L)
     }
 
     @Test
