@@ -390,9 +390,8 @@ private fun NewMiniPlayer(
                         glassBackdrop,
                         RoundedCornerShape(30.dp),
                         backgroundColor,
-                        if (lightGlass) Color.Transparent else Color.Black.copy(alpha = 0.45f),
+                        if (lightGlass) Color.White.copy(alpha = 0.12f) else Color.Black.copy(alpha = 0.45f),
                     )
-                    .then(if (lightGlass) Modifier.background(Color.White.copy(alpha = 0.58f)) else Modifier)
                     .border(1.dp, outlineColor.copy(alpha = 0.45f), RoundedCornerShape(30.dp))
                     .drawWithContent {
                         drawContent()
