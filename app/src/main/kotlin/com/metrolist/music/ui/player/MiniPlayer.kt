@@ -301,9 +301,11 @@ private fun NewMiniPlayer(
             miniPlayerBackground == MiniPlayerBackgroundStyle.BLUR ||
             miniPlayerBackground == MiniPlayerBackgroundStyle.GRADIENT)
 
-    val primaryColor = if (forceLightColors) Color.White else MaterialTheme.colorScheme.primary
-    val outlineColor = if (forceLightColors) Color.White else MaterialTheme.colorScheme.outline
-    val onSurfaceColor = if (forceLightColors) Color.White else MaterialTheme.colorScheme.onSurface
+    val lightGlass = miniPlayerBackground == MiniPlayerBackgroundStyle.DEFAULT ||
+        miniPlayerBackground == MiniPlayerBackgroundStyle.TRANSPARENT
+    val primaryColor = if (lightGlass) Color.Black else if (forceLightColors) Color.White else MaterialTheme.colorScheme.primary
+    val outlineColor = if (lightGlass) Color.White else if (forceLightColors) Color.White else MaterialTheme.colorScheme.outline
+    val onSurfaceColor = if (lightGlass) Color.Black else if (forceLightColors) Color.White else MaterialTheme.colorScheme.onSurface
     val errorColor = if (forceLightColors) Color(0xFFFF6B6B) else MaterialTheme.colorScheme.error
 
     Box(
@@ -381,22 +383,28 @@ private fun NewMiniPlayer(
             modifier =
                 Modifier
                     .then(if (isTabletLandscape) Modifier.width(500.dp).align(Alignment.Center) else Modifier.fillMaxWidth())
-                    .height(56.dp)
+                    .height(60.dp)
                     .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                    .clip(RoundedCornerShape(32.dp))
-                    .glassSurface(glassBackdrop, RoundedCornerShape(32.dp), backgroundColor, Color.Black.copy(alpha = 0.45f))
-                    .border(1.dp, outlineColor.copy(alpha = 0.3f), RoundedCornerShape(32.dp))
+                    .clip(RoundedCornerShape(30.dp))
+                    .glassSurface(
+                        glassBackdrop,
+                        RoundedCornerShape(30.dp),
+                        backgroundColor,
+                        if (lightGlass) Color.Transparent else Color.Black.copy(alpha = 0.45f),
+                    )
+                    .then(if (lightGlass) Modifier.background(Color.White.copy(alpha = 0.58f)) else Modifier)
+                    .border(1.dp, outlineColor.copy(alpha = 0.45f), RoundedCornerShape(30.dp))
                     .drawWithContent {
                         drawContent()
                         val corner = CornerRadius(size.height / 2f)
                         drawRoundRect(
-                            brush = Brush.verticalGradient(0f to Color.White.copy(alpha = 0.22f), 0.5f to Color.Transparent),
+                            brush = Brush.verticalGradient(0f to Color.White.copy(alpha = 0.10f), 0.5f to Color.Transparent),
                             cornerRadius = corner,
                         )
                         drawRoundRect(
                             brush =
                                 Brush.linearGradient(
-                                    colors = listOf(Color.White.copy(alpha = 0.7f), Color.White.copy(alpha = 0.05f)),
+                                    colors = listOf(Color.White.copy(alpha = 0.8f), Color.White.copy(alpha = 0.2f)),
                                     start = Offset.Zero,
                                     end = Offset(size.width, size.height),
                                 ),
@@ -455,7 +463,7 @@ private fun NewMiniPlayer(
                     model = mediaMetadata?.thumbnailUrl?.resize(160, 160),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(44.dp).clip(RoundedCornerShape(10.dp)),
+                    modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)),
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -656,8 +664,8 @@ private fun NewMiniPlayerSongInfo(
             Text(
                 text = metadata.title,
                 color = onSurfaceColor,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Clip,
                 modifier = Modifier.basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp),
@@ -670,8 +678,8 @@ private fun NewMiniPlayerSongInfo(
                  if (metadata.artists.any { it.name.isNotBlank() }) {
                      Text(
                          text = metadata.artists.joinToArtistString(" ${stringResource(R.string.and)} ") { it.name },
-                         color = onSurfaceColor.copy(alpha = 0.7f),
-                        fontSize = 12.sp,
+                         color = onSurfaceColor.copy(alpha = 0.6f),
+                        fontSize = 14.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Clip,
                         modifier = Modifier.basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp),

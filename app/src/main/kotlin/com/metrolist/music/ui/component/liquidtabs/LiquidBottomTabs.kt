@@ -67,8 +67,8 @@ fun LiquidBottomTabs(
     content: @Composable RowScope.() -> Unit
 ) {
     val isLightTheme = !isSystemInDarkTheme()
-    val accentColor = Color(0xFF0A60D8)
-    val containerColor = Color(0xFFA6A6A6).copy(0.92f)
+    val accentColor = Color(0xFFFA233B)
+    val containerColor = Color.White.copy(0.58f)
 
     val tabsBackdrop = rememberLayerBackdrop()
 
@@ -80,7 +80,7 @@ fun LiquidBottomTabs(
         val tabWidth = with(density) {
             (constraints.maxWidth.toFloat() - 8f.dp.toPx()) / tabsCount
         }
-        val barHeight = 64f.dp
+        val barHeight = 72f.dp
 
         val offsetAnimation = remember { Animatable(0f) }
         val panelOffset by remember(density) {
@@ -104,7 +104,7 @@ fun LiquidBottomTabs(
                 valueRange = 0f..(tabsCount - 1).toFloat(),
                 visibilityThreshold = 0.001f,
                 initialScale = 1f,
-                pressedScale = 78f / 56f,
+                pressedScale = 78f / 64f,
                 onDragStarted = {},
                 onDragStopped = {
                     val targetIndex = targetValue.fastRoundToInt().fastCoerceIn(0, tabsCount - 1)
@@ -166,19 +166,19 @@ fun LiquidBottomTabs(
                     shape = { Capsule() },
                     effects = {
                         vibrancy()
-                        blur(20f.dp.toPx())
+                        blur(24f.dp.toPx())
                     },
                     highlight = { Highlight.Default },
-                    shadow = { Shadow(alpha = 0.3f) },
-                    innerShadow = { InnerShadow(radius = 6f.dp, alpha = 0.25f) },
+                    shadow = { Shadow(alpha = 0.12f) },
+                    innerShadow = { InnerShadow(radius = 6f.dp, alpha = 0.08f) },
                     onDrawSurface = { drawRect(containerColor) }
                 )
                 .border(
                     1f.dp,
                     Brush.verticalGradient(
-                        0f to Color.White.copy(alpha = 0.55f),
-                        0.5f to Color.White.copy(alpha = 0.06f),
-                        1f to Color.White.copy(alpha = 0.55f),
+                        0f to Color.White.copy(alpha = 0.85f),
+                        0.5f to Color.White.copy(alpha = 0.25f),
+                        1f to Color.White.copy(alpha = 0.85f),
                     ),
                     Capsule(),
                 )
@@ -277,13 +277,13 @@ fun LiquidBottomTabs(
                     onDrawSurface = {
                         val progress = dampedDragAnimation.pressProgress
                         drawRect(
-                            Color.Black.copy(0.12f),
+                            accentColor.copy(0.16f),
                             alpha = 1f - progress
                         )
                         drawRect(Color.Black.copy(alpha = 0.03f * progress))
                     }
                 )
-                .height(56f.dp)
+                .height(64f.dp)
                 .fillMaxWidth(1f / tabsCount)
         )
     }

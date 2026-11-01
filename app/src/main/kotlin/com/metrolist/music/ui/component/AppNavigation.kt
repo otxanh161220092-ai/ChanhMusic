@@ -34,6 +34,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -397,7 +398,7 @@ private fun LiquidNavigationBar(
         .indexOfFirst { isRouteSelected(currentRoute, it.route, navigationItems) }
         .coerceAtLeast(0)
     val tabsCount = navigationItems.size
-    val iconColor = MaterialTheme.colorScheme.onSurface
+    val iconColor = Color.Black
 
     LiquidBottomTabs(
         selectedTabIndex = { selectedIndex },
@@ -443,6 +444,7 @@ private fun LiquidNavigationBar(
                 Text(
                     text = stringResource(screen.titleId),
                     fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
                     color = iconColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
