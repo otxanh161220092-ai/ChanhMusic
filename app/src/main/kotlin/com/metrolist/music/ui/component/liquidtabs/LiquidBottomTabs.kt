@@ -178,6 +178,15 @@ fun LiquidBottomTabs(
                     highlight = {
                         Highlight.Default.copy(alpha = dampedDragAnimation.pressProgress)
                     },
+                    shadow = {
+                        Shadow(alpha = dampedDragAnimation.pressProgress)
+                    },
+                    innerShadow = {
+                        InnerShadow(
+                            radius = 8f.dp * dampedDragAnimation.pressProgress,
+                            alpha = dampedDragAnimation.pressProgress,
+                        )
+                    },
                     layerBlock = {
                         val progress = dampedDragAnimation.pressProgress
                         val scale = lerp(1f, 1f + 16f.dp.toPx() / size.width, progress)
