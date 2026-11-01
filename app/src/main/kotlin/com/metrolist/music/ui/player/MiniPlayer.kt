@@ -303,9 +303,9 @@ private fun NewMiniPlayer(
 
     val lightGlass = miniPlayerBackground == MiniPlayerBackgroundStyle.DEFAULT ||
         miniPlayerBackground == MiniPlayerBackgroundStyle.TRANSPARENT
-    val primaryColor = if (lightGlass) Color.Black else if (forceLightColors) Color.White else MaterialTheme.colorScheme.primary
+    val primaryColor = if (lightGlass) Color.White else if (forceLightColors) Color.White else MaterialTheme.colorScheme.primary
     val outlineColor = if (lightGlass) Color.White else if (forceLightColors) Color.White else MaterialTheme.colorScheme.outline
-    val onSurfaceColor = if (lightGlass) Color.Black else if (forceLightColors) Color.White else MaterialTheme.colorScheme.onSurface
+    val onSurfaceColor = if (lightGlass) Color.White else if (forceLightColors) Color.White else MaterialTheme.colorScheme.onSurface
     val errorColor = if (forceLightColors) Color(0xFFFF6B6B) else MaterialTheme.colorScheme.error
 
     Box(
@@ -390,14 +390,14 @@ private fun NewMiniPlayer(
                         glassBackdrop,
                         RoundedCornerShape(30.dp),
                         backgroundColor,
-                        if (lightGlass) Color.White.copy(alpha = 0.12f) else Color.Black.copy(alpha = 0.45f),
+                        if (lightGlass) Color.Transparent else Color.Black.copy(alpha = 0.45f),
                     )
                     .border(1.dp, outlineColor.copy(alpha = 0.45f), RoundedCornerShape(30.dp))
                     .drawWithContent {
                         drawContent()
                         val corner = CornerRadius(size.height / 2f)
                         drawRoundRect(
-                            brush = Brush.verticalGradient(0f to Color.White.copy(alpha = 0.10f), 0.5f to Color.Transparent),
+                            brush = Brush.verticalGradient(0f to Color.Transparent, 0.5f to Color.Transparent),
                             cornerRadius = corner,
                         )
                         drawRoundRect(

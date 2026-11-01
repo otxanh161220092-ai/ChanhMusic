@@ -68,7 +68,7 @@ fun LiquidBottomTabs(
 ) {
     val isLightTheme = !isSystemInDarkTheme()
     val accentColor = Color(0xFFFA233B)
-    val containerColor = Color.White.copy(0.12f)
+    val containerColor = Color.Transparent
 
     val tabsBackdrop = rememberLayerBackdrop()
 
@@ -165,27 +165,16 @@ fun LiquidBottomTabs(
                     backdrop = backdrop,
                     shape = { Capsule() },
                     effects = {
-                        vibrancy()
-                        blur(8f.dp.toPx())
+                        blur(2f.dp.toPx())
                         lens(
-                            12f.dp.toPx(),
+                            16f.dp.toPx(),
                             16f.dp.toPx(),
                             chromaticAberration = true,
                         )
                     },
                     highlight = { Highlight.Default },
                     shadow = { Shadow(alpha = 0.2f) },
-                    innerShadow = { InnerShadow(radius = 8f.dp, alpha = 0.3f) },
-                    onDrawSurface = { drawRect(containerColor) }
-                )
-                .border(
-                    1f.dp,
-                    Brush.verticalGradient(
-                        0f to Color.White.copy(alpha = 0.85f),
-                        0.5f to Color.White.copy(alpha = 0.25f),
-                        1f to Color.White.copy(alpha = 0.85f),
-                    ),
-                    Capsule(),
+                    innerShadow = { InnerShadow(radius = 8f.dp, alpha = 0.15f) },
                 )
                 .then(interactiveHighlight.modifier)
                 .height(barHeight)
