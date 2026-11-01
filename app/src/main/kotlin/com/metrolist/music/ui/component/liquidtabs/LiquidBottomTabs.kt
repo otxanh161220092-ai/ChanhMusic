@@ -4,6 +4,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.border
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.metrolist.music.R
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -191,6 +195,10 @@ fun LiquidBottomTabs(
                     ),
                     Capsule(),
                 )
+                .paint(
+                    painterResource(R.drawable.tab_bar_glass),
+                    contentScale = ContentScale.FillBounds,
+                )
                 .then(interactiveHighlight.modifier)
                 .height(barHeight)
                 .fillMaxWidth()
@@ -292,6 +300,10 @@ fun LiquidBottomTabs(
                         )
                         drawRect(Color.Black.copy(alpha = 0.03f * progress))
                     }
+                )
+                .paint(
+                    painterResource(R.drawable.tab_bar_selection),
+                    contentScale = ContentScale.FillBounds,
                 )
                 .height(56f.dp)
                 .fillMaxWidth(1f / tabsCount)
