@@ -169,8 +169,12 @@ fun LiquidBottomTabs(
                     shape = { Capsule() },
                     effects = {
                         vibrancy()
-                        blur(8f.dp.toPx())
-                            lens(24f.dp.toPx(), 24f.dp.toPx())
+                        blur(12f.dp.toPx())
+                        lens(
+                            10f.dp.toPx(),
+                            14f.dp.toPx(),
+                            chromaticAberration = true,
+                        )
                     },
                     highlight = { Highlight.Default },
                     shadow = { Shadow(alpha = 0.3f) },
