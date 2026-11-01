@@ -165,16 +165,16 @@ fun LiquidBottomTabs(
                     backdrop = backdrop,
                     shape = { Capsule() },
                     effects = {
-                        blur(2f.dp.toPx())
+                        blur(5f.dp.toPx())
                         lens(
-                            16f.dp.toPx(),
-                            16f.dp.toPx(),
+                            32f.dp.toPx(),
+                            36f.dp.toPx(),
                             chromaticAberration = true,
                         )
                     },
                     highlight = { Highlight.Default },
                     shadow = { Shadow(alpha = 0.2f) },
-                    innerShadow = { InnerShadow(radius = 8f.dp, alpha = 0.15f) },
+                    innerShadow = { InnerShadow(radius = 10f.dp, alpha = 0.3f) },
                 )
                 .then(interactiveHighlight.modifier)
                 .height(barHeight)

@@ -17,6 +17,8 @@ import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
+import com.kyant.backdrop.highlight.Highlight
+import com.kyant.backdrop.shadow.Shadow
 
 /** Root layer that records the app content, so floating bars can render glass over it. */
 val LocalGlassBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
@@ -36,9 +38,11 @@ fun Modifier.glassSurface(
             shape = { shape },
             effects = {
                 vibrancy()
-                blur(8f.dp.toPx())
-                lens(24f.dp.toPx(), 24f.dp.toPx())
+                blur(10f.dp.toPx())
+                lens(36f.dp.toPx(), 36f.dp.toPx(), chromaticAberration = true)
             },
+            highlight = { Highlight.Default },
+            shadow = { Shadow(alpha = 0.2f) },
             onDrawSurface = { drawRect(tint, blendMode = BlendMode.Overlay) },
         )
     }
