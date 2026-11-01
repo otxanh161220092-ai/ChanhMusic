@@ -170,29 +170,11 @@ fun LiquidBottomTabs(
                     effects = {
                         vibrancy()
                         blur(8f.dp.toPx())
-                        lens(
-                            24f.dp.toPx() + 12f.dp.toPx() * dampedDragAnimation.pressProgress,
-                            24f.dp.toPx() + 8f.dp.toPx() * dampedDragAnimation.pressProgress,
-                        )
+                            lens(24f.dp.toPx(), 24f.dp.toPx())
                     },
-                    highlight = {
-                        Highlight.Default.copy(alpha = dampedDragAnimation.pressProgress)
-                    },
-                    shadow = {
-                        Shadow(alpha = dampedDragAnimation.pressProgress)
-                    },
-                    innerShadow = {
-                        InnerShadow(
-                            radius = 8f.dp * dampedDragAnimation.pressProgress,
-                            alpha = dampedDragAnimation.pressProgress,
-                        )
-                    },
-                    layerBlock = {
-                        val progress = dampedDragAnimation.pressProgress
-                        val scale = lerp(1f, 1f + 16f.dp.toPx() / size.width, progress)
-                        scaleX = scale
-                        scaleY = scale
-                    },
+                    highlight = { Highlight.Default },
+                    shadow = { Shadow(alpha = 0.3f) },
+                    innerShadow = { InnerShadow(radius = 8f.dp, alpha = 0.6f) },
                     onDrawSurface = { drawRect(containerColor) }
                 )
                 .border(
@@ -204,7 +186,6 @@ fun LiquidBottomTabs(
                     ),
                     Capsule(),
                 )
-                .then(dampedDragAnimation.modifier)
                 .then(interactiveHighlight.modifier)
                 .height(64f.dp)
                 .fillMaxWidth()
