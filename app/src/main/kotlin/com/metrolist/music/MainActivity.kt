@@ -1150,7 +1150,18 @@ class MainActivity : FragmentActivity() {
                                     onHomeLongHold = { showAccountDialog = true },
                                 )
                             }
-                            Box(Modifier.weight(1f).then(glassBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)) {
+                            Box(
+                                Modifier
+                                    .weight(1f)
+                                    .then(glassBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
+                                    .then(
+                                        if (glassBackdrop != null) {
+                                            Modifier.background(if (pureBlack) Color.Black else MaterialTheme.colorScheme.background)
+                                        } else {
+                                            Modifier
+                                        },
+                                    ),
+                            ) {
                                 // NavHost with animations (Material 3 Expressive style)
                                 NavHost(
                                     navController = navController,
