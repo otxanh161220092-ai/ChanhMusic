@@ -384,7 +384,7 @@ private fun NewMiniPlayer(
                     .height(56.dp)
                     .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
                     .clip(RoundedCornerShape(32.dp))
-                    .glassSurface(glassBackdrop, RoundedCornerShape(32.dp), backgroundColor, Color.White.copy(alpha = 0.5f))
+                    .glassSurface(glassBackdrop, RoundedCornerShape(32.dp), backgroundColor, Color.Black.copy(alpha = 0.45f))
                     .border(1.dp, outlineColor.copy(alpha = 0.3f), RoundedCornerShape(32.dp))
                     .drawWithContent {
                         drawContent()

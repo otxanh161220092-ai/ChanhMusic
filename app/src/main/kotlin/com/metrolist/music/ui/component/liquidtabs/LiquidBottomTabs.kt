@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -68,10 +69,10 @@ fun LiquidBottomTabs(
     val isLightTheme = !isSystemInDarkTheme()
     val accentColor =
         if (isLightTheme) Color(0xFF0088FF)
-        else Color(0xFF0091FF)
+        else Color(0xFFFF375F)
     val containerColor =
         if (isLightTheme) Color(0xFFFAFAFA).copy(0.4f)
-        else Color(0xFF121212).copy(0.4f)
+        else Color(0xFF000000).copy(0.5f)
 
     val tabsBackdrop = rememberLayerBackdrop()
 
@@ -179,7 +180,15 @@ fun LiquidBottomTabs(
                     },
                     onDrawSurface = { drawRect(containerColor) }
                 )
-                .border(1f.dp, Color.White.copy(alpha = 0.55f), Capsule())
+                .border(
+                    1f.dp,
+                    Brush.verticalGradient(
+                        0f to Color.White.copy(alpha = 0.55f),
+                        0.5f to Color.White.copy(alpha = 0.06f),
+                        1f to Color.White.copy(alpha = 0.55f),
+                    ),
+                    Capsule(),
+                )
                 .then(interactiveHighlight.modifier)
                 .height(64f.dp)
                 .fillMaxWidth()
