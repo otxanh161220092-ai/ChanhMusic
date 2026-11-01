@@ -365,6 +365,10 @@
     <string name="transition_crossfade_desc">Fixed-length fade at the end of every song</string>
     <string name="creative_transitions">Creative transitions</string>
     <string name="creative_transitions_desc">Adds a low-pass filter sweep to the song that is leaving</string>
+    <string name="automix_status_analyzing">Finding the best mix point…</string>
+    <string name="automix_status_ready">Mix %1$s → next song from %2$s</string>
+    <string name="automix_status_ready_matched">Mix %1$s → next song from %2$s · beat matched</string>
+    <string name="automix_status_unavailable">No mix point found, playing normally</string>
     <string name="automix">Automix</string>
     <string name="mixing">Mixing</string>
     <string name="player_state_on">On</string>

@@ -53,7 +53,7 @@ class SmartTransitionCalculatorTest {
         a: SongStructure,
         b: SongStructure,
         earliest: Long = 0L,
-    ) = SmartTransitionCalculator.calculateTransitionPlan(a, b, earliest)!!
+    ) = SmartTransitionCalculator.calculateTransitionPlan(a, b, earliest, longFadeMs = 12_000L)!!
 
     @Test
     fun `drop in A hands over exactly where the drop ends and B enters calm with a long fade`() {
@@ -64,7 +64,8 @@ class SmartTransitionCalculatorTest {
 
         assertEquals(TransitionKind.DROP_TO_CALM, p.kind)
         assertEquals(130_000L, p.handoverEndA)
-        assertEquals(0L, p.mixInPositionB)
+        // B does not restart from 0:00 when it has a later calm part to enter on.
+        assertEquals(20_000L, p.mixInPositionB)
         // A is cut short (2 beats at the 500 ms fallback beat), B fades in for much longer.
         assertEquals(1_000L, p.fadeOutDurationA)
         assertEquals(12_000L, p.fadeInDurationB)
@@ -226,5 +227,25 @@ class SmartTransitionCalculatorTest {
         val paused = SmartTransitionCalculator.calculateTransitionPlan(pausesInA, b)!!
 
         assertTrue(paused.cost < sung.cost)
+    }
+
+    @Test
+    fun `B may still start at zero when its intro is the only calm part`() {
+        val a = song(200_000, seg(SegmentType.DROP, 100_000, 130_000))
+        val b = song(200_000, seg(SegmentType.INTRO, 0, 30_000), seg(SegmentType.CHORUS, 30_000, 90_000))
+
+        assertEquals(0L, plan(a, b).mixInPositionB)
+    }
+
+    @Test
+    fun `fade lengths are whole bars chosen from 16 8 6 4 2`() {
+        val grid = BeatGrid(0.0, 500.0) // 2 s bars
+        val a = song(400_000, seg(SegmentType.VERSE, 40_000, 200_000), bpm = 120f, grid = grid)
+        val b = song(400_000, seg(SegmentType.CHORUS, 150_000, 250_000), bpm = 120f, grid = grid)
+
+        val p = SmartTransitionCalculator.calculateTransitionPlan(a, b)!!
+        assertEquals(32_000L, p.fadeOutDurationA) // 16 bars of 2 s
+        val tight = SmartTransitionCalculator.calculateTransitionPlan(a, b, longFadeMs = 13_000L)!!
+        assertEquals(12_000L, tight.fadeOutDurationA) // 6 bars
     }
 }

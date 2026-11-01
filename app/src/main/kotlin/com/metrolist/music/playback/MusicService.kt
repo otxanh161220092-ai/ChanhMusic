@@ -27,6 +27,7 @@ import android.media.audiofx.AudioEffect
 import com.metrolist.music.playback.audio.VolumeNormalizationAudioProcessor
 import com.metrolist.music.playback.automix.AutomixAnalyzer
 import com.metrolist.music.playback.automix.AutomixPrescanner
+import com.metrolist.music.playback.automix.AutomixStatus
 import com.metrolist.music.playback.automix.FileAutomixFeatureStore
 import com.metrolist.music.playback.automix.PhaseController
 import com.metrolist.music.playback.automix.TailFxAudioProcessor
@@ -429,6 +430,11 @@ class MusicService :
     private var automixEnabled = false
     private var mixPlan: TransitionPlan? = null
     private var mixPlanJob: Job? = null
+
+    /** The media id the current plan (or the analysis in progress) was made for. */
+    private var plannedNextId: String? = null
+    private var plannedCurrentId: String? = null
+    val automixStatus = MutableStateFlow<AutomixStatus>(AutomixStatus.Idle)
     private var preparedMix: PreparedMix? = null
     private var tempoRampJob: Job? = null
     private val automixAnalyzer by lazy {
@@ -2916,6 +2922,7 @@ class MusicService :
 
     override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
         updateNotification()
+        replanIfNextChanged()
         if (shuffleModeEnabled) {
             if (player.mediaItemCount == 0) return
 
@@ -2941,6 +2948,7 @@ class MusicService :
 
     override fun onRepeatModeChanged(repeatMode: Int) {
         updateNotification()
+        replanIfNextChanged()
         scope.launch {
             safeDataStoreEdit { settings ->
                 settings[RepeatModeKey] = repeatMode
@@ -4902,8 +4910,31 @@ class MusicService :
         reason: Int,
     ) {
         if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+            // Seeking must not throw away an analysis that is already running for the same songs.
+            if (automixEnabled && mixPlan == null && mixPlanJob?.isActive == true) return
             scheduleCrossfade()
         }
+    }
+
+    /**
+     * Re-plans AutoMix when the song that follows the current one is no longer the one the plan was
+     * made for (queue reordered, item removed or inserted, shuffle or repeat changed).
+     */
+    private fun replanIfNextChanged() {
+        if (!automixEnabled || isCrossfading) return
+        val nextIndex =
+            if (player.repeatMode == REPEAT_MODE_ONE) player.currentMediaItemIndex else player.nextMediaItemIndex
+        val nextId = if (nextIndex != C.INDEX_UNSET && nextIndex < player.mediaItemCount) player.getMediaItemAt(nextIndex).mediaId else null
+        val currentId = player.currentMediaItem?.mediaId
+        if (nextId == plannedNextId && currentId == plannedCurrentId) return
+        scheduleCrossfade()
+    }
+
+    override fun onTimelineChanged(
+        timeline: androidx.media3.common.Timeline,
+        reason: Int,
+    ) {
+        replanIfNextChanged()
     }
 
     private fun scheduleCrossfade() {
@@ -4956,6 +4987,9 @@ class MusicService :
         mixPlanJob?.cancel()
         mixPlanJob = null
         mixPlan = null
+        plannedNextId = null
+        plannedCurrentId = null
+        automixStatus.value = AutomixStatus.Idle
         discardPreparedSecondary()
     }
 
@@ -4983,11 +5017,18 @@ class MusicService :
         if (nextIndex == C.INDEX_UNSET) return
         val nextId = player.getMediaItemAt(nextIndex).mediaId
 
+        plannedCurrentId = currentId
+        plannedNextId = nextId
+        automixStatus.value = AutomixStatus.Analyzing
         mixPlanJob =
             scope.launch {
-                val featuresA = automixAnalyzer.analyze(currentId) ?: return@launch
-                val featuresB = automixAnalyzer.analyze(nextId) ?: return@launch
-                if (player.currentMediaItem?.mediaId != currentId || isCrossfading) return@launch
+                val featuresA = automixAnalyzer.analyze(currentId)
+                val featuresB = if (featuresA != null) automixAnalyzer.analyze(nextId) else null
+                if (player.currentMediaItem?.mediaId != currentId || isCrossfading || plannedNextId != nextId) return@launch
+                if (featuresA == null || featuresB == null) {
+                    automixStatus.value = AutomixStatus.Unavailable
+                    return@launch
+                }
 
                 val duration = player.duration
                 val plan =
@@ -4998,8 +5039,11 @@ class MusicService :
                         // Automix has its own fade limit; the crossfade slider does not affect it.
                         longFadeMs = SmartTransitionCalculator.DEFAULT_LONG_FADE_MS,
                         quickCut = AUTOMIX_QUICK_CUT,
-                    ) ?: return@launch
-                if (duration == C.TIME_UNSET || plan.handoverEndA > duration) return@launch
+                    )
+                if (plan == null || duration == C.TIME_UNSET || plan.handoverEndA > duration) {
+                    automixStatus.value = AutomixStatus.Unavailable
+                    return@launch
+                }
 
                 Timber
                     .tag(TAG)
@@ -5015,6 +5059,7 @@ class MusicService :
                         plan.tempoMatched,
                     )
                 mixPlan = plan
+                automixStatus.value = AutomixStatus.Ready(plan.startA, plan.secondaryStartPositionMs, plan.tempoMatched)
                 mixZone.value = plan.startA..plan.handoverEndA
                 scheduleCrossfadeMessage(plan.startA, currentId)
                 scheduleAutomixPrescan()
@@ -5068,7 +5113,7 @@ class MusicService :
             }
         if (targetIndex == C.INDEX_UNSET) return
 
-        val plan = mixPlan
+        val plan = mixPlan?.takeIf { plannedNextId == null || plannedNextId == player.getMediaItemAt(targetIndex).mediaId }
         val prepared = preparedMix
         val preparedUsable =
             prepared != null &&

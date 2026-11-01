@@ -357,6 +357,7 @@ fun BottomSheetPlayer(
     val currentSong by playerConnection.currentSong.collectAsStateWithLifecycle(initialValue = null)
     val automix by playerConnection.service.automixItems.collectAsStateWithLifecycle()
     val mixZone by playerConnection.service.mixZone.collectAsStateWithLifecycle()
+    val automixStatus by playerConnection.service.automixStatus.collectAsStateWithLifecycle()
     val isMixing by playerConnection.service.isMixing.collectAsStateWithLifecycle()
     val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsStateWithLifecycle()
@@ -1180,6 +1181,11 @@ fun BottomSheetPlayer(
                             }
                         }
                     }
+                    AutomixStatusLine(
+                        status = automixStatus,
+                        color = TextBackgroundColor.copy(alpha = 0.6f),
+                        modifier = Modifier.vibrant(useVibrantText),
+                    )
                 }
 
                 Spacer(modifier = Modifier.width(12.dp))

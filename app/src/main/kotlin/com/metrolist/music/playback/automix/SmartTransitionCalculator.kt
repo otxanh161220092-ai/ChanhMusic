@@ -27,7 +27,10 @@ import kotlin.math.roundToLong
  */
 object SmartTransitionCalculator {
     const val MIN_FADE_MS = 4_000L
-    const val DEFAULT_LONG_FADE_MS = 12_000L
+    const val DEFAULT_LONG_FADE_MS = 32_000L
+
+    /** Fade lengths in bars, longest first; the longest that fits the sections involved is used. */
+    private val BAR_CHOICES = intArrayOf(16, 8, 6, 4, 2)
 
     private const val MAX_TEMPO_DELTA = 0.08
     private const val SHORT_FADE_BEATS = 2.0
@@ -37,11 +40,14 @@ object SmartTransitionCalculator {
 
     private const val WEIGHT_ENERGY = 2.0
     private const val WEIGHT_TEMPO = 1.5
-    private const val WEIGHT_SKIP_A = 1.5
-    private const val WEIGHT_SKIP_B = 1.0
+    private const val WEIGHT_SKIP_A = 0.3
+    private const val WEIGHT_SKIP_B = 0.2
     private const val NO_TEMPO_COST = 1.0
     private const val UNMATCHABLE_TEMPO_COST = 3.0
     private const val WEIGHT_VOCAL = 2.0
+
+    /** B should not start from 0:00 unless nothing else fits. */
+    private const val START_AT_ZERO_COST = 1.5
 
     /**
      * @param earliestMixMs the overlap may not open before this position in A.
@@ -107,7 +113,7 @@ object SmartTransitionCalculator {
                 fadeOut = ((if (quickCut) QUICK_FADE_BEATS else SHORT_FADE_BEATS) * beatA).roundToLong().coerceAtLeast(1L)
                 val entry = barAlignedStart(b, gridB)
                 val room = minOf(longFadeMs, sectionA, ((b.endTimeMs - entry) / factor).toLong())
-                fadeIn = roundDownToBars(room, barA)
+                fadeIn = pickBars(room, barA)
                 if (fadeIn < MIN_FADE_MS) return null
                 handoverB = entry + (fadeIn * factor).toLong()
             }
@@ -117,7 +123,7 @@ object SmartTransitionCalculator {
                 // B is pre-rolled before its chorus, so a chorus that comes early limits how long A can fade.
                 val longCap = if (quickCut) (QUICK_CALM_BEATS * beatA).toLong() else longFadeMs
                 val room = minOf(longCap, sectionA, (handoverB / factor).toLong())
-                fadeOut = roundDownToBars(room, barA)
+                fadeOut = pickBars(room, barA)
                 if (fadeOut < MIN_FADE_MS) return null
             }
         }
@@ -146,7 +152,8 @@ object SmartTransitionCalculator {
                 WEIGHT_TEMPO * tempo.cost +
                 WEIGHT_SKIP_A * skipA +
                 WEIGHT_SKIP_B * skipB +
-                WEIGHT_VOCAL * vocalCost
+                WEIGHT_VOCAL * vocalCost +
+                (if (secondaryStartB < 1_000L) START_AT_ZERO_COST else 0.0)
 
         // Beat phase is only meaningful when the two beats are the same musical beat, not a folded half/double.
         val trackPhase = tempo.matched && !tempo.octaveFolded
@@ -212,6 +219,19 @@ object SmartTransitionCalculator {
     ): Long {
         val aligned = grid?.firstBarAtOrAfter(segment.startTimeMs.toDouble())?.toLong() ?: return segment.startTimeMs
         return if (aligned < segment.endTimeMs - MIN_FADE_MS) aligned else segment.startTimeMs
+    }
+
+    /** Longest of 16/8/6/4/2 bars that fits in [roomMs]; without a beat grid the room is used as is. */
+    private fun pickBars(
+        roomMs: Long,
+        barMs: Double,
+    ): Long {
+        if (barMs <= 0.0) return roomMs
+        for (bars in BAR_CHOICES) {
+            val length = (bars * barMs).toLong()
+            if (length <= roomMs) return length
+        }
+        return roundDownToBars(roomMs, barMs)
     }
 
     private fun roundDownToBars(

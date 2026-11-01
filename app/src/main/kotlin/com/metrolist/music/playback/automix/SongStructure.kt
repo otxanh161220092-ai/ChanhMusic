@@ -21,11 +21,11 @@ class SongStructure(
     val vocalGaps: List<LongRange>? = null,
 )
 
-/** Builds a structure from analysis results using the heuristic segmenter. */
+/** Builds a structure from analysis results from the loudness curve (falling back to the length-based heuristic when it is flat). */
 fun TrackFeatures.toSongStructure(vocalGaps: List<LongRange>? = null): SongStructure =
     SongStructure(
         durationMs = durationMs,
-        segments = HeuristicSegmenter.segment(durationMs, loudnessDb),
+        segments = LoudnessSegmenter.segment(durationMs, loudnessDb) ?: HeuristicSegmenter.segment(durationMs, loudnessDb),
         bpm = bpm,
         hasTempo = hasTempo,
         gridNear = { positionMs -> if (hasTempo) gridNear(positionMs.toDouble()) else null },
