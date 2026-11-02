@@ -16,8 +16,8 @@ import kotlin.math.roundToLong
  * - A's section is high energy (Drop/Chorus) and B enters on a calm part (Intro/Verse): A keeps its
  *   energy up to the end of the section and is cut short, while B fades in over a long time, starting
  *   before the section ends. The handover completes exactly where A's section ends.
- * - A's section is calm and B has a high-energy part (Chorus/Drop): A fades out slowly through its
- *   calm section, and B comes in for a single beat so that its chorus lands exactly when the handover
+ * - A's section is calm and B has a high-energy part (Chorus/Drop): A fades out through its calm
+ *   section while B rises over the same stretch, so that its chorus is fully in exactly when the handover
  *   completes. B is pre-rolled, so it starts wherever its structure requires, not at 0:00.
  *
  * Each candidate is scored on how well the energies contrast, how far the tempos are apart, and how
@@ -37,6 +37,7 @@ object SmartTransitionCalculator {
     private const val MAX_TEMPO_DELTA = 0.08
     private const val SHORT_FADE_BEATS = 2.0
     private const val QUICK_FADE_BEATS = 1.0
+    private const val QUICK_MIN_FADE_MS = 1_000L
     private const val QUICK_CALM_BEATS = 4.0
     private const val FALLBACK_BEAT_MS = 500.0
 
@@ -164,7 +165,6 @@ object SmartTransitionCalculator {
                 handoverB = entryB + (fadeIn * factor).toLong()
             }
             TransitionKind.CALM_TO_HIGH, TransitionKind.HIGH_TO_HIGH -> {
-                fadeIn = (QUICK_FADE_BEATS * beatA).roundToLong().coerceAtLeast(1L)
                 handoverB = gridB?.nearestBar(b.startTimeMs.toDouble())?.toLong()?.coerceAtLeast(0L) ?: b.startTimeMs
                 entryB = handoverB
                 // B is pre-rolled before its chorus, so a chorus that comes early limits how long A can fade.
@@ -172,7 +172,10 @@ object SmartTransitionCalculator {
                 val longCap = if (quickCut) (QUICK_CALM_BEATS * beatA).toLong() else longFadeMs
                 val room = minOf(longCap, sectionA, (handoverB / factor).toLong())
                 fadeOut = pickBars(room, barA, if (highToHigh) BARS_SHORT else BARS_MEDIUM)
-                if (fadeOut < MIN_FADE_MS) return null
+                if (fadeOut < (if (quickCut) QUICK_MIN_FADE_MS else MIN_FADE_MS)) return null
+                // B rises through the whole overlap, so it is clearly audible, and already building, while A
+                // fades; it is at full level exactly where its chorus lands. Only the quick cut is a one-beat entry.
+                fadeIn = if (quickCut) (QUICK_FADE_BEATS * beatA).roundToLong().coerceAtLeast(1L) else fadeOut
             }
         }
 

@@ -85,11 +85,14 @@ class SmartTransitionCalculatorTest {
         assertEquals(TransitionKind.CALM_TO_HIGH, p.kind)
         assertEquals(80_000L, p.handoverEndA)
         assertEquals(12_000L, p.fadeOutDurationA)
-        assertEquals(500L, p.fadeInDurationB)
+        // B rises through the whole overlap, so it is building while A fades and full where its chorus lands.
+        assertEquals(12_000L, p.fadeInDurationB)
         assertEquals(60_000L, p.handoverEndB)
         // B does not start at 0:00: it starts where the pre-roll needs it.
         assertEquals(48_000L, p.secondaryStartPositionMs)
-        assertTrue(p.fadeOutDurationA > p.fadeInDurationB)
+        assertEquals(p.fadeOutDurationA, p.fadeInDurationB)
+        val (a50, b50) = p.gainsAt(p.windowMs / 2.0)
+        assertTrue(a50 > 0.5f && b50 > 0.5f)
     }
 
     @Test
@@ -175,7 +178,7 @@ class SmartTransitionCalculatorTest {
 
         assertEquals(0L, p.handoverEndA % 2_000L)
         assertTrue(p.handoverEndA <= 79_700L)
-        assertEquals(500L, p.fadeInDurationB)
+        assertEquals(p.fadeOutDurationA, p.fadeInDurationB)
         assertEquals(0L, p.fadeOutDurationA % 2_000L)
         assertTrue(p.tempoMatched)
         assertNotNull(p.gridA)
@@ -283,7 +286,7 @@ class SmartTransitionCalculatorTest {
         assertEquals(TransitionKind.HIGH_TO_HIGH, p.kind)
         assertEquals(130_000L, p.handoverEndA)
         assertEquals(60_000L, p.handoverEndB)
-        assertTrue(p.fadeInDurationB < p.fadeOutDurationA)
+        assertEquals(p.fadeOutDurationA, p.fadeInDurationB)
     }
 
     @Test
@@ -317,5 +320,16 @@ class SmartTransitionCalculatorTest {
         val late = song(240_000, seg(SegmentType.VERSE, 150_000, 210_000))
 
         assertTrue(plan(a, early).cost < plan(a, late).cost)
+    }
+
+    @Test
+    fun `quick cut keeps the one beat entry for B`() {
+        val grid = BeatGrid(0.0, 500.0)
+        val a = song(200_000, seg(SegmentType.VERSE, 40_000, 80_000), bpm = 120f, grid = grid)
+        val b = song(200_000, seg(SegmentType.CHORUS, 60_000, 90_000), bpm = 120f, grid = grid)
+
+        val quick = SmartTransitionCalculator.calculateTransitionPlan(a, b, quickCut = true, minPlayedFraction = 0.0)!!
+
+        assertEquals(500L, quick.fadeInDurationB)
     }
 }

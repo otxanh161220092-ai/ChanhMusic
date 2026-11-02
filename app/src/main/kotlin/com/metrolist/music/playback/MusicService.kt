@@ -1385,7 +1385,14 @@ class MusicService :
         }
     }
 
-    private fun createExoPlayer(prefs: Preferences? = null): ExoPlayer {
+    /**
+     * @param publish whether the new player becomes the one the player screen follows. The preloaded next
+     * song must not: until the mix switches over, the screen and every control stay on the current song.
+     */
+    private fun createExoPlayer(
+        prefs: Preferences? = null,
+        publish: Boolean = true,
+    ): ExoPlayer {
         val normalizationProcessor = VolumeNormalizationAudioProcessor()
         val eqProcessor = CustomEqualizerAudioProcessor()
 
@@ -1486,7 +1493,7 @@ class MusicService :
         player.addAnalyticsListener(historyReporter.listener)
 
         // Cleanup handled manually in onDestroy/release
-        _playerFlow.value = player
+        if (publish) _playerFlow.value = player
         return player
     }
 
@@ -5208,7 +5215,7 @@ class MusicService :
         startPositionMs: Long,
         speedFactor: Float,
     ): ExoPlayer? {
-        val secPlayer = createExoPlayer()
+        val secPlayer = createExoPlayer(publish = false)
         secPlayer.addListener(secondaryPlayerListener)
 
         val items = mutableListOf<MediaItem>()
