@@ -151,21 +151,33 @@ class SmartTransitionCalculatorTest {
     }
 
     @Test
-    fun `a song with no usable section gives no plan`() {
+    fun `every pair of songs gets a plan even with no usable section`() {
         val a = song(200_000, seg(SegmentType.DROP, 100_000, 130_000))
         val outroOnly = song(200_000, seg(SegmentType.OUTRO, 150_000, 200_000))
         val b = song(200_000, seg(SegmentType.CHORUS, 60_000, 90_000))
 
-        assertNull(SmartTransitionCalculator.calculateTransitionPlan(a, outroOnly))
-        assertNull(SmartTransitionCalculator.calculateTransitionPlan(song(200_000), b))
+        for ((x, y) in listOf(a to outroOnly, song(200_000) to b, song(200_000) to song(180_000))) {
+            val p = SmartTransitionCalculator.calculateTransitionPlan(x, y, earliestMixMs = 30_000L)!!
+            assertTrue(p.startA >= 30_000L)
+            assertTrue(p.handoverEndA <= x.durationMs)
+            assertTrue(p.fadeOutDurationA > 0L && p.fadeInDurationB > 0L)
+        }
     }
 
     @Test
-    fun `a chorus that comes too early to pre-roll gives no plan`() {
+    fun `a song that is nearly over has no room for a mix`() {
+        val p = SmartTransitionCalculator.calculateTransitionPlan(song(200_000), song(200_000), earliestMixMs = 199_500L)
+        assertNull(p)
+    }
+
+    @Test
+    fun `a chorus that comes too early to pre-roll is not used, B enters from its start instead`() {
         val a = song(200_000, seg(SegmentType.VERSE, 40_000, 80_000))
         val b = song(200_000, seg(SegmentType.CHORUS, 2_000, 30_000))
 
-        assertNull(SmartTransitionCalculator.calculateTransitionPlan(a, b))
+        val p = SmartTransitionCalculator.calculateTransitionPlan(a, b, minPlayedFraction = 0.0)!!
+
+        assertTrue(p.mixInPositionB <= 2_000L)
     }
 
     @Test

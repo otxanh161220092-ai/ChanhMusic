@@ -59,6 +59,10 @@ object SmartTransitionCalculator {
     const val DEFAULT_MIN_PLAYED_FRACTION = 0.25
 
     private const val ECHO_BEATS = 0.75
+    private const val END_MARGIN_MS = 300L
+    private const val FALLBACK_COST = 99.0
+    private const val RELAXED_MIN_FADE_MS = 1_500L
+    private const val RELAXED_MIN_B_REMAINING_MS = 8_000L
     private const val START_AT_ZERO_COST = 0.5
 
     /**
@@ -67,7 +71,8 @@ object SmartTransitionCalculator {
      * @param longFadeMs the long fade, shortened to fit the sections involved.
      * @param quickCut when true, the transition is a single-beat cut: A's fade is one beat on a drop,
      * and four beats on a calm section instead of the long fade.
-     * @return the best plan, or null when no pair of sections fits (the caller keeps a plain crossfade).
+     * @return the best plan. Every pair of songs gets one (a structure-free overlap when no sections fit);
+     * null only when A has about a second left.
      */
     fun calculateTransitionPlan(
         songA: SongStructure,
@@ -78,17 +83,81 @@ object SmartTransitionCalculator {
         minPlayedFraction: Double = DEFAULT_MIN_PLAYED_FRACTION,
     ): TransitionPlan? {
         if (songA.durationMs <= 0 || songB.durationMs <= 0) return null
+        val originalEarliest = earliestMixMs
         val earliestMixMs = maxOf(earliestMixMs, (songA.durationMs * minPlayedFraction).toLong())
         val tempo = matchTempo(songA, songB)
 
+        // Strict pass: the energy rules, enough of A played and room for B to play on.
+        var best = bestCandidate(songA, songB, tempo, earliestMixMs, longFadeMs, quickCut, relaxed = false)
+        // Relaxed pass: any section pair, no minimum share of A, shorter fades. Every song pair must be mixable.
+        if (best == null) {
+            best = bestCandidate(songA, songB, tempo, originalEarliest, longFadeMs, quickCut, relaxed = true)
+        }
+        // Last resort when no sections are known or none fit: overlap A's ending with B's beginning.
+        val plan = best ?: structureFreePlan(songA, songB, tempo, originalEarliest, longFadeMs, quickCut)
+        return plan?.let { refineWithCrossCorrelation(it, songA, songB) }
+    }
+
+    private fun bestCandidate(
+        songA: SongStructure,
+        songB: SongStructure,
+        tempo: TempoMatch,
+        earliestMixMs: Long,
+        longFadeMs: Long,
+        quickCut: Boolean,
+        relaxed: Boolean,
+    ): TransitionPlan? {
         var best: TransitionPlan? = null
         for (a in songA.segments) {
             for (b in songB.segments) {
-                val plan = candidate(a, b, songA, songB, tempo, earliestMixMs, longFadeMs, quickCut) ?: continue
+                val plan = candidate(a, b, songA, songB, tempo, earliestMixMs, longFadeMs, quickCut, relaxed) ?: continue
                 if (best == null || plan.cost < best.cost) best = plan
             }
         }
-        return best?.let { refineWithCrossCorrelation(it, songA, songB) }
+        return best
+    }
+
+    /**
+     * A plan that needs no section analysis: A's last bars overlap B's first bars with an equal-power
+     * crossfade. Used when the songs could not be analyzed or no section pair fits, so every song still
+     * gets a mix. Null only when A has less than about a second left.
+     */
+    private fun structureFreePlan(
+        songA: SongStructure,
+        songB: SongStructure,
+        tempo: TempoMatch,
+        earliestMixMs: Long,
+        longFadeMs: Long,
+        quickCut: Boolean,
+    ): TransitionPlan? {
+        val endA = songA.durationMs - END_MARGIN_MS
+        val room = endA - earliestMixMs
+        if (room < 1_000L) return null
+        val gridA = songA.gridNear(endA)
+        val gridB = songB.gridNear(0L)
+        val beatA = gridA?.beatMs ?: if (songA.hasTempo && songA.bpm > 0f) 60_000.0 / songA.bpm else FALLBACK_BEAT_MS
+        val barA = gridA?.barMs ?: 0.0
+
+        val cap = minOf(longFadeMs, room, songA.durationMs / 2)
+        val fade =
+            if (quickCut) minOf((QUICK_CALM_BEATS * beatA).toLong(), cap) else pickBars(cap, barA, BARS_MEDIUM).coerceAtLeast(minOf(cap, 1_000L))
+        val handover = floorToBar(endA, gridA).let { if (it - fade >= earliestMixMs) it else endA }
+        val entryB = gridB?.firstBarAtOrAfter(0.0)?.toLong()?.takeIf { it < 4_000L } ?: 0L
+        val trackPhase = tempo.matched && !tempo.octaveFolded
+        return TransitionPlan(
+            kind = TransitionKind.CALM_TO_CALM,
+            mixOutPositionA = handover - fade,
+            fadeOutDurationA = fade,
+            mixInPositionB = entryB,
+            fadeInDurationB = fade,
+            speedFactorB = tempo.factor,
+            tempoMatched = tempo.matched,
+            cost = FALLBACK_COST,
+            gridA = if (trackPhase) gridA else null,
+            gridB = if (trackPhase) gridB else null,
+            tailFxA = true,
+            tailEchoMs = (ECHO_BEATS * beatA).roundToLong().coerceIn(150L, 1_000L),
+        )
     }
 
     /**
@@ -123,14 +192,17 @@ object SmartTransitionCalculator {
         earliestMixMs: Long,
         longFadeMs: Long,
         quickCut: Boolean,
+        relaxed: Boolean = false,
     ): TransitionPlan? {
+        val minFade = if (relaxed) RELAXED_MIN_FADE_MS else MIN_FADE_MS
+        val bCalm = b.isCalmEntry || (relaxed && b.type == SegmentType.OUTRO)
         // The four cases: where A is (high energy or calm) and where B has to land (calm entry or high energy).
         val kind =
             when {
-                a.isHighEnergy && b.isCalmEntry -> TransitionKind.DROP_TO_CALM
+                a.isHighEnergy && bCalm -> TransitionKind.DROP_TO_CALM
                 !a.isHighEnergy && b.isHighEnergy -> TransitionKind.CALM_TO_HIGH
                 a.isHighEnergy && b.isHighEnergy -> TransitionKind.HIGH_TO_HIGH
-                b.isCalmEntry -> TransitionKind.CALM_TO_CALM
+                bCalm -> TransitionKind.CALM_TO_CALM
                 else -> return null
             }
 
@@ -144,7 +216,7 @@ object SmartTransitionCalculator {
         // The handover completes at a bar line at or before the end of A's section.
         val handoverA = minOf(floorToBar(a.endTimeMs, gridA), songA.durationMs)
         val sectionA = handoverA - a.startTimeMs
-        if (sectionA < MIN_FADE_MS) return null
+        if (sectionA < minFade) return null
 
         val fadeOut: Long
         val fadeIn: Long
@@ -158,7 +230,7 @@ object SmartTransitionCalculator {
                 val room = minOf(cap, sectionA, ((b.endTimeMs - entryB) / factor).toLong())
                 val bars = if (symmetric) BARS_LONG else BARS_MEDIUM
                 fadeIn = pickBars(room, barA, bars)
-                if (fadeIn < MIN_FADE_MS) return null
+                if (fadeIn < minFade) return null
                 // A leaves quickly from a drop; from a calm part it leaves as slowly as B arrives.
                 fadeOut =
                     if (symmetric) fadeIn else ((if (quickCut) QUICK_FADE_BEATS else SHORT_FADE_BEATS) * beatA).roundToLong().coerceAtLeast(1L)
@@ -172,7 +244,7 @@ object SmartTransitionCalculator {
                 val longCap = if (quickCut) (QUICK_CALM_BEATS * beatA).toLong() else longFadeMs
                 val room = minOf(longCap, sectionA, (handoverB / factor).toLong())
                 fadeOut = pickBars(room, barA, if (highToHigh) BARS_SHORT else BARS_MEDIUM)
-                if (fadeOut < (if (quickCut) QUICK_MIN_FADE_MS else MIN_FADE_MS)) return null
+                if (fadeOut < (if (quickCut) QUICK_MIN_FADE_MS else minFade)) return null
                 // B rises through the whole overlap, so it is clearly audible, and already building, while A
                 // fades; it is at full level exactly where its chorus lands. Only the quick cut is a one-beat entry.
                 fadeIn = if (quickCut) (QUICK_FADE_BEATS * beatA).roundToLong().coerceAtLeast(1L) else fadeOut
@@ -180,7 +252,8 @@ object SmartTransitionCalculator {
         }
 
         // B has to keep playing after the handover, so it never enters near its own end.
-        if (songB.durationMs - handoverB < maxOf(MIN_B_REMAINING_MS, (songB.durationMs * MIN_B_REMAINING_FRACTION).toLong())) return null
+        val minRemaining = if (relaxed) RELAXED_MIN_B_REMAINING_MS else maxOf(MIN_B_REMAINING_MS, (songB.durationMs * MIN_B_REMAINING_FRACTION).toLong())
+        if (songB.durationMs - handoverB < minRemaining) return null
 
         val mixOutA = handoverA - fadeOut
         val mixInB = handoverB - (fadeIn * factor).toLong()
