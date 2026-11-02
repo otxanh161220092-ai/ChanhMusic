@@ -165,9 +165,10 @@ class SmartTransitionCalculatorTest {
     }
 
     @Test
-    fun `a song that is nearly over has no room for a mix`() {
+    fun `a song that is nearly over still gets a mix point inside it`() {
         val p = SmartTransitionCalculator.calculateTransitionPlan(song(200_000), song(200_000), earliestMixMs = 199_500L)
-        assertNull(p)
+        assertNotNull(p)
+        assertTrue(p!!.handoverEndA <= 200_000L)
     }
 
     @Test
@@ -343,5 +344,16 @@ class SmartTransitionCalculatorTest {
         val quick = SmartTransitionCalculator.calculateTransitionPlan(a, b, quickCut = true, minPlayedFraction = 0.0)!!
 
         assertEquals(500L, quick.fadeInDurationB)
+    }
+
+    @Test
+    fun `a mix point exists even when the next song is close to the end of A`() {
+        val a = song(200_000, seg(SegmentType.VERSE, 40_000, 80_000))
+        val b = song(200_000, seg(SegmentType.CHORUS, 60_000, 90_000))
+
+        val p = SmartTransitionCalculator.calculateTransitionPlan(a, b, earliestMixMs = 195_000L)
+
+        assertNotNull(p)
+        assertTrue(p!!.handoverEndA <= 200_000L)
     }
 }

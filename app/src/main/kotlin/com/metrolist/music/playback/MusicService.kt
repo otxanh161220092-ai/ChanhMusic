@@ -33,7 +33,9 @@ import com.metrolist.music.playback.automix.PhaseController
 import com.metrolist.music.playback.automix.TailFxAudioProcessor
 import com.metrolist.music.playback.automix.TailFxMix
 import com.metrolist.music.playback.automix.VocalGaps
+import com.metrolist.music.playback.automix.HeuristicSegmenter
 import com.metrolist.music.playback.automix.SmartTransitionCalculator
+import com.metrolist.music.playback.automix.SongStructure
 import com.metrolist.music.playback.automix.TransitionPlan
 import com.metrolist.music.playback.automix.toSongStructure
 import kotlin.math.abs
@@ -285,6 +287,7 @@ private const val AUTOMIX_EARLY_TOLERANCE_MS = 1_500L
 private const val AUTOMIX_MIN_LEAD_MS = 3_000L
 private const val AUTOMIX_TEMPO_RAMP_MS = 8_000L
 private const val AUTOMIX_QUICK_CUT = false
+private const val RETIRE_DELAY_MS = 300L
 private const val AUTOMIX_ANALYSIS_TIMEOUT_MS = 60_000L
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -5083,16 +5086,25 @@ class MusicService :
                     automixStatus.value = AutomixStatus.Idle
                     return@launch
                 }
-                if (featuresA == null || featuresB == null) {
+                // A song that could not be analyzed still gets a mix: its length alone gives a usable layout.
+                val duration = player.duration
+                val durationB =
+                    featuresB?.durationMs
+                        ?: database.songEntity(nextId)?.duration?.takeIf { it > 0 }?.let { it * 1000L }
+                if (duration == C.TIME_UNSET || duration <= 0 || durationB == null) {
                     automixStatus.value = AutomixStatus.Unavailable
                     return@launch
                 }
-
-                val duration = player.duration
+                val songA =
+                    featuresA?.toSongStructure(vocalGapsFor(currentId, duration))
+                        ?: SongStructure(duration, HeuristicSegmenter.segment(duration))
+                val songB =
+                    featuresB?.toSongStructure(vocalGapsFor(nextId, durationB))
+                        ?: SongStructure(durationB, HeuristicSegmenter.segment(durationB))
                 val plan =
                     SmartTransitionCalculator.calculateTransitionPlan(
-                        songA = featuresA.toSongStructure(vocalGapsFor(currentId, featuresA.durationMs)),
-                        songB = featuresB.toSongStructure(vocalGapsFor(nextId, featuresB.durationMs)),
+                        songA = songA,
+                        songB = songB,
                         earliestMixMs = player.currentPosition + AUTOMIX_MIN_LEAD_MS,
                         // Automix has its own fade limit; the crossfade slider does not affect it.
                         longFadeMs = SmartTransitionCalculator.DEFAULT_LONG_FADE_MS,
@@ -5390,8 +5402,10 @@ class MusicService :
                 }
 
                 swapRoles()
+                // Give the UI a moment to attach to the new player before the old one is retired, and let the
+                // echo and reverb ring out before A's player is released.
+                delay(RETIRE_DELAY_MS)
                 if (tailInChain && plan != null && plan.tailEchoMs > 0) {
-                    // Let the echo and reverb ring out before A's player is released.
                     delay(TailFxMix.ringOutMs(plan.tailEchoMs))
                 }
                 try {
@@ -5457,7 +5471,11 @@ class MusicService :
             } catch (e: Exception) {
             }
             finishMixBookkeeping()
-            cleanupCrossfade(fadingPlayerSessionId = sessionId)
+            // The song the user is on is already published; retire the old one a moment later.
+            scope.launch {
+                delay(RETIRE_DELAY_MS)
+                cleanupCrossfade(fadingPlayerSessionId = sessionId)
+            }
         }
         automixStatus.value = AutomixStatus.Idle
         if (reschedule && automixEnabled && !wasSwapped) scheduleCrossfade(force = true)
@@ -5509,8 +5527,9 @@ class MusicService :
 
     private fun cleanupCrossfade(fadingPlayerSessionId: Int = C.AUDIO_SESSION_ID_UNSET) {
         fadingPlayer?.let { previousPlayer ->
+            // Only stop and release: clearing the items would announce "no song" to any listener that is
+            // still attached to this player and blank the title, artwork and controls of the current song.
             previousPlayer.stop()
-            previousPlayer.clearMediaItems()
             releaseExoPlayer(previousPlayer)
         }
         fadingPlayer = null

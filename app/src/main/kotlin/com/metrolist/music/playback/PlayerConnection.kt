@@ -592,7 +592,18 @@ class PlayerConnection(
         }
     }
 
+    /**
+     * True when the listener is still attached to a player that the service has already replaced (the
+     * outgoing song of a mix). Its state changes, including the queue being cleared when it is retired,
+     * must not overwrite the state of the song the user is actually on.
+     */
+    private fun isRetiredPlayer(): Boolean {
+        val current = getPlayerOrNull() ?: return false
+        return attachedPlayer != null && attachedPlayer !== current
+    }
+
     override fun onPlaybackStateChanged(state: Int) {
+        if (isRetiredPlayer()) return
         playbackState.value = state
         error.value = player.playerError
     }
@@ -601,6 +612,7 @@ class PlayerConnection(
         newPlayWhenReady: Boolean,
         reason: Int,
     ) {
+        if (isRetiredPlayer()) return
         val wasPlaying = playWhenReady.value
         playWhenReady.value = newPlayWhenReady
 
@@ -614,6 +626,7 @@ class PlayerConnection(
         mediaItem: MediaItem?,
         reason: Int,
     ) {
+        if (isRetiredPlayer()) return
         mediaMetadata.value = mediaItem?.metadata
         currentMediaItemIndex.value = player.currentMediaItemIndex
         currentWindowIndex.value = player.getCurrentQueueIndex()
@@ -624,6 +637,7 @@ class PlayerConnection(
         timeline: Timeline,
         reason: Int,
     ) {
+        if (isRetiredPlayer()) return
         queueWindows.value = player.getQueueWindows()
         queueTitle.value = service.queueTitle
         currentMediaItemIndex.value = player.currentMediaItemIndex
@@ -632,6 +646,7 @@ class PlayerConnection(
     }
 
     override fun onShuffleModeEnabledChanged(enabled: Boolean) {
+        if (isRetiredPlayer()) return
         shuffleModeEnabled.value = enabled
         queueWindows.value = player.getQueueWindows()
         currentWindowIndex.value = player.getCurrentQueueIndex()
@@ -639,12 +654,14 @@ class PlayerConnection(
     }
 
     override fun onRepeatModeChanged(mode: Int) {
+        if (isRetiredPlayer()) return
         if (mode != player.repeatMode) return
         repeatMode.value = mode
         updateCanSkipPreviousAndNext()
     }
 
     override fun onPlayerErrorChanged(playbackError: PlaybackException?) {
+        if (isRetiredPlayer()) return
         if (playbackError != null) {
             reportException(playbackError)
         }

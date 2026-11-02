@@ -37,7 +37,8 @@ fun AutomixStatusLine(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.height(18.dp).padding(top = 2.dp),
     ) {
-        if (status is AutomixStatus.Idle) return@Row
+        // Idle and Unavailable show nothing: every song gets a mix point, so there is no 'not found' text.
+        if (status is AutomixStatus.Idle || status is AutomixStatus.Unavailable) return@Row
         if (status is AutomixStatus.Analyzing) {
             CircularProgressIndicator(
                 modifier = Modifier.size(12.dp),
@@ -60,7 +61,6 @@ fun AutomixStatusLine(
                         formatClock(status.mixOutMs),
                         formatClock(status.mixInMs),
                     )
-                is AutomixStatus.Unavailable -> stringResource(R.string.automix_status_unavailable)
                 else -> stringResource(R.string.automix_status_analyzing)
             }
         Text(

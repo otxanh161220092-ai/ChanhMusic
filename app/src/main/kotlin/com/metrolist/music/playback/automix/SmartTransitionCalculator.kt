@@ -132,13 +132,13 @@ object SmartTransitionCalculator {
     ): TransitionPlan? {
         val endA = songA.durationMs - END_MARGIN_MS
         val room = endA - earliestMixMs
-        if (room < 1_000L) return null
+        if (songA.durationMs < 1_500L || songB.durationMs < 1_500L) return null
         val gridA = songA.gridNear(endA)
         val gridB = songB.gridNear(0L)
         val beatA = gridA?.beatMs ?: if (songA.hasTempo && songA.bpm > 0f) 60_000.0 / songA.bpm else FALLBACK_BEAT_MS
         val barA = gridA?.barMs ?: 0.0
 
-        val cap = minOf(longFadeMs, room, songA.durationMs / 2)
+        val cap = minOf(longFadeMs, maxOf(room, 500L), songA.durationMs / 2, songB.durationMs / 2).coerceAtLeast(500L)
         val fade =
             if (quickCut) minOf((QUICK_CALM_BEATS * beatA).toLong(), cap) else pickBars(cap, barA, BARS_MEDIUM).coerceAtLeast(minOf(cap, 1_000L))
         val handover = floorToBar(endA, gridA).let { if (it - fade >= earliestMixMs) it else endA }
