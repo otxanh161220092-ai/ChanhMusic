@@ -4914,9 +4914,9 @@ class MusicService :
         reason: Int,
     ) {
         if (reason == Player.DISCONTINUITY_REASON_SEEK) {
-            // Seeking must not throw away an analysis that is already running for the same songs.
-            if (automixEnabled && mixPlan == null && mixPlanJob?.isActive == true) return
-            scheduleCrossfade()
+            // A seek keeps the AutoMix plan unless it jumped past the mix point; a failed plan is retried,
+            // since the new position may allow one.
+            scheduleCrossfade(force = automixStatus.value is AutomixStatus.Unavailable)
         }
     }
 
@@ -4941,7 +4941,28 @@ class MusicService :
         replanIfNextChanged()
     }
 
-    private fun scheduleCrossfade() {
+    /**
+     * True when the AutoMix plan (or the analysis in progress, or the verdict "no mix found") already
+     * belongs to the current song and the one after it, and the playhead has not passed the mix point.
+     * Player state changes (buffering, pause, seek) fire often and must not discard a prepared next song.
+     */
+    private fun keepAutomixPlan(): Boolean {
+        if (isCrossfading) return true
+        val currentId = player.currentMediaItem?.mediaId ?: return false
+        val nextIndex =
+            if (player.repeatMode == REPEAT_MODE_ONE) player.currentMediaItemIndex else player.nextMediaItemIndex
+        if (nextIndex == C.INDEX_UNSET || nextIndex >= player.mediaItemCount) return false
+        if (currentId != plannedCurrentId || player.getMediaItemAt(nextIndex).mediaId != plannedNextId) return false
+        val plan = mixPlan
+        return when {
+            plan != null -> player.currentPosition <= plan.startA
+            mixPlanJob?.isActive == true -> true
+            else -> automixStatus.value is AutomixStatus.Unavailable
+        }
+    }
+
+    private fun scheduleCrossfade(force: Boolean = false) {
+        if (automixEnabled && !force && keepAutomixPlan()) return
         crossfadeMessage?.cancel()
         crossfadeMessage = null
         cancelMixPlanning()
@@ -5199,6 +5220,11 @@ class MusicService :
         val currentPlayer = player
 
         fadingPlayer = currentPlayer
+        // This mix is consumed: the next plan is made for the new current song once it is over.
+        mixPlan = null
+        plannedCurrentId = null
+        plannedNextId = null
+        automixStatus.value = AutomixStatus.Analyzing
         // The effect tail lives in A's audio chain: low-pass sweep, A's own fade-out and a ringing echo.
         val tailInChain = plan?.tailFxA == true && automixCreative && playerTailFxProcessors[currentPlayer] != null
         if (tailInChain && plan != null) {
@@ -5377,6 +5403,7 @@ class MusicService :
         sleepTimer?.notifySongTransition()
 
         applyCachedAudioNormalizationNow()
+        if (automixEnabled) scheduleCrossfade(force = true)
 
         if (fadingPlayerSessionId != C.AUDIO_SESSION_ID_UNSET && fadingPlayerSessionId > 0) {
             closeAudioEffectSession(sessionIdOverride = fadingPlayerSessionId, clearNormalizationCache = true)
