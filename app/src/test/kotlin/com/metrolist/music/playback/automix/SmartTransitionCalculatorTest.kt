@@ -148,11 +148,12 @@ class SmartTransitionCalculatorTest {
     }
 
     @Test
-    fun `no pair that follows the energy rule gives no plan`() {
+    fun `a song with no usable section gives no plan`() {
         val a = song(200_000, seg(SegmentType.DROP, 100_000, 130_000))
+        val outroOnly = song(200_000, seg(SegmentType.OUTRO, 150_000, 200_000))
         val b = song(200_000, seg(SegmentType.CHORUS, 60_000, 90_000))
 
-        assertNull(SmartTransitionCalculator.calculateTransitionPlan(a, b))
+        assertNull(SmartTransitionCalculator.calculateTransitionPlan(a, outroOnly))
         assertNull(SmartTransitionCalculator.calculateTransitionPlan(song(200_000), b))
     }
 
@@ -232,7 +233,7 @@ class SmartTransitionCalculatorTest {
     @Test
     fun `B may still start at zero when its intro is the only calm part`() {
         val a = song(200_000, seg(SegmentType.DROP, 100_000, 130_000))
-        val b = song(200_000, seg(SegmentType.INTRO, 0, 30_000), seg(SegmentType.CHORUS, 30_000, 90_000))
+        val b = song(200_000, seg(SegmentType.INTRO, 0, 30_000))
 
         assertEquals(0L, plan(a, b).mixInPositionB)
     }
@@ -270,5 +271,51 @@ class SmartTransitionCalculatorTest {
         val a = song(200_000, seg(SegmentType.DROP, 100_000, 130_000))
         val b = song(200_000, seg(SegmentType.VERSE, 20_000, 60_000))
         assertEquals(375L, SmartTransitionCalculator.calculateTransitionPlan(a, b)!!.tailEchoMs)
+    }
+
+    @Test
+    fun `case 3 drop to drop lands B on its chorus where A's drop ends`() {
+        val a = song(200_000, seg(SegmentType.DROP, 100_000, 130_000))
+        val b = song(200_000, seg(SegmentType.CHORUS, 60_000, 90_000))
+
+        val p = plan(a, b)
+
+        assertEquals(TransitionKind.HIGH_TO_HIGH, p.kind)
+        assertEquals(130_000L, p.handoverEndA)
+        assertEquals(60_000L, p.handoverEndB)
+        assertTrue(p.fadeInDurationB < p.fadeOutDurationA)
+    }
+
+    @Test
+    fun `case 4 calm to calm is a long symmetric overlap ending with A's calm section`() {
+        val a = song(200_000, seg(SegmentType.VERSE, 60_000, 120_000))
+        val b = song(200_000, seg(SegmentType.INTRO, 0, 20_000), seg(SegmentType.VERSE, 20_000, 80_000))
+
+        val p = plan(a, b)
+
+        assertEquals(TransitionKind.CALM_TO_CALM, p.kind)
+        assertEquals(120_000L, p.handoverEndA)
+        assertEquals(p.fadeOutDurationA, p.fadeInDurationB)
+        assertTrue(p.fadeInDurationB >= 4_000L)
+    }
+
+    @Test
+    fun `B enters at a fitting place, never deep into a short song`() {
+        val a = song(200_000, seg(SegmentType.DROP, 100_000, 130_000))
+        // A calm part only after 4:00 of a 4:05 song must not be used; the early verse is.
+        val b = song(245_000, seg(SegmentType.VERSE, 15_000, 60_000), seg(SegmentType.VERSE, 240_000, 245_000))
+
+        val p = plan(a, b)
+
+        assertTrue(p.mixInPositionB in 1_000L..90_000L)
+    }
+
+    @Test
+    fun `B's entry in the late half of a song costs more than an early one`() {
+        val a = song(200_000, seg(SegmentType.DROP, 100_000, 130_000))
+        val early = song(240_000, seg(SegmentType.VERSE, 20_000, 80_000))
+        val late = song(240_000, seg(SegmentType.VERSE, 150_000, 210_000))
+
+        assertTrue(plan(a, early).cost < plan(a, late).cost)
     }
 }

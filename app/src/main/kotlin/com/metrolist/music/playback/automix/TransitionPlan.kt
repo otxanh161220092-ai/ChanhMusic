@@ -15,6 +15,12 @@ enum class TransitionKind {
 
     /** A is on a calm part; B's chorus/drop lands exactly when A's long fade ends. B fades in for one beat. */
     CALM_TO_HIGH,
+
+    /** A is on a drop/chorus; B's drop/chorus lands exactly where A's section ends (drop into drop). */
+    HIGH_TO_HIGH,
+
+    /** A is on a calm part; B enters on a calm part, with a long symmetric overlap. */
+    CALM_TO_CALM,
 }
 
 /**
@@ -40,6 +46,8 @@ class TransitionPlan(
     val gridB: BeatGrid?,
     /** Darken A's tail with a low-pass sweep while it is cut. */
     val tailFxA: Boolean = false,
+    /** B's own beat shift found by cross-correlation, already applied to [mixInPositionB] and [gridB]. */
+    val alignmentShiftMs: Long = 0L,
     /** Echo delay for A's tail in ms (about three quarters of a beat); 0 when A leaves without an echo. */
     val tailEchoMs: Long = 0L,
 ) {
@@ -97,4 +105,25 @@ class TransitionPlan(
         val end = phaseErrorMs(handoverEndA, handoverEndB) ?: return null
         return start to end
     }
+
+    /**
+     * The same plan with B started [shiftMs] later (earlier when negative): B's positions move, and so
+     * does its beat grid, so the phase tracker keeps the alignment that was found.
+     */
+    fun withBShift(shiftMs: Long): TransitionPlan =
+        TransitionPlan(
+            kind = kind,
+            mixOutPositionA = mixOutPositionA,
+            fadeOutDurationA = fadeOutDurationA,
+            mixInPositionB = mixInPositionB + shiftMs,
+            fadeInDurationB = fadeInDurationB,
+            speedFactorB = speedFactorB,
+            tempoMatched = tempoMatched,
+            cost = cost,
+            gridA = gridA,
+            gridB = gridB?.let { BeatGrid(it.downbeatMs + shiftMs, it.beatMs) },
+            tailFxA = tailFxA,
+            alignmentShiftMs = shiftMs,
+            tailEchoMs = tailEchoMs,
+        )
 }

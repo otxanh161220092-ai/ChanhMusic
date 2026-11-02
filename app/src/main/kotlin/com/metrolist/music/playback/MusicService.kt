@@ -1252,7 +1252,10 @@ class MusicService :
             .distinctUntilChanged()
             .collect(scope) { enabled ->
                 automixEnabled = enabled
-                if (!enabled) cancelMixPlanning()
+                if (!enabled) {
+                    abortMix(reschedule = false)
+                    cancelMixPlanning()
+                }
             }
 
         // Observe and cache common preferences to avoid runBlocking reads in playback callbacks
@@ -2626,6 +2629,10 @@ class MusicService :
         mediaItem: MediaItem?,
         reason: Int,
     ) {
+        // Skipping to another song while a mix runs ends the mix (see abortMix).
+        if (isCrossfading && reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) {
+            abortMix()
+        }
         // Only natural completion transitions mark the previous track as fully cached,
         // never a manual skip or seek. Read lastTransitionedMediaId before replacing it.
         if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO ||
@@ -4914,10 +4921,14 @@ class MusicService :
         newPosition: Player.PositionInfo,
         reason: Int,
     ) {
+        if (isCrossfading && reason == Player.DISCONTINUITY_REASON_SEEK) {
+            abortMix()
+            return
+        }
         if (reason == Player.DISCONTINUITY_REASON_SEEK) {
             // A seek keeps the AutoMix plan unless it jumped past the mix point; a failed plan is retried,
             // since the new position may allow one.
-            scheduleCrossfade(force = automixStatus.value is AutomixStatus.Unavailable)
+            scheduleCrossfade()
         }
     }
 
@@ -4944,7 +4955,7 @@ class MusicService :
 
     /**
      * True when the AutoMix plan (or the analysis in progress, or the verdict "no mix found") already
-     * belongs to the current song and the one after it, and the playhead has not passed the mix point.
+     * belongs to the current song and the one after it.
      * Player state changes (buffering, pause, seek) fire often and must not discard a prepared next song.
      */
     private fun keepAutomixPlan(): Boolean {
@@ -4954,12 +4965,9 @@ class MusicService :
             if (player.repeatMode == REPEAT_MODE_ONE) player.currentMediaItemIndex else player.nextMediaItemIndex
         if (nextIndex == C.INDEX_UNSET || nextIndex >= player.mediaItemCount) return false
         if (currentId != plannedCurrentId || player.getMediaItemAt(nextIndex).mediaId != plannedNextId) return false
-        val plan = mixPlan
-        return when {
-            plan != null -> player.currentPosition <= plan.startA
-            mixPlanJob?.isActive == true -> true
-            else -> automixStatus.value is AutomixStatus.Unavailable
-        }
+        // Only a change of the queue order (checked above) or a new song makes AutoMix look again;
+        // seeking, pausing and buffering never do.
+        return mixPlan != null || mixPlanJob?.isActive == true || automixStatus.value is AutomixStatus.Unavailable
     }
 
     private fun scheduleCrossfade(force: Boolean = false) {
@@ -5230,96 +5238,120 @@ class MusicService :
         }
     }
 
+    // State of the mix in progress. Until the incoming song becomes the loudest, the outgoing song stays
+    // `player` (so the player screen and every control still belong to it); the roles swap at that point.
+    private var mixSwapped = false
+    private var mixOutgoing: ExoPlayer? = null
+    private var mixIncoming: ExoPlayer? = null
+    private var mixSyncListener: Player.Listener? = null
+    private var mixTargetSpeedB = 1f
+    private var mixSpeedFactor = 1f
+
     private fun performCrossfadeSwap(plan: TransitionPlan? = null) {
+        val incoming = secondaryPlayer ?: return
+        val outgoing = player
         isCrossfading = true
         isMixing.value = true
-        val nextPlayer = secondaryPlayer ?: return
-        val currentPlayer = player
-
-        fadingPlayer = currentPlayer
+        mixSwapped = false
+        mixOutgoing = outgoing
+        mixIncoming = incoming
+        mixSpeedFactor = plan?.speedFactorB ?: 1f
         // This mix is consumed: the next plan is made for the new current song once it is over.
         mixPlan = null
         plannedCurrentId = null
         plannedNextId = null
-        automixStatus.value = AutomixStatus.Analyzing
-        // The effect tail lives in A's audio chain: low-pass sweep, A's own fade-out and a ringing echo.
-        val tailInChain = plan?.tailFxA == true && automixCreative && playerTailFxProcessors[currentPlayer] != null
+        automixStatus.value = AutomixStatus.Idle
+
+        // Effects live in the audio chains: A's tail (low-pass, own fade-out, echo and reverb that ring on)
+        // and B's start (opening low-pass and a reverb wash).
+        val tailInChain = plan?.tailFxA == true && automixCreative && playerTailFxProcessors[outgoing] != null
         if (tailInChain && plan != null) {
-            val untilMixOut = (plan.mixOutPositionA - currentPlayer.currentPosition).coerceAtLeast(0L)
-            playerTailFxProcessors[currentPlayer]?.scheduleTail(untilMixOut, plan.fadeOutDurationA, plan.tailEchoMs)
-        }
-        player = nextPlayer
-        _playerFlow.value = player
-        secondaryPlayer = null
-
-        // Do not persist the retired player's temporary repeat-off state.
-        fadingPlayer?.removeListener(this)
-        sleepTimer?.let { timer -> fadingPlayer?.removeListener(timer) }
-        fadingPlayer?.repeatMode = Player.REPEAT_MODE_OFF
-        fadingPlayer?.let {
-            val currentIndex = it.currentMediaItemIndex
-            if (currentIndex < it.mediaItemCount - 1) {
-                it.removeMediaItems(currentIndex + 1, it.mediaItemCount)
-            }
+            val untilMixOut = (plan.mixOutPositionA - outgoing.currentPosition).coerceAtLeast(0L)
+            playerTailFxProcessors[outgoing]?.scheduleTail(untilMixOut, plan.fadeOutDurationA, plan.tailEchoMs)
+            val untilBFadeIn = ((plan.bFadeInStartA - plan.startA) * plan.speedFactorB).toLong()
+            playerTailFxProcessors[incoming]?.scheduleHead(untilBFadeIn, (plan.fadeInDurationB * plan.speedFactorB).toLong())
         }
 
-        player.addListener(
+        // Pausing or resuming from anywhere (notification, headset, screen) acts on both songs.
+        val sync =
             object : Player.Listener {
-                override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    if (isCrossfading && fadingPlayer != null) {
-                        if (isPlaying) {
-                            fadingPlayer?.play()
-                        } else {
-                            fadingPlayer?.pause()
-                        }
-                    } else {
-                        player.removeListener(this)
-                    }
+                override fun onPlayWhenReadyChanged(
+                    playWhenReady: Boolean,
+                    reason: Int,
+                ) {
+                    if (outgoing.playWhenReady != playWhenReady) outgoing.playWhenReady = playWhenReady
+                    if (incoming.playWhenReady != playWhenReady) incoming.playWhenReady = playWhenReady
                 }
-            },
-        )
+            }
+        mixSyncListener = sync
+        outgoing.addListener(sync)
+        incoming.addListener(sync)
 
-        nextPlayer.removeListener(secondaryPlayerListener)
-        nextPlayer.addListener(this)
-        sleepTimer?.let { nextPlayer.addListener(it) }
+        val previousAudioSessionId = outgoing.audioSessionId
 
-        sleepTimer?.player = player
+        // The incoming song becomes the current one: player screen, session, sleep timer, scrobbling.
+        fun swapRoles() {
+            if (mixSwapped) return
+            mixSwapped = true
+            fadingPlayer = outgoing
+            player = incoming
+            _playerFlow.value = player
+            secondaryPlayer = null
+            mixZone.value = null
 
-        try {
-            mediaSession?.let { (it as MediaSession).player = player }
-        } catch (e: Exception) {
-            timber.log.Timber.e(e, "Failed to swap player in MediaSession")
+            // Do not persist the retired player's temporary repeat-off state.
+            outgoing.removeListener(this)
+            sleepTimer?.let { timer -> outgoing.removeListener(timer) }
+            outgoing.repeatMode = Player.REPEAT_MODE_OFF
+            val currentIndex = outgoing.currentMediaItemIndex
+            if (currentIndex < outgoing.mediaItemCount - 1) {
+                outgoing.removeMediaItems(currentIndex + 1, outgoing.mediaItemCount)
+            }
+
+            incoming.removeListener(secondaryPlayerListener)
+            incoming.addListener(this)
+            sleepTimer?.let { incoming.addListener(it) }
+            sleepTimer?.player = player
+            try {
+                mediaSession?.let { (it as MediaSession).player = player }
+            } catch (e: Exception) {
+                timber.log.Timber.e(e, "Failed to swap player in MediaSession")
+            }
+
+            // The incoming song was playing silently in the background without `this` as a listener, so its
+            // real transition never reached onMediaItemTransition. Re-fire it so metadata recovery, cache
+            // marking, scrobbling and normalization all run.
+            onMediaItemTransition(player.currentMediaItem, Player.MEDIA_ITEM_TRANSITION_REASON_AUTO)
+            openAudioEffectSession()
         }
 
-        // secondaryPlayer was playing this item silently in the background without
-        // `this` attached as a listener, so its real transition into this item never
-        // reached onMediaItemTransition. Re-fire it manually now that the swap is done
-        // so metadata recovery, cache marking, scrobbling, and normalization all run.
-        onMediaItemTransition(player.currentMediaItem, Player.MEDIA_ITEM_TRANSITION_REASON_AUTO)
-
-        val previousAudioSessionId = fadingPlayer?.audioSessionId ?: C.AUDIO_SESSION_ID_UNSET
-
-        openAudioEffectSession()
+        // A fixed crossfade switches at once; AutoMix switches when B overtakes A (see the loop).
+        if (plan == null) swapRoles()
 
         crossfadeJob =
             scope.launch {
-                val speed = fadingPlayer?.playbackParameters?.speed?.coerceAtLeast(0.01f) ?: 1f
+                val speed = outgoing.playbackParameters.speed.coerceAtLeast(0.01f)
                 val windowMs = plan?.windowMs?.toFloat() ?: crossfadeDuration
                 val duration = (windowMs / speed).toLong()
                 val steps = if (plan != null) (duration / 50L).toInt().coerceIn(20, 400) else 20
                 val stepTime = duration / steps
                 val startVolume =
                     try {
-                        fadingPlayer?.volume ?: 1f
+                        outgoing.volume
                     } catch (e: Exception) {
                         1f
                     }
-                val targetSpeedB = player.playbackParameters.speed
+                val targetSpeedB = incoming.playbackParameters.speed
+                mixTargetSpeedB = targetSpeedB
 
                 for (i in 0..steps) {
                     if (!isActive) break
-                    while (!player.isPlaying && isActive) {
+                    // Paused: wait. Buffering: wait a little, but never stall the mix for good.
+                    var waited = 0L
+                    while (!incoming.isPlaying && isActive) {
                         delay(100)
+                        waited += 100
+                        if (incoming.playWhenReady && waited > 3_000L) break
                     }
 
                     val progress = i / steps.toFloat()
@@ -5331,37 +5363,97 @@ class MusicService :
                             (remaining * remaining) to (1f - remaining * remaining)
                         }
 
+                    // The screen follows the ear: switch when the incoming song becomes the louder one.
+                    if (plan != null && !mixSwapped && fadeIn >= fadeOut) swapRoles()
+
                     try {
-                        player.volume = startVolume * fadeIn
+                        incoming.volume = startVolume * fadeIn
                         // With the tail in A's audio chain the fade-out happens there, so the echo can ring on.
-                        if (!(tailInChain && plan?.tailEchoMs.let { it != null && it > 0 })) {
-                            fadingPlayer?.volume = startVolume * fadeOut
+                        if (!(tailInChain && plan != null && plan.tailEchoMs > 0)) {
+                            outgoing.volume = startVolume * fadeOut
                         }
                     } catch (e: Exception) {
                         break
                     }
 
                     if (plan != null && plan.canTrackPhase) {
-                        correctBeatPhase(plan, first = i == 0, last = i == steps, targetSpeedB = targetSpeedB)
+                        correctBeatPhase(plan, outgoing, incoming, first = i == 0, last = i == steps, targetSpeedB = targetSpeedB)
                     }
                     delay(stepTime)
                 }
 
+                swapRoles()
                 if (tailInChain && plan != null && plan.tailEchoMs > 0) {
-                    // Let the echo ring out before A's player is released.
+                    // Let the echo and reverb ring out before A's player is released.
                     delay(TailFxMix.ringOutMs(plan.tailEchoMs))
                 }
                 try {
-                    fadingPlayer?.volume = 0f
-                    player.volume = startVolume
-                    player.playbackParameters = PlaybackParameters(targetSpeedB, player.playbackParameters.pitch)
+                    outgoing.volume = 0f
+                    incoming.volume = startVolume
+                    incoming.playbackParameters = PlaybackParameters(targetSpeedB, incoming.playbackParameters.pitch)
                 } catch (e: Exception) {
                 }
 
+                finishMixBookkeeping()
                 cleanupCrossfade(fadingPlayerSessionId = previousAudioSessionId)
 
                 if (plan != null && plan.speedFactorB != 1f) rampTempoBack(plan.speedFactorB)
             }
+    }
+
+    private fun finishMixBookkeeping() {
+        mixSyncListener?.let { listener ->
+            mixOutgoing?.removeListener(listener)
+            mixIncoming?.removeListener(listener)
+        }
+        mixSyncListener = null
+        mixOutgoing = null
+        mixIncoming = null
+    }
+
+    /**
+     * A control was used while a mix was running (skip, seek, queue stop). Before the roles swapped the
+     * user is still on the outgoing song, so the mix is called off and that song plays on normally; after
+     * the swap the mix is finished at once so the user is on the incoming song at full volume.
+     */
+    private fun abortMix(reschedule: Boolean = true) {
+        if (!isCrossfading) return
+        val wasSwapped = mixSwapped
+        crossfadeJob?.cancel()
+        crossfadeJob = null
+        val outgoing = mixOutgoing
+        val incoming = mixIncoming
+        if (!mixSwapped) {
+            outgoing?.let { playerTailFxProcessors[it]?.clearTail() }
+            incoming?.let { prepared ->
+                playerTailFxProcessors[prepared]?.clearTail()
+                prepared.removeListener(secondaryPlayerListener)
+                prepared.stop()
+                prepared.clearMediaItems()
+                releaseExoPlayer(prepared)
+            }
+            secondaryPlayer = null
+            preparedMix = null
+            finishMixBookkeeping()
+            isCrossfading = false
+            isMixing.value = false
+            mixZone.value = null
+            applyEffectiveVolume()
+        } else {
+            fadingPlayer?.let { playerTailFxProcessors[it]?.clearTail() }
+            playerTailFxProcessors[player]?.clearTail()
+            val sessionId = fadingPlayer?.audioSessionId ?: C.AUDIO_SESSION_ID_UNSET
+            try {
+                if (mixSpeedFactor != 1f) {
+                    player.playbackParameters = PlaybackParameters(mixTargetSpeedB / mixSpeedFactor, player.playbackParameters.pitch)
+                }
+            } catch (e: Exception) {
+            }
+            finishMixBookkeeping()
+            cleanupCrossfade(fadingPlayerSessionId = sessionId)
+        }
+        automixStatus.value = AutomixStatus.Idle
+        if (reschedule && automixEnabled && !wasSwapped) scheduleCrossfade(force = true)
     }
 
     /**
@@ -5370,19 +5462,21 @@ class MusicService :
      */
     private fun correctBeatPhase(
         plan: TransitionPlan,
+        outgoing: ExoPlayer,
+        incoming: ExoPlayer,
         first: Boolean,
         last: Boolean,
         targetSpeedB: Float,
     ) {
-        val positionA = fadingPlayer?.currentPosition ?: return
-        val positionB = player.currentPosition
+        val positionA = outgoing.currentPosition
+        val positionB = incoming.currentPosition
         val errorMs = plan.phaseErrorMs(positionA, positionB) ?: return
         val predicted = plan.predictedPhaseErrorMs()
         if (first) Timber.tag(TAG).i("Beat phase at start: %.1f ms (predicted %.1f ms)", errorMs, predicted?.first ?: 0.0)
         if (last) Timber.tag(TAG).i("Beat phase at end: %.1f ms (predicted %.1f ms)", errorMs, predicted?.second ?: 0.0)
         val multiplier =
             if (last) 1.0 else PhaseController.speedMultiplier(plan.phaseErrorBeats(positionA, positionB) ?: 0.0, plan.gridA?.beatMs ?: return)
-        player.playbackParameters = PlaybackParameters(targetSpeedB * multiplier.toFloat(), player.playbackParameters.pitch)
+        incoming.playbackParameters = PlaybackParameters(targetSpeedB * multiplier.toFloat(), incoming.playbackParameters.pitch)
     }
 
     // The next song was sped up or slowed down to match the previous one; glide back to the user's speed.

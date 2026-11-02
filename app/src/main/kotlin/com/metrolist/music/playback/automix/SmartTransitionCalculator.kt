@@ -26,11 +26,13 @@ import kotlin.math.roundToLong
  * Pure Kotlin with no Android types, so it can be unit tested on the JVM.
  */
 object SmartTransitionCalculator {
-    const val MIN_FADE_MS = 4_000L
+    const val MIN_FADE_MS = 3_000L
     const val DEFAULT_LONG_FADE_MS = 16_000L
 
     /** Fade lengths in bars, longest first; the longest that fits the sections involved is used. */
-    private val BAR_CHOICES = intArrayOf(8, 6, 4, 2)
+    private val BARS_LONG = intArrayOf(16, 8, 6, 4, 2)
+    private val BARS_MEDIUM = intArrayOf(8, 6, 4, 2)
+    private val BARS_SHORT = intArrayOf(4, 2)
 
     private const val MAX_TEMPO_DELTA = 0.08
     private const val SHORT_FADE_BEATS = 2.0
@@ -41,7 +43,12 @@ object SmartTransitionCalculator {
     private const val WEIGHT_ENERGY = 2.0
     private const val WEIGHT_TEMPO = 1.5
     private const val WEIGHT_SKIP_A = 0.8
-    private const val WEIGHT_SKIP_B = 1.5
+    private const val WEIGHT_B_ENTRY = 2.0
+    private const val CALM_ENTRY_FREE_UNTIL = 0.2
+    private const val HIGH_ENTRY_FREE_UNTIL = 0.4
+    private const val MIN_B_REMAINING_MS = 30_000L
+    private const val MIN_B_REMAINING_FRACTION = 0.2
+    private const val ALIGN_WINDOW_MS = 8_000.0
     private const val NO_TEMPO_COST = 1.0
     private const val UNMATCHABLE_TEMPO_COST = 3.0
     private const val WEIGHT_VOCAL = 2.0
@@ -51,7 +58,7 @@ object SmartTransitionCalculator {
     const val DEFAULT_MIN_PLAYED_FRACTION = 0.25
 
     private const val ECHO_BEATS = 0.75
-    private const val START_AT_ZERO_COST = 0.3
+    private const val START_AT_ZERO_COST = 0.5
 
     /**
      * @param earliestMixMs the overlap may not open before this position in A.
@@ -80,7 +87,30 @@ object SmartTransitionCalculator {
                 if (best == null || plan.cost < best.cost) best = plan
             }
         }
-        return best
+        return best?.let { refineWithCrossCorrelation(it, songA, songB) }
+    }
+
+    /**
+     * Fine-tunes B's start so its kicks land on A's kicks: cross-correlates the two kick curves around
+     * the overlap and moves B by the lag of the correlation peak, instead of trusting the beat grid alone.
+     */
+    private fun refineWithCrossCorrelation(
+        plan: TransitionPlan,
+        songA: SongStructure,
+        songB: SongStructure,
+    ): TransitionPlan {
+        if (!plan.tempoMatched || !plan.canTrackPhase) return plan
+        val factor = plan.speedFactorB.toDouble()
+        val beatMs = plan.gridA?.beatMs ?: return plan
+        val maxLagMs = beatMs / 2.0
+        val lengthMs = minOf(ALIGN_WINDOW_MS, plan.windowMs.toDouble()).toLong()
+        val padMs = maxLagMs * factor
+        val a = songA.onsetSliceAt(plan.startA, lengthMs) ?: return plan
+        val bStart = (plan.secondaryStartPositionMs - padMs).toLong()
+        val b = songB.onsetSliceAt(bStart, ((lengthMs + maxLagMs) * factor + 2 * padMs).toLong()) ?: return plan
+        val shift = TransientAligner.alignmentShiftMs(a, b, factor, padMs, maxLagMs) ?: return plan
+        val rounded = shift.roundToLong()
+        return if (rounded == 0L || plan.secondaryStartPositionMs + rounded < 0) plan else plan.withBShift(rounded)
     }
 
     private fun candidate(
@@ -93,10 +123,13 @@ object SmartTransitionCalculator {
         longFadeMs: Long,
         quickCut: Boolean,
     ): TransitionPlan? {
+        // The four cases: where A is (high energy or calm) and where B has to land (calm entry or high energy).
         val kind =
             when {
                 a.isHighEnergy && b.isCalmEntry -> TransitionKind.DROP_TO_CALM
                 !a.isHighEnergy && b.isHighEnergy -> TransitionKind.CALM_TO_HIGH
+                a.isHighEnergy && b.isHighEnergy -> TransitionKind.HIGH_TO_HIGH
+                b.isCalmEntry -> TransitionKind.CALM_TO_CALM
                 else -> return null
             }
 
@@ -115,25 +148,36 @@ object SmartTransitionCalculator {
         val fadeOut: Long
         val fadeIn: Long
         val handoverB: Long
+        val entryB: Long
         when (kind) {
-            TransitionKind.DROP_TO_CALM -> {
-                fadeOut = ((if (quickCut) QUICK_FADE_BEATS else SHORT_FADE_BEATS) * beatA).roundToLong().coerceAtLeast(1L)
-                val entry = barAlignedStart(b, gridB)
-                val room = minOf(longFadeMs, sectionA, ((b.endTimeMs - entry) / factor).toLong())
-                fadeIn = pickBars(room, barA)
+            TransitionKind.DROP_TO_CALM, TransitionKind.CALM_TO_CALM -> {
+                val symmetric = kind == TransitionKind.CALM_TO_CALM
+                entryB = barAlignedStart(b, gridB)
+                val cap = if (symmetric) longFadeMs * 2 else longFadeMs
+                val room = minOf(cap, sectionA, ((b.endTimeMs - entryB) / factor).toLong())
+                val bars = if (symmetric) BARS_LONG else BARS_MEDIUM
+                fadeIn = pickBars(room, barA, bars)
                 if (fadeIn < MIN_FADE_MS) return null
-                handoverB = entry + (fadeIn * factor).toLong()
+                // A leaves quickly from a drop; from a calm part it leaves as slowly as B arrives.
+                fadeOut =
+                    if (symmetric) fadeIn else ((if (quickCut) QUICK_FADE_BEATS else SHORT_FADE_BEATS) * beatA).roundToLong().coerceAtLeast(1L)
+                handoverB = entryB + (fadeIn * factor).toLong()
             }
-            TransitionKind.CALM_TO_HIGH -> {
+            TransitionKind.CALM_TO_HIGH, TransitionKind.HIGH_TO_HIGH -> {
                 fadeIn = (QUICK_FADE_BEATS * beatA).roundToLong().coerceAtLeast(1L)
                 handoverB = gridB?.nearestBar(b.startTimeMs.toDouble())?.toLong()?.coerceAtLeast(0L) ?: b.startTimeMs
+                entryB = handoverB
                 // B is pre-rolled before its chorus, so a chorus that comes early limits how long A can fade.
+                val highToHigh = kind == TransitionKind.HIGH_TO_HIGH
                 val longCap = if (quickCut) (QUICK_CALM_BEATS * beatA).toLong() else longFadeMs
                 val room = minOf(longCap, sectionA, (handoverB / factor).toLong())
-                fadeOut = pickBars(room, barA)
+                fadeOut = pickBars(room, barA, if (highToHigh) BARS_SHORT else BARS_MEDIUM)
                 if (fadeOut < MIN_FADE_MS) return null
             }
         }
+
+        // B has to keep playing after the handover, so it never enters near its own end.
+        if (songB.durationMs - handoverB < maxOf(MIN_B_REMAINING_MS, (songB.durationMs * MIN_B_REMAINING_FRACTION).toLong())) return null
 
         val mixOutA = handoverA - fadeOut
         val mixInB = handoverB - (fadeIn * factor).toLong()
@@ -145,9 +189,18 @@ object SmartTransitionCalculator {
         if (startA < earliestMixMs || startA < 0) return null
         if (secondaryStartB < 0 || handoverB > songB.durationMs) return null
 
-        val contrast = if (kind == TransitionKind.DROP_TO_CALM) a.energy - b.energy else b.energy - a.energy
+        // Different-energy pairs want contrast; same-energy pairs want the two sections to match.
+        val contrast =
+            when (kind) {
+                TransitionKind.DROP_TO_CALM -> a.energy - b.energy
+                TransitionKind.CALM_TO_HIGH -> b.energy - a.energy
+                else -> 1.0f - 2.0f * abs(a.energy - b.energy)
+            }
         val skipA = (songA.durationMs - handoverA).toDouble() / songA.durationMs
-        val skipB = secondaryStartB.toDouble() / songB.durationMs
+        // B should come in at a fitting place: not at 0:00 for no reason, and not deep into the song.
+        val posB = entryB.toDouble() / songB.durationMs
+        val freeUntil = if (b.isHighEnergy) HIGH_ENTRY_FREE_UNTIL else CALM_ENTRY_FREE_UNTIL
+        val lateness = (posB - freeUntil).coerceAtLeast(0.0) / (1.0 - freeUntil)
         // Share of the overlap where a sung line would sit on top of the other song's vocal.
         val sungA = VocalGaps.vocalFraction(songA.vocalGaps, mixOutA, handoverA)
         val sungB = VocalGaps.vocalFraction(songB.vocalGaps, mixInB, handoverB)
@@ -158,7 +211,7 @@ object SmartTransitionCalculator {
             WEIGHT_ENERGY * (1.0 - contrast) / 2.0 +
                 WEIGHT_TEMPO * tempo.cost +
                 WEIGHT_SKIP_A * skipA +
-                WEIGHT_SKIP_B * skipB +
+                WEIGHT_B_ENTRY * lateness +
                 WEIGHT_VOCAL * vocalCost +
                 (if (secondaryStartB < 1_000L) START_AT_ZERO_COST else 0.0)
 
@@ -229,13 +282,14 @@ object SmartTransitionCalculator {
         return if (aligned < segment.endTimeMs - MIN_FADE_MS) aligned else segment.startTimeMs
     }
 
-    /** Longest of 8/6/4/2 bars that fits in [roomMs]; without a beat grid the room is used as is. */
+    /** Longest of [choices] (in bars) that fits in [roomMs]; without a beat grid the room is used as is. */
     private fun pickBars(
         roomMs: Long,
         barMs: Double,
+        choices: IntArray,
     ): Long {
         if (barMs <= 0.0) return roomMs
-        for (bars in BAR_CHOICES) {
+        for (bars in choices) {
             val length = (bars * barMs).toLong()
             if (length <= roomMs) return length
         }

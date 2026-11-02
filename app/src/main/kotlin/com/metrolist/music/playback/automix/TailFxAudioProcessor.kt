@@ -29,8 +29,17 @@ class TailFxAudioProcessor : BaseAudioProcessor() {
         val echoMs: Long,
     )
 
+    private class Head(
+        val startMs: Double,
+        val durationMs: Long,
+    )
+
     @Volatile
     private var tail: Tail? = null
+
+    @Volatile
+    private var head: Head? = null
+    private var reverbs = emptyArray<SimpleReverb>()
 
     @Volatile
     private var clockMs = 0.0
@@ -55,11 +64,22 @@ class TailFxAudioProcessor : BaseAudioProcessor() {
         tail = Tail(clockMs + delayMs.coerceAtLeast(0L), durationMs.coerceAtLeast(1L), echoMs.coerceAtLeast(0L))
         if (echoMs > 0 && sampleRate > 0) {
             echoes = Array(channelCount) { TailEcho((sampleRate * echoMs / 1000).toInt()) }
+            reverbs = Array(channelCount) { SimpleReverb(sampleRate) }
         }
+    }
+
+    /** Dresses the start of this stream (the incoming song): an opening low-pass and a reverb wash that fades out. */
+    fun scheduleHead(
+        delayMs: Long,
+        durationMs: Long,
+    ) {
+        if (sampleRate > 0) reverbs = Array(channelCount) { SimpleReverb(sampleRate) }
+        head = Head(clockMs + delayMs.coerceAtLeast(0L), durationMs.coerceAtLeast(1L))
     }
 
     fun clearTail() {
         tail = null
+        head = null
     }
 
     override fun onConfigure(inputAudioFormat: AudioProcessor.AudioFormat): AudioProcessor.AudioFormat {
@@ -74,6 +94,7 @@ class TailFxAudioProcessor : BaseAudioProcessor() {
         sampleRate = inputAudioFormat.sampleRate
         filters = Array(channelCount) { OnePoleLowPass() }
         echoes = emptyArray()
+        reverbs = emptyArray()
         return inputAudioFormat
     }
 
@@ -81,16 +102,20 @@ class TailFxAudioProcessor : BaseAudioProcessor() {
         framesProcessed = 0L
         clockMs = 0.0
         tail = null
+        head = null
         filters.forEach { it.reset() }
         echoes.forEach { it.reset() }
+        reverbs = emptyArray()
     }
 
     override fun onReset() {
         tail = null
+        head = null
         framesProcessed = 0L
         clockMs = 0.0
         filters = emptyArray()
         echoes = emptyArray()
+        reverbs = emptyArray()
     }
 
     override fun queueInput(inputBuffer: ByteBuffer) {
@@ -100,6 +125,7 @@ class TailFxAudioProcessor : BaseAudioProcessor() {
         val frames = inputBuffer.remaining() / frameBytes
         val output = replaceOutputBuffer(frames * frameBytes)
         val current = tail
+        val intro = head
 
         inputBuffer.order(ByteOrder.LITTLE_ENDIAN)
         output.order(ByteOrder.LITTLE_ENDIAN)
@@ -110,15 +136,22 @@ class TailFxAudioProcessor : BaseAudioProcessor() {
             val progress = if (active) (positionMs - current!!.startMs) / current.durationMs else 0.0
             val cutoff = if (active) TailFxSweep.cutoffAt(positionMs, current!!.startMs, current.durationMs.toDouble()) else 0.0
             val echoOn = active && current!!.echoMs > 0 && echoes.size == channelCount
+            val introActive = !active && intro != null && positionMs >= intro.startMs && positionMs < intro.startMs + intro.durationMs
+            val introProgress = if (introActive) (positionMs - intro!!.startMs) / intro.durationMs else 0.0
             for (c in 0 until channelCount) {
                 val x = readSample(inputBuffer)
                 var y = x
-                if (active) {
+                if (introActive) {
+                    val opened = filters[c].process(x, HeadFx.cutoffAt(introProgress), sampleRate)
+                    y = opened
+                    if (reverbs.size == channelCount) y += reverbs[c].process(opened) * HeadFx.washAt(introProgress)
+                } else if (active) {
                     val filtered = filters[c].process(x, cutoff, sampleRate)
                     y = filtered
                     if (echoOn) {
                         val wet = echoes[c].process(filtered * TailFxMix.sendLevel(progress))
-                        y = filtered * TailFxMix.dryGain(progress) + wet * TailFxMix.WET_LEVEL
+                        val wash = if (reverbs.size == channelCount) reverbs[c].process(filtered * TailFxMix.sendLevel(progress)) else 0.0
+                        y = filtered * TailFxMix.dryGain(progress) + wet * TailFxMix.WET_LEVEL + wash * TAIL_WASH_LEVEL
                     }
                 }
                 writeSample(output, y)
@@ -127,6 +160,10 @@ class TailFxAudioProcessor : BaseAudioProcessor() {
         }
         clockMs = framesProcessed * 1000.0 / sampleRate
         output.flip()
+    }
+
+    private companion object {
+        const val TAIL_WASH_LEVEL = 0.3
     }
 
     private fun readSample(buffer: ByteBuffer): Double =

@@ -89,4 +89,22 @@ class VocalGapsAndTailFxTest {
         assertTrue(TailFxMix.sendLevel(0.5) > 0.0)
         assertEquals(2_250L, TailFxMix.ringOutMs(375))
     }
+
+    @Test
+    fun `reverb rings after an impulse and then dies away`() {
+        val reverb = SimpleReverb(sampleRate = 8_000)
+        val out = DoubleArray(16_000) { i -> reverb.process(if (i == 0) 1.0 else 0.0) }
+        fun energy(from: Int, to: Int) = (from until to).sumOf { out[it] * out[it] }
+        assertTrue(energy(400, 4_000) > 0.0)
+        assertTrue(energy(12_000, 16_000) < energy(400, 4_000))
+    }
+
+    @Test
+    fun `head effect opens the filter and fades the wash over the fade-in`() {
+        assertEquals(HeadFx.START_HZ, HeadFx.cutoffAt(0.0), 1e-6)
+        assertEquals(TailFxSweep.OPEN_HZ, HeadFx.cutoffAt(1.0), 1e-6)
+        assertTrue(HeadFx.cutoffAt(0.5) > HeadFx.cutoffAt(0.2))
+        assertEquals(HeadFx.WASH_LEVEL, HeadFx.washAt(0.0), 1e-9)
+        assertEquals(0.0, HeadFx.washAt(1.0), 1e-9)
+    }
 }

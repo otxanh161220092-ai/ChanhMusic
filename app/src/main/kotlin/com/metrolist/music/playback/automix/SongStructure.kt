@@ -19,6 +19,8 @@ class SongStructure(
     val gridNear: (Long) -> BeatGrid? = { null },
     /** Pauses between sung lines. Null when no lyrics are known; empty when the song is sung throughout. */
     val vocalGaps: List<LongRange>? = null,
+    /** Kick (low-band onset) curve over [startMs, startMs + lengthMs), or null when it is not known. */
+    val onsetSliceAt: (Long, Long) -> OnsetSlice? = { _, _ -> null },
 )
 
 /** Builds a structure from analysis results from the loudness curve (falling back to the length-based heuristic when it is flat). */
@@ -30,4 +32,13 @@ fun TrackFeatures.toSongStructure(vocalGaps: List<LongRange>? = null): SongStruc
         hasTempo = hasTempo,
         gridNear = { positionMs -> if (hasTempo) gridNear(positionMs.toDouble()) else null },
         vocalGaps = vocalGaps,
+        onsetSliceAt = { startMs, lengthMs ->
+            if (!hasTempo || hopMs <= 0.0 || lowOnset.isEmpty()) {
+                null
+            } else {
+                val from = (startMs / hopMs).toInt()
+                val count = (lengthMs / hopMs).toInt()
+                if (from < 0 || count <= 0 || from + count > lowOnset.size) null else OnsetSlice(lowOnset.copyOfRange(from, from + count), hopMs)
+            }
+        },
     )

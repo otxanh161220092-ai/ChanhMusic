@@ -80,3 +80,75 @@ object TailFxMix {
     /** How long the repeats stay audible after the cut: about -40 dB at feedback 0.5. */
     fun ringOutMs(echoMs: Long): Long = (echoMs * 6).coerceAtMost(4_000L)
 }
+
+/**
+ * Small Schroeder reverb (four damped comb filters into two all-pass filters). Returns only the wet
+ * signal, which the caller mixes under the dry one.
+ */
+class SimpleReverb(
+    sampleRate: Int,
+) {
+    private class Comb(
+        size: Int,
+    ) {
+        val buffer = DoubleArray(size.coerceAtLeast(1))
+        var index = 0
+        var store = 0.0
+
+        fun process(
+            input: Double,
+            feedback: Double,
+            damp: Double,
+        ): Double {
+            val out = buffer[index]
+            store = out * (1.0 - damp) + store * damp
+            buffer[index] = input + store * feedback
+            index = (index + 1) % buffer.size
+            return out
+        }
+    }
+
+    private class AllPass(
+        size: Int,
+    ) {
+        val buffer = DoubleArray(size.coerceAtLeast(1))
+        var index = 0
+
+        fun process(input: Double): Double {
+            val delayed = buffer[index]
+            val out = delayed - input
+            buffer[index] = input + delayed * 0.5
+            index = (index + 1) % buffer.size
+            return out
+        }
+    }
+
+    private val combs = doubleArrayOf(29.7, 37.1, 41.1, 43.7).map { Comb((sampleRate * it / 1000.0).toInt()) }
+    private val allPasses = doubleArrayOf(5.0, 1.7).map { AllPass((sampleRate * it / 1000.0).toInt()) }
+
+    fun process(input: Double): Double {
+        var sum = 0.0
+        for (c in combs) sum += c.process(input, FEEDBACK, DAMP)
+        var out = sum * 0.25
+        for (a in allPasses) out = a.process(out)
+        return out
+    }
+
+    private companion object {
+        const val FEEDBACK = 0.84
+        const val DAMP = 0.25
+    }
+}
+
+/** Opening low-pass and fading reverb wash that dress the start of the incoming song. */
+object HeadFx {
+    const val START_HZ = 500.0
+    const val WASH_LEVEL = 0.35
+
+    /** Cutoff opens from [START_HZ] to fully open across the fade-in, on a log scale. */
+    fun cutoffAt(progress: Double): Double =
+        exp(ln(START_HZ) + (ln(TailFxSweep.OPEN_HZ) - ln(START_HZ)) * progress.coerceIn(0.0, 1.0))
+
+    /** Reverb send: strongest at the very start, gone by the end of the fade-in. */
+    fun washAt(progress: Double): Double = WASH_LEVEL * (1.0 - progress.coerceIn(0.0, 1.0))
+}
