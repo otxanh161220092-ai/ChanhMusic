@@ -40,17 +40,22 @@ object SmartTransitionCalculator {
 
     private const val WEIGHT_ENERGY = 2.0
     private const val WEIGHT_TEMPO = 1.5
-    private const val WEIGHT_SKIP_A = 0.3
+    private const val WEIGHT_SKIP_A = 0.8
     private const val WEIGHT_SKIP_B = 0.2
     private const val NO_TEMPO_COST = 1.0
     private const val UNMATCHABLE_TEMPO_COST = 3.0
     private const val WEIGHT_VOCAL = 2.0
 
     /** B should not start from 0:00 unless nothing else fits. */
+    /** The overlap may not open before this share of A has played, so a song is never cut off at its start. */
+    const val DEFAULT_MIN_PLAYED_FRACTION = 0.4
+
+    private const val ECHO_BEATS = 0.75
     private const val START_AT_ZERO_COST = 1.5
 
     /**
      * @param earliestMixMs the overlap may not open before this position in A.
+     * @param minPlayedFraction the overlap also may not open before this share of A's length.
      * @param longFadeMs the long fade, shortened to fit the sections involved.
      * @param quickCut when true, the transition is a single-beat cut: A's fade is one beat on a drop,
      * and four beats on a calm section instead of the long fade.
@@ -62,8 +67,10 @@ object SmartTransitionCalculator {
         earliestMixMs: Long = 0L,
         longFadeMs: Long = DEFAULT_LONG_FADE_MS,
         quickCut: Boolean = false,
+        minPlayedFraction: Double = DEFAULT_MIN_PLAYED_FRACTION,
     ): TransitionPlan? {
         if (songA.durationMs <= 0 || songB.durationMs <= 0) return null
+        val earliestMixMs = maxOf(earliestMixMs, (songA.durationMs * minPlayedFraction).toLong())
         val tempo = matchTempo(songA, songB)
 
         var best: TransitionPlan? = null
@@ -169,6 +176,7 @@ object SmartTransitionCalculator {
             gridA = if (trackPhase) gridA else null,
             gridB = if (trackPhase) gridB else null,
             tailFxA = kind == TransitionKind.DROP_TO_CALM,
+            tailEchoMs = if (kind == TransitionKind.DROP_TO_CALM) (ECHO_BEATS * beatA).roundToLong().coerceIn(150L, 1_000L) else 0L,
         )
     }
 

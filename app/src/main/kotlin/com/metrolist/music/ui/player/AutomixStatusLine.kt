@@ -5,9 +5,8 @@
 
 package com.metrolist.music.ui.player
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,47 +31,46 @@ fun AutomixStatusLine(
     color: Color,
     modifier: Modifier = Modifier,
 ) {
-    AnimatedVisibility(visible = status !is AutomixStatus.Idle, modifier = modifier.animateContentSize()) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 2.dp),
-        ) {
-            when (status) {
-                is AutomixStatus.Analyzing ->
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(12.dp),
-                        strokeWidth = 1.5.dp,
-                        color = color,
-                    )
-                else ->
-                    Icon(
-                        painter = painterResource(R.drawable.ic_automix),
-                        contentDescription = null,
-                        tint = color,
-                        modifier = Modifier.size(12.dp),
-                    )
-            }
-            val text =
-                when (status) {
-                    is AutomixStatus.Analyzing -> stringResource(R.string.automix_status_analyzing)
-                    is AutomixStatus.Ready ->
-                        stringResource(
-                            if (status.tempoMatched) R.string.automix_status_ready_matched else R.string.automix_status_ready,
-                            formatClock(status.mixOutMs),
-                            formatClock(status.mixInMs),
-                        )
-                    is AutomixStatus.Unavailable -> stringResource(R.string.automix_status_unavailable)
-                    is AutomixStatus.Idle -> ""
-                }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelMedium,
+    // The line always takes the same height while AutoMix is on, so the title, artist and controls
+    // never move when the status changes between finding, ready and unavailable.
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.height(18.dp).padding(top = 2.dp),
+    ) {
+        if (status is AutomixStatus.Idle) return@Row
+        if (status is AutomixStatus.Analyzing) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(12.dp),
+                strokeWidth = 1.5.dp,
                 color = color,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(start = 6.dp),
+            )
+        } else {
+            Icon(
+                painter = painterResource(R.drawable.ic_automix),
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(12.dp),
             )
         }
+        val text =
+            when (status) {
+                is AutomixStatus.Ready ->
+                    stringResource(
+                        if (status.tempoMatched) R.string.automix_status_ready_matched else R.string.automix_status_ready,
+                        formatClock(status.mixOutMs),
+                        formatClock(status.mixInMs),
+                    )
+                is AutomixStatus.Unavailable -> stringResource(R.string.automix_status_unavailable)
+                else -> stringResource(R.string.automix_status_analyzing)
+            }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            color = color,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(start = 6.dp),
+        )
     }
 }
 

@@ -150,6 +150,7 @@ import com.metrolist.music.LocalDownloadUtil
 import com.metrolist.music.LocalListenTogetherManager
 import com.metrolist.music.LocalPlayerConnection
 import com.metrolist.music.R
+import com.metrolist.music.constants.AutomixEnabledKey
 import com.metrolist.music.constants.CropAlbumArtKey
 import com.metrolist.music.constants.DarkModeKey
 import com.metrolist.music.constants.HidePlayerThumbnailKey
@@ -358,6 +359,7 @@ fun BottomSheetPlayer(
     val automix by playerConnection.service.automixItems.collectAsStateWithLifecycle()
     val mixZone by playerConnection.service.mixZone.collectAsStateWithLifecycle()
     val automixStatus by playerConnection.service.automixStatus.collectAsStateWithLifecycle()
+    val automixOn by rememberPreference(AutomixEnabledKey, defaultValue = false)
     val isMixing by playerConnection.service.isMixing.collectAsStateWithLifecycle()
     val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsStateWithLifecycle()
@@ -1181,11 +1183,12 @@ fun BottomSheetPlayer(
                             }
                         }
                     }
-                    AutomixStatusLine(
-                        status = automixStatus,
-                        color = TextBackgroundColor.copy(alpha = 0.6f),
-                        modifier = Modifier.vibrant(useVibrantText),
-                    )
+                    if (automixOn) {
+                        AutomixStatusLine(
+                            status = automixStatus,
+                            color = TextBackgroundColor.copy(alpha = 0.6f),
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(12.dp))

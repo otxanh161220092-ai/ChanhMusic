@@ -40,6 +40,8 @@ class TransitionPlan(
     val gridB: BeatGrid?,
     /** Darken A's tail with a low-pass sweep while it is cut. */
     val tailFxA: Boolean = false,
+    /** Echo delay for A's tail in ms (about three quarters of a beat); 0 when A leaves without an echo. */
+    val tailEchoMs: Long = 0L,
 ) {
     /**
      * Equal-power gains at [relMs] after the window opens: A's fade-out and B's fade-in, in that order.

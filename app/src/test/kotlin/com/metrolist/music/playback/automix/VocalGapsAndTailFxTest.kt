@@ -69,4 +69,24 @@ class VocalGapsAndTailFxTest {
         assertTrue(mid < start && mid > end)
         assertEquals(cos(0.0 * PI), 1.0, 0.0)
     }
+
+    @Test
+    fun `echo repeats decay and ring out after the input stops`() {
+        val echo = TailEcho(delayFrames = 4, feedback = 0.5)
+        val out = DoubleArray(13) { i -> echo.process(if (i == 0) 1.0 else 0.0) }
+        assertEquals(1.0, out[4], 1e-9)
+        assertEquals(0.5, out[8], 1e-9)
+        assertEquals(0.25, out[12], 1e-9)
+        assertEquals(0.0, out[5], 1e-9)
+    }
+
+    @Test
+    fun `tail dry signal fades with equal power while echo send stops at the end`() {
+        assertEquals(1.0, TailFxMix.dryGain(0.0), 1e-9)
+        assertEquals(Math.sqrt(0.5), TailFxMix.dryGain(0.5), 1e-9)
+        assertEquals(0.0, TailFxMix.dryGain(1.0), 1e-9)
+        assertEquals(0.0, TailFxMix.sendLevel(1.0), 1e-9)
+        assertTrue(TailFxMix.sendLevel(0.5) > 0.0)
+        assertEquals(2_250L, TailFxMix.ringOutMs(375))
+    }
 }

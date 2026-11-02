@@ -14,19 +14,27 @@ import java.nio.ByteOrder
 import kotlin.math.roundToInt
 
 /**
- * Sweeps a low-pass filter closed over the tail of one player's stream, so the outgoing song
- * darkens as it is cut. Times are on this processor's clock: frames since the last flush.
+ * Ends the outgoing song with an effect tail: a low-pass filter that closes over the fade, the song's
+ * own fade-out, and a feedback echo that keeps ringing after the song is gone.
+ *
+ * The tail is scheduled relative to "now" ([scheduleTail] takes a delay), because this processor's
+ * clock is frames since the last flush, which differs from the track position after any seek.
  * Scheduling from another thread only swaps an immutable value.
  */
 @UnstableApi
 class TailFxAudioProcessor : BaseAudioProcessor() {
-    private class Sweep(
-        val startMs: Long,
+    private class Tail(
+        val startMs: Double,
         val durationMs: Long,
+        val echoMs: Long,
     )
 
     @Volatile
-    private var sweep: Sweep? = null
+    private var tail: Tail? = null
+
+    @Volatile
+    private var clockMs = 0.0
+    private var echoes = emptyArray<TailEcho>()
 
     private var encoding = C.ENCODING_INVALID
     private var bytesPerSample = 0
@@ -35,15 +43,23 @@ class TailFxAudioProcessor : BaseAudioProcessor() {
     private var framesProcessed = 0L
     private var filters = emptyArray<OnePoleLowPass>()
 
-    fun scheduleSweep(
-        startMs: Long,
+    /**
+     * Starts the tail [delayMs] from now (in this stream's own time) and lets it run for [durationMs].
+     * [echoMs] is the echo delay; 0 turns the echo and the in-processor fade off (low-pass only).
+     */
+    fun scheduleTail(
+        delayMs: Long,
         durationMs: Long,
+        echoMs: Long,
     ) {
-        sweep = Sweep(startMs.coerceAtLeast(0L), durationMs.coerceAtLeast(1L))
+        tail = Tail(clockMs + delayMs.coerceAtLeast(0L), durationMs.coerceAtLeast(1L), echoMs.coerceAtLeast(0L))
+        if (echoMs > 0 && sampleRate > 0) {
+            echoes = Array(channelCount) { TailEcho((sampleRate * echoMs / 1000).toInt()) }
+        }
     }
 
-    fun clearSweep() {
-        sweep = null
+    fun clearTail() {
+        tail = null
     }
 
     override fun onConfigure(inputAudioFormat: AudioProcessor.AudioFormat): AudioProcessor.AudioFormat {
@@ -57,18 +73,24 @@ class TailFxAudioProcessor : BaseAudioProcessor() {
         channelCount = inputAudioFormat.channelCount
         sampleRate = inputAudioFormat.sampleRate
         filters = Array(channelCount) { OnePoleLowPass() }
+        echoes = emptyArray()
         return inputAudioFormat
     }
 
     override fun onFlush(streamMetadata: AudioProcessor.StreamMetadata) {
         framesProcessed = 0L
+        clockMs = 0.0
+        tail = null
         filters.forEach { it.reset() }
+        echoes.forEach { it.reset() }
     }
 
     override fun onReset() {
-        sweep = null
+        tail = null
         framesProcessed = 0L
+        clockMs = 0.0
         filters = emptyArray()
+        echoes = emptyArray()
     }
 
     override fun queueInput(inputBuffer: ByteBuffer) {
@@ -77,27 +99,33 @@ class TailFxAudioProcessor : BaseAudioProcessor() {
         val frameBytes = bytesPerSample * channelCount
         val frames = inputBuffer.remaining() / frameBytes
         val output = replaceOutputBuffer(frames * frameBytes)
-        val current = sweep
+        val current = tail
 
         inputBuffer.order(ByteOrder.LITTLE_ENDIAN)
         output.order(ByteOrder.LITTLE_ENDIAN)
 
         repeat(frames) {
             val positionMs = framesProcessed * 1000.0 / sampleRate
-            val filtered = current != null && positionMs >= current.startMs
-            val cutoff =
-                if (filtered) {
-                    TailFxSweep.cutoffAt(positionMs, current!!.startMs.toDouble(), current.durationMs.toDouble())
-                } else {
-                    0.0
-                }
+            val active = current != null && positionMs >= current.startMs
+            val progress = if (active) (positionMs - current!!.startMs) / current.durationMs else 0.0
+            val cutoff = if (active) TailFxSweep.cutoffAt(positionMs, current!!.startMs, current.durationMs.toDouble()) else 0.0
+            val echoOn = active && current!!.echoMs > 0 && echoes.size == channelCount
             for (c in 0 until channelCount) {
                 val x = readSample(inputBuffer)
-                val y = if (filtered) filters[c].process(x, cutoff, sampleRate) else x
+                var y = x
+                if (active) {
+                    val filtered = filters[c].process(x, cutoff, sampleRate)
+                    y = filtered
+                    if (echoOn) {
+                        val wet = echoes[c].process(filtered * TailFxMix.sendLevel(progress))
+                        y = filtered * TailFxMix.dryGain(progress) + wet * TailFxMix.WET_LEVEL
+                    }
+                }
                 writeSample(output, y)
             }
             framesProcessed++
         }
+        clockMs = framesProcessed * 1000.0 / sampleRate
         output.flip()
     }
 

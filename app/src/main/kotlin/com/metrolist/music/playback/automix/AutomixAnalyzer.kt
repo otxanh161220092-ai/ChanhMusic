@@ -39,13 +39,14 @@ class AutomixAnalyzer(
             override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, TrackFeatures>?): Boolean = size > MAX_CACHED_TRACKS
         }
     private val failed = HashSet<String>()
-    private val mutex = Mutex()
+    // One lock per song, so the current song and the next one are analyzed at the same time.
+    private val locks = java.util.concurrent.ConcurrentHashMap<String, Mutex>()
 
     suspend fun analyze(mediaId: String): TrackFeatures? {
         synchronized(results) { results[mediaId] }?.let { return it }
         if (synchronized(failed) { mediaId in failed }) return null
 
-        return mutex.withLock {
+        return locks.getOrPut(mediaId) { Mutex() }.withLock {
             val cached = synchronized(results) { results[mediaId] }
             val stored = if (cached == null) store?.load(mediaId)?.features else null
             if (cached != null) {

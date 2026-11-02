@@ -31,6 +31,7 @@ import com.metrolist.music.playback.automix.AutomixStatus
 import com.metrolist.music.playback.automix.FileAutomixFeatureStore
 import com.metrolist.music.playback.automix.PhaseController
 import com.metrolist.music.playback.automix.TailFxAudioProcessor
+import com.metrolist.music.playback.automix.TailFxMix
 import com.metrolist.music.playback.automix.VocalGaps
 import com.metrolist.music.playback.automix.SmartTransitionCalculator
 import com.metrolist.music.playback.automix.TransitionPlan
@@ -244,6 +245,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -262,6 +264,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 import timber.log.Timber
 import java.io.File
@@ -281,6 +284,7 @@ private const val AUTOMIX_PREPARE_LEAD_MS = 8_000L
 private const val AUTOMIX_MIN_LEAD_MS = 3_000L
 private const val AUTOMIX_TEMPO_RAMP_MS = 8_000L
 private const val AUTOMIX_QUICK_CUT = false
+private const val AUTOMIX_ANALYSIS_TIMEOUT_MS = 60_000L
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -5022,9 +5026,19 @@ class MusicService :
         automixStatus.value = AutomixStatus.Analyzing
         mixPlanJob =
             scope.launch {
-                val featuresA = automixAnalyzer.analyze(currentId)
-                val featuresB = if (featuresA != null) automixAnalyzer.analyze(nextId) else null
-                if (player.currentMediaItem?.mediaId != currentId || isCrossfading || plannedNextId != nextId) return@launch
+                // Both songs are analyzed at the same time, and a song that cannot be analyzed in time is
+                // given up on, so the status never stays on "finding" forever.
+                val (featuresA, featuresB) =
+                    withTimeoutOrNull(AUTOMIX_ANALYSIS_TIMEOUT_MS) {
+                        val a = async { automixAnalyzer.analyze(currentId) }
+                        val b = async { automixAnalyzer.analyze(nextId) }
+                        a.await() to b.await()
+                    } ?: (null to null)
+                if (player.currentMediaItem?.mediaId != currentId || plannedNextId != nextId) return@launch
+                if (isCrossfading) {
+                    automixStatus.value = AutomixStatus.Idle
+                    return@launch
+                }
                 if (featuresA == null || featuresB == null) {
                     automixStatus.value = AutomixStatus.Unavailable
                     return@launch
@@ -5185,8 +5199,11 @@ class MusicService :
         val currentPlayer = player
 
         fadingPlayer = currentPlayer
-        if (plan?.tailFxA == true && automixCreative) {
-            playerTailFxProcessors[currentPlayer]?.scheduleSweep(plan.mixOutPositionA, plan.fadeOutDurationA)
+        // The effect tail lives in A's audio chain: low-pass sweep, A's own fade-out and a ringing echo.
+        val tailInChain = plan?.tailFxA == true && automixCreative && playerTailFxProcessors[currentPlayer] != null
+        if (tailInChain && plan != null) {
+            val untilMixOut = (plan.mixOutPositionA - currentPlayer.currentPosition).coerceAtLeast(0L)
+            playerTailFxProcessors[currentPlayer]?.scheduleTail(untilMixOut, plan.fadeOutDurationA, plan.tailEchoMs)
         }
         player = nextPlayer
         _playerFlow.value = player
@@ -5273,7 +5290,10 @@ class MusicService :
 
                     try {
                         player.volume = startVolume * fadeIn
-                        fadingPlayer?.volume = startVolume * fadeOut
+                        // With the tail in A's audio chain the fade-out happens there, so the echo can ring on.
+                        if (!(tailInChain && plan?.tailEchoMs.let { it != null && it > 0 })) {
+                            fadingPlayer?.volume = startVolume * fadeOut
+                        }
                     } catch (e: Exception) {
                         break
                     }
@@ -5284,6 +5304,10 @@ class MusicService :
                     delay(stepTime)
                 }
 
+                if (tailInChain && plan != null && plan.tailEchoMs > 0) {
+                    // Let the echo ring out before A's player is released.
+                    delay(TailFxMix.ringOutMs(plan.tailEchoMs))
+                }
                 try {
                     fadingPlayer?.volume = 0f
                     player.volume = startVolume

@@ -53,7 +53,7 @@ class SmartTransitionCalculatorTest {
         a: SongStructure,
         b: SongStructure,
         earliest: Long = 0L,
-    ) = SmartTransitionCalculator.calculateTransitionPlan(a, b, earliest, longFadeMs = 12_000L)!!
+    ) = SmartTransitionCalculator.calculateTransitionPlan(a, b, earliest, longFadeMs = 12_000L, minPlayedFraction = 0.0)!!
 
     @Test
     fun `drop in A hands over exactly where the drop ends and B enters calm with a long fade`() {
@@ -223,8 +223,8 @@ class SmartTransitionCalculatorTest {
         val sungEverywhere = song(200_000, seg(SegmentType.VERSE, 40_000, 80_000), vocal = listOf(0L..200_000L))
         val pausesInA = song(200_000, seg(SegmentType.VERSE, 40_000, 80_000), vocal = listOf(0L..30_000L, 100_000L..200_000L))
 
-        val sung = SmartTransitionCalculator.calculateTransitionPlan(sungEverywhere, b)!!
-        val paused = SmartTransitionCalculator.calculateTransitionPlan(pausesInA, b)!!
+        val sung = SmartTransitionCalculator.calculateTransitionPlan(sungEverywhere, b, minPlayedFraction = 0.0)!!
+        val paused = SmartTransitionCalculator.calculateTransitionPlan(pausesInA, b, minPlayedFraction = 0.0)!!
 
         assertTrue(paused.cost < sung.cost)
     }
@@ -243,9 +243,32 @@ class SmartTransitionCalculatorTest {
         val a = song(400_000, seg(SegmentType.VERSE, 40_000, 200_000), bpm = 120f, grid = grid)
         val b = song(400_000, seg(SegmentType.CHORUS, 150_000, 250_000), bpm = 120f, grid = grid)
 
-        val p = SmartTransitionCalculator.calculateTransitionPlan(a, b)!!
+        val p = SmartTransitionCalculator.calculateTransitionPlan(a, b, minPlayedFraction = 0.0)!!
         assertEquals(32_000L, p.fadeOutDurationA) // 16 bars of 2 s
-        val tight = SmartTransitionCalculator.calculateTransitionPlan(a, b, longFadeMs = 13_000L)!!
+        val tight = SmartTransitionCalculator.calculateTransitionPlan(a, b, longFadeMs = 13_000L, minPlayedFraction = 0.0)!!
         assertEquals(12_000L, tight.fadeOutDurationA) // 6 bars
+    }
+
+    @Test
+    fun `a song is never cut off near its start`() {
+        // An early calm section followed by a later one: only the later one may be used by default.
+        val a =
+            song(
+                200_000,
+                seg(SegmentType.VERSE, 5_000, 40_000),
+                seg(SegmentType.VERSE, 120_000, 170_000),
+            )
+        val b = song(200_000, seg(SegmentType.CHORUS, 60_000, 90_000))
+
+        val p = SmartTransitionCalculator.calculateTransitionPlan(a, b)!!
+
+        assertTrue(p.startA >= 80_000L)
+    }
+
+    @Test
+    fun `drop to calm ends A with an echo tail`() {
+        val a = song(200_000, seg(SegmentType.DROP, 100_000, 130_000))
+        val b = song(200_000, seg(SegmentType.VERSE, 20_000, 60_000))
+        assertEquals(375L, SmartTransitionCalculator.calculateTransitionPlan(a, b)!!.tailEchoMs)
     }
 }
