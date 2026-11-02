@@ -58,13 +58,13 @@ class SmartTransitionCalculatorTest {
     @Test
     fun `drop in A hands over exactly where the drop ends and B enters calm with a long fade`() {
         val a = song(200_000, seg(SegmentType.DROP, 100_000, 130_000))
-        val b = song(200_000, seg(SegmentType.INTRO, 0, 20_000), seg(SegmentType.VERSE, 20_000, 60_000))
+        val b = song(200_000, seg(SegmentType.VERSE, 20_000, 60_000), seg(SegmentType.VERSE, 120_000, 160_000))
 
         val p = plan(a, b)
 
         assertEquals(TransitionKind.DROP_TO_CALM, p.kind)
         assertEquals(130_000L, p.handoverEndA)
-        // B does not restart from 0:00 when it has a later calm part to enter on.
+        // B enters at its first suitable calm part: near its start, but not at 0:00 and not far into the song.
         assertEquals(20_000L, p.mixInPositionB)
         // A is cut short (2 beats at the 500 ms fallback beat), B fades in for much longer.
         assertEquals(1_000L, p.fadeOutDurationA)
@@ -238,13 +238,13 @@ class SmartTransitionCalculatorTest {
     }
 
     @Test
-    fun `fade lengths are whole bars chosen from 16 8 6 4 2`() {
+    fun `fade lengths are whole bars chosen from 8 6 4 2`() {
         val grid = BeatGrid(0.0, 500.0) // 2 s bars
         val a = song(400_000, seg(SegmentType.VERSE, 40_000, 200_000), bpm = 120f, grid = grid)
         val b = song(400_000, seg(SegmentType.CHORUS, 150_000, 250_000), bpm = 120f, grid = grid)
 
         val p = SmartTransitionCalculator.calculateTransitionPlan(a, b, minPlayedFraction = 0.0)!!
-        assertEquals(32_000L, p.fadeOutDurationA) // 16 bars of 2 s
+        assertEquals(16_000L, p.fadeOutDurationA) // 8 bars of 2 s
         val tight = SmartTransitionCalculator.calculateTransitionPlan(a, b, longFadeMs = 13_000L, minPlayedFraction = 0.0)!!
         assertEquals(12_000L, tight.fadeOutDurationA) // 6 bars
     }

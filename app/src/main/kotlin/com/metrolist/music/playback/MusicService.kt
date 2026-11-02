@@ -280,7 +280,8 @@ private const val INSTANT_SILENCE_SKIP_SETTLE_MS = 350L
 
 // Automix: how long before the mix the next song is prepared, the earliest a plan may start
 // from now, and how long the next song's tempo takes to glide back to normal after the mix.
-private const val AUTOMIX_PREPARE_LEAD_MS = 8_000L
+private const val AUTOMIX_PREPARE_LEAD_MS = 25_000L
+private const val AUTOMIX_EARLY_TOLERANCE_MS = 1_500L
 private const val AUTOMIX_MIN_LEAD_MS = 3_000L
 private const val AUTOMIX_TEMPO_RAMP_MS = 8_000L
 private const val AUTOMIX_QUICK_CUT = false
@@ -4999,6 +5000,13 @@ class MusicService :
         crossfadeMessage = player.createMessage { _, _ ->
             val timer = sleepTimer
             if (player.isPlaying && player.currentMediaItem?.mediaId == targetMediaId && (timer == null || !timer.pauseWhenSongEnd)) {
+                val planned = mixPlan?.startA
+                if (planned != null && player.currentPosition < planned - AUTOMIX_EARLY_TOLERANCE_MS) {
+                    // Never open a mix before the planned point.
+                    Timber.tag(TAG).w("Mix trigger ignored: at %d ms, planned %d ms", player.currentPosition, planned)
+                    return@createMessage
+                }
+                Timber.tag(TAG).d("Mix starts at A=%d ms (planned %s)", player.currentPosition, planned)
                 startCrossfade()
             }
         }.apply {
@@ -5156,6 +5164,15 @@ class MusicService :
                 prepared.targetIndex == targetIndex &&
                 prepared.itemCount == player.mediaItemCount &&
                 player.getMediaItemAt(targetIndex).mediaId == prepared.targetMediaId
+
+        // An AutoMix plan is aligned to the beat, so it only starts when the next song is already loaded and
+        // ready. Otherwise the song keeps playing and nothing is switched, instead of a half-started mix.
+        if (plan != null && !(preparedUsable && secondaryPlayer?.playbackState == Player.STATE_READY)) {
+            Timber.tag(TAG).w("Mix skipped: next song not ready (usable=%b)", preparedUsable)
+            discardPreparedSecondary()
+            automixStatus.value = AutomixStatus.Unavailable
+            return
+        }
 
         val secPlayer: ExoPlayer
         if (preparedUsable) {

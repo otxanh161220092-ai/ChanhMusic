@@ -27,10 +27,10 @@ import kotlin.math.roundToLong
  */
 object SmartTransitionCalculator {
     const val MIN_FADE_MS = 4_000L
-    const val DEFAULT_LONG_FADE_MS = 32_000L
+    const val DEFAULT_LONG_FADE_MS = 16_000L
 
     /** Fade lengths in bars, longest first; the longest that fits the sections involved is used. */
-    private val BAR_CHOICES = intArrayOf(16, 8, 6, 4, 2)
+    private val BAR_CHOICES = intArrayOf(8, 6, 4, 2)
 
     private const val MAX_TEMPO_DELTA = 0.08
     private const val SHORT_FADE_BEATS = 2.0
@@ -41,17 +41,17 @@ object SmartTransitionCalculator {
     private const val WEIGHT_ENERGY = 2.0
     private const val WEIGHT_TEMPO = 1.5
     private const val WEIGHT_SKIP_A = 0.8
-    private const val WEIGHT_SKIP_B = 0.2
+    private const val WEIGHT_SKIP_B = 1.5
     private const val NO_TEMPO_COST = 1.0
     private const val UNMATCHABLE_TEMPO_COST = 3.0
     private const val WEIGHT_VOCAL = 2.0
 
     /** B should not start from 0:00 unless nothing else fits. */
     /** The overlap may not open before this share of A has played, so a song is never cut off at its start. */
-    const val DEFAULT_MIN_PLAYED_FRACTION = 0.4
+    const val DEFAULT_MIN_PLAYED_FRACTION = 0.25
 
     private const val ECHO_BEATS = 0.75
-    private const val START_AT_ZERO_COST = 1.5
+    private const val START_AT_ZERO_COST = 0.3
 
     /**
      * @param earliestMixMs the overlap may not open before this position in A.
@@ -175,8 +175,8 @@ object SmartTransitionCalculator {
             cost = cost,
             gridA = if (trackPhase) gridA else null,
             gridB = if (trackPhase) gridB else null,
-            tailFxA = kind == TransitionKind.DROP_TO_CALM,
-            tailEchoMs = if (kind == TransitionKind.DROP_TO_CALM) (ECHO_BEATS * beatA).roundToLong().coerceIn(150L, 1_000L) else 0L,
+            tailFxA = true,
+            tailEchoMs = (ECHO_BEATS * beatA).roundToLong().coerceIn(150L, 1_000L),
         )
     }
 
@@ -229,7 +229,7 @@ object SmartTransitionCalculator {
         return if (aligned < segment.endTimeMs - MIN_FADE_MS) aligned else segment.startTimeMs
     }
 
-    /** Longest of 16/8/6/4/2 bars that fits in [roomMs]; without a beat grid the room is used as is. */
+    /** Longest of 8/6/4/2 bars that fits in [roomMs]; without a beat grid the room is used as is. */
     private fun pickBars(
         roomMs: Long,
         barMs: Double,
