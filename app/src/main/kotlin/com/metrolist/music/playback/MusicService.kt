@@ -288,6 +288,7 @@ private const val AUTOMIX_MIN_LEAD_MS = 3_000L
 private const val AUTOMIX_TEMPO_RAMP_MS = 8_000L
 private const val AUTOMIX_QUICK_CUT = false
 private const val RETIRE_DELAY_MS = 300L
+private const val DEFAULT_UNKNOWN_DURATION_MS = 180_000L
 private const val AUTOMIX_ANALYSIS_TIMEOUT_MS = 60_000L
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -2741,6 +2742,15 @@ class MusicService :
         }
     }
 
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+        if (!isPlaying || !mixWaitingForPlay || isCrossfading || !automixEnabled) return
+        mixWaitingForPlay = false
+        if (mixPlan != null && player.currentMediaItem?.mediaId == plannedCurrentId) {
+            Timber.tag(TAG).d("Resumed at the mix point, starting the mix")
+            startCrossfade()
+        }
+    }
+
     override fun onPlaybackStateChanged(
         @Player.State playbackState: Int,
     ) {
@@ -4982,6 +4992,7 @@ class MusicService :
 
     private fun scheduleCrossfade(force: Boolean = false) {
         if (automixEnabled && !force && keepAutomixPlan()) return
+        mixWaitingForPlay = false
         crossfadeMessage?.cancel()
         crossfadeMessage = null
         cancelMixPlanning()
@@ -5017,7 +5028,11 @@ class MusicService :
         crossfadeMessage?.cancel()
         crossfadeMessage = player.createMessage { _, _ ->
             val timer = sleepTimer
-            if (player.isPlaying && player.currentMediaItem?.mediaId == targetMediaId && (timer == null || !timer.pauseWhenSongEnd)) {
+            if (!player.isPlaying && player.currentMediaItem?.mediaId == targetMediaId && (timer == null || !timer.pauseWhenSongEnd)) {
+                // Paused at the mix point: the mix starts as soon as playback resumes, it is not dropped.
+                mixWaitingForPlay = true
+            } else if (player.isPlaying && player.currentMediaItem?.mediaId == targetMediaId && (timer == null || !timer.pauseWhenSongEnd)) {
+                mixWaitingForPlay = false
                 val planned = mixPlan?.startA
                 if (planned != null && player.currentPosition < planned - AUTOMIX_EARLY_TOLERANCE_MS) {
                     // Never open a mix before the planned point.
@@ -5091,7 +5106,9 @@ class MusicService :
                 val durationB =
                     featuresB?.durationMs
                         ?: database.songEntity(nextId)?.duration?.takeIf { it > 0 }?.let { it * 1000L }
-                if (duration == C.TIME_UNSET || duration <= 0 || durationB == null) {
+                        ?: player.getMediaItemAt(nextIndex).metadata?.duration?.takeIf { it > 0 }?.let { it * 1000L }
+                        ?: DEFAULT_UNKNOWN_DURATION_MS
+                if (duration == C.TIME_UNSET || duration <= 0) {
                     automixStatus.value = AutomixStatus.Unavailable
                     return@launch
                 }
@@ -5192,14 +5209,8 @@ class MusicService :
                 prepared.itemCount == player.mediaItemCount &&
                 player.getMediaItemAt(targetIndex).mediaId == prepared.targetMediaId
 
-        // An AutoMix plan is aligned to the beat, so it only starts when the next song is already loaded and
-        // ready. Otherwise the song keeps playing and nothing is switched, instead of a half-started mix.
-        if (plan != null && !(preparedUsable && secondaryPlayer?.playbackState == Player.STATE_READY)) {
-            Timber.tag(TAG).w("Mix skipped: next song not ready (usable=%b)", preparedUsable)
-            discardPreparedSecondary()
-            automixStatus.value = AutomixStatus.Unavailable
-            return
-        }
+        // A mix is never dropped because the next song is still loading: it is built now and the mix waits
+        // for it to start playing (see the fade loop).
 
         val secPlayer: ExoPlayer
         if (preparedUsable) {
@@ -5260,6 +5271,7 @@ class MusicService :
     // State of the mix in progress. Until the incoming song becomes the loudest, the outgoing song stays
     // `player` (so the player screen and every control still belong to it); the roles swap at that point.
     private var mixSwapped = false
+    private var mixWaitingForPlay = false
     private var mixOutgoing: ExoPlayer? = null
     private var mixIncoming: ExoPlayer? = null
     private var mixSyncListener: Player.Listener? = null
