@@ -758,11 +758,12 @@ fun ExperimentalLyrics(
                         )
 
                         Box(
-                            modifier = Modifier.fillMaxWidth().then(if (distance >= 1) Modifier.blur((distance * 1.6f).coerceAtMost(9f).dp) else Modifier).graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen; blendMode = BlendMode.Overlay }.layout { m, c ->
+                            modifier = Modifier.fillMaxWidth().graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen; blendMode = BlendMode.Overlay }.layout { m, c ->
                                 val p = m.measure(c.copy(maxHeight = Constraints.Infinity))
                                 layout(p.width, 0) { p.place(0, 0) }
                             }.offset { IntOffset(0, (animatedOffset + userManualOffset).roundToInt()) }
                         ) {
+                            Box(modifier = Modifier.then(if (distance >= 1) Modifier.blur((distance * 1.6f).coerceAtMost(9f).dp) else Modifier)) {
                             when (listItem) {
                                 is LyricsListItem.Indicator -> {
                                     val visible =
@@ -823,6 +824,7 @@ fun ExperimentalLyrics(
                                         }
                                     )
                                 }
+                            }
                             }
                         }
                     }
