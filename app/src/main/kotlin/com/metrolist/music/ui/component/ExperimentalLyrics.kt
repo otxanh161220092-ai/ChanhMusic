@@ -10,6 +10,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawWithContent
 import com.metrolist.music.ui.utils.resize
 import coil3.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
@@ -763,7 +764,18 @@ fun ExperimentalLyrics(
                                 layout(p.width, 0) { p.place(0, 0) }
                             }.offset { IntOffset(0, (animatedOffset + userManualOffset).roundToInt()) }
                         ) {
-                            Box(modifier = Modifier.then(if (distance >= 1) Modifier.blur((distance * 1.6f).coerceAtMost(9f).dp) else Modifier)) {
+                            Box(
+                                modifier = Modifier
+                                    .then(if (distance >= 1) Modifier.blur((distance * 1.6f).coerceAtMost(9f).dp) else Modifier)
+                                    .then(
+                                        if (listIndex < activeListIndex) {
+                                            Modifier.drawWithContent {
+                                                drawContent()
+                                                drawRect(Color.White.copy(alpha = 0.7f), blendMode = BlendMode.Overlay)
+                                            }
+                                        } else Modifier,
+                                    ),
+                            ) {
                             when (listItem) {
                                 is LyricsListItem.Indicator -> {
                                     val visible =

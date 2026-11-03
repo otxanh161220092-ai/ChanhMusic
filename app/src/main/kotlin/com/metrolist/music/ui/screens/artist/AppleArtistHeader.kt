@@ -327,6 +327,7 @@ fun channelLogoFor(artistId: String?, name: String?): Int? {
     return when {
         id == "UC9EnTDbvIsouypHkAhVRVmw" || name.equalsName("Jasmine Lemon") -> R.drawable.channel_logo_jasmine
         id == "UCwHrSL1grR1vatPkF8MW1hQ" || name.equalsName("ereusmixes") -> R.drawable.channel_logo_ereus
+        id == "UCfF_G4dUT_TNA_I_FEa6R2Q" || name.equalsName("Armpit Hydrangea") -> R.drawable.artist_logo_custom
         else -> null
     }
 }
