@@ -7,7 +7,10 @@ package com.metrolist.music.ui.component
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.imageResource
+import com.metrolist.music.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.imageResource
@@ -55,3 +58,14 @@ fun Modifier.liquidGlassSurface(shape: Shape): Modifier {
     val highlight = ImageBitmap.imageResource(R.drawable.liquid_glass_highlight)
     return this.clip(shape).liquidGlass(highlight)
 }
+
+/** Highlight & border layer only (Overlay blend), for controls that already have their own overlay. */
+fun Modifier.highlightBorder(highlight: ImageBitmap): Modifier =
+    this.drawWithContent {
+        drawContent()
+        drawHighlight(highlight)
+    }
+
+/** [highlightBorder] with the supplied highlight image from resources. */
+@Composable
+fun Modifier.highlightBorder(): Modifier = highlightBorder(ImageBitmap.imageResource(R.drawable.liquid_glass_highlight))

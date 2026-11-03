@@ -150,6 +150,7 @@ import com.metrolist.music.LocalDownloadUtil
 import com.metrolist.music.LocalListenTogetherManager
 import com.metrolist.music.LocalPlayerConnection
 import com.metrolist.music.R
+import com.metrolist.music.ui.component.highlightBorder
 import com.metrolist.music.constants.AutomixEnabledKey
 import com.metrolist.music.constants.CropAlbumArtKey
 import com.metrolist.music.constants.DarkModeKey
@@ -1224,7 +1225,7 @@ fun BottomSheetPlayer(
                                     containerColor = if (isFavorite) likedCircleColor else roundButtonContainerColor,
                                     contentColor = if (isFavorite) likedStarColor else roundButtonContentColor,
                                 ),
-                            modifier = Modifier.size(36.dp),
+                            modifier = Modifier.size(36.dp).highlightBorder(),
                         ) {
                             Icon(
                                 painter = painterResource(if (isFavorite) R.drawable.star_filled else R.drawable.star_outline),
@@ -1415,7 +1416,7 @@ fun BottomSheetPlayer(
                                     containerColor = roundButtonContainerColor,
                                     contentColor = roundButtonContentColor,
                                 ),
-                            modifier = Modifier.size(36.dp),
+                            modifier = Modifier.size(36.dp).highlightBorder(),
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.more_horiz),
