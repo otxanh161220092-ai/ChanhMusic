@@ -30,6 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import com.metrolist.music.R
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -70,12 +73,14 @@ fun IconButton(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable () -> Unit,
 ) {
+    val glassHighlight = ImageBitmap.imageResource(R.drawable.liquid_glass_highlight)
     Box(
         modifier = modifier
             .minimumInteractiveComponentSize()
             .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
             .clip(CircleShape)
             .background(color = colors.containerColor)
+            .liquidGlass(glassHighlight)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,

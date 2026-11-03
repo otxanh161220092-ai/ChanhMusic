@@ -1,0 +1,44 @@
+/**
+ * Metrolist Project (C) 2026
+ * Licensed under GPL-3.0 | See git history for contributors
+ */
+
+package com.metrolist.music.ui.component
+
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.IntSize
+
+/**
+ * Liquid glass for round top-bar buttons, bottom to top:
+ * 1. white layer in Overlay blend mode,
+ * 2. grey-white layer at 50% opacity,
+ * 3. the highlight & border image, in Overlay blend mode, over everything.
+ */
+fun Modifier.liquidGlass(highlight: ImageBitmap): Modifier =
+    this
+        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawBehind {
+            drawRect(Color.White, blendMode = BlendMode.Overlay)
+            drawRect(Color(0xFFD9D9D9).copy(alpha = 0.5f))
+        }
+        .drawWithContent {
+            drawContent()
+            drawHighlight(highlight)
+        }
+
+private fun DrawScope.drawHighlight(image: ImageBitmap) {
+    drawImage(
+        image = image,
+        dstSize = IntSize(size.width.toInt(), size.height.toInt()),
+        blendMode = BlendMode.Overlay,
+    )
+}
