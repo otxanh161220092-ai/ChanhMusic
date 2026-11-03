@@ -769,10 +769,13 @@ fun ExperimentalLyrics(
                                     .then(if (distance >= 1) Modifier.blur((distance * 1.6f).coerceAtMost(9f).dp) else Modifier)
                                     .then(
                                         if (listIndex < activeListIndex) {
-                                            Modifier.drawWithContent {
-                                                drawContent()
-                                                drawRect(Color.White.copy(alpha = 0.7f), blendMode = BlendMode.Overlay)
-                                            }
+                                            Modifier
+                                                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                                                .drawWithContent {
+                                                    drawContent()
+                                                    // SrcAtop paints only where the line already has pixels, so no box shows around the text.
+                                                    drawRect(Color.White.copy(alpha = 0.7f), blendMode = BlendMode.SrcAtop)
+                                                }
                                         } else Modifier,
                                     ),
                             ) {
