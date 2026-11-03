@@ -5,7 +5,13 @@
 
 package com.metrolist.music.ui.component
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.imageResource
+import com.metrolist.music.R
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
@@ -41,4 +47,11 @@ private fun DrawScope.drawHighlight(image: ImageBitmap) {
         dstSize = IntSize(size.width.toInt(), size.height.toInt()),
         blendMode = BlendMode.Overlay,
     )
+}
+
+/** [liquidGlass] clipped to [shape], with the highlight image loaded from resources. */
+@Composable
+fun Modifier.liquidGlassSurface(shape: Shape): Modifier {
+    val highlight = ImageBitmap.imageResource(R.drawable.liquid_glass_highlight)
+    return this.clip(shape).liquidGlass(highlight)
 }

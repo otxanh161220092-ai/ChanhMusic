@@ -184,6 +184,7 @@ import com.metrolist.music.ui.component.Material3MenuItemData
 import com.metrolist.music.ui.component.Lyrics
 import com.metrolist.music.ui.component.PlayerSliderTrack
 import com.metrolist.music.ui.component.ResizableIconButton
+import com.metrolist.music.ui.component.liquidGlassSurface
 import com.metrolist.music.ui.component.SquigglySlider
 import com.metrolist.music.ui.component.WavySlider
 import com.metrolist.music.ui.component.rememberBottomSheetState
@@ -1965,6 +1966,7 @@ fun BottomSheetPlayer(
                                         Modifier
                                             .size(32.dp)
                                             .align(Alignment.Center)
+                                            .liquidGlassSurface(CircleShape)
                                             .alpha(if (isListenTogetherGuest) 0.5f else 1f),
                                     onClick = playerConnection::seekToPrevious,
                                 )
@@ -1977,6 +1979,7 @@ fun BottomSheetPlayer(
                                     Modifier
                                         .size(72.dp)
                                         .clip(RoundedCornerShape(playPauseRoundness))
+                                        .liquidGlassSurface(RoundedCornerShape(playPauseRoundness))
                                         .background(textButtonColor)
                                         .clickable {
                                             if (isListenTogetherGuest) {
@@ -2033,6 +2036,7 @@ fun BottomSheetPlayer(
                                         Modifier
                                             .size(32.dp)
                                             .align(Alignment.Center)
+                                            .liquidGlassSurface(CircleShape)
                                             .alpha(if (isListenTogetherGuest) 0.5f else 1f),
                                     onClick = playerConnection::seekToNext,
                                 )
