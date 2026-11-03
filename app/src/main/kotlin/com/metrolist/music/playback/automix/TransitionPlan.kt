@@ -79,6 +79,14 @@ class TransitionPlan(
         get() = mixInPositionB - ((bFadeInStartA - startA) * speedFactorB.toDouble()).toLong()
 
     /** B's position when the handover completes. */
+    /**
+     * Both songs move toward a shared tempo: the outgoing song plays at [outgoingTempoFactor] and the
+     * incoming one at [incomingTempoFactor]. Their ratio is [speedFactorB], so the beats still line up,
+     * but each song only travels half the distance (in log scale) instead of B taking all of it.
+     */
+    val outgoingTempoFactor: Float get() = (1.0 / Math.sqrt(speedFactorB.toDouble())).toFloat()
+    val incomingTempoFactor: Float get() = Math.sqrt(speedFactorB.toDouble()).toFloat()
+
     val handoverEndB: Long get() = mixInPositionB + (fadeInDurationB * speedFactorB.toDouble()).toLong()
 
     /** Phase can only be tracked when both beat grids are known and tempos are matched without octave folding. */

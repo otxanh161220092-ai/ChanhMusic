@@ -286,6 +286,7 @@ private const val AUTOMIX_PREPARE_LEAD_MS = 25_000L
 private const val AUTOMIX_EARLY_TOLERANCE_MS = 1_500L
 private const val AUTOMIX_MIN_LEAD_MS = 3_000L
 private const val AUTOMIX_TEMPO_RAMP_MS = 8_000L
+private const val AUTOMIX_TEMPO_LEAD_MS = 12_000L
 private const val AUTOMIX_QUICK_CUT = false
 private const val RETIRE_DELAY_MS = 300L
 private const val DEFAULT_UNKNOWN_DURATION_MS = 180_000L
@@ -5149,6 +5150,7 @@ class MusicService :
                 automixStatus.value = AutomixStatus.Ready(plan.startA, plan.secondaryStartPositionMs, plan.tempoMatched)
                 mixZone.value = plan.startA..plan.handoverEndA
                 scheduleCrossfadeMessage(plan.startA, currentId)
+                startOutgoingTempoRamp(plan, currentId)
                 scheduleAutomixPrescan()
 
                 // Load the next song shortly before the mix so it starts exactly on the beat.
@@ -5158,7 +5160,7 @@ class MusicService :
                     buildSecondaryPlayer(
                         targetIndex = nextIndex,
                         startPositionMs = plan.secondaryStartPositionMs,
-                        speedFactor = plan.speedFactorB,
+                        speedFactor = plan.incomingTempoFactor,
                     ) ?: return@launch
                 secondaryPlayer = prepared
                 preparedMix = PreparedMix(nextIndex, nextId, player.mediaItemCount)
@@ -5224,7 +5226,7 @@ class MusicService :
                 buildSecondaryPlayer(
                     targetIndex = targetIndex,
                     startPositionMs = plan?.secondaryStartPositionMs ?: 0L,
-                    speedFactor = plan?.speedFactorB ?: 1f,
+                    speedFactor = plan?.incomingTempoFactor ?: 1f,
                 ) ?: return
             secondaryPlayer = secPlayer
         }
@@ -5251,7 +5253,7 @@ class MusicService :
         secPlayer.volume = 0f
 
         val base = player.playbackParameters
-        secPlayer.playbackParameters = PlaybackParameters(base.speed * speedFactor, base.pitch)
+        secPlayer.playbackParameters = PlaybackParameters((aTempoBase ?: base.speed) * speedFactor, base.pitch)
 
         secPlayer.repeatMode = player.repeatMode
         secPlayer.shuffleModeEnabled = player.shuffleModeEnabled
@@ -5286,7 +5288,8 @@ class MusicService :
         mixSwapped = false
         mixOutgoing = outgoing
         mixIncoming = incoming
-        mixSpeedFactor = plan?.speedFactorB ?: 1f
+        mixSpeedFactor = plan?.incomingTempoFactor ?: 1f
+        handOverOutgoingTempo(plan)
         // This mix is consumed: the next plan is made for the new current song once it is over.
         mixPlan = null
         plannedCurrentId = null
@@ -5329,6 +5332,7 @@ class MusicService :
             _playerFlow.value = player
             secondaryPlayer = null
             mixZone.value = null
+            aTempoBase = null
 
             // Do not persist the retired player's temporary repeat-off state.
             outgoing.removeListener(this)
@@ -5430,8 +5434,80 @@ class MusicService :
                 finishMixBookkeeping()
                 cleanupCrossfade(fadingPlayerSessionId = previousAudioSessionId)
 
-                if (plan != null && plan.speedFactorB != 1f) rampTempoBack(plan.speedFactorB)
+                if (plan != null && plan.speedFactorB != 1f) rampTempoBack(plan.incomingTempoFactor)
             }
+    }
+
+
+    // ---- Tempo meeting: the outgoing song drifts toward a shared BPM before the mix ----
+    private var aTempoBase: Float? = null
+    private var aTempoJob: Job? = null
+    private var aTempoHandedOver = false
+
+    /** Eases the outgoing song toward the shared tempo, driven by its own position so a seek stays correct. */
+    private fun startOutgoingTempoRamp(
+        plan: TransitionPlan,
+        currentId: String,
+    ) {
+        aTempoJob?.cancel()
+        aTempoJob = null
+        if (!plan.tempoMatched || abs(plan.outgoingTempoFactor - 1f) < 0.002f) return
+        val rampPlayer = player
+        val target = plan.outgoingTempoFactor
+        val leadStart = (plan.startA - AUTOMIX_TEMPO_LEAD_MS).coerceAtLeast(0L)
+        val span = (plan.startA - leadStart).coerceAtLeast(1L).toFloat()
+        aTempoHandedOver = false
+        aTempoJob =
+            scope.launch {
+                val base = rampPlayer.playbackParameters.speed
+                var lastSet = base
+                try {
+                    while (isActive) {
+                        if (player !== rampPlayer || mixPlan !== plan || rampPlayer.currentMediaItem?.mediaId != currentId || isCrossfading) break
+                        val pos = rampPlayer.currentPosition
+                        val p = ((pos - leadStart) / span).coerceIn(0f, 1f)
+                        if (p > 0f || aTempoBase != null) {
+                            // The user changed the speed meanwhile: leave their choice alone.
+                            if (abs(rampPlayer.playbackParameters.speed - lastSet) > 0.003f) {
+                                aTempoBase = null
+                                return@launch
+                            }
+                            aTempoBase = base
+                            lastSet = base * (1f + (target - 1f) * p)
+                            rampPlayer.playbackParameters = PlaybackParameters(lastSet, rampPlayer.playbackParameters.pitch)
+                        }
+                        delay(200)
+                    }
+                } finally {
+                    if (!aTempoHandedOver) restoreOutgoingTempo(rampPlayer)
+                }
+            }
+    }
+
+    private fun restoreOutgoingTempo(target: ExoPlayer?) {
+        val base = aTempoBase ?: return
+        aTempoBase = null
+        if (target == null) return
+        try {
+            target.playbackParameters = PlaybackParameters(base, target.playbackParameters.pitch)
+        } catch (e: Exception) {
+        }
+    }
+
+    /** The mix starts: A holds the shared tempo exactly; B is built relative to the user's own speed. */
+    private fun handOverOutgoingTempo(plan: TransitionPlan?) {
+        aTempoHandedOver = true
+        aTempoJob?.cancel()
+        aTempoJob = null
+        val base = aTempoBase ?: return
+        if (plan == null || plan.speedFactorB == 1f) {
+            restoreOutgoingTempo(player)
+            return
+        }
+        try {
+            player.playbackParameters = PlaybackParameters(base * plan.outgoingTempoFactor, player.playbackParameters.pitch)
+        } catch (e: Exception) {
+        }
     }
 
     private fun finishMixBookkeeping() {
@@ -5457,6 +5533,7 @@ class MusicService :
         val outgoing = mixOutgoing
         val incoming = mixIncoming
         if (!mixSwapped) {
+            restoreOutgoingTempo(outgoing)
             outgoing?.let { playerTailFxProcessors[it]?.clearTail() }
             incoming?.let { prepared ->
                 playerTailFxProcessors[prepared]?.clearTail()

@@ -45,3 +45,14 @@ class PhaseDriftTest {
         assertEquals(1.0, PhaseController.speedMultiplier(0.02, 500.0), 0.0)
     }
 }
+
+class TempoMeetingTest {
+    @Test
+    fun factorsMeetInTheMiddleAndKeepTheRatio() {
+        val plan = TransitionPlan(TransitionKind.HIGH_TO_HIGH, 10_000, 8_000, 5_000, 8_000, 1.10f, true, 0.0, null, null)
+        val a = plan.outgoingTempoFactor
+        val b = plan.incomingTempoFactor
+        assertEquals(1.10, (b / a).toDouble(), 1e-4)
+        assertTrue(a < 1f && b > 1f)
+    }
+}
