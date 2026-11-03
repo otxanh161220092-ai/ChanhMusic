@@ -34,9 +34,9 @@ object BeatPhase {
  * up when it is behind A's beat and slows down when it is ahead. Time stretching keeps the pitch.
  */
 object PhaseController {
-    const val MAX_NUDGE = 0.04
+    const val MAX_NUDGE = 0.08
     const val LOCK_TOLERANCE_MS = 12.0
-    const val TIME_CONSTANT_MS = 1_500.0
+    const val TIME_CONSTANT_MS = 800.0
 
     /** Multiplier for B's playback speed, 1.0 when the beats are already locked. */
     fun speedMultiplier(

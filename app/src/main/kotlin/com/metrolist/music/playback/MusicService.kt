@@ -5230,6 +5230,17 @@ class MusicService :
                 ) ?: return
             secondaryPlayer = secPlayer
         }
+        // Lock B's beat to A's beat before B becomes audible: shift B's position by the measured beat error.
+        plan?.let { p ->
+            if (p.canTrackPhase) {
+                val errorMs = p.phaseErrorMs(player.currentPosition, secPlayer.currentPosition)
+                val beatMs = p.gridA?.beatMs ?: 0.0
+                if (errorMs != null && beatMs > 0 && abs(errorMs) > 8.0) {
+                    val target = (secPlayer.currentPosition - errorMs.toLong()).coerceAtLeast(0L)
+                    runCatching { secPlayer.seekTo(target) }
+                }
+            }
+        }
         secPlayer.playWhenReady = true
 
         performCrossfadeSwap(plan)
