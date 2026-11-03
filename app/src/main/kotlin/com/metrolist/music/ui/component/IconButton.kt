@@ -79,8 +79,14 @@ fun IconButton(
             .minimumInteractiveComponentSize()
             .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
             .clip(CircleShape)
-            .background(color = colors.containerColor)
-            .liquidGlass(glassHighlight)
+            .glassSurface(
+                backdrop = LocalGlassBackdrop.current,
+                shape = CircleShape,
+                fallbackColor = colors.containerColor,
+                tint = Color.White,
+                mask = Color(0xFFD9D9D9).copy(alpha = 0.5f),
+            )
+            .highlightBorder(glassHighlight)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
