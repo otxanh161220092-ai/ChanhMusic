@@ -847,12 +847,14 @@ fun ExperimentalLyrics(
                         .matchParentSize()
                         .blur(80.dp, BlurredEdgeTreatment.Unbounded),
                 )
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .graphicsLayer { blendMode = BlendMode.Overlay }
-                        .background(Color.White),
-                )
+                repeat(2) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .graphicsLayer { blendMode = BlendMode.Overlay }
+                            .background(Color.White),
+                    )
+                }
             }
         }
 

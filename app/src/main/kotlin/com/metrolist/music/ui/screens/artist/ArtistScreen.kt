@@ -138,6 +138,7 @@ import kotlinx.coroutines.withContext
 
 
 private const val CUSTOM_LOGO_ARTIST_ID = "UCfF_G4dUT_TNA_I_FEa6R2Q"
+private const val CUSTOM_LOGO_ARTIST_NAME = "Armpit Hydrangea"
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -397,7 +398,7 @@ fun ArtistScreen(
                                         .padding(horizontal = 16.dp),
                             ) {
                                 // Artist Name (this channel shows its logo instead of the text)
-                                if (viewModel.artistId == CUSTOM_LOGO_ARTIST_ID) {
+                                if (viewModel.artistId == CUSTOM_LOGO_ARTIST_ID || displayArtistName.equals(CUSTOM_LOGO_ARTIST_NAME, ignoreCase = true)) {
                                     Image(
                                         painter = painterResource(R.drawable.artist_logo_custom),
                                         contentDescription = displayArtistName ?: "Unknown",
