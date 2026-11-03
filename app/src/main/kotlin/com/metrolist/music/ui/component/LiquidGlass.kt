@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.graphics.drawscope.clipRect
 
 /**
  * Liquid glass for round top-bar buttons, bottom to top:
@@ -42,11 +43,14 @@ fun Modifier.liquidGlass(highlight: ImageBitmap): Modifier =
         }
 
 private fun DrawScope.drawHighlight(image: ImageBitmap) {
-    drawImage(
-        image = image,
-        dstSize = IntSize(size.width.toInt(), size.height.toInt()),
-        blendMode = BlendMode.Overlay,
-    )
+    // Clipped to the control's own bounds so the ring never spills into neighbouring buttons.
+    clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+        drawImage(
+            image = image,
+            dstSize = IntSize(size.width.toInt(), size.height.toInt()),
+            blendMode = BlendMode.Overlay,
+        )
+    }
 }
 
 /** [liquidGlass] clipped to [shape], with the highlight image loaded from resources. */
