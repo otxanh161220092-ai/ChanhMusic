@@ -62,7 +62,7 @@ fun Modifier.liquidGlassSurface(shape: Shape): Modifier {
 
 /** Highlight & border layer only (Overlay blend), for controls that already have their own overlay. */
 fun Modifier.highlightBorder(highlight: ImageBitmap): Modifier =
-    this.drawWithContent {
+    this.clip(CircleShape).drawWithContent {
         drawContent()
         drawHighlight(highlight)
     }
