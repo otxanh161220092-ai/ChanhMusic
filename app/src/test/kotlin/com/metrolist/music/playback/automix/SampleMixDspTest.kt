@@ -71,4 +71,18 @@ class SampleMixDspTest {
         assertTrue(abs(w - n / 1.001) < 3)
         assertTrue(rms(dst, 100, w - 100) > 6000)
     }
+
+    @Test fun vocalPriorityDucksOnlyTheOtherSideVocalBand() {
+        val sr = 44100; val n = 44100
+        val vocal = tone(1000.0, n, sr)       // inside the vocal band
+        val silence = ByteArray(n * 4)
+        val out = ByteArray(n * 4)
+        // Mid-transition with A singing and B silent: A keeps its vocal band (not ducked).
+        SampleMixDsp.Mixer(sr).mix(vocal, 0, silence, 0, out, 0, n, 0, n, bassSwap = false, vocalPriority = 1)
+        assertTrue(rms(out, n / 4, n / 4 + 2000) > 3000)
+        // B singing in the vocal band while A is the non-singer: B keeps its vocal, A's vocal band is ducked
+        val outB = ByteArray(n * 4)
+        SampleMixDsp.Mixer(sr).mix(vocal, 0, vocal, 0, outB, 0, n, 0, n, bassSwap = false, vocalPriority = 1)
+        assertTrue(rms(outB, n - 2000, n - 100) < rms(vocal, n - 2000, n - 100) * 1.2)
+    }
 }

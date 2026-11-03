@@ -47,10 +47,17 @@ object SampleMixDsp {
         private val alpha = 1.0 - exp(-2.0 * PI * crossoverHz / sampleRate)
         private val lpA = DoubleArray(2)
         private val lpB = DoubleArray(2)
+        // Vocal band: formants of sung/spoken vowels sit roughly between 300 Hz and 3.4 kHz.
+        private val alphaVocalLo = 1.0 - exp(-2.0 * PI * VOCAL_LOW_HZ / sampleRate)
+        private val alphaVocalHi = 1.0 - exp(-2.0 * PI * VOCAL_HIGH_HZ / sampleRate)
+        private val vLoA = DoubleArray(2)
+        private val vHiA = DoubleArray(2)
+        private val vLoB = DoubleArray(2)
+        private val vHiB = DoubleArray(2)
 
         fun reset() {
-            lpA.fill(0.0)
-            lpB.fill(0.0)
+            lpA.fill(0.0); lpB.fill(0.0)
+            vLoA.fill(0.0); vHiA.fill(0.0); vLoB.fill(0.0); vHiB.fill(0.0)
         }
 
         /**
@@ -65,6 +72,8 @@ object SampleMixDsp {
             frameOffset: Int,
             totalFrames: Int,
             bassSwap: Boolean = true,
+            /** 1 = A keeps the vocal band and B's is ducked; -1 = the reverse; 0 = no vocal yield. */
+            vocalPriority: Int = 0,
         ) {
             val n = totalFrames.coerceAtLeast(1)
             for (f in 0 until frames) {
@@ -87,6 +96,15 @@ object SampleMixDsp {
                         xa = (sa - lpA[c]) + lpA[c] * bassA
                         xb = (sb - lpB[c]) + lpB[c] * bassB
                     }
+                    if (vocalPriority != 0) {
+                        vLoA[c] += alphaVocalLo * (xa - vLoA[c]); vHiA[c] += alphaVocalHi * (xa - vHiA[c])
+                        vLoB[c] += alphaVocalLo * (xb - vLoB[c]); vHiB[c] += alphaVocalHi * (xb - vHiB[c])
+                        val bandA = vHiA[c] - vLoA[c]
+                        val bandB = vHiB[c] - vLoB[c]
+                        // The side that is not singing gives up the vocal band, fading in over the transition.
+                        val duck = VOCAL_DUCK_DEPTH * ((p - 0.5) * 2).coerceIn(0.0, 1.0)
+                        if (vocalPriority > 0) xb -= bandB * duck else xa -= bandA * duck
+                    }
                     val m = xa * gA + xb * gB
                     wr(out, outOff + i, m)
                 }
@@ -102,6 +120,10 @@ object SampleMixDsp {
             buf[i + 1] = ((s shr 8) and 0xFF).toByte()
         }
     }
+
+    const val VOCAL_LOW_HZ = 300.0
+    const val VOCAL_HIGH_HZ = 3400.0
+    const val VOCAL_DUCK_DEPTH = 0.8
 
     /**
      * Linear-interpolation resampler for drift correction (ratio = srcRate/dstRate, near 1.0).
