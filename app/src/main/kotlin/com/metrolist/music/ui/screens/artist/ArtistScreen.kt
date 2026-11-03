@@ -63,6 +63,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -134,6 +135,9 @@ import com.metrolist.music.viewmodels.ArtistViewModel
 import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+
+private const val CUSTOM_LOGO_ARTIST_ID = "UCfF_G4dUT_TNA_I_FEa6R2Q"
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -392,16 +396,28 @@ fun ArtistScreen(
                                         .fillMaxWidth()
                                         .padding(horizontal = 16.dp),
                             ) {
-                                // Artist Name
-                                Text(
-                                    text = displayArtistName ?: "Unknown",
-                                    style = MaterialTheme.typography.headlineLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    fontSize = 32.sp,
-                                    modifier = Modifier.padding(bottom = 16.dp),
-                                )
+                                // Artist Name (this channel shows its logo instead of the text)
+                                if (viewModel.artistId == CUSTOM_LOGO_ARTIST_ID) {
+                                    Image(
+                                        painter = painterResource(R.drawable.artist_logo_custom),
+                                        contentDescription = displayArtistName ?: "Unknown",
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.85f)
+                                            .height(96.dp)
+                                            .padding(bottom = 16.dp),
+                                    )
+                                } else {
+                                    Text(
+                                        text = displayArtistName ?: "Unknown",
+                                        style = MaterialTheme.typography.headlineLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        fontSize = 32.sp,
+                                        modifier = Modifier.padding(bottom = 16.dp),
+                                    )
+                                }
 
                                 // Buttons Row
                                 Row(
