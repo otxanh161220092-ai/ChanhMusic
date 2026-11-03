@@ -8,6 +8,10 @@ package com.metrolist.music.ui.component
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.res.imageResource
 import com.metrolist.music.R
 import androidx.compose.ui.draw.clip
@@ -43,8 +47,10 @@ fun Modifier.liquidGlass(highlight: ImageBitmap): Modifier =
         }
 
 private fun DrawScope.drawHighlight(image: ImageBitmap) {
-    // Clipped to the control's own bounds so the ring never spills into neighbouring buttons.
-    clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+    // Explicit circular clip: only the disc of the control is painted, so the square corners of the
+    // ring image never reach the neighbouring buttons.
+    val disc = Path().apply { addOval(Rect(Offset.Zero, size)) }
+    clipPath(disc) {
         drawImage(
             image = image,
             dstSize = IntSize(size.width.toInt(), size.height.toInt()),
