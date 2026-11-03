@@ -52,7 +52,7 @@ object SmartTransitionCalculator {
     private const val ALIGN_WINDOW_MS = 8_000.0
     private const val NO_TEMPO_COST = 1.0
     private const val UNMATCHABLE_TEMPO_COST = 3.0
-    private const val WEIGHT_VOCAL = 2.0
+    private const val WEIGHT_VOCAL = 6.0
 
     /** B should not start from 0:00 unless nothing else fits. */
     /** The overlap may not open before this share of A has played, so a song is never cut off at its start. */
@@ -281,7 +281,8 @@ object SmartTransitionCalculator {
         val sungA = VocalGaps.vocalFraction(songA.vocalGaps, mixOutA, handoverA)
         val sungB = VocalGaps.vocalFraction(songB.vocalGaps, mixInB, handoverB)
         val known = listOfNotNull(sungA, sungB)
-        val vocalCost = if (known.isEmpty()) 0.0 else known.average()
+        // Worst side counts: a sung line over the other song's vocal is what makes the mix sound messy.
+        val vocalCost = known.maxOrNull() ?: 0.0
 
         val cost =
             WEIGHT_ENERGY * (1.0 - contrast) / 2.0 +
