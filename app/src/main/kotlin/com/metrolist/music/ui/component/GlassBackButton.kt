@@ -51,10 +51,11 @@ fun GlassBackButton(
                 .glassSurface(
                     backdrop = backdrop,
                     shape = CircleShape,
-                    fallbackColor = Color.Black.copy(alpha = 0.45f),
-                    tint = Color.Black.copy(alpha = 0.3f),
-                    mask = Color(0xFF1A1A1A).copy(alpha = 0.4f),
+                    fallbackColor = Color.White.copy(alpha = 0.15f),
+                    tint = Color.White,
+                    mask = Color(0xFFD9D9D9).copy(alpha = 0.3f),
                 )
+                .highlightBorder()
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
