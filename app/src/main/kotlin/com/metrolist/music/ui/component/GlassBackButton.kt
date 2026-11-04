@@ -10,7 +10,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -83,5 +86,5 @@ fun GlassBackButton(
 
 /** Global switch for the per-screen top-bar back icons. Off: only the floating glass back button navigates back. */
 object FloatingBackState {
-    var showOriginalBack by androidx.compose.runtime.mutableStateOf(false)
+    var showOriginalBack by mutableStateOf(false)
 }
