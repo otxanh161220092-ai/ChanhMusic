@@ -93,23 +93,18 @@ fun Modifier.highlightBorder(): Modifier = highlightBorder(ImageBitmap.imageReso
 @Composable
 fun Modifier.highlightPill(): Modifier {
     val image = ImageBitmap.imageResource(R.drawable.liquid_glass_pill_highlight)
-    return this
-        .graphicsLayer {
-            shape = RoundedCornerShape(percent = 50)
-            clip = true
-            compositingStrategy = CompositingStrategy.Offscreen
+    return this.drawWithContent {
+        drawContent()
+        // Only the pill itself is painted: the ring image's square corners are cut away by the path.
+        val pill = Path().apply {
+            addRoundRect(RoundRect(Rect(Offset.Zero, size), CornerRadius(size.height / 2f)))
         }
-        .drawWithContent {
-            drawContent()
-            val pill = Path().apply {
-                addRoundRect(RoundRect(Rect(Offset.Zero, size), CornerRadius(size.height / 2f)))
-            }
-            clipPath(pill) {
-                drawImage(
-                    image = image,
-                    dstSize = IntSize(size.width.toInt(), size.height.toInt()),
-                    blendMode = BlendMode.Overlay,
-                )
-            }
+        clipPath(pill) {
+            drawImage(
+                image = image,
+                dstSize = IntSize(size.width.toInt(), size.height.toInt()),
+                blendMode = BlendMode.Overlay,
+            )
         }
+    }
 }

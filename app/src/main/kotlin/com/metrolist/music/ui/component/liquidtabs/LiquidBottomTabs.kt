@@ -189,8 +189,8 @@ fun LiquidBottomTabs(
                 .then(interactiveHighlight.modifier)
                 .height(barHeight)
                 .fillMaxWidth()
-                .padding(4f.dp)
-                .highlightPill(),
+                .highlightPill()
+                .padding(4f.dp),
             verticalAlignment = Alignment.CenterVertically,
             content = content
         )
