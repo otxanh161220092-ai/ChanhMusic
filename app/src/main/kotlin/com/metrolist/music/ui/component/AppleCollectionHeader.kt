@@ -35,6 +35,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.kyant.backdrop.backdrops.layerBackdrop
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
@@ -152,6 +154,8 @@ fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
 fun AppleCollectionContainer(
     thumbnailUrl: String?,
     enabled: Boolean,
+    /** Records only the artwork background (never the top bar), so top buttons can sample it. */
+    backdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val brush = rememberAppleCollectionBrush(thumbnailUrl)
@@ -162,7 +166,11 @@ fun AppleCollectionContainer(
                 LocalAppleCollectionTextColor provides textColor,
                 LocalContentColor provides textColor,
             ) {
-                AppleCollectionBackdrop(thumbnailUrl)
+                if (backdrop != null) {
+                    Box(Modifier.matchParentSize().layerBackdrop(backdrop)) { AppleCollectionBackdrop(thumbnailUrl) }
+                } else {
+                    AppleCollectionBackdrop(thumbnailUrl)
+                }
                 content()
             }
         } else {

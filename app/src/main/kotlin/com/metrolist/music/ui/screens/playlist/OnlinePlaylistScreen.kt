@@ -55,6 +55,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
@@ -200,7 +201,8 @@ fun OnlinePlaylistScreen(
     }
 
     val appleStyle = true
-    AppleCollectionContainer(thumbnailUrl = playlist?.thumbnail, enabled = appleStyle) {
+    val topGlassBackdrop = rememberLayerBackdrop()
+    AppleCollectionContainer(thumbnailUrl = playlist?.thumbnail, enabled = appleStyle, backdrop = topGlassBackdrop) {
         LazyColumn(
             state = lazyListState,
             contentPadding = appleCollectionContentPadding(LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(), appleStyle),
@@ -423,6 +425,7 @@ fun OnlinePlaylistScreen(
                             navController.navigateUp()
                         }
                     },
+                    backdrop = topGlassBackdrop,
                     onLongClick = {
                         if (!isSearching && !inSelectMode) {
                             navController.backToMain()

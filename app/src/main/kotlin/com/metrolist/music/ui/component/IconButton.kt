@@ -71,6 +71,8 @@ fun IconButton(
     enabled: Boolean = true,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    /** When set, the button is real liquid glass sampling this backdrop (must not be the top bar's own layer). */
+    backdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null,
     content: @Composable () -> Unit,
 ) {
     val glassHighlight = ImageBitmap.imageResource(R.drawable.liquid_glass_highlight)
@@ -79,8 +81,19 @@ fun IconButton(
             .minimumInteractiveComponentSize()
             .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
             .clip(CircleShape)
-            .background(color = colors.containerColor)
-            .liquidGlass(glassHighlight)
+            .then(
+                if (backdrop != null) {
+                    Modifier.glassSurface(
+                        backdrop = backdrop,
+                        shape = CircleShape,
+                        fallbackColor = colors.containerColor,
+                        tint = Color.White,
+                        mask = Color(0xFFD9D9D9).copy(alpha = 0.5f),
+                    ).highlightBorder(glassHighlight)
+                } else {
+                    Modifier.background(color = colors.containerColor).liquidGlass(glassHighlight)
+                },
+            )
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
