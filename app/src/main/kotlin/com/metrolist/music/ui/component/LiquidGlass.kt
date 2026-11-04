@@ -11,6 +11,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import android.graphics.BitmapFactory
+import android.graphics.Bitmap
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -89,42 +94,48 @@ fun Modifier.highlightBorder(highlight: ImageBitmap): Modifier =
 fun Modifier.highlightBorder(): Modifier = highlightBorder(ImageBitmap.imageResource(R.drawable.liquid_glass_highlight))
 
 /**
- * Highlight & border layer for pill-shaped surfaces (mini player, bottom bar). The pill ring image is
- * stretched over the whole surface, and everything outside the pill is clipped away.
+ * Highlight & border layer for pill-shaped surfaces (mini player, bottom bar). Only the dark edge of
+ * the supplied ring is kept: black ink whose opacity is the original alpha times how dark the pixel
+ * is, so the white fill becomes transparent. The image file itself is not modified.
  */
 @Composable
 fun Modifier.highlightPill(): Modifier {
-    val image = ImageBitmap.imageResource(R.drawable.liquid_glass_pill_highlight)
+    val context = LocalContext.current
+    val ring = remember(context) { pillRingEdge(context.resources) }
     return this.drawWithContent {
         drawContent()
-        // Only the pill itself is painted: the ring image's square corners are cut away by the path.
         val pill = Path().apply {
             addRoundRect(RoundRect(Rect(Offset.Zero, size), CornerRadius(size.height / 2f)))
         }
         clipPath(pill) {
             drawImage(
-                image = image,
+                image = ring,
                 dstSize = IntSize(size.width.toInt(), size.height.toInt()),
-                colorFilter = pillRingFilter,
                 blendMode = BlendMode.SrcOver,
             )
         }
     }
 }
 
-/**
- * The supplied ring image is an opaque white pill with dark edges. Drawn as is, its white fill
- * covers the whole bar. This filter keeps only the dark edge: black ink whose opacity follows how
- * dark each pixel is, so the white interior becomes transparent. The image file itself is unchanged.
- */
-private val pillRingFilter: ColorFilter =
-    ColorFilter.colorMatrix(
-        ColorMatrix(
-            floatArrayOf(
-                0f, 0f, 0f, 0f, 0f,
-                0f, 0f, 0f, 0f, 0f,
-                0f, 0f, 0f, 0f, 0f,
-                -0.3f, -0.59f, -0.11f, 0f, 1f,
-            ),
-        ),
-    )
+/** Builds the edge-only ring once from the resource. */
+private fun pillRingEdge(resources: android.content.res.Resources): ImageBitmap {
+    val source = BitmapFactory.decodeResource(resources, R.drawable.liquid_glass_pill_highlight)
+    val width = source.width
+    val height = source.height
+    val pixels = IntArray(width * height)
+    source.getPixels(pixels, 0, width, 0, 0, width, height)
+    for (index in pixels.indices) {
+        val p = pixels[index]
+        val alpha = (p ushr 24) and 0xFF
+        val red = (p ushr 16) and 0xFF
+        val green = (p ushr 8) and 0xFF
+        val blue = p and 0xFF
+        val luminance = (red * 0.3 + green * 0.59 + blue * 0.11) / 255.0
+        val ink = (alpha * (1.0 - luminance)).toInt().coerceIn(0, 255)
+        pixels[index] = ink shl 24
+    }
+    val out = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    out.setPixels(pixels, 0, width, 0, 0, width, height)
+    source.recycle()
+    return out.asImageBitmap()
+}
