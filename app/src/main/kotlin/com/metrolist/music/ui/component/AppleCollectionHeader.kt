@@ -33,6 +33,9 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -40,6 +43,7 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
@@ -50,6 +54,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.foundation.background
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -85,6 +90,9 @@ import com.metrolist.music.ui.utils.resize
 /** Text and icon color for the Apple collection content; [Color.Unspecified] outside that layout. */
 val LocalAppleCollectionTextColor = compositionLocalOf { Color.Unspecified }
 
+/** Shared "is the backdrop behind the collection light?" flag, written by the header's buttons and read by list rows. */
+val LocalAppleBackdropIsLight = compositionLocalOf<androidx.compose.runtime.MutableState<Boolean>?> { null }
+
 /** Black over bright artwork, white over dark, so text and icons stay readable on the backdrop. */
 @Composable
 fun rememberAppleTextColor(thumbnailUrl: String?): Color {
@@ -96,11 +104,10 @@ fun rememberAppleTextColor(thumbnailUrl: String?): Color {
 @Composable
 fun appleSubtitleColor(): Color {
     val text = LocalAppleCollectionTextColor.current
-    return if (text == Color.Unspecified || text == Color.White) {
-        MaterialTheme.colorScheme.secondary
-    } else {
-        text.copy(alpha = 0.7f)
-    }
+    if (text == Color.Unspecified) return MaterialTheme.colorScheme.secondary
+    // Black on light backdrop, warm ivory on dark, sampled from the real pixels behind the list.
+    val backdropIsLight = LocalAppleBackdropIsLight.current?.value ?: (text == Color.Black)
+    return if (backdropIsLight) Color.Black else Color(0xFFF7F0E1)
 }
 
 /** Transparent top bar whose content follows the artwork brightness in Apple style. */
@@ -161,9 +168,11 @@ fun AppleCollectionContainer(
     Box(modifier = Modifier.fillMaxSize().then(if (enabled) Modifier.appleCollectionBackground(brush) else Modifier)) {
         if (enabled) {
             val textColor = rememberAppleTextColor(thumbnailUrl)
+            val backdropIsLight = remember { mutableStateOf(false) }
             CompositionLocalProvider(
                 LocalAppleCollectionTextColor provides textColor,
                 LocalContentColor provides textColor,
+                LocalAppleBackdropIsLight provides backdropIsLight,
             ) {
                 if (backdrop != null) {
                     Box(Modifier.fillMaxSize().layerBackdrop(backdrop)) { AppleCollectionBackdrop(thumbnailUrl) }
@@ -293,6 +302,12 @@ fun AppleCollectionHeader(
     val heroLuminance = heroColor?.luminance() ?: 0f
     val onButton =
         if (heroLuminance + playHighlightAlpha * (1f - heroLuminance) > 0.75f) Color.Black else Color.White
+    // Button ink follows the real pixels directly beneath the button row.
+    var buttonsBounds by remember { mutableStateOf<Rect?>(null) }
+    val buttonsLight by rememberBackdropIsLight(buttonsBounds)
+    val sharedLight = LocalAppleBackdropIsLight.current
+    LaunchedEffect(buttonsLight) { sharedLight?.value = buttonsLight }
+    val buttonInk = if (buttonsLight) Color.Black else Color.White
     val titleFontFamily = albumTitleFontFamily(heroColor, title)
     val titleFontSize = albumTitleFontSize(title)
 
@@ -360,7 +375,7 @@ fun AppleCollectionHeader(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().onGloballyPositioned { buttonsBounds = it.windowRect() },
                     horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -375,7 +390,7 @@ fun AppleCollectionHeader(
                                 Icon(
                                     painter = painterResource(R.drawable.shuffle),
                                     contentDescription = stringResource(R.string.shuffle_home),
-                                    tint = onColor,
+                                    tint = buttonInk,
                                     modifier = Modifier.size(24.dp),
                                 )
                             }
@@ -396,7 +411,7 @@ fun AppleCollectionHeader(
                             Icon(
                                 painter = painterResource(R.drawable.play),
                                 contentDescription = null,
-                                tint = onButton,
+                                tint = buttonInk,
                                 modifier = Modifier.size(22.dp),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -404,7 +419,7 @@ fun AppleCollectionHeader(
                                 text = stringResource(R.string.play),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = onButton,
+                                color = buttonInk,
                             )
                         }
                     }
@@ -419,7 +434,7 @@ fun AppleCollectionHeader(
                             Icon(
                                 painter = painterResource(R.drawable.more_vert),
                                 contentDescription = null,
-                                tint = onColor,
+                                tint = buttonInk,
                                 modifier = Modifier.size(24.dp),
                             )
                         }
