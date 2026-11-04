@@ -36,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.kyant.backdrop.backdrops.layerBackdrop
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
@@ -167,7 +166,7 @@ fun AppleCollectionContainer(
                 LocalContentColor provides textColor,
             ) {
                 if (backdrop != null) {
-                    Box(Modifier.matchParentSize().layerBackdrop(backdrop)) { AppleCollectionBackdrop(thumbnailUrl) }
+                    Box(Modifier.fillMaxSize().layerBackdrop(backdrop)) { AppleCollectionBackdrop(thumbnailUrl) }
                 } else {
                     AppleCollectionBackdrop(thumbnailUrl)
                 }

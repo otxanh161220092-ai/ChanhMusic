@@ -10,6 +10,7 @@ package com.metrolist.music.ui.player
 import android.content.res.Configuration
 import com.metrolist.music.ui.component.LocalGlassBackdrop
 import com.metrolist.music.ui.component.glassSurface
+import com.metrolist.music.ui.component.highlightPill
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -46,6 +47,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -395,6 +397,7 @@ private fun NewMiniPlayer(
                         if (lightGlass) Color.White.copy(alpha = 0.5f) else Color.Transparent,
                     )
                     .border(1.dp, outlineColor.copy(alpha = 0.45f), RoundedCornerShape(27.dp))
+                    .highlightPill()
                     .drawWithContent {
                         drawContent()
                         val corner = CornerRadius(size.height / 2f)
@@ -464,7 +467,7 @@ private fun NewMiniPlayer(
                     model = mediaMetadata?.thumbnailUrl?.resize(160, 160),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(56.dp).aspectRatio(1f).clip(RoundedCornerShape(10.dp)),
+                    modifier = Modifier.size(40.dp).aspectRatio(1f).clip(RoundedCornerShape(8.dp)),
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -493,6 +496,8 @@ private fun NewMiniPlayer(
                 val isPlayingNow by playerConnection.isPlaying.collectAsState()
                 IconButton(
                     onClick = { if (isPlayingNow) playerConnection.player.pause() else playerConnection.player.play() },
+                    modifier = Modifier.size(40.dp),
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = onSurfaceColor.copy(alpha = 0.18f)),
                 ) {
                     Icon(
                         painter = painterResource(if (isPlayingNow) R.drawable.pause else R.drawable.play),
@@ -504,6 +509,8 @@ private fun NewMiniPlayer(
                 IconButton(
                     onClick = { playerConnection.player.seekToNext() },
                     enabled = canSkipNext,
+                    modifier = Modifier.size(40.dp),
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = onSurfaceColor.copy(alpha = 0.18f)),
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.skip_next),

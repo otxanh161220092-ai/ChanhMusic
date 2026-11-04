@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.metrolist.music.ui.component.highlightPill
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -188,7 +189,8 @@ fun LiquidBottomTabs(
                 .then(interactiveHighlight.modifier)
                 .height(barHeight)
                 .fillMaxWidth()
-                .padding(4f.dp),
+                .padding(4f.dp)
+                .highlightPill(),
             verticalAlignment = Alignment.CenterVertically,
             content = content
         )

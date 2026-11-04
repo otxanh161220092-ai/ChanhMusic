@@ -5,6 +5,9 @@
 
 package com.metrolist.music.ui.component
 
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -82,3 +85,31 @@ fun Modifier.highlightBorder(highlight: ImageBitmap): Modifier =
 /** [highlightBorder] with the supplied highlight image from resources. */
 @Composable
 fun Modifier.highlightBorder(): Modifier = highlightBorder(ImageBitmap.imageResource(R.drawable.liquid_glass_highlight))
+
+/**
+ * Highlight & border layer for pill-shaped surfaces (mini player, bottom bar). The pill ring image is
+ * stretched over the whole surface, and everything outside the pill is clipped away.
+ */
+@Composable
+fun Modifier.highlightPill(): Modifier {
+    val image = ImageBitmap.imageResource(R.drawable.liquid_glass_pill_highlight)
+    return this
+        .graphicsLayer {
+            shape = RoundedCornerShape(percent = 50)
+            clip = true
+            compositingStrategy = CompositingStrategy.Offscreen
+        }
+        .drawWithContent {
+            drawContent()
+            val pill = Path().apply {
+                addRoundRect(RoundRect(Rect(Offset.Zero, size), CornerRadius(size.height / 2f)))
+            }
+            clipPath(pill) {
+                drawImage(
+                    image = image,
+                    dstSize = IntSize(size.width.toInt(), size.height.toInt()),
+                    blendMode = BlendMode.Overlay,
+                )
+            }
+        }
+}
