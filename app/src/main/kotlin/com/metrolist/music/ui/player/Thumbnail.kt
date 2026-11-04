@@ -51,6 +51,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import kotlin.math.abs
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -384,7 +387,8 @@ fun Thumbnail(
                                 isLandscape = isLandscape,
                                 isListenTogetherGuest = isListenTogetherGuest,
                                 currentMediaId = mediaMetadata?.id,
-                                currentMediaThumbnail = mediaMetadata?.thumbnailUrl
+                                currentMediaThumbnail = mediaMetadata?.thumbnailUrl,
+                                gridState = thumbnailLazyGridState,
                             )
                         }
                     }
@@ -429,6 +433,7 @@ private fun ThumbnailItem(
     isListenTogetherGuest: Boolean = false,
     currentMediaId: String? = null,
     currentMediaThumbnail: String? = null,
+    gridState: LazyGridState,
     modifier: Modifier = Modifier,
 ) {
     val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
@@ -447,6 +452,27 @@ private fun ThumbnailItem(
                 }
             )
             .padding(horizontal = if (isLandscape) PlayerHorizontalPadding else 0.dp)
+            // Cover-change look: the cover blurs, shrinks and fades as it moves away from the centre,
+            // so the incoming cover resolves out of the blur. Read in the draw phase only.
+            .graphicsLayer {
+                val info = gridState.layoutInfo
+                val visible = info.visibleItemsInfo.firstOrNull { it.key == item.mediaId }
+                val viewport = (info.viewportEndOffset - info.viewportStartOffset).coerceAtLeast(1)
+                val distance =
+                    if (visible == null) {
+                        1f
+                    } else {
+                        val centre = visible.offset.x + visible.size.width / 2
+                        val viewportCentre = info.viewportStartOffset + viewport / 2
+                        (abs(centre - viewportCentre).toFloat() / viewport).coerceIn(0f, 1f)
+                    }
+                alpha = 1f - 0.45f * distance
+                val scale = 1f - 0.06f * distance
+                scaleX = scale
+                scaleY = scale
+                renderEffect =
+                    if (distance > 0.01f) BlurEffect(40f * density * distance, 40f * density * distance) else null
+            }
             .pointerInput(Unit) {
                 detectTapGestures(
                     onDoubleTap = { offset ->
