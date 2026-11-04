@@ -703,7 +703,12 @@ class MainActivity : FragmentActivity() {
                 val accountImageUrl by homeViewModel.accountImageUrl.collectAsStateWithLifecycle()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 // Read the observed state here so the floating back button recomposes on navigation.
-                val canGoBack = navBackStackEntry != null && navController.previousBackStackEntry != null
+                // Top-level tabs never show the floating back button, even though tab switches leave the start destination underneath.
+                val tabRoutes = remember { setOf("home", "search_input", "listen_together", "library") }
+                val canGoBack =
+                    navBackStackEntry != null &&
+                        navBackStackEntry?.destination?.route !in tabRoutes &&
+                        navController.previousBackStackEntry != null
                 val (previousTab, setPreviousTab) = rememberSaveable { mutableStateOf("home") }
 
                 val listenTogetherInTopBar = false

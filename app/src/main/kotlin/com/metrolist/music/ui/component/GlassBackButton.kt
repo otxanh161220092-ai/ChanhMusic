@@ -50,9 +50,9 @@ fun GlassBackButton(
                 .glassSurface(
                     backdrop = backdrop,
                     shape = CircleShape,
-                    fallbackColor = Color.White.copy(alpha = 0.25f),
+                    fallbackColor = Color.White.copy(alpha = 0.15f),
                     tint = Color.White,
-                    mask = Color(0xFFD9D9D9).copy(alpha = 0.5f),
+                    mask = Color(0xFFD9D9D9).copy(alpha = 0.3f),
                 )
                 .highlightBorder()
                 .clickable(
