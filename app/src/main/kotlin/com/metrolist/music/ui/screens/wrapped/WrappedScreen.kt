@@ -199,7 +199,7 @@ fun WrappedScreenContent() {
             TopAppBar(
                 title = { },
                 navigationIcon = {
-                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
+                com.metrolist.music.ui.component.OriginalBackSlot {
                     IconButton(onClick = onClose) {
                         Icon(painterResource(R.drawable.arrow_back), stringResource(R.string.back_button_desc), tint = Color.White)
                     }

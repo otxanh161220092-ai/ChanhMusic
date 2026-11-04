@@ -377,7 +377,7 @@ fun ArtistItemsScreen(
     TopAppBar(
         title = { Text(title) },
         navigationIcon = {
-                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
+                com.metrolist.music.ui.component.OriginalBackSlot {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,

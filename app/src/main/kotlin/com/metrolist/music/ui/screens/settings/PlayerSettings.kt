@@ -1162,7 +1162,7 @@ fun PlayerSettings(
     TopAppBar(
         title = { Text(stringResource(R.string.player_and_audio)) },
         navigationIcon = {
-                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
+                com.metrolist.music.ui.component.OriginalBackSlot {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain

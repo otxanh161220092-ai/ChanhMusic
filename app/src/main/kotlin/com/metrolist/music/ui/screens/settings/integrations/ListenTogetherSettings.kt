@@ -516,7 +516,7 @@ fun ListenTogetherSettings(navController: NavController) {
     TopAppBar(
         title = { Text(stringResource(R.string.listen_together)) },
         navigationIcon = {
-                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
+                com.metrolist.music.ui.component.OriginalBackSlot {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,

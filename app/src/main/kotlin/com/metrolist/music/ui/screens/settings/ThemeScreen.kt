@@ -164,7 +164,7 @@ fun ThemeScreen(
     TopAppBar(
         title = { Text(stringResource(R.string.theme_colors)) },
         navigationIcon = {
-                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
+                com.metrolist.music.ui.component.OriginalBackSlot {
             IconButton(onClick = { navController.navigateUp() }) {
                 Icon(
                     painter = painterResource(R.drawable.arrow_back),

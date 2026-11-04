@@ -718,7 +718,7 @@ fun StatsScreen(
             }
         },
         navigationIcon = {
-                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
+                com.metrolist.music.ui.component.OriginalBackSlot {
             if (inSelectMode) {
                 androidx.compose.material3.IconButton(onClick = onExitSelectionMode) {
                     Icon(

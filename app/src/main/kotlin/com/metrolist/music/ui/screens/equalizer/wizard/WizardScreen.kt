@@ -74,7 +74,7 @@ private fun WizardScreenContent(
                     )
                 },
                 navigationIcon = {
-                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
+                com.metrolist.music.ui.component.OriginalBackSlot {
                     IconButton(onClick = if (state.canGoBack) onBackClicked else onNavigateBack) {
                         Icon(painterResource(R.drawable.arrow_back), contentDescription = null)
                     }

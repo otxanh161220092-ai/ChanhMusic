@@ -83,6 +83,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -705,10 +706,14 @@ class MainActivity : FragmentActivity() {
                 // Read the observed state here so the floating back button recomposes on navigation.
                 // Top-level tabs never show the floating back button, even though tab switches leave the start destination underneath.
                 val tabRoutes = remember { setOf("home", "search_input", "listen_together", "library") }
+                val currentRouteName = navBackStackEntry?.destination?.route
+                // Search results live under the search tab, so they are not a separate page to return from.
                 val canGoBack =
-                    navBackStackEntry != null &&
-                        navBackStackEntry?.destination?.route !in tabRoutes &&
+                    currentRouteName != null &&
+                        currentRouteName !in tabRoutes &&
+                        !currentRouteName.startsWith("search/") &&
                         navController.previousBackStackEntry != null
+                SideEffect { com.metrolist.music.ui.component.FloatingBackState.floatingVisible = canGoBack }
                 val (previousTab, setPreviousTab) = rememberSaveable { mutableStateOf("home") }
 
                 val listenTogetherInTopBar = false
@@ -1307,6 +1312,18 @@ class MainActivity : FragmentActivity() {
                             val navBarTotalHeight = bottomInset + (if (useAppleStyleLayout) 116.dp else NavigationBarHeight)
 
                             if (!showRail && currentRoute != "wrapped") {
+                                // Floating back button sits under the player sheet.
+                                if (canGoBack) {
+                                    com.metrolist.music.ui.component.GlassBackButton(
+                                        backdrop = LocalGlassBackdrop.current,
+                                        onClick = { navController.popBackStack() },
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.TopStart)
+                                                .statusBarsPadding()
+                                                .padding(start = 16.dp, top = 8.dp),
+                                    )
+                                }
                                 Box {
                                     if (activePlayerConnection != null) {
                                         BottomSheetPlayer(
@@ -1352,19 +1369,6 @@ class MainActivity : FragmentActivity() {
                                                 },
                                     )
 
-                                    // Floating back button: only once there is a page to return to.
-                                    if (canGoBack) {
-                                        com.metrolist.music.ui.component.GlassBackButton(
-                                            backdrop = LocalGlassBackdrop.current,
-                                            onClick = { navController.popBackStack() },
-                                            modifier =
-                                                Modifier
-                                                    .align(Alignment.TopStart)
-                                                    .statusBarsPadding()
-                                                    .padding(start = 16.dp, top = 8.dp),
-                                        )
-                                    }
-
                                     Box(
                                         modifier =
                                             Modifier
@@ -1386,6 +1390,19 @@ class MainActivity : FragmentActivity() {
                                     )
                                 }
                             } else {
+                                    // Floating back button: only once there is a page to return to.
+                                    if (canGoBack) {
+                                        com.metrolist.music.ui.component.GlassBackButton(
+                                            backdrop = LocalGlassBackdrop.current,
+                                            onClick = { navController.popBackStack() },
+                                            modifier =
+                                                Modifier
+                                                    .align(Alignment.TopStart)
+                                                    .statusBarsPadding()
+                                                    .padding(start = 16.dp, top = 8.dp),
+                                        )
+                                    }
+
                                 if (currentRoute != "wrapped") {
                                     if (activePlayerConnection != null) {
                                         BottomSheetPlayer(

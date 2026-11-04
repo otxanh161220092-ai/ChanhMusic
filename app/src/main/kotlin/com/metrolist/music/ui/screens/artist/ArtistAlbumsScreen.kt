@@ -144,7 +144,7 @@ fun ArtistAlbumsScreen(
         TopAppBar(
             title = { Text(artist?.artist?.name.orEmpty()) },
             navigationIcon = {
-                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
+                com.metrolist.music.ui.component.OriginalBackSlot {
                 IconButton(
                     onClick = navController::navigateUp,
                     onLongClick = navController::backToMain,

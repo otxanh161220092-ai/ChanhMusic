@@ -754,7 +754,7 @@ fun AutoPlaylistScreen(
                 }
             },
             navigationIcon = {
-                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
+                com.metrolist.music.ui.component.OriginalBackSlot {
                 IconButton(
                     onClick = {
                         when {

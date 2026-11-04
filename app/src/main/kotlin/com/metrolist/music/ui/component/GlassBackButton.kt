@@ -9,6 +9,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,11 +51,10 @@ fun GlassBackButton(
                 .glassSurface(
                     backdrop = backdrop,
                     shape = CircleShape,
-                    fallbackColor = Color.White.copy(alpha = 0.15f),
-                    tint = Color.White,
-                    mask = Color(0xFFD9D9D9).copy(alpha = 0.3f),
+                    fallbackColor = Color.Black.copy(alpha = 0.45f),
+                    tint = Color.Black.copy(alpha = 0.3f),
+                    mask = Color(0xFF1A1A1A).copy(alpha = 0.4f),
                 )
-                .highlightBorder()
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -87,4 +87,16 @@ fun GlassBackButton(
 /** Global switch for the per-screen top-bar back icons. Off: only the floating glass back button navigates back. */
 object FloatingBackState {
     var showOriginalBack by mutableStateOf(false)
+    /** True while the floating back button is on screen; the title slot then leaves room for it. */
+    var floatingVisible by mutableStateOf(false)
+}
+
+/** Stands in for a screen's original navigation icon: renders it only when enabled, otherwise reserves the button's space when the floating back button is showing. */
+@Composable
+fun OriginalBackSlot(content: @Composable () -> Unit) {
+    if (FloatingBackState.showOriginalBack) {
+        content()
+    } else if (FloatingBackState.floatingVisible) {
+        Spacer(Modifier.size(56.dp))
+    }
 }
