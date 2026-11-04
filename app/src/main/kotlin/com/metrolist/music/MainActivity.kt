@@ -702,6 +702,8 @@ class MainActivity : FragmentActivity() {
                 val homeViewModel: HomeViewModel = hiltViewModel()
                 val accountImageUrl by homeViewModel.accountImageUrl.collectAsStateWithLifecycle()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
+                // Read the observed state here so the floating back button recomposes on navigation.
+                val canGoBack = navBackStackEntry != null && navController.previousBackStackEntry != null
                 val (previousTab, setPreviousTab) = rememberSaveable { mutableStateOf("home") }
 
                 val listenTogetherInTopBar = false
@@ -1346,7 +1348,7 @@ class MainActivity : FragmentActivity() {
                                     )
 
                                     // Floating back button: only once there is a page to return to.
-                                    if (navController.previousBackStackEntry != null) {
+                                    if (canGoBack) {
                                         com.metrolist.music.ui.component.GlassBackButton(
                                             backdrop = LocalGlassBackdrop.current,
                                             onClick = { navController.popBackStack() },

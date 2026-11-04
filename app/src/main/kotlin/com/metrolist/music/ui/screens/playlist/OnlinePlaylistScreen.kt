@@ -414,7 +414,9 @@ fun OnlinePlaylistScreen(
                 }
             },
             navigationIcon = {
-                IconButton(
+                // Original back button hidden: the floating glass back button replaces it.
+                // Only the search/selection close action remains.
+                if (isSearching || inSelectMode) IconButton(
                     onClick = {
                         if (isSearching) {
                             isSearching = false
