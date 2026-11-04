@@ -1217,212 +1217,216 @@ fun BottomSheetPlayer(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.vibrant(useVibrant, 0.9f),
                     ) {
-                        FilledIconButton(
-                            onClick = playerConnection::toggleLike,
-                            shape = CircleShape,
-                            colors =
-                                IconButtonDefaults.filledIconButtonColors(
-                                    containerColor = if (isFavorite) likedCircleColor else roundButtonContainerColor,
-                                    contentColor = if (isFavorite) likedStarColor else roundButtonContentColor,
-                                ),
-                            modifier = Modifier.size(36.dp).highlightBorder(),
-                        ) {
-                            Icon(
-                                painter = painterResource(if (isFavorite) R.drawable.star_filled else R.drawable.star_outline),
-                                contentDescription = stringResource(R.string.like),
-                                modifier = Modifier.size(20.dp),
-                            )
+                                                Box(modifier = Modifier.size(36.dp).highlightBorder()) {
+    FilledIconButton(
+                                onClick = playerConnection::toggleLike,
+                                shape = CircleShape,
+                                colors =
+                                    IconButtonDefaults.filledIconButtonColors(
+                                        containerColor = if (isFavorite) likedCircleColor else roundButtonContainerColor,
+                                        contentColor = if (isFavorite) likedStarColor else roundButtonContentColor,
+                                    ),
+                                modifier = Modifier.fillMaxSize(),
+                            ) {
+                                Icon(
+                                    painter = painterResource(if (isFavorite) R.drawable.star_filled else R.drawable.star_outline),
+                                    contentDescription = stringResource(R.string.like),
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
                         }
 
-                        FilledIconButton(
-                            onClick = {
-                                menuState.show {
-                                    PlayerMenu(
-                                        mediaMetadata = mediaMetadata,
-                                        playerBottomSheetState = state,
-                                        onShowDetailsDialog = {
-                                            mediaMetadata.id.let {
-                                                bottomSheetPageState.show {
-                                                    ShowMediaInfo(it)
+                                                Box(modifier = Modifier.size(36.dp).highlightBorder()) {
+    FilledIconButton(
+                                onClick = {
+                                    menuState.show {
+                                        PlayerMenu(
+                                            mediaMetadata = mediaMetadata,
+                                            playerBottomSheetState = state,
+                                            onShowDetailsDialog = {
+                                                mediaMetadata.id.let {
+                                                    bottomSheetPageState.show {
+                                                        ShowMediaInfo(it)
+                                                    }
                                                 }
-                                            }
-                                        },
-                                        onDismiss = menuState::dismiss,
-                                        extraItems = {
-                                            val menuShuffle by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
-                                            val menuRepeat by playerConnection.repeatMode.collectAsStateWithLifecycle()
-                                            val menuLyrics by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
-                                            buildList {
-                                                add(
-                                                    Material3MenuItemData(
-                                                        title = { Text(text = stringResource(R.string.share)) },
-                                                        icon = {
-                                                            Icon(
-                                                                painter = painterResource(R.drawable.share),
-                                                                contentDescription = null,
-                                                                modifier = Modifier.size(24.dp),
-                                                            )
-                                                        },
-                                                        onClick = {
-                                                            val intent =
-                                                                Intent().apply {
-                                                                    action = Intent.ACTION_SEND
-                                                                    type = "text/plain"
-                                                                    putExtra(
-                                                                        Intent.EXTRA_TEXT,
-                                                                        "https://music.youtube.com/watch?v=${mediaMetadata.id}",
-                                                                    )
-                                                                }
-                                                            context.startActivity(Intent.createChooser(intent, null))
-                                                            menuState.dismiss()
-                                                        },
-                                                    ),
-                                                )
-                                                if (!isListenTogetherGuest) {
+                                            },
+                                            onDismiss = menuState::dismiss,
+                                            extraItems = {
+                                                val menuShuffle by playerConnection.shuffleModeEnabled.collectAsStateWithLifecycle()
+                                                val menuRepeat by playerConnection.repeatMode.collectAsStateWithLifecycle()
+                                                val menuLyrics by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
+                                                buildList {
                                                     add(
                                                         Material3MenuItemData(
-                                                            title = { Text(text = stringResource(R.string.shuffle)) },
-                                                            description = {
-                                                                Text(
-                                                                    text =
-                                                                        stringResource(
-                                                                            if (menuShuffle) R.string.player_state_on else R.string.player_state_off,
-                                                                        ),
-                                                                )
-                                                            },
+                                                            title = { Text(text = stringResource(R.string.share)) },
                                                             icon = {
                                                                 Icon(
-                                                                    painter = painterResource(R.drawable.shuffle),
+                                                                    painter = painterResource(R.drawable.share),
                                                                     contentDescription = null,
                                                                     modifier = Modifier.size(24.dp),
                                                                 )
                                                             },
                                                             onClick = {
-                                                                playerConnection.player.shuffleModeEnabled = !menuShuffle
+                                                                val intent =
+                                                                    Intent().apply {
+                                                                        action = Intent.ACTION_SEND
+                                                                        type = "text/plain"
+                                                                        putExtra(
+                                                                            Intent.EXTRA_TEXT,
+                                                                            "https://music.youtube.com/watch?v=${mediaMetadata.id}",
+                                                                        )
+                                                                    }
+                                                                context.startActivity(Intent.createChooser(intent, null))
+                                                                menuState.dismiss()
                                                             },
                                                         ),
                                                     )
-                                                    add(
-                                                        Material3MenuItemData(
-                                                            title = { Text(text = stringResource(R.string.player_repeat)) },
-                                                            description = {
-                                                                Text(
-                                                                    text =
-                                                                        stringResource(
-                                                                            when (menuRepeat) {
-                                                                                Player.REPEAT_MODE_ALL -> R.string.repeat_mode_all
-                                                                                Player.REPEAT_MODE_ONE -> R.string.repeat_mode_one
-                                                                                else -> R.string.repeat_mode_off
+                                                    if (!isListenTogetherGuest) {
+                                                        add(
+                                                            Material3MenuItemData(
+                                                                title = { Text(text = stringResource(R.string.shuffle)) },
+                                                                description = {
+                                                                    Text(
+                                                                        text =
+                                                                            stringResource(
+                                                                                if (menuShuffle) R.string.player_state_on else R.string.player_state_off,
+                                                                            ),
+                                                                    )
+                                                                },
+                                                                icon = {
+                                                                    Icon(
+                                                                        painter = painterResource(R.drawable.shuffle),
+                                                                        contentDescription = null,
+                                                                        modifier = Modifier.size(24.dp),
+                                                                    )
+                                                                },
+                                                                onClick = {
+                                                                    playerConnection.player.shuffleModeEnabled = !menuShuffle
+                                                                },
+                                                            ),
+                                                        )
+                                                        add(
+                                                            Material3MenuItemData(
+                                                                title = { Text(text = stringResource(R.string.player_repeat)) },
+                                                                description = {
+                                                                    Text(
+                                                                        text =
+                                                                            stringResource(
+                                                                                when (menuRepeat) {
+                                                                                    Player.REPEAT_MODE_ALL -> R.string.repeat_mode_all
+                                                                                    Player.REPEAT_MODE_ONE -> R.string.repeat_mode_one
+                                                                                    else -> R.string.repeat_mode_off
+                                                                                },
+                                                                            ),
+                                                                    )
+                                                                },
+                                                                icon = {
+                                                                    Icon(
+                                                                        painter =
+                                                                            painterResource(
+                                                                                if (menuRepeat == Player.REPEAT_MODE_ONE) R.drawable.repeat_one else R.drawable.repeat,
+                                                                            ),
+                                                                        contentDescription = null,
+                                                                        modifier = Modifier.size(24.dp),
+                                                                    )
+                                                                },
+                                                                onClick = {
+                                                                    playerConnection.player.toggleRepeatMode()
+                                                                },
+                                                            ),
+                                                        )
+                                                        add(
+                                                            Material3MenuItemData(
+                                                                title = { Text(text = stringResource(R.string.sleep_timer)) },
+                                                                description = {
+                                                                    if (sleepTimerEnabled) {
+                                                                        Text(text = makeTimeString(sleepTimerTimeLeft))
+                                                                    }
+                                                                },
+                                                                icon = {
+                                                                    Icon(
+                                                                        painter = painterResource(R.drawable.bedtime),
+                                                                        contentDescription = null,
+                                                                        modifier = Modifier.size(24.dp),
+                                                                    )
+                                                                },
+                                                                onClick = {
+                                                                    if (sleepTimerEnabled) {
+                                                                        playerConnection.service.sleepTimer?.clear()
+                                                                    } else {
+                                                                        showSleepTimerDialog = true
+                                                                    }
+                                                                    menuState.dismiss()
+                                                                },
+                                                            ),
+                                                        )
+                                                    }
+                                                    if (showInlineLyrics) {
+                                                        add(
+                                                            Material3MenuItemData(
+                                                                title = { Text(text = stringResource(R.string.player_fullscreen_lyrics)) },
+                                                                icon = {
+                                                                    Icon(
+                                                                        painter = painterResource(R.drawable.fullscreen),
+                                                                        contentDescription = null,
+                                                                        modifier = Modifier.size(24.dp),
+                                                                    )
+                                                                },
+                                                                onClick = {
+                                                                    isFullScreen = !isFullScreen
+                                                                    menuState.dismiss()
+                                                                },
+                                                            ),
+                                                        )
+                                                        add(
+                                                            Material3MenuItemData(
+                                                                title = { Text(text = stringResource(R.string.player_lyrics_options)) },
+                                                                icon = {
+                                                                    Icon(
+                                                                        painter = painterResource(R.drawable.lyrics),
+                                                                        contentDescription = null,
+                                                                        modifier = Modifier.size(24.dp),
+                                                                    )
+                                                                },
+                                                                onClick = {
+                                                                    menuState.show {
+                                                                        com.metrolist.music.ui.menu.LyricsMenu(
+                                                                            lyricsProvider = { menuLyrics },
+                                                                            songProvider = { currentSong?.song },
+                                                                            mediaMetadataProvider = { mediaMetadata },
+                                                                            onDismiss = menuState::dismiss,
+                                                                            onShowOffsetDialog = {
+                                                                                bottomSheetPageState.show {
+                                                                                    ShowOffsetDialog(
+                                                                                        songProvider = { currentSong?.song },
+                                                                                    )
+                                                                                }
                                                                             },
-                                                                        ),
-                                                                )
-                                                            },
-                                                            icon = {
-                                                                Icon(
-                                                                    painter =
-                                                                        painterResource(
-                                                                            if (menuRepeat == Player.REPEAT_MODE_ONE) R.drawable.repeat_one else R.drawable.repeat,
-                                                                        ),
-                                                                    contentDescription = null,
-                                                                    modifier = Modifier.size(24.dp),
-                                                                )
-                                                            },
-                                                            onClick = {
-                                                                playerConnection.player.toggleRepeatMode()
-                                                            },
-                                                        ),
-                                                    )
-                                                    add(
-                                                        Material3MenuItemData(
-                                                            title = { Text(text = stringResource(R.string.sleep_timer)) },
-                                                            description = {
-                                                                if (sleepTimerEnabled) {
-                                                                    Text(text = makeTimeString(sleepTimerTimeLeft))
-                                                                }
-                                                            },
-                                                            icon = {
-                                                                Icon(
-                                                                    painter = painterResource(R.drawable.bedtime),
-                                                                    contentDescription = null,
-                                                                    modifier = Modifier.size(24.dp),
-                                                                )
-                                                            },
-                                                            onClick = {
-                                                                if (sleepTimerEnabled) {
-                                                                    playerConnection.service.sleepTimer?.clear()
-                                                                } else {
-                                                                    showSleepTimerDialog = true
-                                                                }
-                                                                menuState.dismiss()
-                                                            },
-                                                        ),
-                                                    )
+                                                                        )
+                                                                    }
+                                                                },
+                                                            ),
+                                                        )
+                                                    }
                                                 }
-                                                if (showInlineLyrics) {
-                                                    add(
-                                                        Material3MenuItemData(
-                                                            title = { Text(text = stringResource(R.string.player_fullscreen_lyrics)) },
-                                                            icon = {
-                                                                Icon(
-                                                                    painter = painterResource(R.drawable.fullscreen),
-                                                                    contentDescription = null,
-                                                                    modifier = Modifier.size(24.dp),
-                                                                )
-                                                            },
-                                                            onClick = {
-                                                                isFullScreen = !isFullScreen
-                                                                menuState.dismiss()
-                                                            },
-                                                        ),
-                                                    )
-                                                    add(
-                                                        Material3MenuItemData(
-                                                            title = { Text(text = stringResource(R.string.player_lyrics_options)) },
-                                                            icon = {
-                                                                Icon(
-                                                                    painter = painterResource(R.drawable.lyrics),
-                                                                    contentDescription = null,
-                                                                    modifier = Modifier.size(24.dp),
-                                                                )
-                                                            },
-                                                            onClick = {
-                                                                menuState.show {
-                                                                    com.metrolist.music.ui.menu.LyricsMenu(
-                                                                        lyricsProvider = { menuLyrics },
-                                                                        songProvider = { currentSong?.song },
-                                                                        mediaMetadataProvider = { mediaMetadata },
-                                                                        onDismiss = menuState::dismiss,
-                                                                        onShowOffsetDialog = {
-                                                                            bottomSheetPageState.show {
-                                                                                ShowOffsetDialog(
-                                                                                    songProvider = { currentSong?.song },
-                                                                                )
-                                                                            }
-                                                                        },
-                                                                    )
-                                                                }
-                                                            },
-                                                        ),
-                                                    )
-                                                }
-                                            }
-                                        },
-                                    )
-                                }
-                            },
-                            shape = CircleShape,
-                            colors =
-                                IconButtonDefaults.filledIconButtonColors(
-                                    containerColor = roundButtonContainerColor,
-                                    contentColor = roundButtonContentColor,
-                                ),
-                            modifier = Modifier.size(36.dp).highlightBorder(),
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.more_horiz),
-                                contentDescription = stringResource(R.string.more_options),
-                                modifier = Modifier.size(20.dp),
-                            )
+                                            },
+                                        )
+                                    }
+                                },
+                                shape = CircleShape,
+                                colors =
+                                    IconButtonDefaults.filledIconButtonColors(
+                                        containerColor = roundButtonContainerColor,
+                                        contentColor = roundButtonContentColor,
+                                    ),
+                                modifier = Modifier.fillMaxSize(),
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.more_horiz),
+                                    contentDescription = stringResource(R.string.more_options),
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
                         }
                     }
                 } else {
