@@ -66,8 +66,7 @@ fun GlassBackButton(
         Canvas(
             modifier =
                 Modifier
-                    .size(20.dp)
-                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen },
+                    .size(20.dp),
         ) {
             val chevron =
                 Path().apply {
@@ -98,6 +97,6 @@ fun OriginalBackSlot(content: @Composable () -> Unit) {
     if (FloatingBackState.showOriginalBack) {
         content()
     } else if (FloatingBackState.floatingVisible) {
-        Spacer(Modifier.size(56.dp))
+        Spacer(Modifier.size(72.dp))
     }
 }
