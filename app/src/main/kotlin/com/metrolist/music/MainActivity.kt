@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -1343,6 +1344,19 @@ class MainActivity : FragmentActivity() {
                                                         }
                                                 },
                                     )
+
+                                    // Floating back button: only once there is a page to return to.
+                                    if (navController.previousBackStackEntry != null) {
+                                        com.metrolist.music.ui.component.GlassBackButton(
+                                            backdrop = LocalGlassBackdrop.current,
+                                            onClick = { navController.popBackStack() },
+                                            modifier =
+                                                Modifier
+                                                    .align(Alignment.TopStart)
+                                                    .statusBarsPadding()
+                                                    .padding(start = 16.dp, top = 8.dp),
+                                        )
+                                    }
 
                                     Box(
                                         modifier =
