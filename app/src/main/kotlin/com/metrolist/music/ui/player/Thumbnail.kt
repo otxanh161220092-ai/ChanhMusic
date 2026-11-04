@@ -235,10 +235,16 @@ fun Thumbnail(
     val thumbnailLazyGridState = rememberLazyGridState()
     // Each new track: the cover starts blurred and resolves over ~700 ms.
     val changeProgress = remember { Animatable(1f) }
+    // Cover being replaced: the new one cross-fades in over it, out of a blur.
+    var shownArtwork by remember { mutableStateOf<String?>(null) }
+    var previousArtwork by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(mediaMetadata?.id) {
         if (mediaMetadata != null) {
+            previousArtwork = shownArtwork
+            shownArtwork = mediaMetadata?.thumbnailUrl
             changeProgress.snapTo(0f)
             changeProgress.animateTo(1f, tween(700))
+            previousArtwork = null
         }
     }
     
@@ -402,6 +408,7 @@ fun Thumbnail(
                                 currentMediaThumbnail = mediaMetadata?.thumbnailUrl,
                                 gridState = thumbnailLazyGridState,
                                 changeProgress = changeProgress,
+                                previousArtwork = previousArtwork,
                             )
                         }
                     }
@@ -448,6 +455,7 @@ private fun ThumbnailItem(
     currentMediaThumbnail: String? = null,
     gridState: LazyGridState,
     changeProgress: Animatable<Float, AnimationVector1D>,
+    previousArtwork: String?,
     modifier: Modifier = Modifier,
 ) {
     val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
@@ -480,8 +488,7 @@ private fun ThumbnailItem(
                         val viewportCentre = info.viewportStartOffset + viewport / 2
                         (abs(centre - viewportCentre).toFloat() / viewport).coerceIn(0f, 1f)
                     }
-                val incoming = if (item.mediaId == currentMediaId) 1f - changeProgress.value else 0f
-                val f = max(distance, incoming)
+                val f = distance
                 alpha = 1f - 0.45f * f
                 val scale = 1f - 0.06f * f
                 scaleX = scale
@@ -540,10 +547,27 @@ private fun ThumbnailItem(
                     item.mediaMetadata.artworkUri?.toString()
                 }
 
+                val isCurrent = item.mediaId == currentMediaId
                 ThumbnailImage(
                     artworkUri = artworkUriToUse,
-                    cropArtwork = cropAlbumArt
+                    cropArtwork = cropAlbumArt,
+                    modifier = if (isCurrent) {
+                        Modifier.graphicsLayer {
+                            val p = changeProgress.value
+                            alpha = p
+                            renderEffect = if (p < 0.99f) BlurEffect(36f * density * (1f - p), 36f * density * (1f - p)) else null
+                        }
+                    } else {
+                        Modifier
+                    }
                 )
+                if (isCurrent && previousArtwork != null) {
+                    ThumbnailImage(
+                        artworkUri = previousArtwork,
+                        cropArtwork = cropAlbumArt,
+                        modifier = Modifier.graphicsLayer { alpha = 1f - changeProgress.value },
+                    )
+                }
             }
         }
     }
