@@ -23,6 +23,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.ImageBitmap
@@ -103,8 +105,26 @@ fun Modifier.highlightPill(): Modifier {
             drawImage(
                 image = image,
                 dstSize = IntSize(size.width.toInt(), size.height.toInt()),
-                blendMode = BlendMode.Overlay,
+                colorFilter = pillRingFilter,
+                blendMode = BlendMode.SrcOver,
             )
         }
     }
 }
+
+/**
+ * The supplied ring image is an opaque white pill with dark edges. Drawn as is, its white fill
+ * covers the whole bar. This filter keeps only the dark edge: black ink whose opacity follows how
+ * dark each pixel is, so the white interior becomes transparent. The image file itself is unchanged.
+ */
+private val pillRingFilter: ColorFilter =
+    ColorFilter.colorMatrix(
+        ColorMatrix(
+            floatArrayOf(
+                0f, 0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f, 0f,
+                0f, 0f, 0f, 0f, 0f,
+                -0.3f, -0.59f, -0.11f, 0f, 1f,
+            ),
+        ),
+    )
