@@ -578,6 +578,7 @@ fun AlbumScreen(
             }
         },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             if (inSelectMode) {
                 IconButton(onClick = onExitSelectionMode) {
                     Icon(
@@ -596,7 +597,8 @@ fun AlbumScreen(
                     )
                 }
             }
-        },
+        }
+            },
         actions = {
             if (inSelectMode) {
                 Checkbox(

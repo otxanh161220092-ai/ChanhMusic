@@ -265,6 +265,7 @@ fun OnlinePodcastScreen(
                 }
             },
             navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                 IconButton(
                     onClick = {
                         if (isSearching) {
@@ -283,6 +284,7 @@ fun OnlinePodcastScreen(
                         contentDescription = null
                     )
                 }
+            }
             },
             actions = {
                 if (!isSearching) {

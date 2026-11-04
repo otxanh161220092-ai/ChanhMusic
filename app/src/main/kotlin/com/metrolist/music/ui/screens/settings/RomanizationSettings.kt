@@ -191,6 +191,7 @@ fun RomanizationSettings(
     TopAppBar(
         title = { Text(stringResource(R.string.lyrics_romanize_title)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -201,5 +202,6 @@ fun RomanizationSettings(
                 )
             }
         }
+            }
     )
 }

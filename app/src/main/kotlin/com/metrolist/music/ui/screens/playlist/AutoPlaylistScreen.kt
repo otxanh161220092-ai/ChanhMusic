@@ -754,6 +754,7 @@ fun AutoPlaylistScreen(
                 }
             },
             navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                 IconButton(
                     onClick = {
                         when {
@@ -786,6 +787,7 @@ fun AutoPlaylistScreen(
                         contentDescription = null,
                     )
                 }
+            }
             },
             actions = {
                 if (inSelectMode) {

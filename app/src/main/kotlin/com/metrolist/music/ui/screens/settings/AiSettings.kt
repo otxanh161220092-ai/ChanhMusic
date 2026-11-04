@@ -660,12 +660,14 @@ fun AiSettings(navController: NavController) {
     TopAppBar(
         title = { Text(stringResource(R.string.ai_lyrics_translation)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(onClick = { navController.navigateUp() }) {
                 Icon(
                     painterResource(R.drawable.arrow_back),
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 }

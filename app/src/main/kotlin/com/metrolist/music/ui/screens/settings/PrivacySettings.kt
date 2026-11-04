@@ -250,6 +250,7 @@ fun PrivacySettings(
     TopAppBar(
         title = { Text(stringResource(R.string.privacy)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -260,5 +261,6 @@ fun PrivacySettings(
                 )
             }
         }
+            }
     )
 }

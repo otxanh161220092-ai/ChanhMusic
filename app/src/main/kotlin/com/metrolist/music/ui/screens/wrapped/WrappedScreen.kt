@@ -199,10 +199,12 @@ fun WrappedScreenContent() {
             TopAppBar(
                 title = { },
                 navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                     IconButton(onClick = onClose) {
                         Icon(painterResource(R.drawable.arrow_back), stringResource(R.string.back_button_desc), tint = Color.White)
                     }
-                },
+                }
+            },
                 actions = {
                     IconButton(onClick = { audioService.toggleMute() }) {
                         val icon = if (isMuted) R.drawable.volume_off else R.drawable.volume_up

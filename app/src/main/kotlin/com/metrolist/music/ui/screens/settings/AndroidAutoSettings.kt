@@ -370,6 +370,7 @@ fun AndroidAutoSettings(
     TopAppBar(
         title = { Text(stringResource(R.string.android_auto)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -379,6 +380,7 @@ fun AndroidAutoSettings(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 }

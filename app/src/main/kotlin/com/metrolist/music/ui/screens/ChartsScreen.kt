@@ -110,6 +110,7 @@ fun ChartsScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.charts)) },
                 navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                     IconButton(
                         onClick = { navController.navigateUp() },
                         onLongClick = { navController.backToMain() },
@@ -119,7 +120,8 @@ fun ChartsScreen(
                             contentDescription = null,
                         )
                     }
-                },
+                }
+            },
             )
         },
     ) { paddingValues ->

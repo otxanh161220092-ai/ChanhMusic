@@ -420,6 +420,7 @@ fun ListenTogetherScreen(
         TopAppBar(
             title = { Text(stringResource(R.string.together)) },
             navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                 IconButton(
                     onClick = navController::navigateUp,
                     onLongClick = navController::backToMain,
@@ -429,6 +430,7 @@ fun ListenTogetherScreen(
                         contentDescription = null,
                     )
                 }
+            }
             },
         )
     }

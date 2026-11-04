@@ -151,6 +151,7 @@ fun RecognitionHistoryScreen(navController: NavController) {
             TopAppBar(
                 title = { Text(stringResource(R.string.recognition_history)) },
                 navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                     IconButton(
                         onClick = { navController.navigateUp() },
                         onLongClick = { navController.backToMain() },
@@ -160,7 +161,8 @@ fun RecognitionHistoryScreen(navController: NavController) {
                             contentDescription = null,
                         )
                     }
-                },
+                }
+            },
                 actions = {
                     if (historyItems.isNotEmpty()) {
                         IconButton(onClick = { showClearDialog = true }) {

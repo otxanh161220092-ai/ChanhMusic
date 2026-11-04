@@ -1104,6 +1104,7 @@ fun ArtistScreen(
     TopAppBar(
         title = { if (!transparentAppBar) Text(displayArtistName.orEmpty()) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -1113,7 +1114,8 @@ fun ArtistScreen(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
         actions = {
             IconButton(
                 onClick = {

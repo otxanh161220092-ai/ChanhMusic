@@ -108,6 +108,7 @@ fun MoodAndGenresScreen(
     TopAppBar(
         title = { Text(stringResource(R.string.mood_and_genres)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -117,7 +118,8 @@ fun MoodAndGenresScreen(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 }
 

@@ -60,6 +60,7 @@ fun IntegrationScreen(
     TopAppBar(
         title = { Text(stringResource(R.string.integrations)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -70,5 +71,6 @@ fun IntegrationScreen(
                 )
             }
         }
+            }
     )
 }

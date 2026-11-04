@@ -414,6 +414,7 @@ fun OnlinePlaylistScreen(
                 }
             },
             navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                 // Original back button hidden: the floating glass back button replaces it.
                 // Only the search/selection close action remains.
                 if (isSearching || inSelectMode) IconButton(
@@ -442,6 +443,7 @@ fun OnlinePlaylistScreen(
                         contentDescription = null,
                     )
                 }
+            }
             },
             actions = {
                 if (inSelectMode) {

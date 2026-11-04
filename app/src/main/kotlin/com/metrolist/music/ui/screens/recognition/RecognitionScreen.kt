@@ -203,6 +203,7 @@ fun RecognitionScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.recognize_music)) },
                 navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                     IconButton(
                         onClick = { navController.navigateUp() },
                         onLongClick = { navController.backToMain() },
@@ -212,7 +213,8 @@ fun RecognitionScreen(
                             contentDescription = null,
                         )
                     }
-                },
+                }
+            },
                 actions = {
                     IconButton(onClick = { navController.navigate("recognition_history") }) {
                         Icon(

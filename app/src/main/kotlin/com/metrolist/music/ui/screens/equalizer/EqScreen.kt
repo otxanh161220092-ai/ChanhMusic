@@ -189,13 +189,15 @@ private fun EqScreenContent(
             TopAppBar(
                 title = { Text(stringResource(R.string.equalizer_header)) },
                 navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             painter = painterResource(R.drawable.arrow_back),
                             contentDescription = null
                         )
                     }
-                },
+                }
+            },
                 actions = {
                     Box {
                         IconButton(onClick = onAddClicked) {

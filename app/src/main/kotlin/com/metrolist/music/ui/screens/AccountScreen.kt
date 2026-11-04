@@ -321,6 +321,7 @@ fun AccountScreen(
     TopAppBar(
         title = { Text(stringResource(R.string.account)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -330,7 +331,8 @@ fun AccountScreen(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 }
 

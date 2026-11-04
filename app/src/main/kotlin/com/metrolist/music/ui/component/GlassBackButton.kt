@@ -80,3 +80,8 @@ fun GlassBackButton(
         }
     }
 }
+
+/** Global switch for the per-screen top-bar back icons. Off: only the floating glass back button navigates back. */
+object FloatingBackState {
+    var showOriginalBack by androidx.compose.runtime.mutableStateOf(false)
+}

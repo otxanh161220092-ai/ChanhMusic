@@ -774,6 +774,7 @@ fun LocalPlaylistScreen(
                 }
             },
             navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                 if (inSelectMode) {
                     IconButton(onClick = onExitSelectionMode) {
                         Icon(
@@ -803,6 +804,7 @@ fun LocalPlaylistScreen(
                         )
                     }
                 }
+            }
             },
             actions = {
                 if (inSelectMode) {

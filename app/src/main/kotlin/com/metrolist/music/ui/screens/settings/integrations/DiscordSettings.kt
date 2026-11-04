@@ -880,6 +880,7 @@ fun DiscordSettings(
     TopAppBar(
         title = { Text(stringResource(R.string.discord_integration)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -889,7 +890,8 @@ fun DiscordSettings(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 }
 

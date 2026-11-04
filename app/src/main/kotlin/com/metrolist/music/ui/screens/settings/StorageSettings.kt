@@ -478,6 +478,7 @@ fun StorageSettings(
     TopAppBar(
         title = { Text(stringResource(R.string.storage)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -487,6 +488,7 @@ fun StorageSettings(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 }

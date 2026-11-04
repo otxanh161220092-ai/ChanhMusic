@@ -245,6 +245,7 @@ fun UpdaterScreen(
     TopAppBar(
         title = { Text(stringResource(R.string.updater)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -254,6 +255,7 @@ fun UpdaterScreen(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 }

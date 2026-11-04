@@ -393,6 +393,7 @@ fun CachePlaylistScreen(
                 }
             },
             navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                 IconButton(onClick = {
                     when {
                         isSearching -> {
@@ -419,6 +420,7 @@ fun CachePlaylistScreen(
                         contentDescription = null
                     )
                 }
+            }
             },
             actions = {
                 if (inSelectMode) {

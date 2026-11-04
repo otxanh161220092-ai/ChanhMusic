@@ -1841,6 +1841,7 @@ fun AppearanceSettings(
     TopAppBar(
         title = { Text(stringResource(R.string.appearance)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -1850,7 +1851,8 @@ fun AppearanceSettings(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 }
 

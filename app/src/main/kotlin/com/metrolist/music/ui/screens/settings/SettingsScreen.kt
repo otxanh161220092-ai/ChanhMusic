@@ -220,6 +220,7 @@ fun SettingsScreen(
     TopAppBar(
         title = { Text(stringResource(R.string.settings)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain
@@ -230,5 +231,6 @@ fun SettingsScreen(
                 )
             }
         }
+            }
     )
 }

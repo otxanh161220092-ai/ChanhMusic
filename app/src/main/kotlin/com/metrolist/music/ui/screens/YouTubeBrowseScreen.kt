@@ -199,6 +199,7 @@ fun YouTubeBrowseScreen(
     TopAppBar(
         title = { Text(browseResult?.title.orEmpty()) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -208,6 +209,7 @@ fun YouTubeBrowseScreen(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 }

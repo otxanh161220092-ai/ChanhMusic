@@ -263,6 +263,7 @@ fun SearchScreen(
                     }
                 },
                 navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             painter = painterResource(R.drawable.arrow_back),
@@ -270,7 +271,8 @@ fun SearchScreen(
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
-                },
+                }
+            },
                 colors =
                     TopAppBarDefaults.topAppBarColors(
                         containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer,

@@ -74,10 +74,12 @@ private fun WizardScreenContent(
                     )
                 },
                 navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
                     IconButton(onClick = if (state.canGoBack) onBackClicked else onNavigateBack) {
                         Icon(painterResource(R.drawable.arrow_back), contentDescription = null)
                     }
-                },
+                }
+            },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )

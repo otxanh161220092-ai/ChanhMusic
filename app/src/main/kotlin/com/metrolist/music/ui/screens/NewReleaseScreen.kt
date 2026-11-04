@@ -105,6 +105,7 @@ fun NewReleaseScreen(
     TopAppBar(
         title = { Text(stringResource(R.string.new_release_albums)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -114,6 +115,7 @@ fun NewReleaseScreen(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 }

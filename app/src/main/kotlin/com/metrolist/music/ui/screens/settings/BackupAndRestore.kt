@@ -220,6 +220,7 @@ fun BackupAndRestore(
     TopAppBar(
         title = { Text(stringResource(R.string.backup_restore)) },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -229,7 +230,8 @@ fun BackupAndRestore(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 
     AddToPlaylistDialogOnline(

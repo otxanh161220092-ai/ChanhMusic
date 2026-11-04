@@ -147,6 +147,7 @@ fun BrowseScreen(
     TopAppBar(
         title = { Text(title ?: "") },
         navigationIcon = {
+                if (com.metrolist.music.ui.component.FloatingBackState.showOriginalBack) {
             IconButton(
                 onClick = navController::navigateUp,
                 onLongClick = navController::backToMain,
@@ -156,6 +157,7 @@ fun BrowseScreen(
                     contentDescription = null,
                 )
             }
-        },
+        }
+            },
     )
 }
