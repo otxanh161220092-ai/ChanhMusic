@@ -41,11 +41,17 @@ suspend fun sampleLuminanceBelow(
     stripHeight: Int = 6,
 ): Float? =
     suspendCancellableCoroutine { cont ->
+        // PixelCopy throws when the window has no surface (app backgrounded, activity stopping).
+        if (!window.decorView.isAttachedToWindow || window.decorView.visibility != android.view.View.VISIBLE) {
+            cont.resumeWith(Result.success(null))
+            return@suspendCancellableCoroutine
+        }
         val width = bounds.width.toInt().coerceAtLeast(1)
         val left = bounds.left.toInt()
         val top = bounds.bottom.toInt() + 2
         val bitmap = Bitmap.createBitmap(width, stripHeight, Bitmap.Config.ARGB_8888)
         val area = android.graphics.Rect(left, top, left + width, top + stripHeight)
+        try {
         PixelCopy.request(
             window,
             area,
@@ -70,6 +76,10 @@ suspend fun sampleLuminanceBelow(
             },
             Handler(Looper.getMainLooper()),
         )
+        } catch (e: IllegalArgumentException) {
+            bitmap.recycle()
+            cont.resumeWith(Result.success(null))
+        }
     }
 
 /**

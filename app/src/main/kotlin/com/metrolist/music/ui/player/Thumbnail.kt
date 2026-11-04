@@ -53,6 +53,10 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import kotlin.math.abs
+import kotlin.math.max
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -229,6 +233,14 @@ fun Thumbnail(
     
     // Grid state
     val thumbnailLazyGridState = rememberLazyGridState()
+    // Each new track: the cover starts blurred and resolves over ~700 ms.
+    val changeProgress = remember { Animatable(1f) }
+    LaunchedEffect(mediaMetadata?.id) {
+        if (mediaMetadata != null) {
+            changeProgress.snapTo(0f)
+            changeProgress.animateTo(1f, tween(700))
+        }
+    }
     
     // Calculate media items data - memoized
     val mediaItemsData by remember(
@@ -389,6 +401,7 @@ fun Thumbnail(
                                 currentMediaId = mediaMetadata?.id,
                                 currentMediaThumbnail = mediaMetadata?.thumbnailUrl,
                                 gridState = thumbnailLazyGridState,
+                                changeProgress = changeProgress,
                             )
                         }
                     }
@@ -434,6 +447,7 @@ private fun ThumbnailItem(
     currentMediaId: String? = null,
     currentMediaThumbnail: String? = null,
     gridState: LazyGridState,
+    changeProgress: Animatable<Float, AnimationVector1D>,
     modifier: Modifier = Modifier,
 ) {
     val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
@@ -466,12 +480,14 @@ private fun ThumbnailItem(
                         val viewportCentre = info.viewportStartOffset + viewport / 2
                         (abs(centre - viewportCentre).toFloat() / viewport).coerceIn(0f, 1f)
                     }
-                alpha = 1f - 0.45f * distance
-                val scale = 1f - 0.06f * distance
+                val incoming = if (item.mediaId == currentMediaId) 1f - changeProgress.value else 0f
+                val f = max(distance, incoming)
+                alpha = 1f - 0.45f * f
+                val scale = 1f - 0.06f * f
                 scaleX = scale
                 scaleY = scale
                 renderEffect =
-                    if (distance > 0.01f) BlurEffect(40f * density * distance, 40f * density * distance) else null
+                    if (f > 0.01f) BlurEffect(40f * density * f, 40f * density * f) else null
             }
             .pointerInput(Unit) {
                 detectTapGestures(
