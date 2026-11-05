@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
@@ -80,34 +79,35 @@ private fun mottledMask(progress: Float): ImageBitmap {
 
 private fun ease(t: Float): Float = t * t * (3f - 2f * t)
 
-/** Accelerates out of the start and decelerates into the end, so the scale never moves at a constant rate. */
 private fun easeInOutCubic(t: Float): Float =
     if (t < 0.5f) 4f * t * t * t else 1f - (-2f * t + 2f).let { it * it * it } / 2f
 
 /**
- * The cover in the centre with its mirror images in the eight surrounding cells, so when the layer is
- * scaled down the empty margin shows mirrored artwork instead of the background.
+ * The cover at [scale] of the screen, centred, with mirror images filling the 3x3 cells around it.
+ * The cells are laid out at the scaled size rather than scaling this layer, because a scaled layer
+ * with an effect clips to its own unscaled bounds and would leave an empty margin.
  */
 @Composable
 private fun MirroredArtwork(
     artwork: String?,
     contentScale: ContentScale,
+    scale: Float,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    // No clip here: the mirror tiles must overflow this layer while it is scaled, and only the screen clips them.
     BoxWithConstraints(modifier = modifier) {
-        val w = maxWidth
-        val h = maxHeight
+        val cellW = maxWidth * scale
+        val cellH = maxHeight * scale
+        val originX = (maxWidth - cellW) / 2f
+        val originY = (maxHeight - cellH) / 2f
         for (row in -1..1) {
             for (col in -1..1) {
                 Box(
                     modifier =
                         Modifier
-                            .size(w, h)
-                            .offset(x = w * col.toFloat(), y = h * row.toFloat())
+                            .size(cellW, cellH)
+                            .offset(x = originX + cellW * col.toFloat(), y = originY + cellH * row.toFloat())
                             .graphicsLayer {
-                                // Each neighbour is flipped across the edge it shares with the centre cell.
                                 scaleX = if (col != 0) -1f else 1f
                                 scaleY = if (row != 0) -1f else 1f
                             },
@@ -140,7 +140,6 @@ fun MixCoverBlend(
     val smoothed = remember { Animatable(target) }
     LaunchedEffect(target) { smoothed.animateTo(target, tween(durationMillis = 120, easing = LinearEasing)) }
     val p = ease(smoothed.value)
-    // Scale gets its own ease-in-out curve so it starts and settles gently instead of moving linearly.
     val s = easeInOutCubic(smoothed.value)
     val mask = remember((p * MASK_LEVELS).toInt()) { mottledMask(p) }
     val contentScale = if (cropArtwork) ContentScale.Crop else ContentScale.Fit
@@ -149,26 +148,22 @@ fun MixCoverBlend(
         MirroredArtwork(
             artwork = visual.outgoingArtwork,
             contentScale = contentScale,
+            scale = 1f - 0.2f * s,
             modifier =
                 Modifier.fillMaxSize().graphicsLayer {
                     alpha = 1f - p
-                    val scale = 1f - 0.2f * s
-                    scaleX = scale
-                    scaleY = scale
                     renderEffect = if (blurEnabled && p > 0.01f) BlurEffect(28f * density * p, 28f * density * p) else null
                 },
         )
         MirroredArtwork(
             artwork = visual.incomingArtwork,
             contentScale = contentScale,
+            scale = 0.88f + 0.12f * s,
             modifier =
                 Modifier
                     .fillMaxSize()
                     .graphicsLayer {
                         compositingStrategy = CompositingStrategy.Offscreen
-                        val scale = 0.88f + 0.12f * s
-                        scaleX = scale
-                        scaleY = scale
                         renderEffect = if (blurEnabled && p < 0.99f) BlurEffect(28f * density * (1f - p), 28f * density * (1f - p)) else null
                     }.drawWithContent {
                         drawContent()
