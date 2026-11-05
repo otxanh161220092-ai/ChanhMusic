@@ -560,16 +560,14 @@ private fun ThumbnailItem(
                     modifier = if (isCurrent) {
                         Modifier.graphicsLayer {
                             val p = changeProgress.value
-                            alpha = p
+                            // While a mix runs the cover is drawn full-screen behind the controls instead.
+                            alpha = if (mixVisual != null) 0f else p
                             renderEffect = if (blurOn && p < 0.99f) BlurEffect(36f * density * (1f - p), 36f * density * (1f - p)) else null
                         }
                     } else {
                         Modifier
                     }
                 )
-                if (mixVisual != null && (item.mediaId == mixVisual.outgoingId || item.mediaId == mixVisual.incomingId)) {
-                    MixCoverBlend(visual = mixVisual, cropArtwork = cropAlbumArt, blurEnabled = blurOn, modifier = Modifier.fillMaxSize())
-                }
                 if (isCurrent && previousArtwork != null && mixVisual == null) {
                     ThumbnailImage(
                         artworkUri = previousArtwork,
