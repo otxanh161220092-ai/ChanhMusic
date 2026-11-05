@@ -95,7 +95,8 @@ private fun MirroredArtwork(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    BoxWithConstraints(modifier = modifier.clipToBounds()) {
+    // No clip here: the mirror tiles must overflow this layer while it is scaled, and only the screen clips them.
+    BoxWithConstraints(modifier = modifier) {
         val w = maxWidth
         val h = maxHeight
         for (row in -1..1) {
