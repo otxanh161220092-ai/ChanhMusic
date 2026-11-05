@@ -145,6 +145,7 @@ object SmartTransitionCalculator {
         val handover = floorToBar(endA, gridA).let { if (it - fade >= earliestMixMs) it else endA }
         val entryB = gridB?.firstBarAtOrAfter(0.0)?.toLong()?.takeIf { it < 4_000L } ?: 0L
         val trackPhase = tempo.matched && !tempo.octaveFolded
+        Timber.tag("MusicService").d("Phase: matched=%b folded=%b gridA=%b gridB=%b", tempo.matched, tempo.octaveFolded, gridA != null, gridB != null)
         return TransitionPlan(
             kind = TransitionKind.CALM_TO_CALM,
             mixOutPositionA = handover - fade,
@@ -295,6 +296,7 @@ object SmartTransitionCalculator {
 
         // Beat phase is only meaningful when the two beats are the same musical beat, not a folded half/double.
         val trackPhase = tempo.matched && !tempo.octaveFolded
+        Timber.tag("MusicService").d("Phase: matched=%b folded=%b gridA=%b gridB=%b", tempo.matched, tempo.octaveFolded, gridA != null, gridB != null)
         return TransitionPlan(
             kind = kind,
             mixOutPositionA = mixOutA,
