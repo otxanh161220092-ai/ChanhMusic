@@ -1905,6 +1905,8 @@ class MusicService :
         restoringQueue: Boolean = false,
     ) {
         if (taskCleared) return
+        // A new queue ends any mix in progress, so the outgoing song cannot carry on over the new one.
+        if (playerInitialized.value && isCrossfading) abortMix(reschedule = false)
         if (!playerInitialized.value) {
             Timber.tag(TAG).w("playQueue called before player initialization, queuing request")
             scope.launch {
@@ -4454,7 +4456,7 @@ class MusicService :
         initialBufferRecoveryJob?.cancel()
         controllerFuture?.let { MediaController.releaseFuture(it) }
         controllerFuture = null
-        releaseExoPlayer(player)
+        silenceStrayPlayers(stopAll = true)
         scope.cancel()
         super.onDestroy()
         shutdownDeferred.complete(Unit)
@@ -4470,6 +4472,8 @@ class MusicService :
         if (dataStore.get(StopMusicOnTaskClearKey, false)) {
             stopOnTaskClear()
         } else {
+            // Media3 pauses only the session's player; a mix copy must not keep playing after the task is cleared.
+            runCatching { liveExoPlayers.toList().forEach { it.playWhenReady = false } }
             super.onTaskRemoved(rootIntent)
         }
     }
@@ -4495,7 +4499,7 @@ class MusicService :
                 castConnectionHandler?.disconnect()
             }
             if (::player.isInitialized) {
-                listOfNotNull(player, secondaryPlayer, fadingPlayer).forEach {
+                liveExoPlayers.toList().forEach {
                     it.pause()
                     it.stop()
                 }
@@ -5300,10 +5304,12 @@ class MusicService :
      * Stops and releases any player that is not one of the current roles (the song on screen, the fading
      * outgoing song, or the incoming song of a mix in progress), so a leftover copy cannot play over a song.
      */
-    private fun silenceStrayPlayers() {
+    private fun silenceStrayPlayers(stopAll: Boolean = false) {
         val keep = mutableSetOf<ExoPlayer>()
-        if (::player.isInitialized) keep += player
-        listOfNotNull(fadingPlayer, secondaryPlayer, mixOutgoing, mixIncoming).forEach { keep += it }
+        if (!stopAll) {
+            if (::player.isInitialized) keep += player
+            listOfNotNull(fadingPlayer, secondaryPlayer, mixOutgoing, mixIncoming).forEach { keep += it }
+        }
         val strays = liveExoPlayers.filter { it !in keep }
         for (stray in strays) {
             Timber.tag(TAG).w("Stopping a stray player left behind by a finished mix")
