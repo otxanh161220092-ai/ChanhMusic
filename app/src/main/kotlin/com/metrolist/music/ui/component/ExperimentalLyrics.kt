@@ -862,7 +862,7 @@ fun ExperimentalLyrics(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .matchParentSize()
-                        .then(if (reduceBlur) Modifier else Modifier.blur(80.dp, BlurredEdgeTreatment.Unbounded)),
+                        .blur(80.dp, BlurredEdgeTreatment.Unbounded),
                 )
                 repeat(2) {
                     Box(
