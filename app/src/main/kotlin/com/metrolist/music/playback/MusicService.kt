@@ -5290,6 +5290,7 @@ class MusicService :
     // State of the mix in progress. Until the incoming song becomes the loudest, the outgoing song stays
     // `player` (so the player screen and every control still belong to it); the roles swap at that point.
     private var mixSwapped = false
+    private var mixSwapAtMs = 0L
     private var mixWaitingForPlay = false
 
     /** Every ExoPlayer this service has created and not yet released. */
@@ -5367,6 +5368,7 @@ class MusicService :
         fun swapRoles() {
             if (mixSwapped) return
             mixSwapped = true
+            mixSwapAtMs = System.currentTimeMillis()
             fadingPlayer = outgoing
             player = incoming
             _playerFlow.value = player
@@ -5434,8 +5436,10 @@ class MusicService :
 
                     val progress = i / steps.toFloat()
                     if (outgoingItem != null && incomingItem != null) {
-                        // The cover transition runs on its own short clock; the audio mix keeps its full length.
-                        val visualProgress = ((i * stepTime).toFloat() / VISUAL_TRANSITION_MS).coerceIn(0f, 1f)
+                        // The cover changes only once the roles have swapped, so it matches the song title; it then
+                        // moves to the new cover on its own short clock while the audio mix keeps its full length.
+                        val visualProgress =
+                            if (mixSwapped) ((System.currentTimeMillis() - mixSwapAtMs) / VISUAL_TRANSITION_MS).coerceIn(0f, 1f) else 0f
                         mixVisual.value =
                             com.metrolist.music.playback.automix.MixVisual(
                                 outgoingId = outgoingItem.mediaId,
