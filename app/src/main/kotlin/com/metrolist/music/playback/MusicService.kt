@@ -5382,7 +5382,8 @@ class MusicService :
                 val speed = outgoing.playbackParameters.speed.coerceAtLeast(0.01f)
                 val windowMs = plan?.windowMs?.toFloat() ?: crossfadeDuration
                 val duration = (windowMs / speed).toLong()
-                val steps = if (plan != null) (duration / 50L).toInt().coerceIn(20, 400) else 20
+                // Same cadence for every mix (~50 ms per step), so a longer mix never jumps in bigger steps.
+                val steps = (duration / 50L).toInt().coerceIn(20, 400)
                 val stepTime = duration / steps
                 val startVolume =
                     try {
