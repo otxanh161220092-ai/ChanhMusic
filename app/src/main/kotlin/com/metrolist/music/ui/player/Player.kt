@@ -363,6 +363,7 @@ fun BottomSheetPlayer(
     val automixStatus by playerConnection.service.automixStatus.collectAsStateWithLifecycle()
     val automixOn by rememberPreference(AutomixEnabledKey, defaultValue = false)
     val isMixing by playerConnection.service.isMixing.collectAsStateWithLifecycle()
+    val mixVisual by playerConnection.service.mixVisual.collectAsStateWithLifecycle()
     val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsStateWithLifecycle()
     val canSkipNext by playerConnection.canSkipNext.collectAsStateWithLifecycle()
@@ -900,7 +901,14 @@ fun BottomSheetPlayer(
             ) {
                 when (playerBackground) {
                     PlayerBackgroundStyle.BLUR -> {
-                        AnimatedContent(
+                        val visual = mixVisual
+                        if (visual != null) {
+                            MixBackgroundBlend(
+                                visual = visual,
+                                backgroundAlpha = backgroundAlpha,
+                                blurRadius = if (useDarkTheme) 150.dp else 100.dp,
+                            )
+                        } else AnimatedContent(
                             targetState = mediaMetadata?.thumbnailUrl,
                             transitionSpec = {
                                 fadeIn(tween(800)).togetherWith(fadeOut(tween(800)))

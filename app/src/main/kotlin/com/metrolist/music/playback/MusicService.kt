@@ -560,6 +560,9 @@ class MusicService :
     /** True while two tracks are being blended. */
     val isMixing = MutableStateFlow(false)
 
+    /** Both covers and the mix progress, so the player screen can blend them over the whole mix. */
+    val mixVisual = MutableStateFlow<com.metrolist.music.playback.automix.MixVisual?>(null)
+
     // Tracks the original queue size to distinguish original items from auto-added ones
     private var originalQueueSize: Int = 0
 
@@ -5389,6 +5392,8 @@ class MusicService :
                     }
                 val targetSpeedB = incoming.playbackParameters.speed
                 mixTargetSpeedB = targetSpeedB
+                val outgoingItem = outgoing.currentMediaItem
+                val incomingItem = incoming.currentMediaItem
 
                 for (i in 0..steps) {
                     if (!isActive) break
@@ -5401,6 +5406,16 @@ class MusicService :
                     }
 
                     val progress = i / steps.toFloat()
+                    if (outgoingItem != null && incomingItem != null) {
+                        mixVisual.value =
+                            com.metrolist.music.playback.automix.MixVisual(
+                                outgoingId = outgoingItem.mediaId,
+                                outgoingArtwork = outgoingItem.mediaMetadata.artworkUri?.toString(),
+                                incomingId = incomingItem.mediaId,
+                                incomingArtwork = incomingItem.mediaMetadata.artworkUri?.toString(),
+                                progress = progress,
+                            )
+                    }
                     val (fadeOut, fadeIn) =
                         if (plan != null) {
                             plan.gainsAt(progress.toDouble() * plan.windowMs)
@@ -5429,6 +5444,7 @@ class MusicService :
                 }
 
                 swapRoles()
+                mixVisual.value = null
                 // Give the UI a moment to attach to the new player before the old one is retired, and let the
                 // echo and reverb ring out before A's player is released.
                 delay(RETIRE_DELAY_MS)
@@ -5558,6 +5574,8 @@ class MusicService :
             finishMixBookkeeping()
             isCrossfading = false
             isMixing.value = false
+        mixVisual.value = null
+            mixVisual.value = null
             mixZone.value = null
             applyEffectiveVolume()
         } else {
@@ -5636,6 +5654,7 @@ class MusicService :
         crossfadeJob = null
         isCrossfading = false
         isMixing.value = false
+        mixVisual.value = null
         applyEffectiveVolume()
         sleepTimer?.notifySongTransition()
 

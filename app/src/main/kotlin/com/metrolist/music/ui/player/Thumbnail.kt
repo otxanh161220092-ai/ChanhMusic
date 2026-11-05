@@ -236,6 +236,7 @@ fun Thumbnail(
     // Each new track: the cover starts blurred and resolves over ~700 ms.
     val changeProgress = remember { Animatable(1f) }
     // Cover being replaced: the new one cross-fades in over it, out of a blur.
+    val mixVisual by playerConnection.service.mixVisual.collectAsState()
     var shownArtwork by remember { mutableStateOf<String?>(null) }
     var previousArtwork by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(mediaMetadata?.id) {
@@ -409,6 +410,7 @@ fun Thumbnail(
                                 gridState = thumbnailLazyGridState,
                                 changeProgress = changeProgress,
                                 previousArtwork = previousArtwork,
+                                mixVisual = mixVisual,
                             )
                         }
                     }
@@ -456,6 +458,7 @@ private fun ThumbnailItem(
     gridState: LazyGridState,
     changeProgress: Animatable<Float, AnimationVector1D>,
     previousArtwork: String?,
+    mixVisual: com.metrolist.music.playback.automix.MixVisual? = null,
     modifier: Modifier = Modifier,
 ) {
     val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
@@ -561,7 +564,10 @@ private fun ThumbnailItem(
                         Modifier
                     }
                 )
-                if (isCurrent && previousArtwork != null) {
+                if (mixVisual != null && (item.mediaId == mixVisual.outgoingId || item.mediaId == mixVisual.incomingId)) {
+                    MixCoverBlend(visual = mixVisual, cropArtwork = cropAlbumArt, modifier = Modifier.fillMaxSize())
+                }
+                if (isCurrent && previousArtwork != null && mixVisual == null) {
                     ThumbnailImage(
                         artworkUri = previousArtwork,
                         cropArtwork = cropAlbumArt,
