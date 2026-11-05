@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 /** Window-space rectangle of a laid-out node. */
 fun LayoutCoordinates.windowRect(): Rect {
@@ -41,44 +42,57 @@ suspend fun sampleLuminanceBelow(
     stripHeight: Int = 6,
 ): Float? =
     suspendCancellableCoroutine { cont ->
+        val decor = window.decorView
         // PixelCopy throws when the window has no surface (app backgrounded, activity stopping).
-        if (!window.decorView.isAttachedToWindow || window.decorView.visibility != android.view.View.VISIBLE) {
-            cont.resumeWith(Result.success(null))
+        if (!decor.isAttachedToWindow || decor.visibility != android.view.View.VISIBLE || !decor.isShown) {
+            cont.resume(null)
             return@suspendCancellableCoroutine
         }
         val width = bounds.width.toInt().coerceAtLeast(1)
         val left = bounds.left.toInt()
         val top = bounds.bottom.toInt() + 2
-        val bitmap = Bitmap.createBitmap(width, stripHeight, Bitmap.Config.ARGB_8888)
+        val bitmap =
+            try {
+                Bitmap.createBitmap(width, stripHeight, Bitmap.Config.ARGB_8888)
+            } catch (e: IllegalArgumentException) {
+                cont.resume(null)
+                return@suspendCancellableCoroutine
+            }
         val area = android.graphics.Rect(left, top, left + width, top + stripHeight)
-        try {
-        PixelCopy.request(
-            window,
-            area,
-            bitmap,
-            { result ->
-                if (result == PixelCopy.SUCCESS) {
-                    val pixels = IntArray(width * stripHeight)
-                    bitmap.getPixels(pixels, 0, width, 0, 0, width, stripHeight)
-                    var sum = 0.0
-                    for (p in pixels) {
-                        val r = ((p shr 16) and 0xFF) / 255.0
-                        val g = ((p shr 8) and 0xFF) / 255.0
-                        val b = (p and 0xFF) / 255.0
-                        sum += 0.2126 * r + 0.7152 * g + 0.0722 * b
-                    }
-                    bitmap.recycle()
-                    cont.resumeWith(Result.success((sum / pixels.size).toFloat()))
-                } else {
-                    bitmap.recycle()
-                    cont.resumeWith(Result.success(null))
-                }
-            },
-            Handler(Looper.getMainLooper()),
-        )
-        } catch (e: IllegalArgumentException) {
+        val finish: (Float?) -> Unit = { value ->
             bitmap.recycle()
-            cont.resumeWith(Result.success(null))
+            if (cont.isActive) cont.resume(value)
+        }
+        try {
+            PixelCopy.request(
+                window,
+                area,
+                bitmap,
+                { result ->
+                    if (result != PixelCopy.SUCCESS) {
+                        finish(null)
+                    } else {
+                        val value =
+                            runCatching {
+                                val pixels = IntArray(width * stripHeight)
+                                bitmap.getPixels(pixels, 0, width, 0, 0, width, stripHeight)
+                                var sum = 0.0
+                                for (p in pixels) {
+                                    val r = ((p shr 16) and 0xFF) / 255.0
+                                    val g = ((p shr 8) and 0xFF) / 255.0
+                                    val b = (p and 0xFF) / 255.0
+                                    sum += 0.2126 * r + 0.7152 * g + 0.0722 * b
+                                }
+                                (sum / pixels.size).toFloat()
+                            }.getOrNull()
+                        finish(value)
+                    }
+                },
+                Handler(Looper.getMainLooper()),
+            )
+        } catch (e: Exception) {
+            // Any failure to copy means no reading this tick; the next tick tries again.
+            finish(null)
         }
     }
 
