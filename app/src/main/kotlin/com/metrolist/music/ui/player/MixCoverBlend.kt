@@ -7,8 +7,8 @@ package com.metrolist.music.ui.player
 
 import android.graphics.Bitmap
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -83,6 +83,23 @@ private fun easeInOutCubic(t: Float): Float =
     if (t < 0.5f) 4f * t * t * t else 1f - (-2f * t + 2f).let { it * it * it } / 2f
 
 /**
+ * The service reports progress in coarse steps. A non-bouncing spring follows each step on the frame
+ * clock, so the motion stays continuous and eases into every new target.
+ */
+@Composable
+private fun rememberMixProgress(target: Float): Float {
+    val clamped = target.coerceIn(0f, 1f)
+    val animated = remember { Animatable(clamped) }
+    LaunchedEffect(clamped) {
+        animated.animateTo(
+            clamped,
+            spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
+        )
+    }
+    return animated.value
+}
+
+/**
  * The cover at [scale] of the screen, centred, with mirror images filling the 3x3 cells around it.
  * The cells are laid out at the scaled size rather than scaling this layer, because a scaled layer
  * with an effect clips to its own unscaled bounds and would leave an empty margin.
@@ -95,6 +112,7 @@ private fun MirroredArtwork(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val request = remember(artwork) { ImageRequest.Builder(context).data(artwork).build() }
     BoxWithConstraints(modifier = modifier) {
         val cellW = maxWidth * scale
         val cellH = maxHeight * scale
@@ -113,7 +131,7 @@ private fun MirroredArtwork(
                             },
                 ) {
                     AsyncImage(
-                        model = ImageRequest.Builder(context).data(artwork).build(),
+                        model = request,
                         contentDescription = null,
                         contentScale = contentScale,
                         modifier = Modifier.fillMaxSize(),
@@ -135,12 +153,9 @@ fun MixCoverBlend(
     blurEnabled: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
-    // The service reports progress in steps; a short tween between them keeps the motion continuous.
-    val target = visual.progress.coerceIn(0f, 1f)
-    val smoothed = remember { Animatable(target) }
-    LaunchedEffect(target) { smoothed.animateTo(target, tween(durationMillis = 120, easing = LinearEasing)) }
-    val p = ease(smoothed.value)
-    val s = easeInOutCubic(smoothed.value)
+    val progress = rememberMixProgress(visual.progress)
+    val p = ease(progress)
+    val s = easeInOutCubic(progress)
     val mask = remember((p * MASK_LEVELS).toInt()) { mottledMask(p) }
     val contentScale = if (cropArtwork) ContentScale.Crop else ContentScale.Fit
 
@@ -186,7 +201,7 @@ fun MixBackgroundBlend(
     blurRadius: Dp,
 ) {
     val context = LocalContext.current
-    val p = ease(visual.progress.coerceIn(0f, 1f))
+    val p = ease(rememberMixProgress(visual.progress))
     Box(modifier = Modifier.alpha(backgroundAlpha)) {
         for ((artwork, layerAlpha) in listOf(visual.outgoingArtwork to 1f, visual.incomingArtwork to p)) {
             AsyncImage(
