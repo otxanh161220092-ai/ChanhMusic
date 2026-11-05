@@ -12,13 +12,9 @@ import androidx.compose.animation.core.tween
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -95,15 +91,17 @@ private fun MirroredArtwork(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    BoxWithConstraints(modifier = modifier.clipToBounds(), contentAlignment = Alignment.Center) {
+    BoxWithConstraints(modifier = modifier.clipToBounds()) {
         val w = maxWidth
         val h = maxHeight
+        // Four mirrored copies around the centre: the grid's centre sits on the cover's centre.
         @Composable
-        fun Cell(flipX: Boolean, flipY: Boolean) {
+        fun Cell(x: Dp, y: Dp, flipX: Boolean, flipY: Boolean) {
             Box(
                 modifier =
                     Modifier
                         .size(w, h)
+                        .offset(x = x, y = y)
                         .graphicsLayer {
                             scaleX = if (flipX) -1f else 1f
                             scaleY = if (flipY) -1f else 1f
@@ -117,16 +115,10 @@ private fun MirroredArtwork(
                 )
             }
         }
-        Column(modifier = Modifier.requiredSize(w * 2, h * 2)) {
-            Row(modifier = Modifier.requiredWidth(w * 2).height(h)) {
-                Cell(flipX = false, flipY = false)
-                Cell(flipX = true, flipY = false)
-            }
-            Row(modifier = Modifier.requiredWidth(w * 2).height(h)) {
-                Cell(flipX = false, flipY = true)
-                Cell(flipX = true, flipY = true)
-            }
-        }
+        Cell(x = -w / 2, y = -h / 2, flipX = false, flipY = false)
+        Cell(x = w / 2, y = -h / 2, flipX = true, flipY = false)
+        Cell(x = -w / 2, y = h / 2, flipX = false, flipY = true)
+        Cell(x = w / 2, y = h / 2, flipX = true, flipY = true)
     }
 }
 
