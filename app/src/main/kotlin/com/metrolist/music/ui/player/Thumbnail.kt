@@ -240,12 +240,21 @@ fun Thumbnail(
     val mixVisual by playerConnection.service.mixVisual.collectAsState()
     var shownArtwork by remember { mutableStateOf<String?>(null) }
     var previousArtwork by remember { mutableStateOf<String?>(null) }
+    var lastMixIncomingId by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(mixVisual) {
+        mixVisual?.let { lastMixIncomingId = it.incomingId }
+    }
     LaunchedEffect(mediaMetadata?.id) {
         if (mediaMetadata != null) {
             previousArtwork = shownArtwork
             shownArtwork = mediaMetadata?.thumbnailUrl
-            changeProgress.snapTo(0f)
-            changeProgress.animateTo(1f, tween(700))
+            if (mediaMetadata?.id == lastMixIncomingId) {
+                // The mix already faded this cover in: keep it visible instead of restarting the blur-in.
+                changeProgress.snapTo(1f)
+            } else {
+                changeProgress.snapTo(0f)
+                changeProgress.animateTo(1f, tween(700))
+            }
             previousArtwork = null
         }
     }
