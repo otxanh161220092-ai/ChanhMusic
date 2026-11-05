@@ -103,4 +103,31 @@
         <item quantity="other">%dsekundi</item>
     </plurals>
     <string name="token_adv_login_description">Ovo je NAPREDNA metoda prijave. Kao alternativa web portalu, ovdje možete direktno unijeti ili ažurirati svoj token za prijavu. Na primjer, ovo može ubrzati prijavu na više uređaja. Imajte na umu da neće biti prihvaćeni nevažeći formati tokena koje aplikacija ne uspije analizirati</string>
+    <string name="apple_style_layout">Raspored u stilu Apple Music</string>
+    <string name="apple_style_layout_desc">Zaobljene kartice i plutajuća navigacijska traka</string>
+    <string name="floating_navbar">Plutajuća donja navigacijska traka</string>
+    <string name="shuffle_home">Nasumično</string>
+    <string name="song_transitions">Prijelazi između pjesama</string>
+    <string name="song_transitions_desc">Stopi jednu pjesmu u sljedeću. Odaberi AutoMix ili Crossfade, nikad oboje</string>
+    <string name="transition_automix">AutoMix</string>
+    <string name="transition_automix_desc">Bira tačke miksanja, stišavanja i tempo za svaki par pjesama</string>
+    <string name="transition_crossfade">Crossfade</string>
+    <string name="transition_crossfade_desc">Fiksno stišavanje na kraju svake pjesme</string>
+    <string name="creative_transitions">Kreativni prijelazi</string>
+    <string name="creative_transitions_desc">Dodaje filter niskih frekvencija pjesmi koja završava</string>
+    <string name="automix_status_analyzing">Traženje najbolje tačke miksa…</string>
+    <string name="automix_status_ready">Miksanje %1$s → sljedeća pjesma od %2$s</string>
+    <string name="automix_status_ready_matched">Miksanje %1$s → sljedeća pjesma od %2$s · takt usklađen</string>
+    <string name="automix">AutoMix</string>
+    <string name="mixing">Miksanje</string>
+    <string name="player_state_on">Uključeno</string>
+    <string name="player_state_off">Isključeno</string>
+    <string name="player_repeat">Ponavljanje</string>
+    <string name="player_fullscreen_lyrics">Tekst preko cijelog ekrana</string>
+    <string name="player_lyrics_options">Opcije teksta</string>
+    <string name="automix_desc">Prelazi u sljedeću pjesmu dok je muzika još glasna, uz usklađivanje tempa i takta kad je moguće</string>
+    <string name="glass_blur">Staklena zamagljenost</string>
+    <string name="recently_added">Nedavno dodano</string>
+    <string name="reduce_blur_effects">Smanji efekte zamućenja</string>
+    <string name="reduce_blur_effects_desc">Isključuje zamućenje na tekstu i pri promjeni omota</string>
 </resources>

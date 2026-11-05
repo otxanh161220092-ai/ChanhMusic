@@ -88,6 +88,7 @@ import com.metrolist.music.constants.SwipeThumbnailKey
 import com.metrolist.music.constants.ThumbnailCornerRadius
 import com.metrolist.music.ui.component.CastButton
 import com.metrolist.music.utils.rememberEnumPreference
+import com.metrolist.music.constants.ReduceBlurEffectsKey
 import com.metrolist.music.utils.rememberPreference
 import kotlinx.coroutines.delay
 
@@ -462,6 +463,8 @@ private fun ThumbnailItem(
     modifier: Modifier = Modifier,
 ) {
     val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
+    val reduceBlur by rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
+    val blurOn = !reduceBlur
     var skipMultiplier by remember { mutableIntStateOf(1) }
     var lastTapTime by remember { mutableLongStateOf(0L) }
 
@@ -497,7 +500,7 @@ private fun ThumbnailItem(
                 scaleX = scale
                 scaleY = scale
                 renderEffect =
-                    if (f > 0.01f) BlurEffect(40f * density * f, 40f * density * f) else null
+                    if (blurOn && f > 0.01f) BlurEffect(40f * density * f, 40f * density * f) else null
             }
             .pointerInput(Unit) {
                 detectTapGestures(
@@ -558,14 +561,14 @@ private fun ThumbnailItem(
                         Modifier.graphicsLayer {
                             val p = changeProgress.value
                             alpha = p
-                            renderEffect = if (p < 0.99f) BlurEffect(36f * density * (1f - p), 36f * density * (1f - p)) else null
+                            renderEffect = if (blurOn && p < 0.99f) BlurEffect(36f * density * (1f - p), 36f * density * (1f - p)) else null
                         }
                     } else {
                         Modifier
                     }
                 )
                 if (mixVisual != null && (item.mediaId == mixVisual.outgoingId || item.mediaId == mixVisual.incomingId)) {
-                    MixCoverBlend(visual = mixVisual, cropArtwork = cropAlbumArt, modifier = Modifier.fillMaxSize())
+                    MixCoverBlend(visual = mixVisual, cropArtwork = cropAlbumArt, blurEnabled = blurOn, modifier = Modifier.fillMaxSize())
                 }
                 if (isCurrent && previousArtwork != null && mixVisual == null) {
                     ThumbnailImage(

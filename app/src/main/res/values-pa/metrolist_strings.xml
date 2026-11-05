@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="apple_style_layout">Apple Music ਸ਼ੈਲੀ ਦਾ ਲੇਆਉਟ</string>
+    <string name="apple_style_layout_desc">ਗੋਲ ਕੋਨਿਆਂ ਵਾਲੇ ਕਾਰਡ ਅਤੇ ਤੈਰਦੀ ਨੈਵੀਗੇਸ਼ਨ ਬਾਰ</string>
+    <string name="floating_navbar">ਤੈਰਦੀ ਹੇਠਲੀ ਨੈਵੀਗੇਸ਼ਨ ਬਾਰ</string>
+    <string name="shuffle_home">ਸ਼ਫ਼ਲ</string>
+    <string name="song_transitions">ਗੀਤਾਂ ਵਿਚਕਾਰ ਤਬਦੀਲੀਆਂ</string>
+    <string name="song_transitions_desc">ਇੱਕ ਗੀਤ ਨੂੰ ਅਗਲੇ ਵਿੱਚ ਮਿਲਾਓ। AutoMix ਜਾਂ Crossfade ਚੁਣੋ, ਦੋਵੇਂ ਨਹੀਂ</string>
+    <string name="transition_automix">AutoMix</string>
+    <string name="transition_automix_desc">ਹਰ ਗੀਤ-ਜੋੜੀ ਲਈ ਮਿਕਸ ਪੁਆਇੰਟ, ਫੇਡ ਅਤੇ ਟੈਂਪੋ ਚੁਣਦਾ ਹੈ</string>
+    <string name="transition_crossfade">Crossfade</string>
+    <string name="transition_crossfade_desc">ਹਰ ਗੀਤ ਦੇ ਅੰਤ ਵਿੱਚ ਤੈਅ ਲੰਬਾਈ ਦਾ ਫੇਡ</string>
+    <string name="creative_transitions">ਰਚਨਾਤਮਕ ਤਬਦੀਲੀਆਂ</string>
+    <string name="creative_transitions_desc">ਖ਼ਤਮ ਹੋ ਰਹੇ ਗੀਤ ਵਿੱਚ ਲੋ-ਪਾਸ ਫ਼ਿਲਟਰ ਸਵੀਪ ਜੋੜਦਾ ਹੈ</string>
+    <string name="automix_status_analyzing">ਸਭ ਤੋਂ ਵਧੀਆ ਮਿਕਸ ਪੁਆਇੰਟ ਲੱਭਿਆ ਜਾ ਰਿਹਾ ਹੈ…</string>
+    <string name="automix_status_ready">%1$s ਮਿਕਸ ਹੋ ਰਿਹਾ ਹੈ → ਅਗਲਾ ਗੀਤ %2$s ਤੋਂ</string>
+    <string name="automix_status_ready_matched">%1$s ਮਿਕਸ ਹੋ ਰਿਹਾ ਹੈ → ਅਗਲਾ ਗੀਤ %2$s ਤੋਂ · ਬੀਟ ਮਿਲੀ</string>
+    <string name="automix">AutoMix</string>
+    <string name="mixing">ਮਿਕਸ ਹੋ ਰਿਹਾ ਹੈ</string>
+    <string name="player_state_on">ਚਾਲੂ</string>
+    <string name="player_state_off">ਬੰਦ</string>
+    <string name="player_repeat">ਦੁਹਰਾਓ</string>
+    <string name="player_fullscreen_lyrics">ਫੁੱਲ-ਸਕ੍ਰੀਨ ਬੋਲ</string>
+    <string name="player_lyrics_options">ਬੋਲ ਵਿਕਲਪ</string>
+    <string name="automix_desc">ਸੰਗੀਤ ਅਜੇ ਉੱਚਾ ਹੋਣ ਤੱਕ ਅਗਲੇ ਗੀਤ ਵਿੱਚ ਮਿਲਾਉਂਦਾ ਹੈ, ਹੋ ਸਕੇ ਤਾਂ ਟੈਂਪੋ ਅਤੇ ਬੀਟ ਮਿਲਾਉਂਦਾ ਹੈ</string>
+    <string name="glass_blur">ਗਲਾਸ ਬਲਰ</string>
+    <string name="recently_added">ਹਾਲ ਹੀ ਵਿੱਚ ਜੋੜਿਆ ਗਿਆ</string>
+    <string name="reduce_blur_effects">ਬਲਰ ਪ੍ਰਭਾਵ ਘਟਾਓ</string>
+    <string name="reduce_blur_effects_desc">ਬੋਲਾਂ ਅਤੇ ਕਵਰ ਬਦਲਣ ਵੇਲੇ ਬਲਰ ਬੰਦ ਕਰਦਾ ਹੈ</string>
+</resources>

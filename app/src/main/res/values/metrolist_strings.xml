@@ -1019,4 +1019,6 @@
     <string name="top_result">Top result</string>
     <string name="other">Other</string>
     <string name="recently_added">Recently Added</string>
+    <string name="reduce_blur_effects">Reduce blur effects</string>
+    <string name="reduce_blur_effects_desc">Turns off the blur on lyrics and when covers change</string>
 </resources>

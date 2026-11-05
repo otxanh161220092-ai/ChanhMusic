@@ -69,6 +69,7 @@ import com.metrolist.music.constants.HidePlayerThumbnailKey
 import com.metrolist.music.constants.HideStatusBarOnFullscreenKey
 import com.metrolist.music.constants.LibraryFilter
 import com.metrolist.music.constants.GlassBlurKey
+import com.metrolist.music.constants.ReduceBlurEffectsKey
 import com.metrolist.music.constants.LyricsAnimationStyle
 import com.metrolist.music.constants.LyricsAnimationStyleKey
 import com.metrolist.music.constants.LyricsClickKey
@@ -282,6 +283,7 @@ fun AppearanceSettings(
     var showDensityScaleDialog by rememberSaveable { mutableStateOf(false) }
 
     val (glassBlur, onGlassBlurChange) = rememberPreference(GlassBlurKey, defaultValue = 5f)
+    val (reduceBlur, onReduceBlurChange) = rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
 
     val (swipeToSong, onSwipeToSongChange) =
         rememberPreference(
@@ -1677,6 +1679,18 @@ fun AppearanceSettings(
                             )
                         },
                         onClick = {},
+                    ),
+                    Material3SettingsItem(
+                        icon = painterResource(R.drawable.grid_view),
+                        title = { Text(stringResource(R.string.reduce_blur_effects)) },
+                        description = { Text(stringResource(R.string.reduce_blur_effects_desc)) },
+                        trailingContent = {
+                            Switch(
+                                checked = reduceBlur,
+                                onCheckedChange = onReduceBlurChange,
+                            )
+                        },
+                        onClick = { onReduceBlurChange(!reduceBlur) },
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.grid_view),

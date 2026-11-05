@@ -282,4 +282,31 @@
     </plurals>
     <string name="restore_confirm_title">Obnovi varnostno kopijo?</string>
     <string name="restore">Obnovi</string>
+    <string name="apple_style_layout">Postavitev v slogu Apple Music</string>
+    <string name="apple_style_layout_desc">Zaobljene kartice in plavajoča navigacijska vrstica</string>
+    <string name="floating_navbar">Plavajoča spodnja navigacijska vrstica</string>
+    <string name="shuffle_home">Naključno</string>
+    <string name="song_transitions">Prehodi med skladbami</string>
+    <string name="song_transitions_desc">Zlije eno skladbo v naslednjo. Izberite AutoMix ali Crossfade, nikoli oba</string>
+    <string name="transition_automix">AutoMix</string>
+    <string name="transition_automix_desc">Izbere točke zlivanja, pojemanje in tempo za vsak par skladb</string>
+    <string name="transition_crossfade">Crossfade</string>
+    <string name="transition_crossfade_desc">Pojemanje stalne dolžine na koncu vsake skladbe</string>
+    <string name="creative_transitions">Ustvarjalni prehodi</string>
+    <string name="creative_transitions_desc">Končujoči se skladbi doda filter nizkih frekvenc</string>
+    <string name="automix_status_analyzing">Iskanje najboljše točke zlivanja…</string>
+    <string name="automix_status_ready">Zlivanje %1$s → naslednja skladba od %2$s</string>
+    <string name="automix_status_ready_matched">Zlivanje %1$s → naslednja skladba od %2$s · takt usklajen</string>
+    <string name="automix">AutoMix</string>
+    <string name="mixing">Zlivanje</string>
+    <string name="player_state_on">Vklj.</string>
+    <string name="player_state_off">Izklj.</string>
+    <string name="player_repeat">Ponovi</string>
+    <string name="player_fullscreen_lyrics">Besedila čez cel zaslon</string>
+    <string name="player_lyrics_options">Možnosti besedil</string>
+    <string name="automix_desc">Zliva v naslednjo skladbo, dokler je glasba še glasna, in po možnosti uskladi tempo in takt</string>
+    <string name="glass_blur">Stekleno zameglitev</string>
+    <string name="recently_added">Nedavno dodano</string>
+    <string name="reduce_blur_effects">Zmanjšaj učinke zameglitve</string>
+    <string name="reduce_blur_effects_desc">Izklopi zameglitev pri besedilih in ob menjavi naslovnice</string>
 </resources>

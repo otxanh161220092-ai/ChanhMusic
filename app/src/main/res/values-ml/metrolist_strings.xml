@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="apple_style_layout">Apple Music ശൈലിയിലുള്ള ലേഔട്ട്</string>
+    <string name="apple_style_layout_desc">വൃത്താകൃതിയിലുള്ള കാർഡുകളും ഒഴുകുന്ന നാവിഗേഷൻ ബാറും</string>
+    <string name="floating_navbar">ഒഴുകുന്ന താഴത്തെ നാവിഗേഷൻ ബാർ</string>
+    <string name="shuffle_home">ഷഫിൾ</string>
+    <string name="song_transitions">ഗാന പരിവർത്തനങ്ങൾ</string>
+    <string name="song_transitions_desc">ഒരു ഗാനം അടുത്തതിലേക്ക് ചേർക്കുക. AutoMix അല്ലെങ്കിൽ Crossfade തിരഞ്ഞെടുക്കുക, രണ്ടും വേണ്ട</string>
+    <string name="transition_automix">AutoMix</string>
+    <string name="transition_automix_desc">ഓരോ ഗാനജോഡിക്കും മിക്‌സ് പോയിന്റും ഫേഡും ടെമ്പോയും തിരഞ്ഞെടുക്കുന്നു</string>
+    <string name="transition_crossfade">Crossfade</string>
+    <string name="transition_crossfade_desc">ഓരോ ഗാനത്തിന്റെയും അവസാനം നിശ്ചിത ദൈർഘ്യമുള്ള ഫേഡ്</string>
+    <string name="creative_transitions">സൃഷ്ടിപരമായ പരിവർത്തനങ്ങൾ</string>
+    <string name="creative_transitions_desc">അവസാനിക്കുന്ന ഗാനത്തിന് ലോ-പാസ് ഫിൽട്ടർ സ്വീപ്പ് ചേർക്കുന്നു</string>
+    <string name="automix_status_analyzing">ഏറ്റവും നല്ല മിക്‌സ് പോയിന്റ് തിരയുന്നു…</string>
+    <string name="automix_status_ready">%1$s മിക്‌സ് ചെയ്യുന്നു → അടുത്ത ഗാനം %2$s മുതൽ</string>
+    <string name="automix_status_ready_matched">%1$s മിക്‌സ് ചെയ്യുന്നു → അടുത്ത ഗാനം %2$s മുതൽ · ബീറ്റ് ഒത്തു</string>
+    <string name="automix">AutoMix</string>
+    <string name="mixing">മിക്‌സ് ചെയ്യുന്നു</string>
+    <string name="player_state_on">ഓൺ</string>
+    <string name="player_state_off">ഓഫ്</string>
+    <string name="player_repeat">ആവർത്തിക്കുക</string>
+    <string name="player_fullscreen_lyrics">ഫുൾസ്ക്രീൻ വരികൾ</string>
+    <string name="player_lyrics_options">വരി ഓപ്ഷനുകൾ</string>
+    <string name="automix_desc">സംഗീതം ഇപ്പോഴും ഉച്ചത്തിലിരിക്കുമ്പോൾ അടുത്ത ഗാനത്തിലേക്ക് മിക്‌സ് ചെയ്യുന്നു, കഴിയുമ്പോൾ ടെമ്പോയും ബീറ്റും ഒത്തുചേർക്കുന്നു</string>
+    <string name="glass_blur">ഗ്ലാസ് ബ്ലർ</string>
+    <string name="recently_added">അടുത്തിടെ ചേർത്തത്</string>
+    <string name="reduce_blur_effects">ബ്ലർ ഇഫക്റ്റുകൾ കുറയ്ക്കുക</string>
+    <string name="reduce_blur_effects_desc">വരികളിലും കവർ മാറുമ്പോഴും ബ്ലർ ഓഫാക്കുന്നു</string>
+</resources>

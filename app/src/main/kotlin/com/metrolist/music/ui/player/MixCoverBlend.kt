@@ -77,6 +77,7 @@ private fun ease(t: Float): Float = t * t * (3f - 2f * t)
 fun MixCoverBlend(
     visual: MixVisual,
     cropArtwork: Boolean,
+    blurEnabled: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -95,7 +96,7 @@ fun MixCoverBlend(
                     val scale = 1f - 0.15f * p
                     scaleX = scale
                     scaleY = scale
-                    renderEffect = if (p > 0.01f) BlurEffect(28f * density * p, 28f * density * p) else null
+                    renderEffect = if (blurEnabled && p > 0.01f) BlurEffect(28f * density * p, 28f * density * p) else null
                 },
         )
         AsyncImage(
@@ -110,7 +111,7 @@ fun MixCoverBlend(
                         val scale = 0.92f + 0.08f * p
                         scaleX = scale
                         scaleY = scale
-                        renderEffect = if (p < 0.99f) BlurEffect(28f * density * (1f - p), 28f * density * (1f - p)) else null
+                        renderEffect = if (blurEnabled && p < 0.99f) BlurEffect(28f * density * (1f - p), 28f * density * (1f - p)) else null
                     }.drawWithContent {
                         drawContent()
                         drawImage(

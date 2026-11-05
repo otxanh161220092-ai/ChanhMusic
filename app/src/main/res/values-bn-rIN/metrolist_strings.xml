@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="apple_style_layout">Apple Music স্টাইলের লেআউট</string>
+    <string name="apple_style_layout_desc">গোলাকার কার্ড ও ভাসমান নেভিগেশন বার</string>
+    <string name="floating_navbar">ভাসমান নিচের নেভিগেশন বার</string>
+    <string name="shuffle_home">শাফেল</string>
+    <string name="song_transitions">গানের মধ্যে ট্রানজিশন</string>
+    <string name="song_transitions_desc">একটি গান পরের গানে মিশিয়ে দিন। AutoMix বা Crossfade বেছে নিন, দুটো একসাথে নয়</string>
+    <string name="transition_automix">AutoMix</string>
+    <string name="transition_automix_desc">প্রতি জোড়া গানের জন্য মিশ্রণ বিন্দু, ফেড ও টেম্পো নির্বাচন করে</string>
+    <string name="transition_crossfade">Crossfade</string>
+    <string name="transition_crossfade_desc">প্রতিটি গানের শেষে নির্দিষ্ট দৈর্ঘ্যের ফেড</string>
+    <string name="creative_transitions">সৃজনশীল ট্রানজিশন</string>
+    <string name="creative_transitions_desc">যে গানটি শেষ হচ্ছে তাতে লো-পাস ফিল্টার স্বীপ যোগ করে</string>
+    <string name="automix_status_analyzing">সেরা মিশ্রণ বিন্দু খোঁজা হচ্ছে…</string>
+    <string name="automix_status_ready">%1$s মিশছে → পরের গান %2$s থেকে</string>
+    <string name="automix_status_ready_matched">%1$s মিশছে → পরের গান %2$s থেকে · বিট মিলেছে</string>
+    <string name="automix">AutoMix</string>
+    <string name="mixing">মিশছে</string>
+    <string name="player_state_on">চালু</string>
+    <string name="player_state_off">বন্ধ</string>
+    <string name="player_repeat">পুনরাবৃত্তি</string>
+    <string name="player_fullscreen_lyrics">পূর্ণ পর্দার লিরিক্স</string>
+    <string name="player_lyrics_options">লিরিক্স অপশন</string>
+    <string name="automix_desc">গান জোরে থাকতেই পরের গানে মেশায়, সম্ভব হলে টেম্পো ও বিট মিলিয়ে</string>
+    <string name="glass_blur">কাচের ব্লার</string>
+    <string name="recently_added">সম্প্রতি যোগ হয়েছে</string>
+    <string name="reduce_blur_effects">ব্লার প্রভাব কমান</string>
+    <string name="reduce_blur_effects_desc">লিরিক্সে ও কভার বদলালে ব্লার বন্ধ করে</string>
+</resources>

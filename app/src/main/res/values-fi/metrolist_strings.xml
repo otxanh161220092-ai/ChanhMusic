@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="apple_style_layout">Apple Music -tyylinen asettelu</string>
+    <string name="apple_style_layout_desc">Pyöristetyt kortit ja kelluva navigointipalkki</string>
+    <string name="floating_navbar">Kelluva alareunan navigointipalkki</string>
+    <string name="shuffle_home">Sekoita</string>
+    <string name="song_transitions">Kappaleiden siirtymät</string>
+    <string name="song_transitions_desc">Sekoita yksi kappale seuraavaan. Valitse AutoMix tai Crossfade, ei koskaan molempia</string>
+    <string name="transition_automix">AutoMix</string>
+    <string name="transition_automix_desc">Valitsee sekoituskohdat, häivytykset ja tempon jokaiselle kappaleparille</string>
+    <string name="transition_crossfade">Crossfade</string>
+    <string name="transition_crossfade_desc">Kiinteä häivytys jokaisen kappaleen lopussa</string>
+    <string name="creative_transitions">Luovat siirtymät</string>
+    <string name="creative_transitions_desc">Lisää loppuvaan kappaleeseen matalapäästösuodattimen pyyhkäisyn</string>
+    <string name="automix_status_analyzing">Etsitään parasta sekoituskohtaa…</string>
+    <string name="automix_status_ready">Sekoitus %1$s → seuraava kappale kohdasta %2$s</string>
+    <string name="automix_status_ready_matched">Sekoitus %1$s → seuraava kappale kohdasta %2$s · tahti osui yhteen</string>
+    <string name="automix">AutoMix</string>
+    <string name="mixing">Sekoitus</string>
+    <string name="player_state_on">Päällä</string>
+    <string name="player_state_off">Pois</string>
+    <string name="player_repeat">Toista uudelleen</string>
+    <string name="player_fullscreen_lyrics">Koko näytön sanoitukset</string>
+    <string name="player_lyrics_options">Sanoitusasetukset</string>
+    <string name="automix_desc">Sekoittaa seuraavaan kappaleeseen, kun musiikki on yhä kovaa, ja sovittaa tempon ja tahdin, kun mahdollista</string>
+    <string name="glass_blur">Lasihämärrys</string>
+    <string name="recently_added">Lisätty äskettäin</string>
+    <string name="reduce_blur_effects">Vähennä hämärrystehosteita</string>
+    <string name="reduce_blur_effects_desc">Poistaa hämärryksen sanoituksista ja kansien vaihtuessa</string>
+</resources>

@@ -89,4 +89,31 @@
         <item quantity="few">%d vremena</item>
         <item quantity="other">%d vremena</item>
     </plurals>
+    <string name="apple_style_layout">Raspored u stilu Apple Music</string>
+    <string name="apple_style_layout_desc">Zaobljene kartice i plutajuća navigaciona traka</string>
+    <string name="floating_navbar">Plutajuća donja navigaciona traka</string>
+    <string name="shuffle_home">Nasumično</string>
+    <string name="song_transitions">Prelazi između pesama</string>
+    <string name="song_transitions_desc">Stapaj jednu pesmu u sledeću. Izaberi AutoMix ili Crossfade, nikad oboje</string>
+    <string name="transition_automix">AutoMix</string>
+    <string name="transition_automix_desc">Bira tačke miksovanja, stišavanja i tempo za svaki par pesama</string>
+    <string name="transition_crossfade">Crossfade</string>
+    <string name="transition_crossfade_desc">Fiksno stišavanje na kraju svake pesme</string>
+    <string name="creative_transitions">Kreativni prelazi</string>
+    <string name="creative_transitions_desc">Dodaje filter niskih frekvencija pesmi koja odlazi</string>
+    <string name="automix_status_analyzing">Traženje najbolje tačke miksa…</string>
+    <string name="automix_status_ready">Miksuje se %1$s → sledeća pesma od %2$s</string>
+    <string name="automix_status_ready_matched">Miksuje se %1$s → sledeća pesma od %2$s · takt usklađen</string>
+    <string name="automix">AutoMix</string>
+    <string name="mixing">Miksovanje</string>
+    <string name="player_state_on">Uključeno</string>
+    <string name="player_state_off">Isključeno</string>
+    <string name="player_repeat">Ponavljanje</string>
+    <string name="player_fullscreen_lyrics">Tekst preko celog ekrana</string>
+    <string name="player_lyrics_options">Opcije teksta</string>
+    <string name="automix_desc">Prelazi u sledeću pesmu dok je muzika još glasna, uz usklađivanje tempa i takta kad je moguće</string>
+    <string name="glass_blur">Stakleni blur</string>
+    <string name="recently_added">Nedavno dodato</string>
+    <string name="reduce_blur_effects">Smanji efekte zamućenja</string>
+    <string name="reduce_blur_effects_desc">Isključuje zamućenje na tekstovima i pri promeni omota</string>
 </resources>

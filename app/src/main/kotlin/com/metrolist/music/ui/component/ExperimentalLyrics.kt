@@ -135,6 +135,7 @@ import com.metrolist.music.ui.screens.settings.defaultList
 import com.metrolist.music.ui.utils.fadingEdge
 import com.metrolist.music.utils.ComposeToImage
 import com.metrolist.music.utils.rememberEnumPreference
+import com.metrolist.music.constants.ReduceBlurEffectsKey
 import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.viewmodels.LyricsViewModel
 import kotlinx.coroutines.delay
@@ -180,6 +181,7 @@ fun ExperimentalLyrics(
 
     val lyricsTextPositionPref by rememberEnumPreference(LyricsTextPositionKey, LyricsPosition.CENTER)
     val lyricsTextSizePref by rememberPreference(LyricsTextSizeKey, 24f)
+    val reduceBlur by rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
     val lyricsTextPosition = textPositionOverride ?: lyricsTextPositionPref
     val changeLyrics by rememberPreference(LyricsClickKey, true)
     val romanizeLyricsList = rememberPreference(LyricsRomanizeList, "")
@@ -766,7 +768,7 @@ fun ExperimentalLyrics(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .then(if (distance >= 1) Modifier.blur((distance * 1.6f).coerceAtMost(9f).dp) else Modifier)
+                                    .then(if (!reduceBlur && distance >= 1) Modifier.blur((distance * 1.6f).coerceAtMost(9f).dp) else Modifier)
                                     .then(
                                         if (listIndex < activeListIndex) {
                                             Modifier
@@ -860,7 +862,7 @@ fun ExperimentalLyrics(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .matchParentSize()
-                        .blur(80.dp, BlurredEdgeTreatment.Unbounded),
+                        .then(if (reduceBlur) Modifier else Modifier.blur(80.dp, BlurredEdgeTreatment.Unbounded)),
                 )
                 repeat(2) {
                     Box(
