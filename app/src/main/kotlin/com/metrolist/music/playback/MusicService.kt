@@ -289,6 +289,7 @@ private const val AUTOMIX_TEMPO_RAMP_MS = 8_000L
 private const val AUTOMIX_TEMPO_LEAD_MS = 12_000L
 private const val AUTOMIX_QUICK_CUT = false
 private const val RETIRE_DELAY_MS = 300L
+private const val VISUAL_TRANSITION_MS = 900f
 private const val DEFAULT_UNKNOWN_DURATION_MS = 180_000L
 private const val AUTOMIX_ANALYSIS_TIMEOUT_MS = 60_000L
 
@@ -5408,13 +5409,15 @@ class MusicService :
 
                     val progress = i / steps.toFloat()
                     if (outgoingItem != null && incomingItem != null) {
+                        // The cover transition runs on its own short clock; the audio mix keeps its full length.
+                        val visualProgress = ((i * stepTime).toFloat() / VISUAL_TRANSITION_MS).coerceIn(0f, 1f)
                         mixVisual.value =
                             com.metrolist.music.playback.automix.MixVisual(
                                 outgoingId = outgoingItem.mediaId,
                                 outgoingArtwork = outgoingItem.mediaMetadata.artworkUri?.toString(),
                                 incomingId = incomingItem.mediaId,
                                 incomingArtwork = incomingItem.mediaMetadata.artworkUri?.toString(),
-                                progress = progress,
+                                progress = visualProgress,
                             )
                     }
                     val (fadeOut, fadeIn) =
