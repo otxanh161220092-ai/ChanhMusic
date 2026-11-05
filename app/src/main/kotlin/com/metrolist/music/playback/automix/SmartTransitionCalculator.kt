@@ -5,6 +5,7 @@
 
 package com.metrolist.music.playback.automix
 
+import timber.log.Timber
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.roundToLong
@@ -326,6 +327,7 @@ object SmartTransitionCalculator {
         songB: SongStructure,
     ): TempoMatch {
         if (!songA.hasTempo || !songB.hasTempo || songA.bpm <= 0f || songB.bpm <= 0f) {
+            Timber.tag("MusicService").d("Tempo unavailable: A bpm=%.1f hasTempo=%b, B bpm=%.1f hasTempo=%b", songA.bpm, songA.hasTempo, songB.bpm, songB.hasTempo)
             return TempoMatch(1f, false, false, NO_TEMPO_COST)
         }
         val raw = songA.bpm.toDouble() / songB.bpm
