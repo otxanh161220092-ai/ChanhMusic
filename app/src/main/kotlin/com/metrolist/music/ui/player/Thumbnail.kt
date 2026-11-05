@@ -241,9 +241,20 @@ fun Thumbnail(
     var shownArtwork by remember { mutableStateOf<String?>(null) }
     var previousArtwork by remember { mutableStateOf<String?>(null) }
     var lastMixIncomingId by remember { mutableStateOf<String?>(null) }
+    // A brief gap in the mix state is not a cut: keep the last mix frame for a moment so the cover does not
+    // drop to the sharp thumbnail and back.
+    var heldMix by remember { mutableStateOf<com.metrolist.music.playback.automix.MixVisual?>(null) }
     LaunchedEffect(mixVisual) {
-        mixVisual?.let { lastMixIncomingId = it.incomingId }
+        val current = mixVisual
+        if (current != null) {
+            heldMix = current
+            lastMixIncomingId = current.incomingId
+        } else {
+            delay(400)
+            heldMix = null
+        }
     }
+    val coverMix = mixVisual ?: heldMix
     LaunchedEffect(mediaMetadata?.id) {
         if (mediaMetadata != null) {
             previousArtwork = shownArtwork
@@ -420,7 +431,7 @@ fun Thumbnail(
                                 gridState = thumbnailLazyGridState,
                                 changeProgress = changeProgress,
                                 previousArtwork = previousArtwork,
-                                mixVisual = mixVisual,
+                                mixVisual = coverMix,
                             )
                         }
                     }
