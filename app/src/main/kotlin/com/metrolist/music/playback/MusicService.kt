@@ -5388,6 +5388,9 @@ class MusicService :
 
             // Do not persist the retired player's temporary repeat-off state.
             outgoing.removeListener(this)
+            // A now fades out on its own. Its end must not pause B through the mix sync listener.
+            mixSyncListener?.let { outgoing.removeListener(it) }
+            outgoing.pauseAtEndOfMediaItems = false
             sleepTimer?.let { timer -> outgoing.removeListener(timer) }
             outgoing.repeatMode = Player.REPEAT_MODE_OFF
             val currentIndex = outgoing.currentMediaItemIndex
