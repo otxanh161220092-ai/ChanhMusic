@@ -1503,6 +1503,7 @@ class MusicService :
 
         // Cleanup handled manually in onDestroy/release
         if (publish) _playerFlow.value = player
+        liveExoPlayers += player
         return player
     }
 
@@ -5219,6 +5220,7 @@ class MusicService :
         // for it to start playing (see the fade loop).
 
         val secPlayer: ExoPlayer
+        silenceStrayPlayers()
         if (preparedUsable) {
             preparedMix = null
             secPlayer = secondaryPlayer!!
@@ -5289,6 +5291,29 @@ class MusicService :
     // `player` (so the player screen and every control still belong to it); the roles swap at that point.
     private var mixSwapped = false
     private var mixWaitingForPlay = false
+
+    /** Every ExoPlayer this service has created and not yet released. */
+    private val liveExoPlayers = mutableSetOf<ExoPlayer>()
+
+    /**
+     * Stops and releases any player that is not one of the current roles (the song on screen, the fading
+     * outgoing song, or the incoming song of a mix in progress), so a leftover copy cannot play over a song.
+     */
+    private fun silenceStrayPlayers() {
+        val keep = mutableSetOf<ExoPlayer>()
+        if (::player.isInitialized) keep += player
+        listOfNotNull(fadingPlayer, secondaryPlayer, mixOutgoing, mixIncoming).forEach { keep += it }
+        val strays = liveExoPlayers.filter { it !in keep }
+        for (stray in strays) {
+            Timber.tag(TAG).w("Stopping a stray player left behind by a finished mix")
+            runCatching {
+                stray.playWhenReady = false
+                stray.stop()
+                stray.clearMediaItems()
+            }
+            releaseExoPlayer(stray)
+        }
+    }
     private var mixOutgoing: ExoPlayer? = null
     private var mixIncoming: ExoPlayer? = null
     private var mixSyncListener: Player.Listener? = null
@@ -5655,6 +5680,7 @@ class MusicService :
             releaseExoPlayer(previousPlayer)
         }
         fadingPlayer = null
+        silenceStrayPlayers()
         crossfadeJob = null
         isCrossfading = false
         isMixing.value = false
@@ -5671,6 +5697,7 @@ class MusicService :
     }
 
     private fun releaseExoPlayer(player: ExoPlayer) {
+        liveExoPlayers -= player
         historyReporters.remove(player)?.close()
         playerNormalizationProcessors.remove(player)
         playerSilenceProcessors.remove(player)
