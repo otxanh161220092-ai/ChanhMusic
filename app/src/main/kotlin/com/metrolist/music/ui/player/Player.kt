@@ -198,7 +198,6 @@ import com.metrolist.music.ui.utils.ShowOffsetDialog
 import com.metrolist.music.utils.dataStore
 import com.metrolist.music.utils.makeTimeString
 import com.metrolist.music.utils.rememberEnumPreference
-import com.metrolist.music.constants.ReduceBlurEffectsKey
 import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.utils.safeDataStoreEdit
 import dagger.hilt.android.EntryPointAccessors
@@ -365,7 +364,6 @@ fun BottomSheetPlayer(
     val automixOn by rememberPreference(AutomixEnabledKey, defaultValue = false)
     val isMixing by playerConnection.service.isMixing.collectAsStateWithLifecycle()
     val mixVisual by playerConnection.service.mixVisual.collectAsStateWithLifecycle()
-    val reduceBlurPref by rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
     val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsStateWithLifecycle()
     val canSkipNext by playerConnection.canSkipNext.collectAsStateWithLifecycle()
@@ -910,8 +908,6 @@ fun BottomSheetPlayer(
                                 backgroundAlpha = backgroundAlpha,
                                 blurRadius = if (useDarkTheme) 150.dp else 100.dp,
                             )
-                            // Cover blend runs full-screen behind the controls, unclipped.
-                            MixCoverBlend(visual = visual, cropArtwork = true, blurEnabled = !reduceBlurPref, modifier = Modifier.fillMaxSize())
                         } else AnimatedContent(
                             targetState = mediaMetadata?.thumbnailUrl,
                             transitionSpec = {
