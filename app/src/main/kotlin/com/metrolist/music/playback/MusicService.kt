@@ -5335,6 +5335,8 @@ class MusicService :
         mixSwapped = false
         mixOutgoing = outgoing
         mixIncoming = incoming
+        // A must stop at its end instead of advancing to B on its own, which would start a second copy of B.
+        outgoing.pauseAtEndOfMediaItems = true
         mixSpeedFactor = plan?.incomingTempoFactor ?: 1f
         handOverOutgoingTempo(plan)
         // This mix is consumed: the next plan is made for the new current song once it is over.
@@ -5375,6 +5377,7 @@ class MusicService :
             if (mixSwapped) return
             mixSwapped = true
             mixSwapAtMs = System.currentTimeMillis()
+            Timber.tag(TAG).d("Mix swap: roles switched")
             fadingPlayer = outgoing
             player = incoming
             _playerFlow.value = player
@@ -5599,6 +5602,7 @@ class MusicService :
         val outgoing = mixOutgoing
         val incoming = mixIncoming
         if (!mixSwapped) {
+            outgoing?.pauseAtEndOfMediaItems = false
             restoreOutgoingTempo(outgoing)
             outgoing?.let { playerTailFxProcessors[it]?.clearTail() }
             incoming?.let { prepared ->
