@@ -328,7 +328,8 @@ object SmartTransitionCalculator {
         songA: SongStructure,
         songB: SongStructure,
     ): TempoMatch {
-        if (!songA.hasTempo || !songB.hasTempo || songA.bpm <= 0f || songB.bpm <= 0f) {
+        // The delta gate below rejects mismatched tempi, so a low-confidence BPM is still safe to compare.
+        if (songA.bpm <= 0f || songB.bpm <= 0f) {
             Timber.tag("MusicService").d("Tempo unavailable: A bpm=%.1f hasTempo=%b, B bpm=%.1f hasTempo=%b", songA.bpm, songA.hasTempo, songB.bpm, songB.hasTempo)
             return TempoMatch(1f, false, false, NO_TEMPO_COST)
         }
