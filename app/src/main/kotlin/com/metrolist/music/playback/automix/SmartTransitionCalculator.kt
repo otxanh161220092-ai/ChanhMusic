@@ -35,7 +35,8 @@ object SmartTransitionCalculator {
     private val BARS_MEDIUM = intArrayOf(8, 6, 4, 2)
     private val BARS_SHORT = intArrayOf(4, 2)
 
-    private const val MAX_TEMPO_DELTA = 0.08
+    // Folded ratios sit in [0.707, 1.414], so every pair is within this delta and gets matched.
+    private const val MAX_TEMPO_DELTA = 0.42
     private const val SHORT_FADE_BEATS = 2.0
     private const val QUICK_FADE_BEATS = 1.0
     private const val QUICK_MIN_FADE_MS = 1_000L
