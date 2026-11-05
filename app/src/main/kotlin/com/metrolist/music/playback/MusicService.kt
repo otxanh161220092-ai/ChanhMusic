@@ -39,6 +39,7 @@ import com.metrolist.music.playback.automix.SongStructure
 import com.metrolist.music.playback.automix.TransitionPlan
 import com.metrolist.music.playback.automix.toSongStructure
 import kotlin.math.abs
+import kotlin.math.min
 import com.metrolist.music.utils.safeDataStoreEdit
 import android.net.ConnectivityManager
 import android.os.Binder
@@ -5411,13 +5412,15 @@ class MusicService :
             openAudioEffectSession()
         }
 
-        // A fixed crossfade switches at once; AutoMix switches when B overtakes A (see the loop).
-        if (plan == null) swapRoles()
+        // The incoming song takes over the screen (title, artist, progress) as the mix starts.
+        swapRoles()
 
         crossfadeJob =
             scope.launch {
                 val speed = outgoing.playbackParameters.speed.coerceAtLeast(0.01f)
                 val windowMs = plan?.windowMs?.toFloat() ?: crossfadeDuration
+                // The cover transition ends well before the mix does, even on a short mix.
+                val visualMs = min(VISUAL_TRANSITION_MS, windowMs * 0.7f).coerceAtLeast(300f)
                 val duration = (windowMs / speed).toLong()
                 // Same cadence for every mix (~50 ms per step), so a longer mix never jumps in bigger steps.
                 val steps = (duration / 50L).toInt().coerceIn(20, 400)
@@ -5448,7 +5451,7 @@ class MusicService :
                         // The cover changes only once the roles have swapped, so it matches the song title; it then
                         // moves to the new cover on its own short clock while the audio mix keeps its full length.
                         val visualProgress =
-                            if (mixSwapped) ((System.currentTimeMillis() - mixSwapAtMs) / VISUAL_TRANSITION_MS).coerceIn(0f, 1f) else 0f
+                            if (mixSwapped) ((System.currentTimeMillis() - mixSwapAtMs) / visualMs).coerceIn(0f, 1f) else 0f
                         mixVisual.value =
                             com.metrolist.music.playback.automix.MixVisual(
                                 outgoingId = outgoingItem.mediaId,
@@ -5467,7 +5470,6 @@ class MusicService :
                         }
 
                     // The screen follows the ear: switch when the incoming song becomes the louder one.
-                    if (plan != null && !mixSwapped && fadeIn >= fadeOut) swapRoles()
 
                     try {
                         incoming.volume = startVolume * fadeIn
