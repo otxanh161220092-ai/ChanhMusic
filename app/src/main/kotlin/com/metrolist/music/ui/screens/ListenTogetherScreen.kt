@@ -34,8 +34,10 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -53,6 +55,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton as MaterialIconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -64,8 +67,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -75,7 +78,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -83,6 +90,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toDp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.metrolist.music.LocalListenTogetherManager
@@ -102,7 +111,6 @@ import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.utils.backToMain
 import com.metrolist.music.utils.rememberPreference
 import kotlinx.coroutines.launch
-import androidx.compose.material3.IconButton as MaterialIconButton
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -234,6 +242,12 @@ fun ListenTogetherScreen(
         }
     }
 
+    // The header floats above the list over a dark fade, unless the top bar already shows the title.
+    val showFloatingHeader = !isInRoom && !shouldShowTopBar
+    val density = LocalDensity.current
+    var floatingHeaderHeightPx by remember { mutableIntStateOf(0) }
+
+    Box(modifier = Modifier.fillMaxSize()) {
     LazyColumn(
         state = lazyListState,
         modifier =
@@ -245,14 +259,21 @@ fun ListenTogetherScreen(
             PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
-                top = windowInsets.asPaddingValues().calculateTopPadding() + 16.dp,
+                top =
+                    if (showFloatingHeader) {
+                        with(density) { floatingHeaderHeightPx.toDp() } + 8.dp
+                    } else {
+                        windowInsets.asPaddingValues().calculateTopPadding() + 16.dp
+                    },
                 bottom = windowInsets.asPaddingValues().calculateBottomPadding() + 16.dp + AppBarHeight,
             ),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // Header
-        item {
-            HeaderSection(isInRoom = isInRoom)
+        if (!showFloatingHeader) {
+            item {
+                HeaderSection(isInRoom = isInRoom)
+            }
         }
 
         // Connection status card
@@ -416,8 +437,29 @@ fun ListenTogetherScreen(
         }
     }
 
+    if (showFloatingHeader) {
+        Box(
+            modifier =
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .onSizeChanged { floatingHeaderHeightPx = it.height }
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Black.copy(alpha = 0.85f),
+                            0.6f to Color.Black.copy(alpha = 0.55f),
+                            1f to Color.Transparent,
+                        ),
+                    ).windowInsetsPadding(WindowInsets.statusBars)
+                    .padding(bottom = 24.dp),
+        ) {
+            HeaderSection(isInRoom = isInRoom)
+        }
+    }
+
     if (shouldShowTopBar) {
         TopAppBar(
+            modifier = Modifier.align(Alignment.TopCenter),
             title = { Text(stringResource(R.string.together)) },
             navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {
@@ -433,6 +475,7 @@ fun ListenTogetherScreen(
             }
             },
         )
+    }
     }
 }
 

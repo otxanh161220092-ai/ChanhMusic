@@ -1318,6 +1318,11 @@ class MainActivity : FragmentActivity() {
 
                             if (!showRail && currentRoute != "wrapped") {
                                 // Floating back button sits under the player sheet.
+                                if (canGoBack && currentRoute?.contains("_playlist/") == true) {
+                                    com.metrolist.music.ui.component.FloatingBackScrim(
+                                        Modifier.align(Alignment.TopStart),
+                                    )
+                                }
                                 if (canGoBack) {
                                     com.metrolist.music.ui.component.GlassBackButton(
                                         backdrop = LocalGlassBackdrop.current,
@@ -1396,6 +1401,11 @@ class MainActivity : FragmentActivity() {
                                 }
                             } else {
                                     // Floating back button: only once there is a page to return to.
+                                    if (canGoBack && currentRoute?.contains("_playlist/") == true) {
+                                        com.metrolist.music.ui.component.FloatingBackScrim(
+                                            Modifier.align(Alignment.TopStart),
+                                        )
+                                    }
                                     if (canGoBack) {
                                         com.metrolist.music.ui.component.GlassBackButton(
                                             backdrop = LocalGlassBackdrop.current,
