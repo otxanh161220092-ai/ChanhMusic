@@ -10,6 +10,8 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.webkit.JavascriptInterface
+import android.webkit.ConsoleMessage
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +28,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.metrolist.music.lyrics.LyricsEntry
 import kotlinx.coroutines.isActive
 import org.json.JSONArray
+import timber.log.Timber
 import org.json.JSONObject
 
 /**
@@ -47,6 +50,15 @@ private val braccatoPage =
     <link rel="stylesheet" href="$BRACCATO_CDN/dist/styles/lyrics.css">
     <link rel="stylesheet" href="$BRACCATO_CDN/dist/styles/instrumental.css">
     <style>
+      /* Braccato's default colours use display-p3 and relative colour syntax, which older WebViews drop,
+         leaving the text unreadable. Plain sRGB values keep it visible on any WebView. */
+      :root {
+        --blyrics-text-color: #ffffff;
+        --blyrics-ui-text-color: #ffffff;
+        --blyrics-lyric-active-color: #ffffff;
+        --blyrics-lyric-inactive-color: rgba(255, 255, 255, 0.35);
+        --blyrics-glow-color: rgba(255, 255, 255, 0.5);
+      }
       html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
       braccato-lyrics { display: block; height: 100%; }
     </style>
@@ -142,6 +154,13 @@ fun BraccatoLyrics(
                 setBackgroundColor(Color.TRANSPARENT)
                 settings.javaScriptEnabled = true
                 webViewClient = WebViewClient()
+                webChromeClient =
+                    object : WebChromeClient() {
+                        override fun onConsoleMessage(message: ConsoleMessage): Boolean {
+                            Timber.tag("Braccato").d("%s (%s:%d)", message.message(), message.sourceId(), message.lineNumber())
+                            return true
+                        }
+                    }
                 addJavascriptInterface(
                     BraccatoBridge(
                         onReady = { mainHandler.post { pageReady = true } },
