@@ -7,6 +7,10 @@ package com.metrolist.music.ui.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.metrolist.music.LocalPlayerConnection
+import com.metrolist.music.lyrics.LyricsUtils
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -42,10 +46,33 @@ fun Lyrics(
             lyricsViewModel = lyricsViewModel
         )
     } else {
-        OriginalLyrics(
+        BraccatoLyricsPanel(
             sliderPositionProvider = sliderPositionProvider,
             modifier = lyricsModifier,
             showLyrics = showLyrics
         )
     }
+}
+
+@Composable
+private fun BraccatoLyricsPanel(
+    sliderPositionProvider: () -> Long?,
+    modifier: Modifier,
+    showLyrics: Boolean,
+) {
+    val playerConnection = LocalPlayerConnection.current ?: return
+    val lyricsEntity by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
+    val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
+    val lines =
+        remember(lyricsEntity) {
+            lyricsEntity?.lyrics?.trim()?.takeIf { it.isNotEmpty() }?.let { LyricsUtils.parseLyrics(it) }.orEmpty()
+        }
+    if (!showLyrics || lines.isEmpty()) return
+    BraccatoLyrics(
+        lines = lines,
+        positionMs = { sliderPositionProvider() ?: playerConnection.player.currentPosition },
+        isPlaying = isPlaying,
+        onSeekMs = { playerConnection.player.seekTo(it) },
+        modifier = modifier,
+    )
 }
