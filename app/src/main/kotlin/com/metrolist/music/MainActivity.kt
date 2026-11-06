@@ -77,6 +77,7 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
@@ -911,8 +912,12 @@ class MainActivity : FragmentActivity() {
                     }
                 }
 
-                LaunchedEffect(activePlayerConnection) {
-                    val player = runCatching { activePlayerConnection?.player }.getOrNull()
+                // The service swaps its player when a mix hands over; follow the live one, not the first.
+                val noPlayer = remember { kotlinx.coroutines.flow.MutableStateFlow<androidx.media3.exoplayer.ExoPlayer?>(null) }
+                val servicePlayer by (activePlayerConnection?.service?.playerFlow ?: noPlayer).collectAsState()
+
+                LaunchedEffect(activePlayerConnection, servicePlayer) {
+                    val player = servicePlayer ?: runCatching { activePlayerConnection?.player }.getOrNull()
                     if (player?.currentMediaItem == null) {
                         if (!playerBottomSheetState.isDismissed) {
                             playerBottomSheetState.dismiss()
@@ -925,8 +930,8 @@ class MainActivity : FragmentActivity() {
                     }
                 }
 
-                DisposableEffect(activePlayerConnection, playerBottomSheetState) {
-                    val player = runCatching { activePlayerConnection?.player }.getOrNull()
+                DisposableEffect(activePlayerConnection, playerBottomSheetState, servicePlayer) {
+                    val player = servicePlayer ?: runCatching { activePlayerConnection?.player }.getOrNull()
                         ?: return@DisposableEffect onDispose { }
                     val listener =
                         object : Player.Listener {

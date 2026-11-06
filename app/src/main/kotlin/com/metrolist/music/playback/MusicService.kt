@@ -2169,6 +2169,9 @@ class MusicService :
 
     fun clearAutomix() {
         automixItems.value = emptyList()
+        // Dismissing the player ends every sound: a mix in progress is called off and the fading song stops too.
+        if (isCrossfading) abortMix(reschedule = false)
+        runCatching { fadingPlayer?.playWhenReady = false }
     }
 
     fun playNext(items: List<MediaItem>) {
@@ -2828,6 +2831,7 @@ class MusicService :
         playWhenReady: Boolean,
         reason: Int,
     ) {
+        Timber.tag(TAG).d("playWhenReady=%b reason=%d mixing=%b swapped=%b", playWhenReady, reason, isCrossfading, mixSwapped)
         // Safety net: if local player tries to start while casting, immediately pause it
         if (playWhenReady && castConnectionHandler?.isCasting?.value == true) {
             player.pause()
