@@ -17,6 +17,9 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.metrolist.music.constants.ExperimentalLyricsKey
+import com.metrolist.music.constants.LyricsAnimationStyle
+import com.metrolist.music.constants.LyricsAnimationStyleKey
+import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.ui.screens.settings.LyricsPosition
 import com.metrolist.music.utils.rememberPreference
 import androidx.compose.ui.graphics.Color
@@ -33,6 +36,7 @@ fun Lyrics(
     lyricsViewModel: LyricsViewModel = hiltViewModel()
 ) {
     val (experimentalLyrics, _) = rememberPreference(key = ExperimentalLyricsKey, defaultValue = true)
+    val lyricsAnimationStyle by rememberEnumPreference(LyricsAnimationStyleKey, LyricsAnimationStyle.APPLE)
     val lyricsModifier = modifier
 
     if (experimentalLyrics) {
@@ -45,8 +49,14 @@ fun Lyrics(
             accentOverride = accentOverride,
             lyricsViewModel = lyricsViewModel
         )
-    } else {
+    } else if (lyricsAnimationStyle == LyricsAnimationStyle.BRACCATO) {
         BraccatoLyricsPanel(
+            sliderPositionProvider = sliderPositionProvider,
+            modifier = lyricsModifier,
+            showLyrics = showLyrics
+        )
+    } else {
+        OriginalLyrics(
             sliderPositionProvider = sliderPositionProvider,
             modifier = lyricsModifier,
             showLyrics = showLyrics

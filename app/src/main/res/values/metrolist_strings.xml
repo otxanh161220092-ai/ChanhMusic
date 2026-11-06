@@ -130,6 +130,7 @@
     <string name="lyrics_animation_slide">Slide</string>
     <string name="lyrics_animation_karaoke">Karaoke</string>
     <string name="lyrics_animation_apple">Apple Music Style</string>
+    <string name="lyrics_animation_braccato">Braccato</string>
     <string name="lyrics_text_size">Lyrics text size</string>
     <string name="lyrics_line_spacing">Lyrics line spacing</string>
     <string name="enable_lrclib_desc">Community-driven synchronized lyrics database</string>
