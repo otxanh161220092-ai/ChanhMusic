@@ -197,6 +197,8 @@ object SmartTransitionCalculator {
         quickCut: Boolean,
         relaxed: Boolean = false,
     ): TransitionPlan? {
+        // An outro is written as a hand-off to the next track on the album, so the normal pass keeps the mix out of it.
+        if (!relaxed && (a.type == SegmentType.OUTRO || b.type == SegmentType.OUTRO)) return null
         val minFade = if (relaxed) RELAXED_MIN_FADE_MS else MIN_FADE_MS
         val bCalm = b.isCalmEntry || (relaxed && b.type == SegmentType.OUTRO)
         // The four cases: where A is (high energy or calm) and where B has to land (calm entry or high energy).
