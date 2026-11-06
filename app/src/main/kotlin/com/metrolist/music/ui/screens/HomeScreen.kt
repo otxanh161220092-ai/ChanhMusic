@@ -79,6 +79,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.ui.unit.toDp
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -1265,13 +1270,21 @@ fun HomeScreen(
                     )
                 }
 
+            val density = LocalDensity.current
+            var homeHeaderHeightPx by remember { mutableIntStateOf(0) }
+            val basePadding = tabScreenContentPadding()
+            val layoutDirection = LocalLayoutDirection.current
             LazyColumn(
                 state = lazylistState,
-                contentPadding = tabScreenContentPadding(),
+                // The header floats over the list, so the list starts below it.
+                contentPadding =
+                    PaddingValues(
+                        start = basePadding.calculateStartPadding(layoutDirection),
+                        end = basePadding.calculateEndPadding(layoutDirection),
+                        top = with(density) { homeHeaderHeightPx.toDp() },
+                        bottom = basePadding.calculateBottomPadding(),
+                    ),
             ) {
-                item(key = "home_header") {
-                    TabHeader(title = stringResource(R.string.home), logoRes = R.drawable.ic_home_logo)
-                }
 
                 val localPicks = quickPicks.orEmpty().distinctBy { it.id }
                 val serverPicks =
@@ -2664,6 +2677,25 @@ fun HomeScreen(
                         }
                     }
                 }
+            }
+
+            // Fixed above the list: it does not scroll, and a dark fade behind it keeps it readable.
+            Box(
+                modifier =
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .onSizeChanged { homeHeaderHeightPx = it.height }
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                        .background(
+                            Brush.verticalGradient(
+                                0f to Color.Black.copy(alpha = 0.85f),
+                                0.6f to Color.Black.copy(alpha = 0.55f),
+                                1f to Color.Transparent,
+                            ),
+                        ).padding(bottom = 24.dp),
+            ) {
+                TabHeader(title = stringResource(R.string.home), logoRes = R.drawable.ic_home_logo)
             }
 
             val homeShuffle: () -> Unit = {
