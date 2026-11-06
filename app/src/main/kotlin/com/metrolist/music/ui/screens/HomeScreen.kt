@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -82,7 +83,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.ui.unit.toDp
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -1279,8 +1279,8 @@ fun HomeScreen(
                 // The header floats over the list, so the list starts below it.
                 contentPadding =
                     PaddingValues(
-                        start = basePadding.calculateStartPadding(layoutDirection),
-                        end = basePadding.calculateEndPadding(layoutDirection),
+                        start = basePadding.calculateLeftPadding(layoutDirection),
+                        end = basePadding.calculateRightPadding(layoutDirection),
                         top = with(density) { homeHeaderHeightPx.toDp() },
                         bottom = basePadding.calculateBottomPadding(),
                     ),

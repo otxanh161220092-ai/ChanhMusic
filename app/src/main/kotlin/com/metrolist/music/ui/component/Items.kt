@@ -467,6 +467,7 @@ fun GridItem(
     thumbnailContent: @Composable BoxWithConstraintsScope.() -> Unit,
     thumbnailRatio: Float = 1f,
     fillMaxWidth: Boolean = false,
+    thumbnailHeight: Dp? = null,
 ) = GridItem(
     modifier = modifier,
     title = {

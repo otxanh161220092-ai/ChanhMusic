@@ -66,7 +66,7 @@ fun GlassBackButton(
                 ),
         contentAlignment = Alignment.Center,
     ) {
-        val chevronColor = if (backgroundIsLight) Color.Black else Color.White
+        val chevronColor = Color.Black
         Canvas(modifier = Modifier.size(20.dp)) {
             val chevron =
                 Path().apply {
