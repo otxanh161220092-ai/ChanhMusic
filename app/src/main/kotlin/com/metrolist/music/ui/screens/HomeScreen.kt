@@ -2686,14 +2686,14 @@ fun HomeScreen(
                         .align(Alignment.TopCenter)
                         .fillMaxWidth()
                         .onSizeChanged { homeHeaderHeightPx = it.height }
-                        .windowInsetsPadding(WindowInsets.statusBars)
                         .background(
                             Brush.verticalGradient(
                                 0f to Color.Black.copy(alpha = 0.85f),
                                 0.6f to Color.Black.copy(alpha = 0.55f),
                                 1f to Color.Transparent,
                             ),
-                        ).padding(bottom = 24.dp),
+                        ).windowInsetsPadding(WindowInsets.statusBars)
+                        .padding(bottom = 24.dp),
             ) {
                 TabHeader(title = stringResource(R.string.home), logoRes = R.drawable.ic_home_logo)
             }
