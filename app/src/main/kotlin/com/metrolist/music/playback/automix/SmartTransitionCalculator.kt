@@ -66,6 +66,7 @@ object SmartTransitionCalculator {
     private const val RELAXED_MIN_FADE_MS = 1_500L
     private const val RELAXED_MIN_B_REMAINING_MS = 8_000L
     private const val START_AT_ZERO_COST = 0.5
+    private const val OUTRO_SEGUE_COST = 3.0
 
     /**
      * @param earliestMixMs the overlap may not open before this position in A.
@@ -91,12 +92,16 @@ object SmartTransitionCalculator {
 
         // Strict pass: the energy rules, enough of A played and room for B to play on.
         var best = bestCandidate(songA, songB, tempo, earliestMixMs, longFadeMs, quickCut, relaxed = false)
+        var pass = "strict"
         // Relaxed pass: any section pair, no minimum share of A, shorter fades. Every song pair must be mixable.
         if (best == null) {
             best = bestCandidate(songA, songB, tempo, originalEarliest, longFadeMs, quickCut, relaxed = true)
+            pass = "relaxed"
         }
         // Last resort when no sections are known or none fit: overlap A's ending with B's beginning.
+        if (best == null) pass = "structure-free"
         val plan = best ?: structureFreePlan(songA, songB, tempo, originalEarliest, longFadeMs, quickCut)
+        Timber.tag("MusicService").d("Mix plan: %s, mixOutA=%d ms of %d ms", pass, plan?.mixOutPositionA ?: -1L, songA.durationMs)
         return plan?.let { refineWithCrossCorrelation(it, songA, songB) }
     }
 
@@ -197,8 +202,10 @@ object SmartTransitionCalculator {
         quickCut: Boolean,
         relaxed: Boolean = false,
     ): TransitionPlan? {
-        // An outro is written as a hand-off to the next track on the album, so the normal pass keeps the mix out of it.
+        // An outro is written as a hand-off to the next track on the album: the normal pass never uses it,
+        // and the relaxed pass uses it only when no other section pair fits.
         if (!relaxed && (a.type == SegmentType.OUTRO || b.type == SegmentType.OUTRO)) return null
+        val outroCost = if (a.type == SegmentType.OUTRO || b.type == SegmentType.OUTRO) OUTRO_SEGUE_COST else 0.0
         val minFade = if (relaxed) RELAXED_MIN_FADE_MS else MIN_FADE_MS
         val bCalm = b.isCalmEntry || (relaxed && b.type == SegmentType.OUTRO)
         // The four cases: where A is (high energy or calm) and where B has to land (calm entry or high energy).
@@ -295,7 +302,8 @@ object SmartTransitionCalculator {
                 WEIGHT_SKIP_A * skipA +
                 WEIGHT_B_ENTRY * lateness +
                 WEIGHT_VOCAL * vocalCost +
-                (if (secondaryStartB < 1_000L) START_AT_ZERO_COST else 0.0)
+                (if (secondaryStartB < 1_000L) START_AT_ZERO_COST else 0.0) +
+                outroCost
 
         // Beat phase is only meaningful when the two beats are the same musical beat, not a folded half/double.
         val trackPhase = tempo.matched && !tempo.octaveFolded
