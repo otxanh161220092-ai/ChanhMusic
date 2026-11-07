@@ -150,7 +150,7 @@ object SmartTransitionCalculator {
             if (quickCut) minOf((QUICK_CALM_BEATS * beatA).toLong(), cap) else pickBars(cap, barA, BARS_MEDIUM).coerceAtLeast(minOf(cap, 1_000L))
         val handover = floorToBar(endA, gridA).let { if (it - fade >= earliestMixMs) it else endA }
         val entryB = gridB?.firstBarAtOrAfter(0.0)?.toLong()?.takeIf { it < 4_000L } ?: 0L
-        val trackPhase = tempo.matched && !tempo.octaveFolded
+        val trackPhase = tempo.matched
         Timber.tag("MusicService").d("Phase v2: matched=%b folded=%b gridA=%b gridB=%b", tempo.matched, tempo.octaveFolded, gridA != null, gridB != null)
         return TransitionPlan(
             kind = TransitionKind.CALM_TO_CALM,
@@ -305,8 +305,8 @@ object SmartTransitionCalculator {
                 (if (secondaryStartB < 1_000L) START_AT_ZERO_COST else 0.0) +
                 outroCost
 
-        // Beat phase is only meaningful when the two beats are the same musical beat, not a folded half/double.
-        val trackPhase = tempo.matched && !tempo.octaveFolded
+        // Half/double tempos still share one pulse (their ratio is a power of two), so beat phase is tracked for them too.
+        val trackPhase = tempo.matched
         Timber.tag("MusicService").d("Phase v2: matched=%b folded=%b gridA=%b gridB=%b", tempo.matched, tempo.octaveFolded, gridA != null, gridB != null)
         return TransitionPlan(
             kind = kind,
