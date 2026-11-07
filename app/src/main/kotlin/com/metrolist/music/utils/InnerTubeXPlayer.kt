@@ -281,7 +281,8 @@ object InnerTubeXPlayer {
 
     private fun AudioQuality.toInnerTubeX(connectivityManager: ConnectivityManager): InnerTubeXAudioQuality =
         when (this) {
-            AudioQuality.HIGH -> InnerTubeXAudioQuality.HIGH
+            // YouTube serves no lossless audio, so Lossless uses the best available stream.
+            AudioQuality.HIGH, AudioQuality.LOSSLESS -> InnerTubeXAudioQuality.HIGH
             AudioQuality.LOW -> InnerTubeXAudioQuality.LOW
             AudioQuality.AUTO ->
                 if (connectivityManager.isActiveNetworkMetered) {
