@@ -442,7 +442,8 @@ private fun NewMiniPlayer(
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 8.dp),
+                // Start inset clears the 27dp rounded end so the artwork corners stay inside the curve.
+                modifier = Modifier.fillMaxSize().padding(start = 14.dp, end = 10.dp, top = 4.dp, bottom = 4.dp),
             ) {
                 AsyncImage(
                     model = mediaMetadata?.thumbnailUrl?.resize(160, 160),
