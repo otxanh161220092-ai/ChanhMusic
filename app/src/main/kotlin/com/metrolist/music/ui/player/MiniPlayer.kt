@@ -24,6 +24,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.layout.Box
@@ -392,8 +393,8 @@ private fun NewMiniPlayer(
                         glassBackdrop,
                         RoundedCornerShape(27.dp),
                         backgroundColor,
-                        if (lightGlass) Color.White.copy(alpha = 0.2f) else Color.Black.copy(alpha = 0.45f),
-                        if (lightGlass) Color.White.copy(alpha = 0.25f) else Color.Transparent,
+                        if (lightGlass) Color.White.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.45f),
+                        if (lightGlass) Color.White.copy(alpha = 0.45f) else Color.Transparent,
                     )
                     .highlightPill()
                     .clickable(
@@ -964,7 +965,7 @@ private fun LegacyMiniMediaInfo(
         Box(
             modifier =
                 Modifier
-                    .padding(6.dp)
+                    .padding(start = 12.dp, top = 6.dp, end = 6.dp, bottom = 6.dp)
                     .size(48.dp)
                     .clip(RoundedCornerShape(ThumbnailCornerRadius)),
         ) {
@@ -1009,9 +1010,11 @@ private fun LegacyMiniMediaInfo(
         }
 
         Column(
+            verticalArrangement = Arrangement.Center,
             modifier =
                 Modifier
                     .weight(1f)
+                    .fillMaxHeight()
                     .padding(horizontal = 6.dp),
         ) {
             Text(
