@@ -30,7 +30,8 @@ fun TrackFeatures.toSongStructure(vocalGaps: List<LongRange>? = null): SongStruc
         segments = LoudnessSegmenter.segment(durationMs, loudnessDb) ?: HeuristicSegmenter.segment(durationMs, loudnessDb),
         bpm = bpm,
         hasTempo = hasTempo,
-        gridNear = { positionMs -> if (hasTempo) gridNear(positionMs.toDouble()) else null },
+        // Same gate as tempo matching: a usable BPM is enough to measure the grid.
+        gridNear = { positionMs -> if (bpm > 0f) gridNear(positionMs.toDouble()) else null },
         vocalGaps = vocalGaps,
         onsetSliceAt = { startMs, lengthMs ->
             if (!hasTempo || hopMs <= 0.0 || lowOnset.isEmpty()) {
