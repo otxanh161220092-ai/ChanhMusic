@@ -5,6 +5,7 @@
 
 package com.metrolist.music.playback.automix
 
+import timber.log.Timber
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.exp
@@ -53,12 +54,17 @@ class TrackFeatures(
         centerMs: Double,
         spanMs: Double = 16_000.0,
     ): BeatGrid? {
-        if (periodHops <= 0.0 || onset.size < 8) return null
         val center = (centerMs / hopMs).roundToInt()
         val half = (spanMs / hopMs / 2.0).roundToInt()
         val lo = max(0, center - half)
         val hi = min(onset.size - 1, center + half)
-        if (hi - lo < periodHops * 8) return null
+        if (periodHops <= 0.0 || onset.size < 8 || hi - lo < periodHops * 8) {
+            Timber.tag("MusicService").d(
+                "Grid unavailable: periodHops=%.2f onsetSize=%d window=%d hops center=%d",
+                periodHops, onset.size, hi - lo, center,
+            )
+            return null
+        }
 
         val p = periodHops
         var bestPhase = 0
