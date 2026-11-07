@@ -102,7 +102,7 @@ fun AppNavigationRail(
             }
             val currentIsSelected by rememberUpdatedState(isSelected)
             val iconRes = remember(isSelected, screen) {
-                if (isSelected) screen.iconIdActive else screen.iconIdInactive
+                screen.iconIdActive
             }
 
             val isSearchItem = screen == Screens.Search && onSearchLongClick != null
@@ -208,7 +208,7 @@ fun AppNavigationBar(
             }
             val currentIsSelected by rememberUpdatedState(isSelected)
             val iconRes = remember(isSelected, screen) {
-                if (isSelected) screen.iconIdActive else screen.iconIdInactive
+                screen.iconIdActive
             }
 
             val isSearchItem = screen == Screens.Search && onSearchLongClick != null
@@ -335,7 +335,7 @@ private fun AppleStyleNavigationBar(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Icon(
-                        painter = painterResource(id = if (isSelected) screen.iconIdActive else screen.iconIdInactive),
+                        painter = painterResource(id = screen.iconIdActive),
                         contentDescription = stringResource(screen.titleId),
                         tint = tint,
                         modifier = Modifier.size(24.dp),
@@ -422,7 +422,6 @@ private fun LiquidNavigationBar(
     ) {
         val tabScale = LocalLiquidBottomTabScale.current
         navigationItems.forEach { screen ->
-            val isSelected = navigationItems.indexOf(screen) == selectedIndex
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -437,7 +436,7 @@ private fun LiquidNavigationBar(
                 verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
             ) {
                 Icon(
-                    painter = painterResource(id = if (isSelected) screen.iconIdActive else screen.iconIdInactive),
+                    painter = painterResource(id = screen.iconIdActive),
                     contentDescription = stringResource(screen.titleId),
                     tint = iconColor,
                     modifier = Modifier.size(28.dp),

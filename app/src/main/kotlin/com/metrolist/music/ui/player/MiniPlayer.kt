@@ -1108,7 +1108,7 @@ private fun SubscribeButton(
                 },
     ) {
         Icon(
-            painter = painterResource(if (isSubscribed) R.drawable.subscribed else R.drawable.subscribe),
+            painter = painterResource(if (isSubscribed) R.drawable.subscribed else R.drawable.subscribed),
             contentDescription = null,
             tint = if (isSubscribed) primaryColor else onSurfaceColor.copy(alpha = 0.7f),
             modifier = Modifier.size(20.dp),
@@ -1146,7 +1146,7 @@ private fun FavoriteButton(
                 ).clickable { playerConnection.service.toggleLike() },
     ) {
         Icon(
-            painter = painterResource(if (isLiked) R.drawable.favorite else R.drawable.favorite_border),
+            painter = painterResource(if (isLiked) R.drawable.favorite else R.drawable.favorite),
             contentDescription = null,
             tint = if (isLiked) errorColor else onSurfaceColor.copy(alpha = 0.7f),
             modifier = Modifier.size(20.dp),
