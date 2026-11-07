@@ -40,7 +40,6 @@ import com.metrolist.music.playback.automix.TransitionPlan
 import com.metrolist.music.playback.automix.toSongStructure
 import kotlin.math.abs
 import kotlin.math.min
-import kotlin.math.roundToLong
 import com.metrolist.music.utils.safeDataStoreEdit
 import android.net.ConnectivityManager
 import android.os.Binder
@@ -5681,12 +5680,6 @@ class MusicService :
         val errorMs = plan.phaseErrorMs(positionA, positionB) ?: return
         val predicted = plan.predictedPhaseErrorMs()
         if (first) Timber.tag(TAG).i("Beat phase at start: %.1f ms (predicted %.1f ms)", errorMs, predicted?.first ?: 0.0)
-        // B is still silent at the start of the overlap, so a jump to the measured beat is inaudible; slow nudges are too slow for it.
-        if (first && abs(errorMs) > PhaseController.LOCK_TOLERANCE_MS) {
-            incoming.seekTo(positionB + errorMs.roundToLong())
-            Timber.tag(TAG).i("Beat phase: B moved %.1f ms to the beat", errorMs)
-            return
-        }
         if (last) Timber.tag(TAG).i("Beat phase at end: %.1f ms (predicted %.1f ms)", errorMs, predicted?.second ?: 0.0)
         val multiplier =
             if (last) 1.0 else PhaseController.speedMultiplier(plan.phaseErrorBeats(positionA, positionB) ?: 0.0, plan.gridA?.beatMs ?: return)
