@@ -422,6 +422,7 @@ private fun LiquidNavigationBar(
     ) {
         val tabScale = LocalLiquidBottomTabScale.current
         navigationItems.forEach { screen ->
+            val isSelected = navigationItems.indexOf(screen) == selectedIndex
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -436,7 +437,7 @@ private fun LiquidNavigationBar(
                 verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
             ) {
                 Icon(
-                    painter = painterResource(id = screen.iconIdInactive),
+                    painter = painterResource(id = if (isSelected) screen.iconIdActive else screen.iconIdInactive),
                     contentDescription = stringResource(screen.titleId),
                     tint = iconColor,
                     modifier = Modifier.size(28.dp),
