@@ -246,7 +246,7 @@ fun LiquidBottomTabs(
                 .drawBackdrop(
                     backdrop = backdrop,
                     shape = { Capsule() },
-                    effects = { blur((glassBlur * 2.8f).dp.toPx()) },
+                    effects = { blur(maxOf(glassBlur * 2.8f, 12f).dp.toPx()) },
                 )
                 .height(64f.dp)
                 .fillMaxWidth(1f / tabsCount)
