@@ -650,30 +650,30 @@ private fun NewMiniPlayerSongInfo(
         verticalArrangement = Arrangement.Center,
     ) {
         mediaMetadata?.let { metadata ->
-            Text(
-                text = metadata.title,
-                color = onSurfaceColor,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Clip,
-                modifier = Modifier.basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp),
-            )
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (metadata.explicit) MIcon.Explicit()
-                 if (metadata.artists.any { it.name.isNotBlank() }) {
-                     Text(
-                         text = metadata.artists.joinToArtistString(" ${stringResource(R.string.and)} ") { it.name },
-                         color = onSurfaceColor.copy(alpha = 0.6f),
-                        fontSize = 14.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Clip,
-                        modifier = Modifier.basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp),
-                    )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (metadata.explicit) {
+                    MIcon.Explicit()
+                    Spacer(Modifier.width(4.dp))
                 }
+                Text(
+                    text = metadata.title,
+                    color = onSurfaceColor,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Clip,
+                    modifier = Modifier.weight(1f).basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp),
+                )
+            }
+            if (metadata.artists.any { it.name.isNotBlank() }) {
+                Text(
+                    text = metadata.artists.joinToArtistString(" ${stringResource(R.string.and)} ") { it.name },
+                    color = onSurfaceColor.copy(alpha = 0.6f),
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Clip,
+                    modifier = Modifier.basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp),
+                )
             }
 
             AnimatedVisibility(visible = error != null, enter = fadeIn(), exit = fadeOut()) {
