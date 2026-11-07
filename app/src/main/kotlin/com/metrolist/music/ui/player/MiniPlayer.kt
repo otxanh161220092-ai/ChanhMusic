@@ -118,7 +118,6 @@ import com.metrolist.music.constants.MiniPlayerBackgroundStyle
 import com.metrolist.music.constants.MiniPlayerBackgroundStyleKey
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.platform.LocalContext
 import androidx.palette.graphics.Palette
 import coil3.imageLoader
@@ -396,26 +395,7 @@ private fun NewMiniPlayer(
                         if (lightGlass) Color.White.copy(alpha = 0.2f) else Color.Black.copy(alpha = 0.45f),
                         if (lightGlass) Color.White.copy(alpha = 0.25f) else Color.Transparent,
                     )
-                    .border(1.dp, outlineColor.copy(alpha = 0.45f), RoundedCornerShape(27.dp))
                     .highlightPill()
-                    .drawWithContent {
-                        drawContent()
-                        val corner = CornerRadius(size.height / 2f)
-                        drawRoundRect(
-                            brush = Brush.verticalGradient(0f to Color.Transparent, 0.5f to Color.Transparent),
-                            cornerRadius = corner,
-                        )
-                        drawRoundRect(
-                            brush =
-                                Brush.linearGradient(
-                                    colors = listOf(Color.White.copy(alpha = 0.8f), Color.White.copy(alpha = 0.2f)),
-                                    start = Offset.Zero,
-                                    end = Offset(size.width, size.height),
-                                ),
-                            cornerRadius = corner,
-                            style = Stroke(width = 1.5.dp.toPx()),
-                        )
-                    }
                     .clickable(
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,
