@@ -42,6 +42,8 @@ import com.metrolist.music.constants.AudioOffload
 import com.metrolist.music.constants.AudioTrackPlaybackParamsKey
 import com.metrolist.music.constants.AudioQuality
 import com.metrolist.music.constants.AudioQualityKey
+import com.metrolist.music.constants.OutputPrecision
+import com.metrolist.music.constants.OutputPrecisionKey
 import com.metrolist.music.constants.AutoDownloadOnLikeKey
 import com.metrolist.music.constants.AutomixCreativeKey
 import com.metrolist.music.constants.AutomixEnabledKey
@@ -102,6 +104,10 @@ fun PlayerSettings(
     val (audioQuality, onAudioQualityChange) = rememberEnumPreference(
         AudioQualityKey,
         defaultValue = AudioQuality.AUTO
+    )
+    val (outputPrecision, onOutputPrecisionChange) = rememberEnumPreference(
+        OutputPrecisionKey,
+        defaultValue = OutputPrecision.PCM_16
     )
     val (crossfadeEnabled, onCrossfadeEnabledChange) = rememberPreference(
         CrossfadeEnabledKey,
@@ -262,6 +268,29 @@ fun PlayerSettings(
         mutableStateOf(false)
     }
 
+    var showOutputPrecisionDialog by remember {
+        mutableStateOf(false)
+    }
+
+    if (showOutputPrecisionDialog) {
+        EnumDialog(
+            onDismiss = { showOutputPrecisionDialog = false },
+            onSelect = {
+                onOutputPrecisionChange(it)
+                showOutputPrecisionDialog = false
+            },
+            title = stringResource(R.string.output_precision),
+            current = outputPrecision,
+            values = OutputPrecision.values().toList(),
+            valueText = {
+                when (it) {
+                    OutputPrecision.PCM_16 -> stringResource(R.string.output_precision_pcm16)
+                    OutputPrecision.FLOAT_32 -> stringResource(R.string.output_precision_float32)
+                }
+            }
+        )
+    }
+
     if (showAudioQualityDialog) {
         EnumDialog(
             onDismiss = { showAudioQualityDialog = false },
@@ -332,6 +361,19 @@ fun PlayerSettings(
                         )
                     },
                     onClick = { showAudioQualityDialog = true }
+                ))
+                add(Material3SettingsItem(
+                    icon = painterResource(R.drawable.graphic_eq),
+                    title = { Text(stringResource(R.string.output_precision)) },
+                    description = {
+                        Text(
+                            when (outputPrecision) {
+                                OutputPrecision.PCM_16 -> stringResource(R.string.output_precision_pcm16)
+                                OutputPrecision.FLOAT_32 -> stringResource(R.string.output_precision_float32)
+                            }
+                        )
+                    },
+                    onClick = { showOutputPrecisionDialog = true }
                 ))
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.linear_scale),

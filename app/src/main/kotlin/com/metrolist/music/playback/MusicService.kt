@@ -121,6 +121,8 @@ import com.metrolist.music.constants.AddToPlaylistPositionKey
 import com.metrolist.music.constants.AndroidAutoTargetPlaylistKey
 import com.metrolist.music.constants.AudioNormalizationKey
 import com.metrolist.music.constants.AudioOffload
+import com.metrolist.music.constants.OutputPrecision
+import com.metrolist.music.constants.OutputPrecisionKey
 import com.metrolist.music.constants.AudioQualityKey
 import com.metrolist.music.constants.AudioTrackPlaybackParamsKey
 import com.metrolist.music.constants.AutoDownloadOnLikeKey
@@ -1409,6 +1411,15 @@ class MusicService :
         val silenceProcessor = SilenceDetectorAudioProcessor { handleLongSilenceDetected() }
         val tailFxProcessor = TailFxAudioProcessor()
 
+        val useFloatOutput =
+            (
+                if (prefs != null) {
+                    prefs[OutputPrecisionKey]
+                } else {
+                    runBlocking { dataStore.get(OutputPrecisionKey, OutputPrecision.PCM_16.name) }
+                }
+            ) == OutputPrecision.FLOAT_32.name
+
         // Set initial state — use pre-read prefs when available, otherwise fall back to DataStore
         val useAudioTrackPlaybackParams = if (prefs != null) {
             val skipSilence = prefs[SkipSilenceKey] ?: false
@@ -1431,7 +1442,7 @@ class MusicService :
                 .setMediaSourceFactory(
                     createMediaSourceFactory(normalizationProcessor) { createdPlayer },
                 )
-                .setRenderersFactory(createRenderersFactory(normalizationProcessor, eqProcessor, silenceProcessor, tailFxProcessor, useAudioTrackPlaybackParams))
+                .setRenderersFactory(createRenderersFactory(normalizationProcessor, eqProcessor, silenceProcessor, tailFxProcessor, useAudioTrackPlaybackParams, useFloatOutput))
                 .setLoadControl(
                     // Start playback once ~750ms is buffered (media3's default is 1000ms) so first
                     // audio is audible a touch sooner. min/max/after-rebuffer match the media3 1.x
@@ -4137,7 +4148,12 @@ class MusicService :
         silenceProcessor: SilenceDetectorAudioProcessor,
         tailFxProcessor: TailFxAudioProcessor,
         useAudioTrackPlaybackParams: Boolean,
+        useFloatOutput: Boolean,
     ) = object : DefaultRenderersFactory(this) {
+        init {
+            setEnableFloatOutput(useFloatOutput)
+        }
+
         override fun buildAudioRenderers(
             context: Context,
             extensionRendererMode: Int,

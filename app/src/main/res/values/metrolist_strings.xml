@@ -1023,4 +1023,7 @@
     <string name="reduce_blur_effects">Reduce blur effects</string>
     <string name="reduce_blur_effects_desc">Turns off the blur on lyrics and when covers change</string>
     <string name="audio_quality_lossless">Lossless</string>
+    <string name="output_precision">Output precision</string>
+    <string name="output_precision_pcm16">16-bit PCM</string>
+    <string name="output_precision_float32">32-bit float</string>
 </resources>

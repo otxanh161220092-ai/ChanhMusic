@@ -118,6 +118,13 @@ enum class AudioQuality {
     LOSSLESS,
 }
 
+val OutputPrecisionKey = stringPreferencesKey("outputPrecision")
+
+enum class OutputPrecision {
+    PCM_16,
+    FLOAT_32,
+}
+
 val AudioOffload = booleanPreferencesKey("enableOffload")
 val AudioTrackPlaybackParamsKey = booleanPreferencesKey("audioTrackPlaybackParams")
 
