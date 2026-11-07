@@ -4150,10 +4150,6 @@ class MusicService :
         useAudioTrackPlaybackParams: Boolean,
         useFloatOutput: Boolean,
     ) = object : DefaultRenderersFactory(this) {
-        init {
-            setEnableFloatOutput(useFloatOutput)
-        }
-
         override fun buildAudioRenderers(
             context: Context,
             extensionRendererMode: Int,
@@ -4204,7 +4200,7 @@ class MusicService :
             enableAudioTrackPlaybackParams: Boolean,
         ) = DefaultAudioSink
             .Builder(this@MusicService)
-            .setEnableFloatOutput(enableFloatOutput)
+            .setEnableFloatOutput(useFloatOutput)
             .setEnableAudioTrackPlaybackParams(useAudioTrackPlaybackParams)
             .setAudioProcessorChain(
                 DefaultAudioSink.DefaultAudioProcessorChain(
