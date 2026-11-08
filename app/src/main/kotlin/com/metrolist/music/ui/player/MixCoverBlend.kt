@@ -206,53 +206,22 @@ fun MixCoverBlend(
     }
 }
 
-private fun backgroundRequest(context: Context, artwork: String?) =
-    ImageRequest
-        .Builder(context)
-        .data(artwork)
-        .size(100, 100)
-        .allowHardware(false)
-        .build()
-
-/** The blurred player background following the same mix: the incoming colours rise over the outgoing ones. */
+/** The background during a mix: the outgoing cover's new-style background fades out as the incoming one fades in. */
 @Composable
 fun MixBackgroundBlend(
     visual: MixVisual,
     backgroundAlpha: Float,
     blurRadius: Dp,
 ) {
-    val context = LocalContext.current
     val progress = rememberMixProgress(visual.progress)
-    val outgoing = remember(visual.outgoingArtwork) { backgroundRequest(context, visual.outgoingArtwork) }
-    val incoming = remember(visual.incomingArtwork) { backgroundRequest(context, visual.incomingArtwork) }
     Box(modifier = Modifier.alpha(backgroundAlpha)) {
-        AsyncImage(
-            model = outgoing,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().blur(blurRadius),
+        ProgressiveBlurArtwork(
+            artwork = visual.outgoingArtwork,
+            modifier = Modifier.fillMaxSize().graphicsLayer { alpha = 1f - ease(progress.value) },
         )
-        AsyncImage(
-            model = incoming,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .blur(blurRadius)
-                    .graphicsLayer { alpha = ease(progress.value) },
-        )
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            0f to Color.Black.copy(alpha = 0.1f),
-                            0.55f to Color.Black.copy(alpha = 0.25f),
-                            1f to Color.Black.copy(alpha = 0.5f),
-                        ),
-                    ),
+        ProgressiveBlurArtwork(
+            artwork = visual.incomingArtwork,
+            modifier = Modifier.fillMaxSize().graphicsLayer { alpha = ease(progress.value) },
         )
     }
 }
