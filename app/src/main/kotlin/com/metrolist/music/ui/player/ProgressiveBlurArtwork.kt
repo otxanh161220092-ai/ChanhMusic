@@ -44,13 +44,16 @@ private const val VARIABLE_BLUR_AGSL = """
 uniform shader image;
 uniform float2 size;
 uniform float maxRadius;
+uniform float squareBottom;
+uniform float softPx;
 
 half4 main(float2 coord) {
-    float t = clamp((coord.y / size.y - 0.5) / 0.15, 0.0, 1.0);
-    float r = t * maxRadius;
-    if (r < 1.0) {
-        return image.eval(coord);
+    float t = clamp((coord.y - squareBottom) / softPx, 0.0, 1.0);
+    half4 sharp = image.eval(coord);
+    if (t <= 0.0) {
+        return sharp;
     }
+    float r = t * maxRadius;
     half4 sum = half4(0.0);
     float total = 0.0;
     for (int i = -4; i <= 4; i++) {
@@ -61,10 +64,11 @@ half4 main(float2 coord) {
             total += w;
         }
     }
-    return sum / half(total);
+    return mix(sharp, sum / half(total), half(t));
 }
 """
 
+/** The square cover stays sharp down to [squareBottom]; below it the edge softens into the blurred fill. */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 private fun variableBlurEffect(
     width: Float,
@@ -74,6 +78,8 @@ private fun variableBlurEffect(
     val shader = RuntimeShader(VARIABLE_BLUR_AGSL)
     shader.setFloatUniform("size", width, height)
     shader.setFloatUniform("maxRadius", maxRadiusPx)
+    shader.setFloatUniform("squareBottom", width)
+    shader.setFloatUniform("softPx", width * 0.2f)
     return RenderEffect.createRuntimeShaderEffect(shader, "image")
 }
 
