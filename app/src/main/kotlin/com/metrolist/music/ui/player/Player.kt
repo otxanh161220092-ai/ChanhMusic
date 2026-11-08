@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
@@ -1605,7 +1606,10 @@ fun BottomSheetPlayer(
 
             // In portrait with lyrics open, the top row is drawn above the lyrics instead
             if (!showInlineLyrics || LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                controlsTopRow(mediaMetadata)
+                // Each row above the next one moves 1.5x as far, so the stack tightens as it drops.
+                Box(modifier = Modifier.offset(y = 20.25.dp)) {
+                    controlsTopRow(mediaMetadata)
+                }
             }
 
             Spacer(Modifier.height(24.dp))
@@ -1670,7 +1674,7 @@ fun BottomSheetPlayer(
                 }
             }
 
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText)) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText).offset(y = 13.5.dp)) {
             when (sliderStyle) {
                 SliderStyle.WAVY -> {
                     if (squigglySlider) {
