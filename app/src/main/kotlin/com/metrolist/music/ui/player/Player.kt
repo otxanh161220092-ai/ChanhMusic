@@ -2281,8 +2281,28 @@ fun BottomSheetPlayer(
                         }
                     }
 
+                    Spacer(Modifier.height(if (videoActive) 40.dp else 0.dp))
                     mediaMetadata?.let {
-                        controlsContent(it)
+                        // With the video on, a dark fade sits behind the whole control block.
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier =
+                                Modifier.then(
+                                    if (videoActive) {
+                                        Modifier.background(
+                                            Brush.verticalGradient(
+                                                0f to Color.Transparent,
+                                                0.2f to Color.Black.copy(alpha = 0.4f),
+                                                1f to Color.Black.copy(alpha = 0.6f),
+                                            ),
+                                        )
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
+                        ) {
+                            controlsContent(it)
+                        }
                     }
 
                     Spacer(Modifier.height(30.dp))
