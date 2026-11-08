@@ -34,6 +34,7 @@ fun Modifier.glassSurface(
     fallbackColor: Color,
     tint: Color,
     mask: Color = Color.Transparent,
+    lensDp: Float = 36f,
 ): Modifier =
     composed {
     val blurDp = LocalGlassBlur.current
@@ -46,7 +47,7 @@ fun Modifier.glassSurface(
             effects = {
                 vibrancy()
                 blur(blurDp.dp.toPx())
-                lens(36f.dp.toPx(), 36f.dp.toPx(), chromaticAberration = true)
+                lens(lensDp.dp.toPx(), lensDp.dp.toPx(), chromaticAberration = true)
             },
             highlight = { Highlight.Default },
             shadow = { Shadow(alpha = 0.2f) },

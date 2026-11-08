@@ -57,6 +57,8 @@ fun GlassBackButton(
                     fallbackColor = Color.White.copy(alpha = 0.15f),
                     tint = Color.White,
                     mask = Color(0xFFD9D9D9).copy(alpha = 0.3f),
+                    // A small lens keeps the edge refraction without magnifying the content behind the button.
+                    lensDp = 6f,
                 )
                 .highlightBorder()
                 .clickable(
