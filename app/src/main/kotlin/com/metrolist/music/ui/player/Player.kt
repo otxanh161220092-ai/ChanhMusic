@@ -357,6 +357,21 @@ fun BottomSheetPlayer(
 
     val playbackState by playerConnection.playbackState.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    var videoUri by remember(mediaMetadata.id) { mutableStateOf(VideoArtworkStore.get(context, mediaMetadata.id)) }
+    var showVideoArtwork by remember(mediaMetadata.id) { mutableStateOf(false) }
+    val videoPicker =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null) {
+                try {
+                    context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                } catch (_: Exception) {
+                    // Some providers grant no persistable access; the choice still works for this session.
+                }
+                VideoArtworkStore.set(context, mediaMetadata.id, uri)
+                videoUri = uri
+                showVideoArtwork = true
+            }
+        }
     val currentSong by playerConnection.currentSong.collectAsStateWithLifecycle(initialValue = null)
     val automix by playerConnection.service.automixItems.collectAsStateWithLifecycle()
     val mixZone by playerConnection.service.mixZone.collectAsStateWithLifecycle()
@@ -1225,6 +1240,27 @@ fun BottomSheetPlayer(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.vibrant(useVibrant, 0.9f),
                     ) {
+                        // Only songs with a chosen video get the switch between cover and video.
+                        videoUri?.let {
+                            Box(modifier = Modifier.size(36.dp).highlightBorder()) {
+                                FilledIconButton(
+                                    onClick = { showVideoArtwork = !showVideoArtwork },
+                                    shape = CircleShape,
+                                    colors =
+                                        IconButtonDefaults.filledIconButtonColors(
+                                            containerColor = roundButtonContainerColor,
+                                            contentColor = roundButtonContentColor,
+                                        ),
+                                    modifier = Modifier.fillMaxSize(),
+                                ) {
+                                    Icon(
+                                        painter = painterResource(if (showVideoArtwork) R.drawable.album else R.drawable.play),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp),
+                                    )
+                                }
+                            }
+                        }
                                                 Box(modifier = Modifier.size(36.dp).highlightBorder()) {
     FilledIconButton(
                                 onClick = playerConnection::toggleLike,
@@ -1264,6 +1300,19 @@ fun BottomSheetPlayer(
                                                 val menuRepeat by playerConnection.repeatMode.collectAsStateWithLifecycle()
                                                 val menuLyrics by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
                                                 buildList {
+                                                    add(
+                                                        Material3MenuItemData(
+                                                            title = { Text(text = stringResource(R.string.choose_video_background)) },
+                                                            icon = {
+                                                                Icon(
+                                                                    painter = painterResource(R.drawable.play),
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(24.dp),
+                                                                )
+                                                            },
+                                                            onClick = { videoPicker.launch(arrayOf("video/*")) },
+                                                        ),
+                                                    )
                                                     add(
                                                         Material3MenuItemData(
                                                             title = { Text(text = stringResource(R.string.share)) },
@@ -2128,6 +2177,8 @@ fun BottomSheetPlayer(
                                     isPlayerExpanded = isExpandedProvider,
                                     isLandscape = true,
                                     isListenTogetherGuest = isListenTogetherGuest,
+                                    videoUri = videoUri,
+                                    showVideo = showVideoArtwork,
                                 )
                             }
                         }
@@ -2198,6 +2249,8 @@ fun BottomSheetPlayer(
                                     modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
                                     isPlayerExpanded = isExpandedProvider,
                                     isListenTogetherGuest = isListenTogetherGuest,
+                                    videoUri = videoUri,
+                                    showVideo = showVideoArtwork,
                                 )
                             }
                         }

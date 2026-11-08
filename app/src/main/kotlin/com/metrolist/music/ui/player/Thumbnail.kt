@@ -207,6 +207,8 @@ fun Thumbnail(
     isPlayerExpanded: () -> Boolean = { true },
     isLandscape: Boolean = false,
     isListenTogetherGuest: Boolean = false,
+    videoUri: android.net.Uri? = null,
+    showVideo: Boolean = false,
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val context = LocalContext.current
@@ -426,6 +428,7 @@ fun Thumbnail(
                                 context = context,
                                 isLandscape = isLandscape,
                                 isListenTogetherGuest = isListenTogetherGuest,
+                                videoUri = if (showVideo) videoUri else null,
                                 currentMediaId = mediaMetadata?.id,
                                 currentMediaThumbnail = mediaMetadata?.thumbnailUrl,
                                 gridState = thumbnailLazyGridState,
@@ -477,6 +480,7 @@ private fun ThumbnailItem(
     currentMediaId: String? = null,
     currentMediaThumbnail: String? = null,
     gridState: LazyGridState,
+    videoUri: android.net.Uri? = null,
     changeProgress: Animatable<Float, AnimationVector1D>,
     previousArtwork: String?,
     mixVisual: com.metrolist.music.playback.automix.MixVisual? = null,
@@ -575,7 +579,14 @@ private fun ThumbnailItem(
 
                 val isCurrent = item.mediaId == currentMediaId
                 val visual = mixVisual
-                if (isCurrent && visual != null) {
+                if (isCurrent && videoUri != null) {
+                    LocalVideoArtwork(
+                        uri = videoUri,
+                        positionProvider = { playerConnection.player.currentPosition },
+                        isPlaying = playerConnection.isPlaying,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else if (isCurrent && visual != null) {
                     MixCoverBlend(
                         visual = visual,
                         cropArtwork = cropAlbumArt,

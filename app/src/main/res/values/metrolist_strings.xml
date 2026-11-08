@@ -1026,4 +1026,5 @@
     <string name="output_precision">Output precision</string>
     <string name="output_precision_pcm16">16-bit PCM</string>
     <string name="output_precision_float32">32-bit float</string>
+    <string name="choose_video_background">Choose video background</string>
 </resources>
