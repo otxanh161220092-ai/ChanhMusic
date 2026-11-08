@@ -104,6 +104,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -360,7 +363,8 @@ fun BottomSheetPlayer(
 
     val playbackState by playerConnection.playbackState.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
-    var videoUri by remember(mediaMetadata?.id) { mutableStateOf(VideoArtworkStore.get(context, mediaMetadata?.id)) }
+    // Video background is paused for now: nothing is loaded, so no video control is shown.
+    var videoUri by remember(mediaMetadata?.id) { mutableStateOf<android.net.Uri?>(null) }
     var showVideoArtwork by remember(mediaMetadata?.id) { mutableStateOf(false) }
     val videoActive = showVideoArtwork && videoUri != null
     val videoPicker =
@@ -936,7 +940,39 @@ fun BottomSheetPlayer(
                             label = "blurBackground",
                         ) { thumbnailUrl ->
                             if (thumbnailUrl != null) {
-                                Box(modifier = Modifier.alpha(backgroundAlpha)) {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .alpha(backgroundAlpha)
+                                            .fillMaxSize()
+                                            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen },
+                                ) {
+                                    // Sharp artwork at the top fades out toward the bottom, where a blurred copy fades in.
+                                    AsyncImage(
+                                        model =
+                                            ImageRequest
+                                                .Builder(context)
+                                                .data(thumbnailUrl)
+                                                .size(400, 400)
+                                                .allowHardware(false)
+                                                .build(),
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize()
+                                                .drawWithContent {
+                                                    drawContent()
+                                                    drawRect(
+                                                        Brush.verticalGradient(
+                                                            0f to Color.Black,
+                                                            0.45f to Color.Black,
+                                                            1f to Color.Transparent,
+                                                        ),
+                                                        blendMode = BlendMode.DstIn,
+                                                    )
+                                                },
+                                    )
                                     AsyncImage(
                                         model =
                                             ImageRequest
@@ -950,7 +986,18 @@ fun BottomSheetPlayer(
                                         modifier =
                                             Modifier
                                                 .fillMaxSize()
-                                                .blur(if (useDarkTheme) 150.dp else 100.dp),
+                                                .blur(if (useDarkTheme) 150.dp else 100.dp)
+                                                .drawWithContent {
+                                                    drawContent()
+                                                    drawRect(
+                                                        Brush.verticalGradient(
+                                                            0f to Color.Transparent,
+                                                            0.4f to Color.Black,
+                                                            1f to Color.Black,
+                                                        ),
+                                                        blendMode = BlendMode.DstIn,
+                                                    )
+                                                },
                                     )
                                     Box(
                                         modifier =
@@ -958,22 +1005,9 @@ fun BottomSheetPlayer(
                                                 .fillMaxSize()
                                                 .background(
                                                     Brush.verticalGradient(
-                                                        colorStops =
-                                                            if (videoActive) {
-                                                                // With the video on, the dark fade starts lower and runs longer.
-                                                                arrayOf(
-                                                                    0f to Color.Black.copy(alpha = 0.1f),
-                                                                    0.7f to Color.Black.copy(alpha = 0.1f),
-                                                                    1f to Color.Black.copy(alpha = 0.7f),
-                                                                )
-                                                            } else {
-                                                                arrayOf(
-                                                                    0f to Color.Black.copy(alpha = 0.1f),
-                                                                    0.6f to Color.Black.copy(alpha = 0.1f),
-                                                                    0.85f to Color.Black.copy(alpha = 0.35f),
-                                                                    1f to Color.Black.copy(alpha = 0.6f),
-                                                                )
-                                                            },
+                                                        0f to Color.Black.copy(alpha = 0.1f),
+                                                        0.6f to Color.Black.copy(alpha = 0.25f),
+                                                        1f to Color.Black.copy(alpha = 0.5f),
                                                     ),
                                                 ),
                                     )
@@ -1318,19 +1352,6 @@ fun BottomSheetPlayer(
                                                 val menuRepeat by playerConnection.repeatMode.collectAsStateWithLifecycle()
                                                 val menuLyrics by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
                                                 buildList {
-                                                    add(
-                                                        Material3MenuItemData(
-                                                            title = { Text(text = stringResource(R.string.choose_video_background)) },
-                                                            icon = {
-                                                                Icon(
-                                                                    painter = painterResource(R.drawable.play),
-                                                                    contentDescription = null,
-                                                                    modifier = Modifier.size(24.dp),
-                                                                )
-                                                            },
-                                                            onClick = { videoPicker.launch(arrayOf("video/*")) },
-                                                        ),
-                                                    )
                                                     add(
                                                         Material3MenuItemData(
                                                             title = { Text(text = stringResource(R.string.share)) },
