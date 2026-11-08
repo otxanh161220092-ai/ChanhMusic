@@ -11,6 +11,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import android.content.res.Configuration
 import android.view.WindowManager
 import android.widget.Toast
@@ -357,17 +359,18 @@ fun BottomSheetPlayer(
 
     val playbackState by playerConnection.playbackState.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
-    var videoUri by remember(mediaMetadata.id) { mutableStateOf(VideoArtworkStore.get(context, mediaMetadata.id)) }
-    var showVideoArtwork by remember(mediaMetadata.id) { mutableStateOf(false) }
+    var videoUri by remember(mediaMetadata?.id) { mutableStateOf(VideoArtworkStore.get(context, mediaMetadata?.id)) }
+    var showVideoArtwork by remember(mediaMetadata?.id) { mutableStateOf(false) }
     val videoPicker =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            if (uri != null) {
+            val songId = mediaMetadata?.id
+            if (uri != null && songId != null) {
                 try {
                     context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 } catch (_: Exception) {
                     // Some providers grant no persistable access; the choice still works for this session.
                 }
-                VideoArtworkStore.set(context, mediaMetadata.id, uri)
+                VideoArtworkStore.set(context, songId, uri)
                 videoUri = uri
                 showVideoArtwork = true
             }
