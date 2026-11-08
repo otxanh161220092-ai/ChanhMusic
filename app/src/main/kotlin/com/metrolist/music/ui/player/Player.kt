@@ -1798,6 +1798,7 @@ fun BottomSheetPlayer(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier =
                     Modifier
+                        .offset(y = if (videoActive) 9.dp else 0.dp)
                         .fillMaxWidth()
                         .vibrant(useVibrantText)
                         .padding(horizontal = PlayerHorizontalPadding),
@@ -1855,6 +1856,7 @@ fun BottomSheetPlayer(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier =
                                 Modifier
+                                    .offset(y = if (videoActive) 6.dp else 0.dp)
                                     .fillMaxWidth()
                                     .vibrant(useVibrant)
                                     .padding(horizontal = PlayerHorizontalPadding),
@@ -1992,6 +1994,7 @@ fun BottomSheetPlayer(
                             tint = glyphColor,
                             modifier =
                                 Modifier
+                                    .offset(y = if (videoActive) 4.dp else 0.dp)
                                     .vibrant(useVibrant)
                                     .padding(horizontal = PlayerHorizontalPadding),
                         )
