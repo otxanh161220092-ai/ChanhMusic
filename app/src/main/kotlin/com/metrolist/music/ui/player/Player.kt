@@ -959,8 +959,9 @@ fun BottomSheetPlayer(
                                                 .background(
                                                     Brush.verticalGradient(
                                                         0f to Color.Black.copy(alpha = 0.1f),
-                                                        0.55f to Color.Black.copy(alpha = 0.25f),
-                                                        1f to Color.Black.copy(alpha = 0.5f),
+                                                        0.6f to Color.Black.copy(alpha = 0.1f),
+                                                        0.85f to Color.Black.copy(alpha = 0.35f),
+                                                        1f to Color.Black.copy(alpha = 0.6f),
                                                     ),
                                                 ),
                                     )
