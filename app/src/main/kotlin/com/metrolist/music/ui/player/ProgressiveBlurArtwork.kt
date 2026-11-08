@@ -39,15 +39,15 @@ import coil3.request.allowHardware
 
 private val MAX_BLUR = 110.dp
 
-/** Pixel-by-pixel blur whose radius grows from 0 at [FADE_START] of the height to [maxRadius] at the bottom. */
+/** Pixel-by-pixel blur: sharp to the middle of the height, then blurs quickly to [maxRadius] below it. */
 private const val VARIABLE_BLUR_AGSL = """
 uniform shader image;
 uniform float2 size;
 uniform float maxRadius;
 
 half4 main(float2 coord) {
-    float t = clamp((coord.y / size.y - 0.45) / 0.55, 0.0, 1.0);
-    float r = t * t * maxRadius;
+    float t = clamp((coord.y / size.y - 0.5) / 0.15, 0.0, 1.0);
+    float r = t * maxRadius;
     if (r < 1.0) {
         return image.eval(coord);
     }
