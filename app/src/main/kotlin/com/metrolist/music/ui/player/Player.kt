@@ -966,7 +966,8 @@ fun BottomSheetPlayer(
                                                     drawRect(
                                                         Brush.verticalGradient(
                                                             0f to Color.Black,
-                                                            0.45f to Color.Black,
+                                                            0.5f to Color.Black,
+                                                            0.62f to Color.Transparent,
                                                             1f to Color.Transparent,
                                                         ),
                                                         blendMode = BlendMode.DstIn,
@@ -992,7 +993,8 @@ fun BottomSheetPlayer(
                                                     drawRect(
                                                         Brush.verticalGradient(
                                                             0f to Color.Transparent,
-                                                            0.4f to Color.Black,
+                                                            0.5f to Color.Transparent,
+                                                            0.7f to Color.Black,
                                                             1f to Color.Black,
                                                         ),
                                                         blendMode = BlendMode.DstIn,
@@ -1005,9 +1007,9 @@ fun BottomSheetPlayer(
                                                 .fillMaxSize()
                                                 .background(
                                                     Brush.verticalGradient(
-                                                        0f to Color.Black.copy(alpha = 0.1f),
-                                                        0.6f to Color.Black.copy(alpha = 0.25f),
-                                                        1f to Color.Black.copy(alpha = 0.5f),
+                                                        0f to Color.Transparent,
+                                                        0.5f to Color.Black.copy(alpha = 0.15f),
+                                                        1f to Color.Black.copy(alpha = 0.45f),
                                                     ),
                                                 ),
                                     )
