@@ -361,6 +361,7 @@ fun BottomSheetPlayer(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     var videoUri by remember(mediaMetadata?.id) { mutableStateOf(VideoArtworkStore.get(context, mediaMetadata?.id)) }
     var showVideoArtwork by remember(mediaMetadata?.id) { mutableStateOf(false) }
+    val videoActive = showVideoArtwork && videoUri != null
     val videoPicker =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             val songId = mediaMetadata?.id
@@ -2154,7 +2155,7 @@ fun BottomSheetPlayer(
                         contentAlignment = Alignment.Center,
                         modifier =
                             Modifier
-                                .weight(1f)
+                                .weight(if (videoActive) 1.6f else 1f)
                                 .nestedScroll(state.preUpPostDownNestedScrollConnection),
                     ) {
                         // Remember lambdas to prevent unnecessary recomposition
@@ -2191,7 +2192,7 @@ fun BottomSheetPlayer(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier =
                             Modifier
-                                .weight(if (showInlineLyrics) 0.65f else 1f, false)
+                                .weight(if (showInlineLyrics) 0.65f else if (videoActive) 0.9f else 1f, false)
                                 .animateContentSize()
                                 .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
                     ) {
@@ -2201,7 +2202,8 @@ fun BottomSheetPlayer(
                             controlsContent(it)
                         }
 
-                        Spacer(Modifier.weight(1f))
+                        // With the video on, the controls sit at the bottom so the picture gets the room above them.
+                        Spacer(Modifier.weight(if (videoActive) 0.01f else 1f))
                     }
                 }
             }
