@@ -940,80 +940,10 @@ fun BottomSheetPlayer(
                             label = "blurBackground",
                         ) { thumbnailUrl ->
                             if (thumbnailUrl != null) {
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .alpha(backgroundAlpha)
-                                            .fillMaxSize()
-                                            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen },
-                                ) {
-                                    // Sharp artwork at the top fades out toward the bottom, where a blurred copy fades in.
-                                    AsyncImage(
-                                        model =
-                                            ImageRequest
-                                                .Builder(context)
-                                                .data(thumbnailUrl)
-                                                .size(400, 400)
-                                                .allowHardware(false)
-                                                .build(),
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop,
-                                        modifier =
-                                            Modifier
-                                                .fillMaxSize()
-                                                .drawWithContent {
-                                                    drawContent()
-                                                    drawRect(
-                                                        Brush.verticalGradient(
-                                                            0f to Color.Black,
-                                                            0.5f to Color.Black,
-                                                            0.62f to Color.Transparent,
-                                                            1f to Color.Transparent,
-                                                        ),
-                                                        blendMode = BlendMode.DstIn,
-                                                    )
-                                                },
-                                    )
-                                    AsyncImage(
-                                        model =
-                                            ImageRequest
-                                                .Builder(context)
-                                                .data(thumbnailUrl)
-                                                .size(100, 100)
-                                                .allowHardware(false)
-                                                .build(),
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop,
-                                        modifier =
-                                            Modifier
-                                                .fillMaxSize()
-                                                .blur(if (useDarkTheme) 150.dp else 100.dp)
-                                                .drawWithContent {
-                                                    drawContent()
-                                                    drawRect(
-                                                        Brush.verticalGradient(
-                                                            0f to Color.Transparent,
-                                                            0.5f to Color.Transparent,
-                                                            0.7f to Color.Black,
-                                                            1f to Color.Black,
-                                                        ),
-                                                        blendMode = BlendMode.DstIn,
-                                                    )
-                                                },
-                                    )
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxSize()
-                                                .background(
-                                                    Brush.verticalGradient(
-                                                        0f to Color.Transparent,
-                                                        0.5f to Color.Black.copy(alpha = 0.0f),
-                                                        1f to Color.Black.copy(alpha = 0.2f),
-                                                    ),
-                                                ),
-                                    )
-                                }
+                                ProgressiveBlurArtwork(
+                                    artwork = thumbnailUrl,
+                                    modifier = Modifier.alpha(backgroundAlpha),
+                                )
                             }
                         }
                     }
