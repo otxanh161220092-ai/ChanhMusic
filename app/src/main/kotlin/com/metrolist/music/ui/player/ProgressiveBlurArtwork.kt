@@ -154,14 +154,32 @@ fun StackedCoverArtwork(
             }
         }
 
-    MirroredCoverStack(
-        request = request,
+    Box(
         modifier =
             modifier
                 .fillMaxSize()
                 .onSizeChanged { size = it }
-                .graphicsLayer { renderEffect = runtimeBlur },
-    )
+                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                .drawWithContent {
+                    drawContent()
+                    val w = this.size.width
+                    val h = this.size.height
+                    drawRect(
+                        Brush.verticalGradient(
+                            0f to Color.Black,
+                            (w * COVER_SCALE / h) to Color.Black,
+                            (w * (COVER_SCALE + 0.5f) / h).coerceAtMost(1f) to Color.Transparent,
+                            1f to Color.Transparent,
+                        ),
+                        blendMode = BlendMode.DstIn,
+                    )
+                },
+    ) {
+        MirroredCoverStack(
+            request = request,
+            modifier = Modifier.fillMaxSize().graphicsLayer { renderEffect = runtimeBlur },
+        )
+    }
 }
 
 /** Full-bleed background: the cover blurred as one soft field across the whole screen. */

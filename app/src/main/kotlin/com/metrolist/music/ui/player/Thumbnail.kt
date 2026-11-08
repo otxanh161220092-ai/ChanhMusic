@@ -563,7 +563,7 @@ private fun ThumbnailItem(
             modifier = (if (isLandscape) {
                 Modifier.size(dimensions.thumbnailSize)
             } else {
-                Modifier.fillMaxWidth().aspectRatio(2f / 3f)
+                Modifier.fillMaxWidth().aspectRatio(0.5f)
             })
                 .clip(RoundedCornerShape(dimensions.cornerRadius))
                 .then(if (isLandscape) Modifier else Modifier.fadeBottomEdge())
