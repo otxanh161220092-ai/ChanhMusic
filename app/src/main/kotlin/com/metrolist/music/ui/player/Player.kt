@@ -1008,8 +1008,8 @@ fun BottomSheetPlayer(
                                                 .background(
                                                     Brush.verticalGradient(
                                                         0f to Color.Transparent,
-                                                        0.5f to Color.Black.copy(alpha = 0.15f),
-                                                        1f to Color.Black.copy(alpha = 0.45f),
+                                                        0.5f to Color.Black.copy(alpha = 0.0f),
+                                                        1f to Color.Black.copy(alpha = 0.2f),
                                                     ),
                                                 ),
                                     )
