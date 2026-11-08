@@ -958,10 +958,22 @@ fun BottomSheetPlayer(
                                                 .fillMaxSize()
                                                 .background(
                                                     Brush.verticalGradient(
-                                                        0f to Color.Black.copy(alpha = 0.1f),
-                                                        0.6f to Color.Black.copy(alpha = 0.1f),
-                                                        0.85f to Color.Black.copy(alpha = 0.35f),
-                                                        1f to Color.Black.copy(alpha = 0.6f),
+                                                        colorStops =
+                                                            if (videoActive) {
+                                                                // With the video on, the dark fade starts lower and runs longer.
+                                                                arrayOf(
+                                                                    0f to Color.Black.copy(alpha = 0.1f),
+                                                                    0.7f to Color.Black.copy(alpha = 0.1f),
+                                                                    1f to Color.Black.copy(alpha = 0.7f),
+                                                                )
+                                                            } else {
+                                                                arrayOf(
+                                                                    0f to Color.Black.copy(alpha = 0.1f),
+                                                                    0.6f to Color.Black.copy(alpha = 0.1f),
+                                                                    0.85f to Color.Black.copy(alpha = 0.35f),
+                                                                    1f to Color.Black.copy(alpha = 0.6f),
+                                                                )
+                                                            },
                                                     ),
                                                 ),
                                     )
@@ -1608,7 +1620,7 @@ fun BottomSheetPlayer(
             // In portrait with lyrics open, the top row is drawn above the lyrics instead
             if (!showInlineLyrics || LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 // Each row above the next one moves 1.5x as far, so the stack tightens as it drops.
-                Box(modifier = Modifier.offset(y = if (videoActive) 20.25.dp else 0.dp)) {
+                Box(modifier = Modifier.offset(y = if (videoActive) 30.375.dp else 0.dp)) {
                     controlsTopRow(mediaMetadata)
                 }
             }
@@ -1675,7 +1687,7 @@ fun BottomSheetPlayer(
                 }
             }
 
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText).offset(y = if (videoActive) 13.5.dp else 0.dp)) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText).offset(y = if (videoActive) 20.25.dp else 0.dp)) {
             when (sliderStyle) {
                 SliderStyle.WAVY -> {
                     if (squigglySlider) {
@@ -1799,7 +1811,7 @@ fun BottomSheetPlayer(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier =
                     Modifier
-                        .offset(y = if (videoActive) 9.dp else 0.dp)
+                        .offset(y = if (videoActive) 13.5.dp else 0.dp)
                         .fillMaxWidth()
                         .vibrant(useVibrantText)
                         .padding(horizontal = PlayerHorizontalPadding),
@@ -1857,7 +1869,7 @@ fun BottomSheetPlayer(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier =
                                 Modifier
-                                    .offset(y = if (videoActive) 6.dp else 0.dp)
+                                    .offset(y = if (videoActive) 9.dp else 0.dp)
                                     .fillMaxWidth()
                                     .vibrant(useVibrant)
                                     .padding(horizontal = PlayerHorizontalPadding),
@@ -1995,7 +2007,7 @@ fun BottomSheetPlayer(
                             tint = glyphColor,
                             modifier =
                                 Modifier
-                                    .offset(y = if (videoActive) 4.dp else 0.dp)
+                                    .offset(y = if (videoActive) 6.dp else 0.dp)
                                     .vibrant(useVibrant)
                                     .padding(horizontal = PlayerHorizontalPadding),
                         )
