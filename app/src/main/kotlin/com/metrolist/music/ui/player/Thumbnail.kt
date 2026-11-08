@@ -593,19 +593,20 @@ private fun ThumbnailItem(
                         blurEnabled = blurOn,
                         modifier = Modifier.fillMaxSize(),
                     )
+                } else if (isCurrent) {
+                    StackedCoverArtwork(
+                        artwork = artworkUriToUse,
+                        modifier = Modifier.graphicsLayer {
+                            val p = changeProgress.value
+                            alpha = p
+                            renderEffect = if (blurOn && p < 0.99f) BlurEffect(36f * density * (1f - p), 36f * density * (1f - p)) else null
+                        },
+                    )
                 } else {
                     ThumbnailImage(
                         artworkUri = artworkUriToUse,
                         cropArtwork = cropAlbumArt,
-                        modifier = if (isCurrent) {
-                            Modifier.graphicsLayer {
-                                val p = changeProgress.value
-                                alpha = p
-                                renderEffect = if (blurOn && p < 0.99f) BlurEffect(36f * density * (1f - p), 36f * density * (1f - p)) else null
-                            }
-                        } else {
-                            Modifier
-                        }
+                        modifier = Modifier,
                     )
                 }
                 if (isCurrent && previousArtwork != null && mixVisual == null) {

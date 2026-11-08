@@ -37,25 +37,24 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import kotlin.math.roundToInt
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
+import kotlin.math.roundToInt
 
 private val MAX_BLUR = 110.dp
 
-/** Rows of the cover stacked down the screen; each odd row is a mirror of the one above. */
+/** Rows of the cover stacked down; each odd row is a mirror of the one above. */
 private const val MIRROR_ROWS = 4
 
 /** The cover is enlarged past the screen width, so its sides are cropped and it reaches further down. */
 private const val COVER_SCALE = 1.5f
 
 /**
- * Pixel-by-pixel blur. The square cover stays sharp down to [squareBottom]; below it the image softens
- * over [softPx] into a blur whose radius grows to [maxRadius].
+ * Pixel-by-pixel blur. The image stays sharp down to [squareBottom]; below it, it softens over [softPx]
+ * into a blur whose radius grows to [maxRadius].
  */
 private const val VARIABLE_BLUR_AGSL = """
 uniform shader image;
-uniform float2 size;
 uniform float maxRadius;
 uniform float squareBottom;
 uniform float softPx;
@@ -83,16 +82,14 @@ half4 main(float2 coord) {
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 private fun variableBlurEffect(
-    width: Float,
-    height: Float,
     maxRadiusPx: Float,
     squareBottomPx: Float,
+    softPx: Float,
 ): RenderEffect {
     val shader = RuntimeShader(VARIABLE_BLUR_AGSL)
-    shader.setFloatUniform("size", width, height)
     shader.setFloatUniform("maxRadius", maxRadiusPx)
     shader.setFloatUniform("squareBottom", squareBottomPx)
-    shader.setFloatUniform("softPx", width * 0.2f)
+    shader.setFloatUniform("softPx", softPx)
     return RenderEffect.createRuntimeShaderEffect(shader, "image")
 }
 
@@ -107,7 +104,7 @@ private val blurBands =
         BlurBand(radius = 110.dp, fromFraction = 0.75f),
     )
 
-/** The cover as a square the width of the screen, repeated down the screen with every other row mirrored. */
+/** The cover as a square [COVER_SCALE] times the width, repeated down with every other row mirrored. */
 @Composable
 private fun MirroredCoverStack(
     request: ImageRequest,
@@ -136,9 +133,48 @@ private fun MirroredCoverStack(
 }
 
 /**
- * Full-screen background built from the cover: the sharp square at the top, mirrored copies below it,
- * and blur that deepens toward the bottom. Android 13+ gets a continuous blur; older versions get
- * stacked bands over the same stack.
+ * The current track's cover: enlarged past the screen width, sharp at the top, with mirrored copies
+ * below that soften into blur toward the bottom.
+ */
+@Composable
+fun StackedCoverArtwork(
+    artwork: String?,
+    modifier: Modifier = Modifier,
+) {
+    if (artwork == null) return
+    val context = LocalContext.current
+    val density = LocalDensity.current
+    val request = remember(artwork) { ImageRequest.Builder(context).data(artwork).size(400, 400).allowHardware(false).build() }
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    val useRuntimeBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
+    val runtimeBlur =
+        remember(size, density) {
+            if (useRuntimeBlur && size.width > 0) {
+                val side = size.width * COVER_SCALE
+                variableBlurEffect(
+                    maxRadiusPx = with(density) { MAX_BLUR.toPx() },
+                    squareBottomPx = side,
+                    softPx = size.width * 0.2f,
+                ).asComposeRenderEffect()
+            } else {
+                null
+            }
+        }
+
+    MirroredCoverStack(
+        request = request,
+        modifier =
+            modifier
+                .fillMaxSize()
+                .onSizeChanged { size = it }
+                .graphicsLayer { renderEffect = runtimeBlur },
+    )
+}
+
+/**
+ * Full-bleed background: the cover cropped to the whole screen, sharp at the top and blurring more
+ * toward the bottom. Android 13+ gets a continuous blur; older versions get stacked bands.
  */
 @Composable
 fun ProgressiveBlurArtwork(
@@ -156,12 +192,11 @@ fun ProgressiveBlurArtwork(
 
     val runtimeBlur =
         remember(size, density) {
-            if (useRuntimeBlur && size.width > 0 && size.height > 0) {
+            if (useRuntimeBlur && size.height > 0) {
                 variableBlurEffect(
-                    size.width.toFloat(),
-                    size.height.toFloat(),
-                    with(density) { MAX_BLUR.toPx() },
-                    size.width * COVER_SCALE,
+                    maxRadiusPx = with(density) { MAX_BLUR.toPx() },
+                    squareBottomPx = size.height * 0.45f,
+                    softPx = size.height * 0.3f,
                 ).asComposeRenderEffect()
             } else {
                 null
@@ -169,13 +204,15 @@ fun ProgressiveBlurArtwork(
         }
 
     Box(modifier = modifier.fillMaxSize().onSizeChanged { size = it }) {
-        MirroredCoverStack(
-            request = sharp,
+        AsyncImage(
+            model = sharp,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize().graphicsLayer { renderEffect = runtimeBlur },
         )
         if (runtimeBlur == null) {
             blurBands.forEach { band ->
-                androidx.compose.foundation.layout.Box(
+                Box(
                     modifier =
                         Modifier
                             .fillMaxSize()
