@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import kotlin.math.roundToInt
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 
@@ -44,6 +45,9 @@ private val MAX_BLUR = 110.dp
 
 /** Rows of the cover stacked down the screen; each odd row is a mirror of the one above. */
 private const val MIRROR_ROWS = 4
+
+/** The cover is enlarged past the screen width, so its sides are cropped and it reaches further down. */
+private const val COVER_SCALE = 1.5f
 
 /**
  * Pixel-by-pixel blur. The square cover stays sharp down to [squareBottom]; below it the image softens
@@ -82,11 +86,12 @@ private fun variableBlurEffect(
     width: Float,
     height: Float,
     maxRadiusPx: Float,
+    squareBottomPx: Float,
 ): RenderEffect {
     val shader = RuntimeShader(VARIABLE_BLUR_AGSL)
     shader.setFloatUniform("size", width, height)
     shader.setFloatUniform("maxRadius", maxRadiusPx)
-    shader.setFloatUniform("squareBottom", width)
+    shader.setFloatUniform("squareBottom", squareBottomPx)
     shader.setFloatUniform("softPx", width * 0.2f)
     return RenderEffect.createRuntimeShaderEffect(shader, "image")
 }
@@ -121,10 +126,11 @@ private fun MirroredCoverStack(
             }
         },
     ) { measurables, constraints ->
-        val side = constraints.maxWidth
+        val side = (constraints.maxWidth * COVER_SCALE).roundToInt()
+        val left = (constraints.maxWidth - side) / 2
         val placeables = measurables.map { it.measure(Constraints.fixed(side, side)) }
         layout(constraints.maxWidth, constraints.maxHeight) {
-            placeables.forEachIndexed { row, placeable -> placeable.place(0, row * side) }
+            placeables.forEachIndexed { row, placeable -> placeable.place(left, row * side) }
         }
     }
 }
@@ -151,8 +157,12 @@ fun ProgressiveBlurArtwork(
     val runtimeBlur =
         remember(size, density) {
             if (useRuntimeBlur && size.width > 0 && size.height > 0) {
-                variableBlurEffect(size.width.toFloat(), size.height.toFloat(), with(density) { MAX_BLUR.toPx() })
-                    .asComposeRenderEffect()
+                variableBlurEffect(
+                    size.width.toFloat(),
+                    size.height.toFloat(),
+                    with(density) { MAX_BLUR.toPx() },
+                    size.width * COVER_SCALE,
+                ).asComposeRenderEffect()
             } else {
                 null
             }
