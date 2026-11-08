@@ -43,6 +43,8 @@ import kotlin.math.roundToInt
 
 private val MAX_BLUR = 110.dp
 
+private val BACKGROUND_BLUR = 100.dp
+
 /** Rows of the cover stacked down; each odd row is a mirror of the one above. */
 private const val MIRROR_ROWS = 4
 
@@ -93,16 +95,6 @@ private fun variableBlurEffect(
     return RenderEffect.createRuntimeShaderEffect(shader, "image")
 }
 
-/** Each band blurs more than the one above and takes over from [fromFraction] of the height downward. */
-private data class BlurBand(val radius: Dp, val fromFraction: Float)
-
-private val blurBands =
-    listOf(
-        BlurBand(radius = 4.dp, fromFraction = 0.15f),
-        BlurBand(radius = 18.dp, fromFraction = 0.35f),
-        BlurBand(radius = 48.dp, fromFraction = 0.55f),
-        BlurBand(radius = 110.dp, fromFraction = 0.75f),
-    )
 
 /** The cover as a square [COVER_SCALE] times the width, repeated down with every other row mirrored. */
 @Composable
@@ -172,10 +164,7 @@ fun StackedCoverArtwork(
     )
 }
 
-/**
- * Full-bleed background: the cover cropped to the whole screen, sharp at the top and blurring more
- * toward the bottom. Android 13+ gets a continuous blur; older versions get stacked bands.
- */
+/** Full-bleed background: the cover blurred as one soft field across the whole screen. */
 @Composable
 fun ProgressiveBlurArtwork(
     artwork: String?,
@@ -183,70 +172,22 @@ fun ProgressiveBlurArtwork(
 ) {
     if (artwork == null) return
     val context = LocalContext.current
-    val density = LocalDensity.current
-    val sharp = remember(artwork) { ImageRequest.Builder(context).data(artwork).size(400, 400).allowHardware(false).build() }
-    val blurred =
+    val request =
         remember(artwork) { ImageRequest.Builder(context).data(artwork).size(200, 200).allowHardware(false).build() }
-    var size by remember { mutableStateOf(IntSize.Zero) }
-    val useRuntimeBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-
-    val runtimeBlur =
-        remember(size, density) {
-            if (useRuntimeBlur && size.height > 0) {
-                variableBlurEffect(
-                    maxRadiusPx = with(density) { MAX_BLUR.toPx() },
-                    squareBottomPx = size.height * 0.45f,
-                    softPx = size.height * 0.3f,
-                ).asComposeRenderEffect()
-            } else {
-                null
-            }
-        }
-
-    Box(modifier = modifier.fillMaxSize().onSizeChanged { size = it }) {
+    Box(modifier = modifier.fillMaxSize()) {
         AsyncImage(
-            model = sharp,
+            model = request,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().graphicsLayer { renderEffect = runtimeBlur },
+            modifier = Modifier.fillMaxSize().blur(BACKGROUND_BLUR),
         )
-        if (runtimeBlur == null) {
-            blurBands.forEach { band ->
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                            .drawWithContent {
-                                drawContent()
-                                drawRect(
-                                    Brush.verticalGradient(
-                                        0f to Color.Transparent,
-                                        band.fromFraction to Color.Transparent,
-                                        (band.fromFraction + 0.15f).coerceAtMost(1f) to Color.Black,
-                                        1f to Color.Black,
-                                    ),
-                                    blendMode = BlendMode.DstIn,
-                                )
-                            },
-                ) {
-                    AsyncImage(
-                        model = blurred,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize().blur(band.radius),
-                    )
-                }
-            }
-        }
         Box(
             modifier =
                 Modifier
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            0f to Color.Transparent,
-                            0.6f to Color.Black.copy(alpha = 0.1f),
+                            0f to Color.Black.copy(alpha = 0.1f),
                             1f to Color.Black.copy(alpha = 0.3f),
                         ),
                     ),
