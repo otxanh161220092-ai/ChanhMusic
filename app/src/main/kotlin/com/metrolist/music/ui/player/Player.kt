@@ -1607,7 +1607,7 @@ fun BottomSheetPlayer(
             // In portrait with lyrics open, the top row is drawn above the lyrics instead
             if (!showInlineLyrics || LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 // Each row above the next one moves 1.5x as far, so the stack tightens as it drops.
-                Box(modifier = Modifier.offset(y = 20.25.dp)) {
+                Box(modifier = Modifier.offset(y = if (videoActive) 20.25.dp else 0.dp)) {
                     controlsTopRow(mediaMetadata)
                 }
             }
@@ -1674,7 +1674,7 @@ fun BottomSheetPlayer(
                 }
             }
 
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText).offset(y = 13.5.dp)) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText).offset(y = if (videoActive) 13.5.dp else 0.dp)) {
             when (sliderStyle) {
                 SliderStyle.WAVY -> {
                     if (squigglySlider) {
