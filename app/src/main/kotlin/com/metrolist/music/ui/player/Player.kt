@@ -2234,7 +2234,7 @@ fun BottomSheetPlayer(
                     }
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(if (videoActive) 1.6f else 1f),
                     ) {
                         // Remember lambdas to prevent unnecessary recomposition
                         val currentSliderPosition by rememberUpdatedState(sliderPosition)
