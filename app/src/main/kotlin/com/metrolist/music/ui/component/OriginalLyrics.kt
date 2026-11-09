@@ -614,7 +614,7 @@ fun OriginalLyrics(
             if (itemInfo != null) {
                 // Item is visible, animate directly to center without sudden jumps
                 val viewportHeight = lazyListState.layoutInfo.viewportEndOffset - lazyListState.layoutInfo.viewportStartOffset
-                val center = lazyListState.layoutInfo.viewportStartOffset + (viewportHeight / 4)
+                val center = lazyListState.layoutInfo.viewportStartOffset + (viewportHeight / 5)
                 val itemCenter = itemInfo.offset + itemInfo.size / 2
                 val offset = itemCenter - center
                 if (kotlin.math.abs(offset) > 10) {
@@ -934,7 +934,7 @@ fun OriginalLyrics(
                                                         lazyListState.layoutInfo.viewportEndOffset -
                                                             lazyListState.layoutInfo.viewportStartOffset
                                                     val center =
-                                                        lazyListState.layoutInfo.viewportStartOffset + (viewportHeight / 4)
+                                                        lazyListState.layoutInfo.viewportStartOffset + (viewportHeight / 5)
                                                     val itemCenter = itemInfo.offset + itemInfo.size / 2
                                                     val offset = itemCenter - center
 
@@ -1059,7 +1059,7 @@ fun OriginalLyrics(
                         // Smaller scale for background vocals
                         val bgScale = if (item.isBackground) 0.85f else 1f
                         val lineDistance = if (displayedCurrentLineIndex >= 0) kotlin.math.abs(index - displayedCurrentLineIndex) else 0
-                        val lineBlur = if (reduceBlur || lineDistance == 0) 0f else minOf(lineDistance, 6) * 1.5f
+                        val lineBlur = if (reduceBlur || lineDistance == 0) 0f else minOf(lineDistance, 8) * 2.5f
 
                         Column(
                             modifier =
