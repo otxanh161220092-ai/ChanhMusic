@@ -2154,7 +2154,7 @@ fun BottomSheetPlayer(
 
             else -> {
                 val bottomPadding by animateDpAsState(
-                    targetValue = queueSheetState.collapsedBound,
+                    targetValue = if (controlsVisible) queueSheetState.collapsedBound else 0.dp,
                     label = "bottomPadding",
                 )
                 Column(
