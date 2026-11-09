@@ -213,7 +213,7 @@ fun BoxScope.AppleCollectionBackdrop(thumbnailUrl: String?) {
         modifier = Modifier
             .matchParentSize()
             .clipToBounds()
-            .blur(100.dp, BlurredEdgeTreatment.Unbounded)
+            .blur(130.dp, BlurredEdgeTreatment.Unbounded)
             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
             .drawWithContent {
                 drawContent()
