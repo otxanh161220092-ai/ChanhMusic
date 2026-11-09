@@ -660,7 +660,7 @@ fun DailyDiscoverCard(
 }
 
 private val AppleHomeCardCornerRadius = 12.dp
-private val HomeCardThumbnailHeight = 104.dp
+private val HomeCardThumbnailHeight = 144.dp
 
 // Shuffle action shared with the Apple style navigation bar while Home is open
 val appleHomeShuffleAction = MutableStateFlow<(() -> Unit)?>(null)
