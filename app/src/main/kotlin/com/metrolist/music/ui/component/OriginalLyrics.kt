@@ -41,7 +41,6 @@ import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
@@ -827,7 +826,6 @@ fun OriginalLyrics(
                         .asPaddingValues(),
                 modifier =
                     Modifier
-                        .offset(y = -(maxHeight * 0.23f))
                         .fadingEdge(vertical = 64.dp)
                         .nestedScroll(
                             remember {
