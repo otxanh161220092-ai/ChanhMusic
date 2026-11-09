@@ -207,8 +207,6 @@ fun Thumbnail(
     isPlayerExpanded: () -> Boolean = { true },
     isLandscape: Boolean = false,
     isListenTogetherGuest: Boolean = false,
-    videoUri: android.net.Uri? = null,
-    showVideo: Boolean = false,
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val context = LocalContext.current
@@ -428,7 +426,6 @@ fun Thumbnail(
                                 context = context,
                                 isLandscape = isLandscape,
                                 isListenTogetherGuest = isListenTogetherGuest,
-                                videoUri = if (showVideo) videoUri else null,
                                 currentMediaId = mediaMetadata?.id,
                                 currentMediaThumbnail = mediaMetadata?.thumbnailUrl,
                                 gridState = thumbnailLazyGridState,
@@ -480,7 +477,6 @@ private fun ThumbnailItem(
     currentMediaId: String? = null,
     currentMediaThumbnail: String? = null,
     gridState: LazyGridState,
-    videoUri: android.net.Uri? = null,
     changeProgress: Animatable<Float, AnimationVector1D>,
     previousArtwork: String?,
     mixVisual: com.metrolist.music.playback.automix.MixVisual? = null,
@@ -563,7 +559,7 @@ private fun ThumbnailItem(
             modifier = (if (isLandscape) {
                 Modifier.size(dimensions.thumbnailSize)
             } else {
-                Modifier.fillMaxWidth().aspectRatio(0.5f)
+                Modifier.aspectRatio(1f)
             })
                 .clip(RoundedCornerShape(dimensions.cornerRadius))
                 .then(if (isLandscape) Modifier else Modifier.fadeBottomEdge())
@@ -579,34 +575,26 @@ private fun ThumbnailItem(
 
                 val isCurrent = item.mediaId == currentMediaId
                 val visual = mixVisual
-                if (isCurrent && videoUri != null) {
-                    LocalVideoArtwork(
-                        uri = videoUri,
-                        positionProvider = { playerConnection.player.currentPosition },
-                        isPlaying = playerConnection.isPlaying,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                } else if (isCurrent && visual != null) {
+                if (isCurrent && visual != null) {
                     MixCoverBlend(
                         visual = visual,
                         cropArtwork = cropAlbumArt,
                         blurEnabled = blurOn,
                         modifier = Modifier.fillMaxSize(),
                     )
-                } else if (isCurrent) {
-                    StackedCoverArtwork(
-                        artwork = artworkUriToUse,
-                        modifier = Modifier.graphicsLayer {
-                            val p = changeProgress.value
-                            alpha = p
-                            renderEffect = if (blurOn && p < 0.99f) BlurEffect(36f * density * (1f - p), 36f * density * (1f - p)) else null
-                        },
-                    )
                 } else {
                     ThumbnailImage(
                         artworkUri = artworkUriToUse,
                         cropArtwork = cropAlbumArt,
-                        modifier = Modifier,
+                        modifier = if (isCurrent) {
+                            Modifier.graphicsLayer {
+                                val p = changeProgress.value
+                                alpha = p
+                                renderEffect = if (blurOn && p < 0.99f) BlurEffect(36f * density * (1f - p), 36f * density * (1f - p)) else null
+                            }
+                        } else {
+                            Modifier
+                        }
                     )
                 }
                 if (isCurrent && previousArtwork != null && mixVisual == null) {

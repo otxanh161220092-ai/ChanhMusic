@@ -11,8 +11,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import android.content.res.Configuration
 import android.view.WindowManager
 import android.widget.Toast
@@ -46,7 +44,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
@@ -104,9 +101,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -363,24 +357,6 @@ fun BottomSheetPlayer(
 
     val playbackState by playerConnection.playbackState.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
-    // Video background is paused for now: nothing is loaded, so no video control is shown.
-    var videoUri by remember(mediaMetadata?.id) { mutableStateOf<android.net.Uri?>(null) }
-    var showVideoArtwork by remember(mediaMetadata?.id) { mutableStateOf(false) }
-    val videoActive = showVideoArtwork && videoUri != null
-    val videoPicker =
-        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            val songId = mediaMetadata?.id
-            if (uri != null && songId != null) {
-                try {
-                    context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                } catch (_: Exception) {
-                    // Some providers grant no persistable access; the choice still works for this session.
-                }
-                VideoArtworkStore.set(context, songId, uri)
-                videoUri = uri
-                showVideoArtwork = true
-            }
-        }
     val currentSong by playerConnection.currentSong.collectAsStateWithLifecycle(initialValue = null)
     val automix by playerConnection.service.automixItems.collectAsStateWithLifecycle()
     val mixZone by playerConnection.service.mixZone.collectAsStateWithLifecycle()
@@ -940,10 +916,35 @@ fun BottomSheetPlayer(
                             label = "blurBackground",
                         ) { thumbnailUrl ->
                             if (thumbnailUrl != null) {
-                                ProgressiveBlurArtwork(
-                                    artwork = thumbnailUrl,
-                                    modifier = Modifier.alpha(backgroundAlpha),
-                                )
+                                Box(modifier = Modifier.alpha(backgroundAlpha)) {
+                                    AsyncImage(
+                                        model =
+                                            ImageRequest
+                                                .Builder(context)
+                                                .data(thumbnailUrl)
+                                                .size(100, 100)
+                                                .allowHardware(false)
+                                                .build(),
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize()
+                                                .blur(if (useDarkTheme) 150.dp else 100.dp),
+                                    )
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize()
+                                                .background(
+                                                    Brush.verticalGradient(
+                                                        0f to Color.Black.copy(alpha = 0.1f),
+                                                        0.55f to Color.Black.copy(alpha = 0.25f),
+                                                        1f to Color.Black.copy(alpha = 0.5f),
+                                                    ),
+                                                ),
+                                    )
+                                }
                             }
                         }
                     }
@@ -1224,27 +1225,6 @@ fun BottomSheetPlayer(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.vibrant(useVibrant, 0.9f),
                     ) {
-                        // Only songs with a chosen video get the switch between cover and video.
-                        videoUri?.let {
-                            Box(modifier = Modifier.size(36.dp).highlightBorder()) {
-                                FilledIconButton(
-                                    onClick = { showVideoArtwork = !showVideoArtwork },
-                                    shape = CircleShape,
-                                    colors =
-                                        IconButtonDefaults.filledIconButtonColors(
-                                            containerColor = roundButtonContainerColor,
-                                            contentColor = roundButtonContentColor,
-                                        ),
-                                    modifier = Modifier.fillMaxSize(),
-                                ) {
-                                    Icon(
-                                        painter = painterResource(if (showVideoArtwork) R.drawable.album else R.drawable.play),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(20.dp),
-                                    )
-                                }
-                            }
-                        }
                                                 Box(modifier = Modifier.size(36.dp).highlightBorder()) {
     FilledIconButton(
                                 onClick = playerConnection::toggleLike,
@@ -1572,10 +1552,7 @@ fun BottomSheetPlayer(
 
             // In portrait with lyrics open, the top row is drawn above the lyrics instead
             if (!showInlineLyrics || LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                // Each row above the next one moves 1.5x as far, so the stack tightens as it drops.
-                Box(modifier = Modifier.offset(y = if (videoActive) 30.375.dp else 0.dp)) {
-                    controlsTopRow(mediaMetadata)
-                }
+                controlsTopRow(mediaMetadata)
             }
 
             Spacer(Modifier.height(24.dp))
@@ -1640,7 +1617,7 @@ fun BottomSheetPlayer(
                 }
             }
 
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText).offset(y = if (videoActive) 20.25.dp else 0.dp)) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText)) {
             when (sliderStyle) {
                 SliderStyle.WAVY -> {
                     if (squigglySlider) {
@@ -1764,7 +1741,6 @@ fun BottomSheetPlayer(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier =
                     Modifier
-                        .offset(y = if (videoActive) 13.5.dp else 0.dp)
                         .fillMaxWidth()
                         .vibrant(useVibrantText)
                         .padding(horizontal = PlayerHorizontalPadding),
@@ -1822,7 +1798,6 @@ fun BottomSheetPlayer(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier =
                                 Modifier
-                                    .offset(y = if (videoActive) 9.dp else 0.dp)
                                     .fillMaxWidth()
                                     .vibrant(useVibrant)
                                     .padding(horizontal = PlayerHorizontalPadding),
@@ -1960,7 +1935,6 @@ fun BottomSheetPlayer(
                             tint = glyphColor,
                             modifier =
                                 Modifier
-                                    .offset(y = if (videoActive) 6.dp else 0.dp)
                                     .vibrant(useVibrant)
                                     .padding(horizontal = PlayerHorizontalPadding),
                         )
@@ -2128,7 +2102,7 @@ fun BottomSheetPlayer(
                         contentAlignment = Alignment.Center,
                         modifier =
                             Modifier
-                                .weight(if (videoActive) 1.6f else 1f)
+                                .weight(1f)
                                 .nestedScroll(state.preUpPostDownNestedScrollConnection),
                     ) {
                         // Remember lambdas to prevent unnecessary recomposition
@@ -2154,8 +2128,6 @@ fun BottomSheetPlayer(
                                     isPlayerExpanded = isExpandedProvider,
                                     isLandscape = true,
                                     isListenTogetherGuest = isListenTogetherGuest,
-                                    videoUri = videoUri,
-                                    showVideo = showVideoArtwork,
                                 )
                             }
                         }
@@ -2165,7 +2137,7 @@ fun BottomSheetPlayer(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier =
                             Modifier
-                                .weight(if (showInlineLyrics) 0.65f else if (videoActive) 0.9f else 1f, false)
+                                .weight(if (showInlineLyrics) 0.65f else 1f, false)
                                 .animateContentSize()
                                 .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
                     ) {
@@ -2175,8 +2147,7 @@ fun BottomSheetPlayer(
                             controlsContent(it)
                         }
 
-                        // With the video on, the controls sit at the bottom so the picture gets the room above them.
-                        Spacer(Modifier.weight(if (videoActive) 0.01f else 1f))
+                        Spacer(Modifier.weight(1f))
                     }
                 }
             }
@@ -2202,34 +2173,36 @@ fun BottomSheetPlayer(
                         }
                     }
                     Box(
-                        contentAlignment = Alignment.TopCenter,
-                        modifier = Modifier.weight(if (videoActive) 1.6f else 1f),
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.weight(1f),
                     ) {
                         // Remember lambdas to prevent unnecessary recomposition
                         val currentSliderPosition by rememberUpdatedState(sliderPosition)
                         val sliderPositionProvider = remember { { currentSliderPosition } }
                         val isExpandedProvider = remember(state) { { state.isExpanded } }
-                        // Not AnimatedContent: it clips the cover to this box, which cut the artwork's edges.
-                        if (showInlineLyrics) {
-                            InlineLyricsView(
-                                mediaMetadata = mediaMetadata,
-                                showLyrics = showInlineLyrics,
-                                positionProvider = { effectivePosition },
-                                accentOverride = TextBackgroundColor,
-                            )
-                        } else {
-                            Thumbnail(
-                                sliderPositionProvider = sliderPositionProvider,
-                                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
-                                isPlayerExpanded = isExpandedProvider,
-                                isListenTogetherGuest = isListenTogetherGuest,
-                                videoUri = videoUri,
-                                showVideo = showVideoArtwork,
-                            )
+                        AnimatedContent(
+                            targetState = showInlineLyrics,
+                            label = "Lyrics",
+                            transitionSpec = { fadeIn() togetherWith fadeOut() },
+                        ) { showLyrics ->
+                            if (showLyrics) {
+                                InlineLyricsView(
+                                    mediaMetadata = mediaMetadata,
+                                    showLyrics = showLyrics,
+                                    positionProvider = { effectivePosition },
+                                    accentOverride = TextBackgroundColor,
+                                )
+                            } else {
+                                Thumbnail(
+                                    sliderPositionProvider = sliderPositionProvider,
+                                    modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+                                    isPlayerExpanded = isExpandedProvider,
+                                    isListenTogetherGuest = isListenTogetherGuest,
+                                )
+                            }
                         }
                     }
 
-                    Spacer(Modifier.height(if (videoActive) 40.dp else 0.dp))
                     mediaMetadata?.let {
                         controlsContent(it)
                     }
