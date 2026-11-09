@@ -19,9 +19,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -410,8 +407,7 @@ fun Thumbnail(
                         modifier = if (isLandscape) {
                             Modifier.size(dimensions.thumbnailSize + (PlayerHorizontalPadding * 2))
                         } else {
-                            // Keep the top edge of the artwork below the status bar
-                            Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)
+                            Modifier.fillMaxSize()
                         }
                     ) {
                         items(
@@ -574,7 +570,7 @@ private fun ThumbnailItem(
                 }
             })
                 .clip(RoundedCornerShape(dimensions.cornerRadius))
-                .then(if (isLandscape) Modifier else Modifier.fadeBottomEdge(0.12f))
+                .then(if (isLandscape) Modifier else Modifier.fadeBottomEdge(0.2f))
         ) {
             if (hidePlayerThumbnail) {
                 HiddenThumbnailPlaceholder(textBackgroundColor = textBackgroundColor)
