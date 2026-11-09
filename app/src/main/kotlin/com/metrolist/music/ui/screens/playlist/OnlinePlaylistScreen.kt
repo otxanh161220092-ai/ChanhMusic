@@ -514,18 +514,11 @@ private fun OnlinePlaylistHeaderWithStyle(
         OnlinePlaylistHeader(playlist, songs, dbPlaylist, coroutineScope, continuation, isPodcastPlaylist, modifier)
         return
     }
-    // Apple style hero: background gradient from the artwork's dominant color
-    val artColor by rememberArtworkColor((songs.firstOrNull()?.thumbnail ?: playlist.thumbnail)?.resize(100, 100))
-    val heroColor = artColor ?: MaterialTheme.colorScheme.surfaceVariant
+    // Transparent so the shared blurred artwork backdrop shows through, like the library view
     Box(
         modifier =
             modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(heroColor, MaterialTheme.colorScheme.background),
-                    ),
-                ),
+                .fillMaxWidth(),
     ) {
         AppleOnlinePlaylistHeader(
             playlist, songs, dbPlaylist, coroutineScope, continuation, isPodcastPlaylist,

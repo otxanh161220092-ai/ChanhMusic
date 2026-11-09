@@ -217,6 +217,8 @@ fun BoxScope.AppleCollectionBackdrop(thumbnailUrl: String?) {
             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
             .drawWithContent {
                 drawContent()
+                // Darkens the blurred artwork a little for every Apple style collection
+                drawRect(color = Color.Black.copy(alpha = 0.25f))
                 drawRect(
                     brush = Brush.verticalGradient(
                         0f to Color.Black,
