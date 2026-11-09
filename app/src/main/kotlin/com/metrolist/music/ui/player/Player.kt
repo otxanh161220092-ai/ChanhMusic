@@ -2230,6 +2230,7 @@ fun BottomSheetPlayer(
                 playerBackground = playerBackground,
                 onToggleLyrics = {
                     showInlineLyrics = !showInlineLyrics
+                    isFullScreen = showInlineLyrics
                 },
                 controlsVisible = controlsVisible,
                 onControlsInteraction = { controlsInteraction++ },
