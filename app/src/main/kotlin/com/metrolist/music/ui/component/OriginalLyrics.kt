@@ -84,6 +84,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -171,6 +172,7 @@ import com.metrolist.music.ui.screens.settings.defaultList
 import com.metrolist.music.ui.utils.fadingEdge
 import com.metrolist.music.utils.ComposeToImage
 import com.metrolist.music.utils.rememberEnumPreference
+import com.metrolist.music.constants.ReduceBlurEffectsKey
 import com.metrolist.music.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -433,6 +435,7 @@ fun OriginalLyrics(
             }
         }
 
+    val reduceBlur by rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
     var currentLineIndex by remember {
         mutableIntStateOf(-1)
     }
@@ -611,7 +614,7 @@ fun OriginalLyrics(
             if (itemInfo != null) {
                 // Item is visible, animate directly to center without sudden jumps
                 val viewportHeight = lazyListState.layoutInfo.viewportEndOffset - lazyListState.layoutInfo.viewportStartOffset
-                val center = lazyListState.layoutInfo.viewportStartOffset + (viewportHeight / 2)
+                val center = lazyListState.layoutInfo.viewportStartOffset + (viewportHeight / 4)
                 val itemCenter = itemInfo.offset + itemInfo.size / 2
                 val offset = itemCenter - center
                 if (kotlin.math.abs(offset) > 10) {
@@ -931,7 +934,7 @@ fun OriginalLyrics(
                                                         lazyListState.layoutInfo.viewportEndOffset -
                                                             lazyListState.layoutInfo.viewportStartOffset
                                                     val center =
-                                                        lazyListState.layoutInfo.viewportStartOffset + (viewportHeight / 2)
+                                                        lazyListState.layoutInfo.viewportStartOffset + (viewportHeight / 4)
                                                     val itemCenter = itemInfo.offset + itemInfo.size / 2
                                                     val offset = itemCenter - center
 
@@ -1055,6 +1058,8 @@ fun OriginalLyrics(
 
                         // Smaller scale for background vocals
                         val bgScale = if (item.isBackground) 0.85f else 1f
+                        val lineDistance = if (displayedCurrentLineIndex >= 0) kotlin.math.abs(index - displayedCurrentLineIndex) else 0
+                        val lineBlur = if (reduceBlur || lineDistance == 0) 0f else minOf(lineDistance, 6) * 1.5f
 
                         Column(
                             modifier =
@@ -1062,6 +1067,7 @@ fun OriginalLyrics(
                                     this.alpha = if (item.isBackground) alpha * 0.8f else alpha
                                     this.scaleX = scale * bgScale
                                     this.scaleY = scale * bgScale
+                                    renderEffect = if (lineBlur > 0f) BlurEffect(lineBlur.dp.toPx(), lineBlur.dp.toPx()) else null
                                 },
                             horizontalAlignment = agentAlignment,
                         ) {
