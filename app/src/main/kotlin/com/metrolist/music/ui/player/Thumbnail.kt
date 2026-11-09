@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.player
 
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.layout.layout
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -563,7 +565,13 @@ private fun ThumbnailItem(
             modifier = (if (isLandscape) {
                 Modifier.size(dimensions.thumbnailSize)
             } else {
-                Modifier.fillMaxWidth().aspectRatio(3f / 4f)
+                // 3:4 artwork, capped to the height the pager gives it so its bottom edge stays on screen
+                Modifier.fillMaxWidth().layout { measurable, constraints ->
+                    val w = constraints.maxWidth
+                    val h = minOf(w * 4 / 3, constraints.maxHeight)
+                    val placeable = measurable.measure(Constraints.fixed(w, h))
+                    layout(w, h) { placeable.place(0, 0) }
+                }
             })
                 .clip(RoundedCornerShape(dimensions.cornerRadius))
                 .then(if (isLandscape) Modifier else Modifier.fadeBottomEdge(0.12f))
