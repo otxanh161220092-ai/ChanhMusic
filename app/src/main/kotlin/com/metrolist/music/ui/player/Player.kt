@@ -2213,7 +2213,7 @@ fun BottomSheetPlayer(
         }
 
         AnimatedVisibility(
-            visible = true,
+            visible = !isFullScreen || controlsVisible,
             enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
             exit = shrinkVertically(shrinkTowards = Alignment.Top) + slideOutVertically(targetOffsetY = { it }) + fadeOut(),
         ) {
