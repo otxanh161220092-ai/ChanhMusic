@@ -642,7 +642,9 @@ fun OriginalLyrics(
         },
     )
 
+    var debugTick by remember { mutableStateOf("-") }
     LaunchedEffect(currentLineIndex, lastPreviewTime, initialScrollDone, isAutoScrollEnabled) {
+        debugTick = "line=$currentLineIndex prev=$previousLineIndex auto=$isAutoScrollEnabled init=$initialScrollDone seek=$isSeeking"
         if (!isSynced) return@LaunchedEffect
         if (isAutoScrollEnabled) {
             if ((currentLineIndex == 0 && shouldScrollToFirstLine) || !initialScrollDone) {
@@ -687,6 +689,18 @@ fun OriginalLyrics(
                 .fillMaxSize()
                 .padding(bottom = 12.dp),
     ) {
+        // TEMP DEBUG overlay: remove after the lyrics position is fixed
+        run {
+            val li = lazyListState.layoutInfo
+            val vh = li.viewportEndOffset - li.viewportStartOffset
+            val lineInfo = li.visibleItemsInfo.firstOrNull { it.index == resolveListScrollIndex(currentLineIndex) }
+            Text(
+                text = "DBG $debugTick scroll=$scrollLyrics vh=$vh lineTop=${lineInfo?.offset} lineH=${lineInfo?.size}",
+                fontSize = 9.sp,
+                color = Color.Yellow,
+                modifier = Modifier.align(Alignment.TopStart).padding(top = 90.dp),
+            )
+        }
         // Status UI for translation
         Box(
             modifier =
