@@ -213,7 +213,7 @@ fun BoxScope.AppleCollectionBackdrop(thumbnailUrl: String?) {
         modifier = Modifier
             .matchParentSize()
             .clipToBounds()
-            .blur(64.dp, BlurredEdgeTreatment.Unbounded)
+            .blur(100.dp, BlurredEdgeTreatment.Unbounded)
             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
             .drawWithContent {
                 drawContent()
@@ -324,7 +324,7 @@ fun AppleCollectionHeader(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f)
+                    .aspectRatio(3f / 4f)
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                     .drawWithContent {
                         drawContent()
