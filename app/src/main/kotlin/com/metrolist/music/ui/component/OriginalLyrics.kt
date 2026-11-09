@@ -169,7 +169,6 @@ import com.metrolist.music.ui.component.shimmer.TextPlaceholder
 import com.metrolist.music.ui.screens.settings.DarkMode
 import com.metrolist.music.ui.screens.settings.LyricsPosition
 import com.metrolist.music.ui.screens.settings.defaultList
-import com.metrolist.music.ui.utils.fadingEdge
 import com.metrolist.music.utils.ComposeToImage
 import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.constants.ReduceBlurEffectsKey
@@ -826,7 +825,6 @@ fun OriginalLyrics(
                         .asPaddingValues(),
                 modifier =
                     Modifier
-                        .fadingEdge(vertical = 64.dp)
                         .nestedScroll(
                             remember {
                                 object : NestedScrollConnection {
