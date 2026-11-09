@@ -2209,28 +2209,23 @@ fun BottomSheetPlayer(
                         val currentSliderPosition by rememberUpdatedState(sliderPosition)
                         val sliderPositionProvider = remember { { currentSliderPosition } }
                         val isExpandedProvider = remember(state) { { state.isExpanded } }
-                        AnimatedContent(
-                            targetState = showInlineLyrics,
-                            label = "Lyrics",
-                            transitionSpec = { fadeIn() togetherWith fadeOut() },
-                        ) { showLyrics ->
-                            if (showLyrics) {
-                                InlineLyricsView(
-                                    mediaMetadata = mediaMetadata,
-                                    showLyrics = showLyrics,
-                                    positionProvider = { effectivePosition },
-                                    accentOverride = TextBackgroundColor,
-                                )
-                            } else {
-                                Thumbnail(
-                                    sliderPositionProvider = sliderPositionProvider,
-                                    modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
-                                    isPlayerExpanded = isExpandedProvider,
-                                    isListenTogetherGuest = isListenTogetherGuest,
-                                    videoUri = videoUri,
-                                    showVideo = showVideoArtwork,
-                                )
-                            }
+                        // Not AnimatedContent: it clips the cover to this box, which cut the artwork's edges.
+                        if (showInlineLyrics) {
+                            InlineLyricsView(
+                                mediaMetadata = mediaMetadata,
+                                showLyrics = showInlineLyrics,
+                                positionProvider = { effectivePosition },
+                                accentOverride = TextBackgroundColor,
+                            )
+                        } else {
+                            Thumbnail(
+                                sliderPositionProvider = sliderPositionProvider,
+                                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+                                isPlayerExpanded = isExpandedProvider,
+                                isListenTogetherGuest = isListenTogetherGuest,
+                                videoUri = videoUri,
+                                showVideo = showVideoArtwork,
+                            )
                         }
                     }
 
