@@ -800,7 +800,7 @@ fun OriginalLyrics(
                 contentPadding =
                     WindowInsets.systemBars
                         .only(WindowInsetsSides.Top)
-                        .add(WindowInsets(top = maxHeight / 3, bottom = maxHeight / 2))
+                        .add(WindowInsets(top = 170.dp, bottom = 0.dp))
                         .asPaddingValues(),
                 modifier =
                     Modifier
