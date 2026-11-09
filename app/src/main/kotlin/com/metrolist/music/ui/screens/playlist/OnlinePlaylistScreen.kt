@@ -202,7 +202,7 @@ fun OnlinePlaylistScreen(
 
     val appleStyle = true
     val topGlassBackdrop = rememberLayerBackdrop()
-    AppleCollectionContainer(thumbnailUrl = playlist?.thumbnail, enabled = appleStyle, backdrop = topGlassBackdrop) {
+    AppleCollectionContainer(thumbnailUrl = songs.firstOrNull()?.thumbnail ?: playlist?.thumbnail, enabled = appleStyle, backdrop = topGlassBackdrop) {
         LazyColumn(
             state = lazyListState,
             contentPadding = appleCollectionContentPadding(LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(), appleStyle),
@@ -515,7 +515,7 @@ private fun OnlinePlaylistHeaderWithStyle(
         return
     }
     // Apple style hero: background gradient from the artwork's dominant color
-    val artColor by rememberArtworkColor(playlist.thumbnail?.resize(100, 100))
+    val artColor by rememberArtworkColor((songs.firstOrNull()?.thumbnail ?: playlist.thumbnail)?.resize(100, 100))
     val heroColor = artColor ?: MaterialTheme.colorScheme.surfaceVariant
     Box(
         modifier =
@@ -559,7 +559,7 @@ private fun AppleOnlinePlaylistHeader(
 
     AppleCollectionHeader(
         title = playlist.title,
-        thumbnailUrl = playlist.thumbnail,
+        thumbnailUrl = songs.firstOrNull()?.thumbnail ?: playlist.thumbnail,
         artistText = playlist.author?.name,
         metaText = listOfNotNull(nSongs, durationText).joinToString(" · "),
         onPlay = {
