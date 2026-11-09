@@ -2202,7 +2202,7 @@ fun BottomSheetPlayer(
                         }
                     }
                     Box(
-                        contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.TopCenter,
                         modifier = Modifier.weight(if (videoActive) 1.6f else 1f),
                     ) {
                         // Remember lambdas to prevent unnecessary recomposition
