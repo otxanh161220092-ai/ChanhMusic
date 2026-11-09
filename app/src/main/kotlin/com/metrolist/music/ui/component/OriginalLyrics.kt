@@ -663,7 +663,12 @@ fun OriginalLyrics(
                     if (currentLineIndex != previousLineIndex) {
                         // Calculate which line should be at the top to center the active group
                         val centerTargetIndex = currentLineIndex
-                        performSmoothPageScroll(centerTargetIndex, 1500) // Auto scroll duration
+                        val anchorPx =
+                            (lazyListState.layoutInfo.viewportEndOffset - lazyListState.layoutInfo.viewportStartOffset) / 5
+                        resolveListScrollIndex(centerTargetIndex)?.let { target ->
+                            val lineSize = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == target }?.size ?: 0
+                            lazyListState.animateScrollToItem(target, scrollOffset = -(anchorPx - lineSize / 2))
+                        }
                     }
                 }
             }
