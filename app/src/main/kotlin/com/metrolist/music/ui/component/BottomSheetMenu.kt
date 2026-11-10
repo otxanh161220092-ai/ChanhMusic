@@ -46,8 +46,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -219,7 +217,7 @@ fun BoxScope.BottomSheetMenu(
                 modifier =
                     Modifier
                         .width(popupWidth)
-                        .heightIn(max = maxHeight * 0.7f)
+                        .heightIn(max = maxHeight * 0.8f)
                         .onSizeChanged { popupHeightPx = it.height.toFloat() }
                         .onGloballyPositioned { entry.coords = it }
                         .glassStretch(stretch)
@@ -230,8 +228,7 @@ fun BoxScope.BottomSheetMenu(
                             fallbackColor = Color.White.copy(alpha = 0.9f),
                             tint = Color.White.copy(alpha = 0.2f),
                             mask = Color.White.copy(alpha = 0.8f),
-                        ).verticalScroll(rememberScrollState())
-                        .padding(vertical = 8.dp),
+                        ).padding(vertical = 8.dp),
             ) {
                 MaterialTheme(colorScheme = glassLightScheme(MaterialTheme.colorScheme)) {
                     CompositionLocalProvider(LocalContentColor provides Color.Black) {
