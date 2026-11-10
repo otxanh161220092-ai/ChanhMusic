@@ -182,8 +182,7 @@ private fun GlassMenuBody(
         modifier =
             Modifier
                 .onGloballyPositioned(onPlaced)
-                .width(IntrinsicSize.Max)
-                .widthIn(min = 200.dp)
+                .width(240.dp)
                 .glassStretch(stretch)
                 .clip(shape)
                 .then(
