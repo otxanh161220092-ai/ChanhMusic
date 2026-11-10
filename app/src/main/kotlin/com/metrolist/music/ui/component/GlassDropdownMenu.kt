@@ -15,6 +15,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.getValue
@@ -42,11 +44,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import com.metrolist.music.R
 
 private val RowHeight = 48.dp
@@ -67,8 +66,15 @@ data class GlassMenuEntry(
  * as the bottom bar and mini player. It opens from the top-right corner, and
  * a highlight pill slides to whichever row the finger is over.
  */
+/**
+ * Dropdown menu drawn as liquid glass over the app backdrop, the same surface
+ * as the bottom bar and mini player. It is drawn inside the caller's layout
+ * rather than in a separate popup window, so the glass samples the right
+ * region. It opens from the top-right corner, and the highlight pill follows
+ * the finger across rows.
+ */
 @Composable
-fun GlassDropdownMenu(
+fun BoxScope.GlassDropdownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     entries: List<GlassMenuEntry>,
@@ -76,41 +82,34 @@ fun GlassDropdownMenu(
 ) {
     val visibleState = remember { MutableTransitionState(false) }
     visibleState.targetState = expanded
+    BackHandler(enabled = expanded, onBack = onDismissRequest)
 
-    if (visibleState.currentState || visibleState.targetState) {
-        Popup(
-            alignment = Alignment.TopEnd,
-            offset = IntOffset(x = 0, y = 0),
-            onDismissRequest = onDismissRequest,
-            properties = PopupProperties(focusable = true),
-        ) {
-            AnimatedVisibility(
-                visibleState = visibleState,
-                enter =
-                    fadeIn(tween(180)) +
-                        scaleIn(
-                            initialScale = 0.9f,
-                            transformOrigin = TransformOrigin(1f, 0f),
-                            animationSpec = spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow),
-                        ),
-                exit =
-                    fadeOut(tween(120)) +
-                        scaleOut(
-                            targetScale = 0.9f,
-                            transformOrigin = TransformOrigin(1f, 0f),
-                            animationSpec = tween(120),
-                        ),
-            ) {
-                GlassMenuBody(
-                    entries = entries,
-                    onEntryClick = {
-                        it.onClick()
-                        onDismissRequest()
-                    },
-                    modifier = modifier,
-                )
-            }
-        }
+    AnimatedVisibility(
+        visibleState = visibleState,
+        modifier = modifier.align(Alignment.TopEnd),
+        enter =
+            fadeIn(tween(180)) +
+                scaleIn(
+                    initialScale = 0.9f,
+                    transformOrigin = TransformOrigin(1f, 0f),
+                    animationSpec = spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow),
+                ),
+        exit =
+            fadeOut(tween(120)) +
+                scaleOut(
+                    targetScale = 0.9f,
+                    transformOrigin = TransformOrigin(1f, 0f),
+                    animationSpec = tween(120),
+                ),
+    ) {
+        GlassMenuBody(
+            entries = entries,
+            onEntryClick = {
+                it.onClick()
+                onDismissRequest()
+            },
+            modifier = Modifier,
+        )
     }
 }
 
@@ -120,7 +119,7 @@ private fun GlassMenuBody(
     onEntryClick: (GlassMenuEntry) -> Unit,
     modifier: Modifier,
 ) {
-    val shape = RoundedCornerShape(24.dp)
+    val shape = SmoothCornerShape(24.dp)
     val backdrop = LocalGlassBackdrop.current
     val fallback = MaterialTheme.colorScheme.surfaceContainerHigh
     val density = LocalDensity.current

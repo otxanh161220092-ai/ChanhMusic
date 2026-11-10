@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.metrolist.music.ui.component.SmoothCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -388,10 +389,10 @@ private fun NewMiniPlayer(
                     .then(if (isTabletLandscape) Modifier.width(500.dp).align(Alignment.Center) else Modifier.fillMaxWidth())
                     .height(54.dp)
                     .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                    .clip(RoundedCornerShape(27.dp))
+                    .clip(SmoothCornerShape(27.dp))
                     .glassSurface(
                         glassBackdrop,
-                        RoundedCornerShape(27.dp),
+                        SmoothCornerShape(27.dp),
                         backgroundColor,
                         if (lightGlass) Color.White.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.45f),
                         if (lightGlass) Color.White.copy(alpha = 0.45f) else Color.Transparent,

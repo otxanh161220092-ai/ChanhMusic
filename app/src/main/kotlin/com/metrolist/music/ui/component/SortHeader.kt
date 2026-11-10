@@ -7,6 +7,7 @@ package com.metrolist.music.ui.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -60,18 +61,20 @@ inline fun <reified T : Enum<T>> SortHeader(
                 }.padding(horizontal = 4.dp, vertical = 8.dp),
         )
 
-        GlassDropdownMenu(
-            expanded = menuExpanded,
-            onDismissRequest = { menuExpanded = false },
-            entries =
-                enumValues<T>().map { type ->
-                    GlassMenuEntry(
-                        label = stringResource(sortTypeText(type)),
-                        selected = sortType == type,
-                        onClick = { onSortTypeChange(type) },
-                    )
-                },
-        )
+        Box {
+            GlassDropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
+                entries =
+                    enumValues<T>().map { type ->
+                        GlassMenuEntry(
+                            label = stringResource(sortTypeText(type)),
+                            selected = sortType == type,
+                            onClick = { onSortTypeChange(type) },
+                        )
+                    },
+            )
+        }
 
         if (sortType != PlaylistSongSortType.CUSTOM && showDescending == true) {
             ResizableIconButton(
