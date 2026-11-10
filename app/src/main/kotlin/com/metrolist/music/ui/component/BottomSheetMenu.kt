@@ -188,6 +188,7 @@ fun BoxScope.BottomSheetMenu(
 
         val shape = SmoothCornerShape(24.dp)
         val backdrop = LocalGlassBackdrop.current
+        val palette = rememberGlassPalette()
         val stretch = rememberGlassStretch()
 
         AnimatedVisibility(
@@ -225,13 +226,14 @@ fun BoxScope.BottomSheetMenu(
                         .glassSurface(
                             backdrop = backdrop,
                             shape = shape,
-                            fallbackColor = Color.White.copy(alpha = 0.9f),
-                            tint = Color.White.copy(alpha = 0.2f),
-                            mask = Color.White.copy(alpha = 0.8f),
+                            fallbackColor = palette.fallback,
+                            tint = palette.tint,
+                            mask = palette.mask,
+                            lensDp = 16f,
                         ).padding(vertical = 8.dp),
             ) {
-                MaterialTheme(colorScheme = glassLightScheme(MaterialTheme.colorScheme)) {
-                    CompositionLocalProvider(LocalContentColor provides Color.Black) {
+                MaterialTheme(colorScheme = glassScheme(MaterialTheme.colorScheme, palette)) {
+                    CompositionLocalProvider(LocalContentColor provides palette.content) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()

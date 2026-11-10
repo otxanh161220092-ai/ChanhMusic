@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -53,11 +54,41 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** Colours for content drawn on glass: black text and icons on the white glass tint. */
-fun glassLightScheme(base: ColorScheme): ColorScheme =
+/** Glass colours for the current theme: white glass with black text in light, dark grey glass with white text in dark. */
+data class GlassPalette(
+    val tint: Color,
+    val mask: Color,
+    val fallback: Color,
+    val content: Color,
+)
+
+@Composable
+fun rememberGlassPalette(): GlassPalette {
+    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    return remember(dark) {
+        if (dark) {
+            GlassPalette(
+                tint = Color.White.copy(alpha = 0.06f),
+                mask = Color(0xFF2C2C2E).copy(alpha = 0.8f),
+                fallback = Color(0xFF2C2C2E).copy(alpha = 0.95f),
+                content = Color.White,
+            )
+        } else {
+            GlassPalette(
+                tint = Color.White.copy(alpha = 0.2f),
+                mask = Color.White.copy(alpha = 0.8f),
+                fallback = Color.White.copy(alpha = 0.9f),
+                content = Color.Black,
+            )
+        }
+    }
+}
+
+/** Theme colours with the glass palette's text colour, so Material text stays readable on the glass. */
+fun glassScheme(base: ColorScheme, palette: GlassPalette): ColorScheme =
     base.copy(
-        onSurface = Color.Black,
-        onSurfaceVariant = Color.Black.copy(alpha = 0.6f),
+        onSurface = palette.content,
+        onSurfaceVariant = palette.content.copy(alpha = 0.6f),
     )
 
 /**
@@ -184,6 +215,7 @@ private fun GlassAlertCard(
 ) {
     val shape = SmoothCornerShape(28.dp)
     val backdrop = LocalGlassBackdrop.current
+    val palette = rememberGlassPalette()
     val stretch = rememberGlassStretch(10.dp)
     val visibleState = remember { MutableTransitionState(false).apply { targetState = true } }
     AnimatedVisibility(
@@ -191,8 +223,8 @@ private fun GlassAlertCard(
         enter = fadeIn(tween(180)) + scaleIn(initialScale = 0.9f, animationSpec = tween(220)),
         exit = fadeOut(tween(120)) + scaleOut(targetScale = 0.9f, animationSpec = tween(120)),
     ) {
-        MaterialTheme(colorScheme = glassLightScheme(MaterialTheme.colorScheme)) {
-            CompositionLocalProvider(LocalContentColor provides Color.Black) {
+        MaterialTheme(colorScheme = glassScheme(MaterialTheme.colorScheme, palette)) {
+            CompositionLocalProvider(LocalContentColor provides palette.content) {
                 Column(
                     modifier =
                         modifier
@@ -202,9 +234,10 @@ private fun GlassAlertCard(
                             .glassSurface(
                                 backdrop = backdrop,
                                 shape = shape,
-                                fallbackColor = Color.White.copy(alpha = 0.9f),
-                                tint = Color.White.copy(alpha = 0.2f),
-                                mask = Color.White.copy(alpha = 0.8f),
+                                fallbackColor = palette.fallback,
+                                tint = palette.tint,
+                                mask = palette.mask,
+                                lensDp = 16f,
                             ).pointerInput(Unit) { detectTapGestures { } }
                             .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -215,13 +248,13 @@ private fun GlassAlertCard(
                     }
                     title?.let {
                         ProvideTextStyle(
-                            TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = Color.Black, textAlign = TextAlign.Center),
+                            TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = palette.content, textAlign = TextAlign.Center),
                         ) { it() }
                     }
                     text?.let {
                         Spacer(Modifier.height(6.dp))
                         ProvideTextStyle(
-                            TextStyle(fontSize = 13.sp, color = Color.Black.copy(alpha = 0.7f), textAlign = TextAlign.Center),
+                            TextStyle(fontSize = 13.sp, color = palette.content.copy(alpha = 0.7f), textAlign = TextAlign.Center),
                         ) { it() }
                     }
                     Spacer(Modifier.height(16.dp))
@@ -246,7 +279,7 @@ private fun GlassActionPill(content: @Composable () -> Unit) {
                 .fillMaxWidth()
                 .height(48.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(Color.Black.copy(alpha = 0.06f)),
+                .background(LocalContentColor.current.copy(alpha = 0.08f)),
         contentAlignment = Alignment.Center,
     ) {
         content()

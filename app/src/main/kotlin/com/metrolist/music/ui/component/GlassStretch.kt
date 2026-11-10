@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlin.math.ln
 import kotlin.math.tanh
 
 /**
@@ -47,7 +48,12 @@ class GlassStretch internal constructor(
             visibilityThreshold = 0.001f,
             initialScale = 1f,
             pressedScale = 1.03f,
-            onDragStarted = { settleJob?.cancel() },
+            onDragStarted = {
+                settleJob?.cancel()
+                // Continue from the displayed offset, so grabbing mid-release does not jump.
+                dragX = inverseRubber(offsetX)
+                dragY = inverseRubber(offsetY)
+            },
             onDragStopped = { settle() },
             onDrag = { _, drag -> nudge(drag) },
         )
@@ -60,6 +66,11 @@ class GlassStretch internal constructor(
 
     /** Rubber band: follows the finger with a slope of [FOLLOW] at rest, then saturates at [maxPx]. */
     private fun rubber(distance: Float): Float = maxPx * tanh(FOLLOW * distance / maxPx)
+
+    private fun inverseRubber(offset: Float): Float {
+        val t = (offset / maxPx).coerceIn(-0.98f, 0.98f)
+        return maxPx * 0.5f * ln((1f + t) / (1f - t)) / FOLLOW
+    }
 
     private fun nudge(drag: Offset) {
         dragX += drag.x
