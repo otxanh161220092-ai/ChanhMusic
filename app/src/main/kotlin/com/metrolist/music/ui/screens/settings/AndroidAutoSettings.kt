@@ -246,7 +246,7 @@ fun AndroidAutoSettings(
         var showTargetPlaylistDialog by remember { mutableStateOf(false) }
 
         if (showTargetPlaylistDialog) {
-            androidx.compose.material3.GlassAlertDialog(
+            GlassAlertDialog(
                 onDismissRequest = { showTargetPlaylistDialog = false },
                 title = { Text(stringResource(R.string.android_auto_target_playlist)) },
                 text = {
