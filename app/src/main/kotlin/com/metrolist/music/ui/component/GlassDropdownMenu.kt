@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.annotation.DrawableRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,11 +51,15 @@ import com.metrolist.music.R
 
 private val RowHeight = 48.dp
 
-/** One row in a [GlassDropdownMenu]. */
+/**
+ * One row in a [GlassDropdownMenu]. [icon] is drawn on the left when set.
+ * [selected] adds a radio mark on the right; leave it null for plain action rows.
+ */
 data class GlassMenuEntry(
     val label: String,
-    val selected: Boolean,
     val onClick: () -> Unit,
+    @DrawableRes val icon: Int? = null,
+    val selected: Boolean? = null,
 )
 
 /**
@@ -195,29 +200,39 @@ private fun GlassMenuBody(
                 entries.forEach { entry ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                         modifier =
                             Modifier
                                 .fillMaxWidth()
                                 .height(RowHeight)
                                 .padding(horizontal = 20.dp),
                     ) {
+                        entry.icon?.let {
+                            Icon(
+                                painter = painterResource(it),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
                         Text(
                             text = entry.label,
                             fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f),
                         )
-                        Icon(
-                            painter =
-                                painterResource(
-                                    if (entry.selected) {
-                                        R.drawable.radio_button_checked
-                                    } else {
-                                        R.drawable.radio_button_unchecked
-                                    },
-                                ),
-                            contentDescription = null,
-                        )
+                        entry.selected?.let { selected ->
+                            Icon(
+                                painter =
+                                    painterResource(
+                                        if (selected) {
+                                            R.drawable.radio_button_checked
+                                        } else {
+                                            R.drawable.radio_button_unchecked
+                                        },
+                                    ),
+                                contentDescription = null,
+                            )
+                        }
                     }
                 }
             }

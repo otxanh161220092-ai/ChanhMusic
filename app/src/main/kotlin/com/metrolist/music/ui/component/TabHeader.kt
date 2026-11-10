@@ -21,8 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -123,43 +121,36 @@ fun TabHeader(
                     contentDescription = null,
                 )
             }
-            DropdownMenu(
+            GlassDropdownMenu(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false },
-            ) {
-                if (showHistoryButton) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.history)) },
-                        leadingIcon = {
-                            Icon(painter = painterResource(R.drawable.history), contentDescription = null)
-                        },
-                        onClick = {
-                            showMenu = false
-                            navController.navigate("history")
-                        },
-                    )
-                }
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.stats)) },
-                    leadingIcon = {
-                        Icon(painter = painterResource(R.drawable.stats), contentDescription = null)
+                entries =
+                    buildList {
+                        if (showHistoryButton) {
+                            add(
+                                GlassMenuEntry(
+                                    label = stringResource(R.string.history),
+                                    icon = R.drawable.history,
+                                    onClick = { navController.navigate("history") },
+                                ),
+                            )
+                        }
+                        add(
+                            GlassMenuEntry(
+                                label = stringResource(R.string.stats),
+                                icon = R.drawable.stats,
+                                onClick = { navController.navigate("stats") },
+                            ),
+                        )
+                        add(
+                            GlassMenuEntry(
+                                label = stringResource(R.string.together),
+                                icon = R.drawable.group_outlined,
+                                onClick = { navController.navigate("listen_together_from_topbar") },
+                            ),
+                        )
                     },
-                    onClick = {
-                        showMenu = false
-                        navController.navigate("stats")
-                    },
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.together)) },
-                    leadingIcon = {
-                        Icon(painter = painterResource(R.drawable.group_outlined), contentDescription = null)
-                    },
-                    onClick = {
-                        showMenu = false
-                        navController.navigate("listen_together_from_topbar")
-                    },
-                )
-            }
+            )
         }
     }
 
