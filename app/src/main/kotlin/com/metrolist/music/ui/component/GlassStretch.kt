@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.metrolist.music.ui.component.liquidtabs.DampedDragAnimation
 import kotlinx.coroutines.CoroutineScope
+import kotlin.math.tanh
 import kotlinx.coroutines.launch
 
 /**
@@ -47,14 +48,21 @@ class GlassStretch internal constructor(
     val translationY: Float get() = offsetY.value
     internal val modifier: Modifier get() = damped.modifier
 
+    private var dragTotal = Offset.Zero
+
+    /** Rubber band: the surface follows the finger, but resistance grows with distance, so it saturates at [maxPx]. */
+    private fun rubber(distance: Float): Float = maxPx * tanh(FOLLOW * distance / maxPx)
+
     private fun nudge(drag: Offset) {
+        dragTotal += drag
         scope.launch {
-            offsetX.snapTo((offsetX.value + drag.x * FOLLOW).coerceIn(-maxPx, maxPx))
-            offsetY.snapTo((offsetY.value + drag.y * FOLLOW).coerceIn(-maxPx, maxPx))
+            offsetX.snapTo(rubber(dragTotal.x))
+            offsetY.snapTo(rubber(dragTotal.y))
         }
     }
 
     private fun settle() {
+        dragTotal = Offset.Zero
         scope.launch {
             launch { offsetX.animateTo(0f, spring(dampingRatio = 0.4f, stiffness = 400f)) }
             launch { offsetY.animateTo(0f, spring(dampingRatio = 0.4f, stiffness = 400f)) }
@@ -62,12 +70,12 @@ class GlassStretch internal constructor(
     }
 
     private companion object {
-        const val FOLLOW = 0.9f
+        const val FOLLOW = 0.6f
     }
 }
 
 @Composable
-fun rememberGlassStretch(maxDp: Dp = 32.dp): GlassStretch {
+fun rememberGlassStretch(maxDp: Dp = 96.dp): GlassStretch {
     val scope = rememberCoroutineScope()
     val maxPx = with(LocalDensity.current) { maxDp.toPx() }
     return remember(scope, maxPx) { GlassStretch(scope, maxPx) }
