@@ -38,16 +38,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.offset
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.metrolist.music.R
-import kotlin.math.roundToInt
 
 private val RowHeight = 48.dp
 
@@ -184,7 +182,7 @@ private fun GlassMenuBody(
                 Box(
                     modifier =
                         Modifier
-                            .offset { IntOffset(0, pillTop.roundToInt()) }
+                            .graphicsLayer { translationY = pillTop }
                             .fillMaxWidth()
                             .height(RowHeight)
                             .padding(horizontal = 8.dp)
