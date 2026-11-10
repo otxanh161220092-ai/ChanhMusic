@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -62,42 +60,18 @@ inline fun <reified T : Enum<T>> SortHeader(
                 }.padding(horizontal = 4.dp, vertical = 8.dp),
         )
 
-        DropdownMenu(
+        GlassDropdownMenu(
             expanded = menuExpanded,
             onDismissRequest = { menuExpanded = false },
-            modifier = Modifier.widthIn(min = 172.dp),
-        ) {
-            enumValues<T>().forEach { type ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = stringResource(sortTypeText(type)),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal,
-                        )
-                    },
-                    trailingIcon = {
-                        Icon(
-                            painter =
-                            painterResource(
-                                if (sortType ==
-                                    type
-                                ) {
-                                    R.drawable.radio_button_checked
-                                } else {
-                                    R.drawable.radio_button_unchecked
-                                },
-                            ),
-                            contentDescription = null,
-                        )
-                    },
-                    onClick = {
-                        onSortTypeChange(type)
-                        menuExpanded = false
-                    },
-                )
-            }
-        }
+            entries =
+                enumValues<T>().map { type ->
+                    GlassMenuEntry(
+                        label = stringResource(sortTypeText(type)),
+                        selected = sortType == type,
+                        onClick = { onSortTypeChange(type) },
+                    )
+                },
+        )
 
         if (sortType != PlaylistSongSortType.CUSTOM && showDescending == true) {
             ResizableIconButton(
