@@ -28,16 +28,19 @@ class SmoothCornerShape(
 
     override fun createOutline(
         size: Size,
+        topStart: Float,
+        topEnd: Float,
+        bottomEnd: Float,
+        bottomStart: Float,
         layoutDirection: LayoutDirection,
-        density: Density,
     ): Outline {
         val w = size.width
         val h = size.height
         val maxR = min(w, h) / 2f
-        val tl = topStart.toPx(size, density).coerceIn(0f, maxR)
-        val tr = topEnd.toPx(size, density).coerceIn(0f, maxR)
-        val br = bottomEnd.toPx(size, density).coerceIn(0f, maxR)
-        val bl = bottomStart.toPx(size, density).coerceIn(0f, maxR)
+        val tl = topStart.coerceIn(0f, maxR)
+        val tr = topEnd.coerceIn(0f, maxR)
+        val br = bottomEnd.coerceIn(0f, maxR)
+        val bl = bottomStart.coerceIn(0f, maxR)
         val path =
             Path().apply {
                 moveTo(tl, 0f)

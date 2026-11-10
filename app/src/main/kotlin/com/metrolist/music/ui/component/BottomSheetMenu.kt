@@ -46,7 +46,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.graphics.TransformOrigin
@@ -171,7 +170,7 @@ fun BoxScope.BottomSheetMenu(
     // Light dim over the screen. It has no pointer input, so taps still reach the outside-tap closer.
     AnimatedVisibility(
         visibleState = visibleState,
-        modifier = Modifier.matchParentSize(),
+        modifier = Modifier.fillMaxSize(),
         enter = fadeIn(tween(160)),
         exit = fadeOut(tween(140)),
     ) {
