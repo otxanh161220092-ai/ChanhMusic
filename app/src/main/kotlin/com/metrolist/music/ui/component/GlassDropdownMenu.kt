@@ -152,7 +152,7 @@ private fun GlassMenuBody(
                 .clip(shape)
                 .then(
                     if (backdrop != null) {
-                        Modifier.glassSurface(backdrop, shape, fallback, Color.White.copy(alpha = 0.2f))
+                        Modifier.glassSurface(backdrop, shape, fallback, Color.White.copy(alpha = 0.2f), mask = Color.White.copy(alpha = 0.8f))
                     } else {
                         Modifier.background(fallback, shape)
                     },
@@ -211,13 +211,13 @@ private fun GlassMenuBody(
                             Icon(
                                 painter = painterResource(it),
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurface,
+                                tint = Color.Black,
                             )
                         }
                         Text(
                             text = entry.label,
                             fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = Color.Black,
                             modifier = Modifier.weight(1f),
                         )
                         entry.selected?.let { selected ->
@@ -231,6 +231,7 @@ private fun GlassMenuBody(
                                         },
                                     ),
                                 contentDescription = null,
+                                tint = Color.Black,
                             )
                         }
                     }
