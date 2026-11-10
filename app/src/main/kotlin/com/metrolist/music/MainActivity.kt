@@ -5,6 +5,7 @@
 
 package com.metrolist.music
 
+import com.metrolist.music.ui.component.GlassAlertDialog
 import android.Manifest
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -56,7 +57,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -190,6 +190,8 @@ import com.metrolist.music.ui.component.AccountSettingsDialog
 import com.metrolist.music.ui.component.AppNavigationBar
 import com.metrolist.music.ui.component.AppNavigationRail
 import com.metrolist.music.ui.component.BottomSheetMenu
+import com.metrolist.music.ui.component.GlassOverlayHost
+import com.metrolist.music.ui.component.glassPressTracker
 import com.metrolist.music.ui.component.BottomSheetPage
 import com.metrolist.music.ui.component.LocalBottomSheetPageState
 import com.metrolist.music.ui.component.LocalMenuState
@@ -682,7 +684,8 @@ class MainActivity : FragmentActivity() {
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface),
+                        .background(if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface)
+                        .glassPressTracker(),
             ) {
                 val density = LocalDensity.current
                 val configuration = LocalWindowInfo.current
@@ -1447,8 +1450,9 @@ class MainActivity : FragmentActivity() {
 
                     BottomSheetMenu(
                         state = LocalMenuState.current,
-                        modifier = Modifier.align(Alignment.BottomCenter),
                     )
+
+                    GlassOverlayHost()
 
                     BottomSheetPage(
                         state = LocalBottomSheetPageState.current,
@@ -1469,7 +1473,6 @@ class MainActivity : FragmentActivity() {
                         playerConnection?.let {
                             Dialog(
                                 onDismissRequest = { sharedSong = null },
-                                properties = DialogProperties(usePlatformDefaultWidth = false),
                             ) {
                                 Surface(
                                     modifier = Modifier.padding(24.dp),
@@ -1500,7 +1503,7 @@ class MainActivity : FragmentActivity() {
                                     }
                                 }
                             }
-                            AlertDialog(
+                            GlassAlertDialog(
                                 onDismissRequest = dismissUpdate,
                                 title = { Text(stringResource(R.string.update_available_title)) },
                                 text = {

@@ -18,6 +18,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,8 +34,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -154,24 +153,25 @@ fun <Int> ChoiceChipsRow(
                 enter = expandIn() + fadeIn(),
                 exit = shrinkOut() + fadeOut(),
             ) {
-                DropdownMenu(
-                    modifier = Modifier.padding(start = 12.dp),
-                    expanded = expanded,
-                    onDismissRequest = {
-                        expanded = false
-                        expandIconDegree -= 180
-                    },
-                ) {
-                    options.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(text = option.second) },
-                            onClick = {
-                                onSelectionChange(option.first)
-                                expandIconDegree -= 180
-                                expanded = false
-                            },
-                        )
-                    }
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    GlassDropdownMenu(
+                        modifier = Modifier.padding(start = 12.dp),
+                        expanded = expanded,
+                        onDismissRequest = {
+                            expanded = false
+                            expandIconDegree -= 180
+                        },
+                        entries = options.map { option ->
+                            GlassMenuEntry(
+                                label = option.second,
+                                onClick = {
+                                    onSelectionChange(option.first)
+                                    expandIconDegree -= 180
+                                    expanded = false
+                                },
+                            )
+                        },
+                    )
                 }
             }
         }

@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.player
 
+import com.metrolist.music.ui.component.GlassAlertDialog
 import androidx.compose.ui.draw.clipToBounds
 import androidx.activity.compose.BackHandler
 import android.content.ClipData
@@ -60,7 +61,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -688,8 +688,7 @@ fun BottomSheetPlayer(
 
 
     if (showSleepTimerDialog) {
-        AlertDialog(
-            properties = DialogProperties(usePlatformDefaultWidth = false),
+        GlassAlertDialog(
             onDismissRequest = { showSleepTimerDialog = false },
             icon = {
                 Icon(

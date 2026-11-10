@@ -1,5 +1,6 @@
 package com.metrolist.music.ui.component.liquidtabs
 
+import com.metrolist.music.ui.component.SmoothCornerShape
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.spring
@@ -169,7 +170,7 @@ fun LiquidBottomTabs(
                 }
                 .drawBackdrop(
                     backdrop = backdrop,
-                    shape = { Capsule() },
+                    shape = { SmoothCornerShape(999.dp) },
                     effects = {
                         blur(glassBlur.dp.toPx())
                         lens(
@@ -210,7 +211,7 @@ fun LiquidBottomTabs(
                     }
                     .drawBackdrop(
                         backdrop = backdrop,
-                        shape = { Capsule() },
+                        shape = { SmoothCornerShape(999.dp) },
                         effects = {
                             val progress = dampedDragAnimation.pressProgress
                             vibrancy()
@@ -245,7 +246,7 @@ fun LiquidBottomTabs(
                 }
                 .drawBackdrop(
                     backdrop = backdrop,
-                    shape = { Capsule() },
+                    shape = { SmoothCornerShape(999.dp) },
                     effects = { blur(maxOf(glassBlur * 2.8f, 12f).dp.toPx()) },
                 )
                 .height(64f.dp)
@@ -264,7 +265,7 @@ fun LiquidBottomTabs(
                 .then(dampedDragAnimation.modifier)
                 .drawBackdrop(
                     backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
-                    shape = { Capsule() },
+                    shape = { SmoothCornerShape(999.dp) },
                     effects = {
                         val progress = dampedDragAnimation.pressProgress
                         lens(

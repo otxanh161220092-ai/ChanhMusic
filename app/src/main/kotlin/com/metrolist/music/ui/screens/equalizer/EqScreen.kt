@@ -1,5 +1,8 @@
 package com.metrolist.music.ui.screens.equalizer
 
+import com.metrolist.music.ui.component.GlassAlertDialog
+import com.metrolist.music.ui.component.GlassDropdownMenu
+import com.metrolist.music.ui.component.GlassMenuEntry
 import android.annotation.SuppressLint
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -16,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -134,7 +136,7 @@ fun EqScreen(
 
     // Error dialog
     if (showError != null) {
-        AlertDialog(
+        GlassAlertDialog(
             onDismissRequest = { showError = null },
             title = {
                 Text(stringResource(R.string.import_error_title))
@@ -152,7 +154,7 @@ fun EqScreen(
 
     // Error dialog for apply failure
     if (state.error != null) {
-        AlertDialog(
+        GlassAlertDialog(
             onDismissRequest = { viewModel.clearError() },
             title = {
                 Text(stringResource(R.string.error_title))
@@ -206,31 +208,22 @@ private fun EqScreenContent(
                                 contentDescription = stringResource(R.string.import_profile)
                             )
                         }
-                        DropdownMenu(
+                        GlassDropdownMenu(
                             expanded = showAddMenu,
-                            onDismissRequest = onAddMenuDismissed
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.eq_wizard)) },
-                                leadingIcon = {
-                                    Icon(
-                                        painter = painterResource(R.drawable.discover_tune),
-                                        contentDescription = null
-                                    )
-                                },
-                                onClick = onWizardClicked
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.import_from_file)) },
-                                leadingIcon = {
-                                    Icon(
-                                        painter = painterResource(R.drawable.upload),
-                                        contentDescription = null
-                                    )
-                                },
-                                onClick = onImportClicked
-                            )
-                        }
+                            onDismissRequest = onAddMenuDismissed,
+                            entries = listOf(
+                                GlassMenuEntry(
+                                    label = stringResource(R.string.eq_wizard),
+                                    icon = R.drawable.discover_tune,
+                                    onClick = onWizardClicked,
+                                ),
+                                GlassMenuEntry(
+                                    label = stringResource(R.string.import_from_file),
+                                    icon = R.drawable.upload,
+                                    onClick = onImportClicked,
+                                ),
+                            ),
+                        )
                     }
                 }
             )
@@ -383,7 +376,7 @@ private fun EQProfileItem(
 
     // Delete confirmation dialog
     if (showDeleteDialog) {
-        AlertDialog(
+        GlassAlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = { Text(stringResource(R.string.delete_profile_desc)) },
             text = {

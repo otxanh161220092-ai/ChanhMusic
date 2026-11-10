@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.GlassAlertDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -245,7 +246,7 @@ fun AndroidAutoSettings(
         var showTargetPlaylistDialog by remember { mutableStateOf(false) }
 
         if (showTargetPlaylistDialog) {
-            androidx.compose.material3.AlertDialog(
+            androidx.compose.material3.GlassAlertDialog(
                 onDismissRequest = { showTargetPlaylistDialog = false },
                 title = { Text(stringResource(R.string.android_auto_target_playlist)) },
                 text = {

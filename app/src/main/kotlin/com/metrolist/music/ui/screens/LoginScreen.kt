@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.GlassAlertDialog
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
@@ -31,7 +32,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -390,7 +390,7 @@ fun LoginScreen(
     }
 
     if (loginStage == LoginStage.SelectingAccount) {
-        AlertDialog(
+        GlassAlertDialog(
             onDismissRequest = {},
             title = { Text(stringResource(R.string.choose_youtube_channel)) },
             text = {
@@ -459,7 +459,7 @@ fun LoginScreen(
     }
 
     errorMessage?.let { error ->
-        AlertDialog(
+        GlassAlertDialog(
             onDismissRequest = { errorMessage = null },
             title = { Text(stringResource(R.string.login_failed)) },
             text = { Text(error) },

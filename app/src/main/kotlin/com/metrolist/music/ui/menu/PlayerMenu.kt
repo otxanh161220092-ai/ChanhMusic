@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.menu
 
+import com.metrolist.music.ui.component.GlassAlertDialog
 import android.content.Context
 import android.content.Intent
 import android.media.audiofx.AudioEffect
@@ -34,7 +35,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -769,8 +769,7 @@ fun TempoPitchDialog(onDismiss: () -> Unit) {
     val listenTogetherManager = com.metrolist.music.LocalListenTogetherManager.current
     val isInRoom = listenTogetherManager?.isInRoom ?: false
 
-    AlertDialog(
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+    GlassAlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(stringResource(R.string.tempo_and_pitch))
@@ -835,8 +834,7 @@ fun SpeedDialog(onDismiss: () -> Unit) {
     }
     val listenTogetherManager = com.metrolist.music.LocalListenTogetherManager.current
 
-    AlertDialog(
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+    GlassAlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(stringResource(R.string.speed))

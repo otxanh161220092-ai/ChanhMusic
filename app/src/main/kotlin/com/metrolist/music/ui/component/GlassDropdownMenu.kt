@@ -33,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +45,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -103,6 +106,13 @@ fun BoxScope.GlassDropdownMenu(
     val visibleState = remember { MutableTransitionState(false) }
     visibleState.targetState = expanded
     BackHandler(enabled = expanded, onBack = onDismissRequest)
+    val entry = remember { GlassPressTracker.OpenMenu(onDismissRequest) }
+    entry.dismiss = onDismissRequest
+    DisposableEffect(expanded) {
+        if (expanded) GlassPressTracker.register(entry) else GlassPressTracker.unregister(entry)
+        onDispose { GlassPressTracker.unregister(entry) }
+    }
+    val stretch = rememberGlassStretch()
 
     AnimatedVisibility(
         visibleState = visibleState,
@@ -125,6 +135,8 @@ fun BoxScope.GlassDropdownMenu(
         GlassMenuBody(
             entries = entries,
             topActions = topActions,
+            stretch = stretch,
+            onPlaced = { entry.coords = it },
             onEntryClick = {
                 it.onClick()
                 onDismissRequest()
@@ -141,6 +153,8 @@ fun BoxScope.GlassDropdownMenu(
 private fun GlassMenuBody(
     entries: List<GlassMenuEntry>,
     topActions: List<GlassTopAction>,
+    stretch: GlassStretch,
+    onPlaced: (LayoutCoordinates) -> Unit,
     onEntryClick: (GlassMenuEntry) -> Unit,
     onTopActionClick: (GlassTopAction) -> Unit,
 ) {
@@ -167,8 +181,10 @@ private fun GlassMenuBody(
     Column(
         modifier =
             Modifier
+                .onGloballyPositioned(onPlaced)
                 .width(IntrinsicSize.Max)
                 .widthIn(min = 200.dp)
+                .glassStretch(stretch)
                 .clip(shape)
                 .then(
                     if (backdrop != null) {
