@@ -227,7 +227,8 @@ fun BoxScope.BottomSheetMenu(
                             fallbackColor = palette.fallback,
                             tint = palette.tint,
                             mask = palette.mask,
-                            lensDp = 16f,
+                            lensDp = 28f,
+                            lensAmount = 2.5f,
                         ).padding(vertical = 8.dp),
             ) {
                 MaterialTheme(colorScheme = glassScheme(MaterialTheme.colorScheme, palette)) {

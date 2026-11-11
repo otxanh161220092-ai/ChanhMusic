@@ -154,6 +154,7 @@ import com.metrolist.music.constants.ExperimentalLyricsKey
 import com.metrolist.music.constants.ForceBottomNavBarKey
 import com.metrolist.music.constants.LastSeenVersionKey
 import com.metrolist.music.constants.GlassBlurKey
+import com.metrolist.music.constants.GlassDragEffectKey
 import com.metrolist.music.constants.ListenTogetherInTopBarKey
 import com.metrolist.music.constants.ListenTogetherUsernameKey
 import com.metrolist.music.constants.LyricsProviderOrderKey
@@ -481,9 +482,11 @@ class MainActivity : FragmentActivity() {
         setContent {
             val glassBackdropRoot = rememberLayerBackdrop()
             val (glassBlurDp) = rememberPreference(GlassBlurKey, defaultValue = 5f)
+            val (glassDragEnabled) = rememberPreference(GlassDragEffectKey, defaultValue = true)
             CompositionLocalProvider(
                 LocalGlassBackdrop provides glassBackdropRoot,
                 com.metrolist.music.ui.component.LocalGlassBlur provides glassBlurDp,
+                com.metrolist.music.ui.component.LocalGlassDragEnabled provides glassDragEnabled,
             ) {
             MetrolistApp(
                 latestVersionName = latestVersionName,
@@ -934,9 +937,11 @@ class MainActivity : FragmentActivity() {
                     }
                 }
 
+                // derivedStateOf makes this recompose when the sheet expands, not only on other changes.
+                val playerExpandedForGlass by remember { derivedStateOf { playerBottomSheetState.progress > 0.5f } }
                 SideEffect {
                     com.metrolist.music.ui.component.GlassBackdropOverride.active =
-                        if (playerBottomSheetState.progress > 0.5f) glassPlayerBackdrop else null
+                        if (playerExpandedForGlass) glassPlayerBackdrop else null
                 }
                 DisposableEffect(activePlayerConnection, playerBottomSheetState, servicePlayer) {
                     val player = servicePlayer ?: runCatching { activePlayerConnection?.player }.getOrNull()

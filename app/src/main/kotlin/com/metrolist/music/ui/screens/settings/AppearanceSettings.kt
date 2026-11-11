@@ -69,6 +69,7 @@ import com.metrolist.music.constants.HidePlayerThumbnailKey
 import com.metrolist.music.constants.HideStatusBarOnFullscreenKey
 import com.metrolist.music.constants.LibraryFilter
 import com.metrolist.music.constants.GlassBlurKey
+import com.metrolist.music.constants.GlassDragEffectKey
 import com.metrolist.music.constants.ReduceBlurEffectsKey
 import com.metrolist.music.constants.LyricsAnimationStyle
 import com.metrolist.music.constants.LyricsAnimationStyleKey
@@ -284,6 +285,7 @@ fun AppearanceSettings(
 
     val (glassBlur, onGlassBlurChange) = rememberPreference(GlassBlurKey, defaultValue = 5f)
     val (reduceBlur, onReduceBlurChange) = rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
+    val (glassDrag, onGlassDragChange) = rememberPreference(GlassDragEffectKey, defaultValue = true)
 
     val (swipeToSong, onSwipeToSongChange) =
         rememberPreference(
@@ -1693,6 +1695,18 @@ fun AppearanceSettings(
                             )
                         },
                         onClick = { onReduceBlurChange(!reduceBlur) },
+                    ),
+                    Material3SettingsItem(
+                        icon = painterResource(R.drawable.grid_view),
+                        title = { Text(stringResource(R.string.glass_drag_effect)) },
+                        description = { Text(stringResource(R.string.glass_drag_effect_desc)) },
+                        trailingContent = {
+                            Switch(
+                                checked = glassDrag,
+                                onCheckedChange = onGlassDragChange,
+                            )
+                        },
+                        onClick = { onGlassDragChange(!glassDrag) },
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.grid_view),

@@ -3,6 +3,7 @@ package com.metrolist.music.ui.component
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ import kotlin.math.tanh
 class GlassStretch internal constructor(
     private val scope: CoroutineScope,
     private val maxPx: Float,
+    val enabled: Boolean,
 ) {
     private var offsetX by mutableFloatStateOf(0f)
     private var offsetY by mutableFloatStateOf(0f)
@@ -114,16 +116,20 @@ class GlassStretch internal constructor(
     }
 }
 
+/** User setting: whether menus stretch and follow the finger. */
+val LocalGlassDragEnabled = compositionLocalOf { true }
+
 @Composable
 fun rememberGlassStretch(maxDp: Dp = 18.dp): GlassStretch {
     val scope = rememberCoroutineScope()
     val maxPx = with(LocalDensity.current) { maxDp.toPx() }
-    return remember(scope, maxPx) { GlassStretch(scope, maxPx) }
+    val enabled = LocalGlassDragEnabled.current
+    return remember(scope, maxPx, enabled) { GlassStretch(scope, maxPx, enabled) }
 }
 
 /** Applies [stretch] to the surface and forwards its press and drag gestures. */
 fun Modifier.glassStretch(stretch: GlassStretch): Modifier =
-    graphicsLayer {
+    if (!stretch.enabled) this else graphicsLayer {
         transformOrigin = TransformOrigin(stretch.pivotX, stretch.pivotY)
         scaleX = stretch.scaleX
         scaleY = stretch.scaleY

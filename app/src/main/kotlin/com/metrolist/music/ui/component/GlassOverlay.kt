@@ -245,7 +245,8 @@ private fun GlassAlertCard(
                                 fallbackColor = palette.fallback,
                                 tint = palette.tint,
                                 mask = palette.mask,
-                                lensDp = 16f,
+                                lensDp = 28f,
+                                lensAmount = 2.5f,
                             ).pointerInput(Unit) { detectTapGestures { } }
                             .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,

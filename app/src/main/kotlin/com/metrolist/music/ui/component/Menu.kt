@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -155,6 +156,8 @@ private fun Material3MenuItemRow(
             .fillMaxWidth()
             .clickable(
                 enabled = item.onClick != null,
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
                 onClick = { item.onClick?.invoke() }
             )
             .padding(horizontal = 20.dp, vertical = 16.dp),

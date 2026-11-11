@@ -3,6 +3,8 @@ package com.metrolist.music.ui.component
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -188,7 +190,12 @@ private fun GlassRow(
             modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .clickable(enabled = entry.enabled, onClick = onClick)
+                .clickable(
+                    enabled = entry.enabled,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = onClick,
+                )
                 .padding(horizontal = 16.dp),
     ) {
         entry.icon?.let {
