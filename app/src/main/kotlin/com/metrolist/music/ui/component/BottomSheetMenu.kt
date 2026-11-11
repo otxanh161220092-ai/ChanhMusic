@@ -53,6 +53,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -137,9 +139,9 @@ fun AnimatedBottomSheet(
 }
 
 /**
- * Menu opened from a button. It is a liquid glass popup anchored at the position the
- * user tapped (recorded by [glassPressTracker] at the app root), not a bottom sheet.
- * A press outside the popup closes it, and Back closes it too.
+ * Menu opened from a button. A liquid glass popup grows out of the tapped point and shrinks
+ * back into it. While open, a transparent layer covers the screen, so a tap outside closes
+ * the menu and stops there instead of reaching what is underneath.
  */
 @Composable
 fun BoxScope.BottomSheetMenu(
@@ -155,6 +157,7 @@ fun BoxScope.BottomSheetMenu(
 
     val visibleState = remember { MutableTransitionState(false) }
     visibleState.targetState = state.isVisible
+    val present = visibleState.currentState || visibleState.targetState
 
     val entry = remember { GlassPressTracker.OpenMenu(close) }
     entry.dismiss = close
@@ -163,14 +166,22 @@ fun BoxScope.BottomSheetMenu(
         onDispose { GlassPressTracker.unregister(entry) }
     }
 
-    // Light dim over the screen. It has no pointer input, so taps still reach the outside-tap closer.
-    AnimatedVisibility(
-        visibleState = visibleState,
-        modifier = Modifier.fillMaxSize(),
-        enter = fadeIn(tween(160)),
-        exit = fadeOut(tween(140)),
-    ) {
-        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.18f)))
+    val transition = rememberTransition(visibleState, label = "glassMenu")
+    val progress by transition.animateFloat(
+        transitionSpec = { tween(if (targetState) 220 else 160) },
+        label = "glassMenuProgress",
+    ) { if (it) 1f else 0f }
+
+    if (present) {
+        // Covers the screen while open: taps outside close the menu and are consumed here.
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer { alpha = progress }
+                    .background(Color.Black.copy(alpha = 0.18f))
+                    .pointerInput(Unit) { detectTapGestures { close() } },
+        )
     }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -189,36 +200,41 @@ fun BoxScope.BottomSheetMenu(
         val palette = rememberGlassPalette()
         val stretch = rememberGlassStretch()
 
-        AnimatedVisibility(
-            visibleState = visibleState,
-            modifier =
-                Modifier.graphicsLayer {
-                    val left =
-                        (anchor.x - popupWidthPx / 2f).coerceIn(
-                            marginPx,
-                            (screenWPx - popupWidthPx - marginPx).coerceAtLeast(marginPx),
-                        )
-                    val below = anchor.y + gapPx
-                    val rawTop =
-                        if (below + popupHeightPx + marginPx <= screenHPx) below else anchor.y - gapPx - popupHeightPx
-                    val top =
-                        rawTop.coerceIn(
-                            marginPx,
-                            (screenHPx - popupHeightPx - marginPx).coerceAtLeast(marginPx),
-                        )
-                    translationX = left
-                    translationY = top
-                },
-            enter = fadeIn(tween(140)),
-            exit = fadeOut(tween(100)),
-        ) {
-            CompositionLocalProvider(LocalGlassBlur provides 2f) { Column(
+        if (present) {
+            Column(
                 modifier =
                     Modifier
                         .width(popupWidth)
                         .heightIn(max = maxHeight * 0.8f)
                         .onSizeChanged { popupHeightPx = it.height.toFloat() }
                         .onGloballyPositioned { entry.coords = it }
+                        .graphicsLayer {
+                            val left =
+                                (anchor.x - popupWidthPx / 2f).coerceIn(
+                                    marginPx,
+                                    (screenWPx - popupWidthPx - marginPx).coerceAtLeast(marginPx),
+                                )
+                            val below = anchor.y + gapPx
+                            val rawTop =
+                                if (below + popupHeightPx + marginPx <= screenHPx) below else anchor.y - gapPx - popupHeightPx
+                            val top =
+                                rawTop.coerceIn(
+                                    marginPx,
+                                    (screenHPx - popupHeightPx - marginPx).coerceAtLeast(marginPx),
+                                )
+                            // Scale pivot is the tapped point, expressed in the popup's own coordinates.
+                            transformOrigin =
+                                TransformOrigin(
+                                    ((anchor.x - left) / popupWidthPx).coerceIn(0f, 1f),
+                                    if (popupHeightPx > 0f) ((anchor.y - top) / popupHeightPx).coerceIn(0f, 1f) else 0f,
+                                )
+                            val s = 0.3f + 0.7f * progress
+                            scaleX = s
+                            scaleY = s
+                            alpha = progress
+                            translationX = left
+                            translationY = top
+                        }
                         .glassStretch(stretch)
                         .clip(shape)
                         .glassSurface(
@@ -242,7 +258,7 @@ fun BoxScope.BottomSheetMenu(
                         }
                     }
                 }
-            } }
+            }
         }
     }
 }
