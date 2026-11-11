@@ -194,7 +194,12 @@ fun BoxScope.BottomSheetMenu(
         val screenWPx = with(density) { maxWidth.toPx() }
         val screenHPx = with(density) { maxHeight.toPx() }
         // Captured when the menu opens: the press that tapped the button.
-        val anchor = remember(state.isVisible) { GlassPressTracker.lastPress }
+        // Read the tap point only when opening; closing keeps the same point so it shrinks back into the button.
+        val openAnchor = remember { OpenAnchor() }
+        val anchor = remember(state.isVisible) {
+            if (state.isVisible) openAnchor.point = GlassPressTracker.lastPress
+            openAnchor.point
+        }
         var popupHeightPx by remember { mutableFloatStateOf(0f) }
 
         val shape = SmoothCornerShape(24.dp)
@@ -263,4 +268,8 @@ fun BoxScope.BottomSheetMenu(
             }
         }
     }
+}
+
+private class OpenAnchor {
+    var point: Offset = Offset.Zero
 }
