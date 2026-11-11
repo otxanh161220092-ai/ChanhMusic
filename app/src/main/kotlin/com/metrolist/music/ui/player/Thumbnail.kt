@@ -497,7 +497,11 @@ private fun ThumbnailItem(
     val isPlayingNow by playerConnection.isPlaying.collectAsState()
     val isCurrentItem = item.mediaId == currentMediaId
     val artworkScale by animateFloatAsState(
-        targetValue = if (squircleArtwork && isCurrentItem && !isPlayingNow) 0.84f else 1f,
+        targetValue = when {
+            !squircleArtwork || !isCurrentItem -> 1f
+            isPlayingNow -> 0.84f
+            else -> 0.7f
+        },
         animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f),
         label = "artworkPauseScale",
     )
