@@ -57,6 +57,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -195,9 +196,11 @@ fun BoxScope.BottomSheetMenu(
         val screenHPx = with(density) { maxHeight.toPx() }
         // Captured when the menu opens: the press that tapped the button.
         // Read the tap point only when opening; closing keeps the same point so it shrinks back into the button.
-        val openAnchor = remember { OpenAnchor() }
-        val anchor = remember(state.isVisible) {
-            if (state.isVisible) openAnchor.point = GlassPressTracker.lastPress
+        val openAnchor: OpenAnchor = remember { OpenAnchor() }
+        val anchor: Offset = remember(state.isVisible) {
+            if (state.isVisible) {
+                openAnchor.point = GlassPressTracker.lastPress
+            }
             openAnchor.point
         }
         var popupHeightPx by remember { mutableFloatStateOf(0f) }
