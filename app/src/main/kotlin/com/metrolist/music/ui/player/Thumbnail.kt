@@ -60,6 +60,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.draw.shadow
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.input.pointer.pointerInput
@@ -576,7 +578,7 @@ private fun ThumbnailItem(
                 // 3:4 artwork, capped to the height the pager gives it so its bottom edge stays on screen
                 Modifier.fillMaxWidth().layout { measurable, constraints ->
                     val w = constraints.maxWidth
-                    val h = minOf(w * 4 / 3, constraints.maxHeight)
+                    val h = if (squircleArtwork) minOf(w, constraints.maxHeight) else minOf(w * 4 / 3, constraints.maxHeight)
                     val placeable = measurable.measure(Constraints.fixed(w, h))
                     layout(w, h) { placeable.place(0, 0) }
                 }
@@ -585,8 +587,22 @@ private fun ThumbnailItem(
                     scaleX = artworkScale
                     scaleY = artworkScale
                 }
-                .clip(if (squircleArtwork) SmoothCornerShape(28.dp) else RoundedCornerShape(dimensions.cornerRadius))
-                .then(if (isLandscape) Modifier else Modifier.fadeBottomEdge(0.2f))
+                .zIndex(if (squircleArtwork) 1f else 0f)
+                .then(
+                    if (squircleArtwork) {
+                        Modifier.shadow(
+                            elevation = 24.dp,
+                            shape = SmoothCornerShape(20.dp),
+                            clip = false,
+                            ambientColor = Color.Black.copy(alpha = 0.6f),
+                            spotColor = Color.Black.copy(alpha = 0.6f),
+                        )
+                    } else {
+                        Modifier
+                    },
+                )
+                .clip(if (squircleArtwork) SmoothCornerShape(20.dp) else RoundedCornerShape(dimensions.cornerRadius))
+                .then(if (isLandscape || squircleArtwork) Modifier else Modifier.fadeBottomEdge(0.2f))
         ) {
             if (hidePlayerThumbnail) {
                 HiddenThumbnailPlaceholder(textBackgroundColor = textBackgroundColor)

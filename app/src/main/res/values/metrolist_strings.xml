@@ -635,8 +635,8 @@
     <string name="listen_together_sync_volume_desc">Guests will match the host\'s volume level</string>
     <string name="glass_blur">Glass blur</string>
     <string name="glass_drag_effect">Glass stretch and drag</string>
-    <string name="squircle_artwork">Rounded square artwork</string>
-    <string name="squircle_artwork_desc">Artwork shrinks when paused and grows back when playing</string>
+    <string name="squircle_artwork">Classic artwork</string>
+    <string name="squircle_artwork_desc">Square 1:1 artwork with a soft shadow, on top; shrinks when paused and grows back when playing</string>
     <string name="live_mesh_background">Live mesh background</string>
     <string name="live_mesh_background_desc">Animated gradient from the cover colours, like Apple Music</string>
     <string name="glass_drag_effect_desc">Menus stretch and follow the finger when held and dragged</string>
