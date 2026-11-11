@@ -145,20 +145,27 @@ private fun GlassMenuList(
                 }
             }
         }
-        GlassDivider()
+        GlassMenuDivider()
     }
-    entries.forEach { entry ->
-        when {
-            entry.isDivider -> GlassDivider()
-            entry.isHeader ->
-                Text(
-                    text = entry.label,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = content.copy(alpha = 0.6f),
-                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 4.dp),
-                )
-            else -> GlassRow(entry = entry, onClick = { onEntry(entry) })
+    GlassHighlightGroup(
+        count = entries.size,
+        selectable = { i -> entries[i].let { it.enabled && !it.isHeader && !it.isDivider } },
+    ) { rowModifier ->
+        Column(modifier = Modifier.fillMaxWidth()) {
+            entries.forEachIndexed { i, entry ->
+                when {
+                    entry.isDivider -> GlassMenuDivider(modifier = rowModifier(i))
+                    entry.isHeader ->
+                        Text(
+                            text = entry.label,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = content.copy(alpha = 0.6f),
+                            modifier = rowModifier(i).fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 4.dp),
+                        )
+                    else -> GlassRow(entry = entry, modifier = rowModifier(i), onClick = { onEntry(entry) })
+                }
+            }
         }
     }
 }
@@ -166,6 +173,7 @@ private fun GlassMenuList(
 @Composable
 private fun GlassRow(
     entry: GlassMenuEntry,
+    modifier: Modifier,
     onClick: () -> Unit,
 ) {
     val content = LocalContentColor.current
@@ -177,7 +185,7 @@ private fun GlassRow(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .height(48.dp)
                 .clickable(enabled = entry.enabled, onClick = onClick)
@@ -212,14 +220,3 @@ private fun GlassRow(
     }
 }
 
-@Composable
-private fun GlassDivider() {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 2.dp)
-                .height(1.dp)
-                .background(LocalContentColor.current.copy(alpha = 0.15f)),
-    )
-}

@@ -5,9 +5,14 @@
 
 package com.metrolist.music.ui.component
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.input.pointer.awaitPointerEvent
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,43 +21,126 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+
+/**
+ * Menu rows separated by thin lines, with no boxed buttons. A pill highlight follows the
+ * finger over the rows while it is held down. Rows are opened by their own click on release.
+ * [selectable] decides which rows can be highlighted.
+ */
+@Composable
+fun GlassHighlightGroup(
+    count: Int,
+    selectable: (Int) -> Boolean,
+    content: @Composable (rowModifier: (Int) -> Modifier) -> Unit,
+) {
+    val density = LocalDensity.current
+    var rects by remember(count) { mutableStateOf<List<Rect?>>(List(count) { null }) }
+    var origin by remember { mutableStateOf(Offset.Zero) }
+    var highlight by remember { mutableIntStateOf(-1) }
+    val selectableState = rememberUpdatedState(selectable)
+    val tint = LocalContentColor.current.copy(alpha = 0.12f)
+
+    val indexAt: (Offset) -> Int = { p ->
+        rects.indices.firstOrNull { i ->
+            selectableState.value(i) && rects[i]?.contains(p) == true
+        } ?: -1
+    }
+
+    val rowModifier: (Int) -> Modifier = { i ->
+        Modifier.onGloballyPositioned { coords ->
+            val r = coords.boundsInRoot()
+            if (rects.getOrNull(i) != r) {
+                rects = rects.toMutableList().also { it[i] = r }
+            }
+        }
+    }
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { origin = it.positionInRoot() }
+                .pointerInput(count) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                        highlight = indexAt(origin + down.position)
+                        var pressed: Boolean
+                        do {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            val change = event.changes.first()
+                            highlight = indexAt(origin + change.position)
+                            pressed = event.changes.any { it.pressed }
+                        } while (pressed)
+                        highlight = -1
+                    }
+                },
+    ) {
+        val rect = rects.getOrNull(highlight)
+        if (rect != null) {
+            val top by animateFloatAsState(targetValue = rect.top - origin.y, label = "glassHighlightTop")
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                        .graphicsLayer { translationY = top }
+                        .height(with(density) { rect.height.toDp() })
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(tint),
+            )
+        }
+        content(rowModifier)
+    }
+}
+
+/** Thin separator between menu rows. */
+@Composable
+fun GlassMenuDivider(modifier: Modifier = Modifier) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .height(1.dp)
+                .background(LocalContentColor.current.copy(alpha = 0.15f)),
+    )
+}
 
 @Composable
 fun Material3MenuGroup(
     items: List<Material3MenuItemData>
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        items.forEachIndexed { index, item ->
-            val shape = when {
-                items.size == 1 -> RoundedCornerShape(24.dp)
-                index == 0 -> RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 6.dp, bottomEnd = 6.dp)
-                index == items.size - 1 -> RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
-                else -> RoundedCornerShape(6.dp)
-            }
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateContentSize(),
-                shape = shape,
-                colors = item.cardColors ?: CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Material3MenuItemRow(item = item)
+    GlassHighlightGroup(
+        count = items.size,
+        selectable = { i -> items[i].onClick != null },
+    ) { rowModifier ->
+        Column(modifier = Modifier.fillMaxWidth()) {
+            items.forEachIndexed { index, item ->
+                if (index > 0) GlassMenuDivider()
+                Material3MenuItemRow(item = item, modifier = rowModifier(index))
             }
         }
     }
@@ -60,10 +148,11 @@ fun Material3MenuGroup(
 
 @Composable
 private fun Material3MenuItemRow(
-    item: Material3MenuItemData
+    item: Material3MenuItemData,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(
                 enabled = item.onClick != null,
@@ -107,6 +196,6 @@ data class Material3MenuItemData(
     val title: @Composable () -> Unit,
     val description: (@Composable () -> Unit)? = null,
     val onClick: (() -> Unit)? = null,
-    val cardColors: CardColors? = null,
+    val cardColors: androidx.compose.material3.CardColors? = null,
     val trailingContent: (@Composable () -> Unit)? = null
 )

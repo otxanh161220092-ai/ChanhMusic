@@ -10,6 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -19,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.tanh
 
@@ -58,8 +60,13 @@ class GlassStretch internal constructor(
             onDrag = { _, drag -> nudge(drag) },
         )
 
-    val scaleX: Float get() = damped.scaleX
-    val scaleY: Float get() = damped.scaleY
+    /** Press scale times the directional stretch: the surface grows along the drag. */
+    val scaleX: Float get() = damped.scaleX * (1f + STRETCH * abs(offsetX) / maxPx)
+    val scaleY: Float get() = damped.scaleY * (1f + STRETCH * abs(offsetY) / maxPx)
+
+    /** Pivot on the edge opposite the drag, so the leading edge extends toward the finger. */
+    val pivotX: Float get() = if (offsetX >= 0f) 0f else 1f
+    val pivotY: Float get() = if (offsetY >= 0f) 0f else 1f
     val translationX: Float get() = offsetX
     val translationY: Float get() = offsetY
     internal val modifier: Modifier get() = damped.modifier
@@ -103,6 +110,7 @@ class GlassStretch internal constructor(
 
     private companion object {
         const val FOLLOW = 0.6f
+        const val STRETCH = 0.12f
     }
 }
 
@@ -116,6 +124,7 @@ fun rememberGlassStretch(maxDp: Dp = 40.dp): GlassStretch {
 /** Applies [stretch] to the surface and forwards its press and drag gestures. */
 fun Modifier.glassStretch(stretch: GlassStretch): Modifier =
     graphicsLayer {
+        transformOrigin = TransformOrigin(stretch.pivotX, stretch.pivotY)
         scaleX = stretch.scaleX
         scaleY = stretch.scaleY
         translationX = stretch.translationX
