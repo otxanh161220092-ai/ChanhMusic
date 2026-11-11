@@ -110,12 +110,12 @@ class GlassStretch internal constructor(
 
     private companion object {
         const val FOLLOW = 0.6f
-        const val STRETCH = 0.12f
+        const val STRETCH = 0.05f
     }
 }
 
 @Composable
-fun rememberGlassStretch(maxDp: Dp = 40.dp): GlassStretch {
+fun rememberGlassStretch(maxDp: Dp = 18.dp): GlassStretch {
     val scope = rememberCoroutineScope()
     val maxPx = with(LocalDensity.current) { maxDp.toPx() }
     return remember(scope, maxPx) { GlassStretch(scope, maxPx) }

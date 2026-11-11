@@ -54,6 +54,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Backdrop the glass popups should sample instead of the page backdrop. The player sets it
+ * while it is open, so menus opened from the player show the player's background.
+ */
+object GlassBackdropOverride {
+    var active: com.kyant.backdrop.backdrops.LayerBackdrop? = null
+}
+
 /** Glass colours for the current theme: white glass with black text in light, dark grey glass with white text in dark. */
 data class GlassPalette(
     val tint: Color,

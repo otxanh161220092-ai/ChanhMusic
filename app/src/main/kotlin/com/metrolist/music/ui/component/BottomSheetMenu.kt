@@ -40,8 +40,6 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -187,7 +185,7 @@ fun BoxScope.BottomSheetMenu(
         var popupHeightPx by remember { mutableFloatStateOf(0f) }
 
         val shape = SmoothCornerShape(24.dp)
-        val backdrop = LocalGlassBackdrop.current
+        val backdrop = remember(state.isVisible) { GlassBackdropOverride.active } ?: LocalGlassBackdrop.current
         val palette = rememberGlassPalette()
         val stretch = rememberGlassStretch()
 
@@ -211,10 +209,10 @@ fun BoxScope.BottomSheetMenu(
                     translationX = left
                     translationY = top
                 },
-            enter = fadeIn(tween(180)) + scaleIn(initialScale = 0.85f, transformOrigin = TransformOrigin(0f, 0f), animationSpec = tween(220)),
-            exit = fadeOut(tween(120)) + scaleOut(targetScale = 0.85f, transformOrigin = TransformOrigin(0f, 0f), animationSpec = tween(120)),
+            enter = fadeIn(tween(140)),
+            exit = fadeOut(tween(100)),
         ) {
-            Column(
+            CompositionLocalProvider(LocalGlassBlur provides 2f) { Column(
                 modifier =
                     Modifier
                         .width(popupWidth)
@@ -243,7 +241,7 @@ fun BoxScope.BottomSheetMenu(
                         }
                     }
                 }
-            }
+            } }
         }
     }
 }

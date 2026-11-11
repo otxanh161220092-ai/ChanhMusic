@@ -828,6 +828,7 @@ class MainActivity : FragmentActivity() {
                     label = "navBarHeight",
                 )
 
+                val glassPlayerBackdrop = rememberLayerBackdrop()
                 val playerBottomSheetState =
                     rememberBottomSheetState(
                         dismissedBound = 0.dp,
@@ -933,6 +934,10 @@ class MainActivity : FragmentActivity() {
                     }
                 }
 
+                SideEffect {
+                    com.metrolist.music.ui.component.GlassBackdropOverride.active =
+                        if (playerBottomSheetState.progress > 0.5f) glassPlayerBackdrop else null
+                }
                 DisposableEffect(activePlayerConnection, playerBottomSheetState, servicePlayer) {
                     val player = servicePlayer ?: runCatching { activePlayerConnection?.player }.getOrNull()
                         ?: return@DisposableEffect onDispose { }
@@ -1339,11 +1344,13 @@ class MainActivity : FragmentActivity() {
                                 }
                                 Box {
                                     if (activePlayerConnection != null) {
-                                        BottomSheetPlayer(
-                                            state = playerBottomSheetState,
-                                            navController = navController,
-                                            pureBlack = pureBlack,
-                                        )
+                                        Box(Modifier.fillMaxSize().layerBackdrop(glassPlayerBackdrop)) {
+                                            BottomSheetPlayer(
+                                                state = playerBottomSheetState,
+                                                navController = navController,
+                                                pureBlack = pureBlack,
+                                            )
+                                        }
                                     }
 
                                     AppNavigationBar(
@@ -1423,11 +1430,13 @@ class MainActivity : FragmentActivity() {
 
                                 if (currentRoute != "wrapped") {
                                     if (activePlayerConnection != null) {
-                                        BottomSheetPlayer(
-                                            state = playerBottomSheetState,
-                                            navController = navController,
-                                            pureBlack = pureBlack,
-                                        )
+                                        Box(Modifier.fillMaxSize().layerBackdrop(glassPlayerBackdrop)) {
+                                            BottomSheetPlayer(
+                                                state = playerBottomSheetState,
+                                                navController = navController,
+                                                pureBlack = pureBlack,
+                                            )
+                                        }
                                     }
                                 }
 
