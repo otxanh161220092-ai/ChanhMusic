@@ -587,6 +587,7 @@ private fun ThumbnailItem(
                     layout(w, h) { placeable.place(0, 0) }
                 }
             })
+                .padding(top = if (squircleArtwork && !isLandscape) 32.dp else 0.dp)
                 .graphicsLayer {
                     scaleX = artworkScale
                     scaleY = artworkScale

@@ -34,7 +34,7 @@ fun LiveMeshBackground(
     val time by rememberInfiniteTransition(label = "liveMesh").animateFloat(
         initialValue = 0f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(14000, easing = LinearEasing), RepeatMode.Restart),
+        animationSpec = infiniteRepeatable(tween(24000, easing = LinearEasing), RepeatMode.Restart),
         label = "liveMeshTime",
     )
     Box(modifier = modifier.fillMaxSize().background(Color.Black)) {
@@ -42,10 +42,12 @@ fun LiveMeshBackground(
             val w = size.width
             val h = size.height
             val radius = maxOf(w, h) * 0.75f
+            // Every term uses an integer number of cycles per loop, so the value at t=1 equals t=0
+            // and the restart is invisible. Different integers per blob keep the motion uneven.
             palette.take(4).forEachIndexed { i, color ->
                 val phase = i * 1.7
-                val cx = w * (0.5f + 0.4f * sin(2 * PI * time + phase).toFloat())
-                val cy = h * (0.45f + 0.3f * cos(2 * PI * time * 0.7 + phase).toFloat())
+                val cx = w * (0.5f + 0.4f * sin(2 * PI * (1 + i % 2) * time + phase).toFloat())
+                val cy = h * (0.45f + 0.3f * cos(2 * PI * (2 + i % 3) * time + phase * 0.5).toFloat())
                 drawRect(
                     brush =
                         Brush.radialGradient(
