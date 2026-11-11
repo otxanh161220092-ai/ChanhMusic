@@ -582,12 +582,18 @@ private fun ThumbnailItem(
                 // 3:4 artwork, capped to the height the pager gives it so its bottom edge stays on screen
                 Modifier.fillMaxWidth().layout { measurable, constraints ->
                     val w = constraints.maxWidth
-                    val h = if (squircleArtwork) minOf(w, constraints.maxHeight) else minOf(w * 4 / 3, constraints.maxHeight)
+                    // Classic mode keeps the square whole and only moves it down by a top gap that is
+                    // counted inside the available height, so the bottom edge is never cut off.
+                    val gap = if (squircleArtwork) 32.dp.roundToPx() else 0
+                    val h = if (squircleArtwork) {
+                        minOf(w, constraints.maxHeight - gap)
+                    } else {
+                        minOf(w * 4 / 3, constraints.maxHeight)
+                    }
                     val placeable = measurable.measure(Constraints.fixed(w, h))
-                    layout(w, h) { placeable.place(0, 0) }
+                    layout(w, h + gap) { placeable.place(0, gap) }
                 }
             })
-                .padding(top = if (squircleArtwork && !isLandscape) 32.dp else 0.dp)
                 .graphicsLayer {
                     scaleX = artworkScale
                     scaleY = artworkScale
