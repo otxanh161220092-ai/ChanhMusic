@@ -83,6 +83,8 @@ import com.metrolist.music.constants.MiniPlayerBackgroundStyle
 import com.metrolist.music.constants.MiniPlayerBackgroundStyleKey
 import com.metrolist.music.constants.PlayerBackgroundStyle
 import com.metrolist.music.constants.PlayerBackgroundStyleKey
+import com.metrolist.music.constants.PlayerSquircleArtworkKey
+import com.metrolist.music.constants.PlayerLiveMeshBackgroundKey
 import com.metrolist.music.constants.PlayerButtonsStyle
 import com.metrolist.music.constants.PlayerButtonsStyleKey
 import com.metrolist.music.constants.PureBlackMiniPlayerKey
@@ -194,6 +196,8 @@ fun AppearanceSettings(
             PlayerBackgroundStyleKey,
             defaultValue = PlayerBackgroundStyle.DEFAULT,
         )
+    val (squircleArtwork, onSquircleArtworkChange) = rememberPreference(PlayerSquircleArtworkKey, defaultValue = false)
+    val (liveMeshBackground, onLiveMeshBackgroundChange) = rememberPreference(PlayerLiveMeshBackgroundKey, defaultValue = false)
 
     val (defaultOpenTab, onDefaultOpenTabChange) =
         rememberEnumPreference(
@@ -1112,6 +1116,24 @@ fun AppearanceSettings(
                             )
                         },
                         onClick = { showPlayerBackgroundDialog = true },
+                    ),
+                    Material3SettingsItem(
+                        icon = painterResource(R.drawable.grid_view),
+                        title = { Text(stringResource(R.string.squircle_artwork)) },
+                        description = { Text(stringResource(R.string.squircle_artwork_desc)) },
+                        trailingContent = {
+                            Switch(checked = squircleArtwork, onCheckedChange = onSquircleArtworkChange)
+                        },
+                        onClick = { onSquircleArtworkChange(!squircleArtwork) },
+                    ),
+                    Material3SettingsItem(
+                        icon = painterResource(R.drawable.gradient),
+                        title = { Text(stringResource(R.string.live_mesh_background)) },
+                        description = { Text(stringResource(R.string.live_mesh_background_desc)) },
+                        trailingContent = {
+                            Switch(checked = liveMeshBackground, onCheckedChange = onLiveMeshBackgroundChange)
+                        },
+                        onClick = { onLiveMeshBackgroundChange(!liveMeshBackground) },
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.hide_image),

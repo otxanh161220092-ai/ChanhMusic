@@ -159,6 +159,7 @@ import com.metrolist.music.constants.HideStatusBarOnFullscreenKey
 import com.metrolist.music.constants.KeepScreenOn
 import com.metrolist.music.constants.PlayerBackgroundStyle
 import com.metrolist.music.constants.PlayerBackgroundStyleKey
+import com.metrolist.music.constants.PlayerLiveMeshBackgroundKey
 import com.metrolist.music.constants.PlayerButtonsStyle
 import com.metrolist.music.constants.PlayerButtonsStyleKey
 import com.metrolist.music.constants.PlayerHorizontalPadding
@@ -888,6 +889,7 @@ fun BottomSheetPlayer(
 
     val backgroundAlpha = state.progress.coerceIn(0f, 1f)
 
+    val (liveMeshBackground) = rememberPreference(PlayerLiveMeshBackgroundKey, defaultValue = false)
     BottomSheet(
         state = state,
         modifier = modifier,
@@ -898,7 +900,9 @@ fun BottomSheetPlayer(
                         .fillMaxSize()
                         .background(bottomSheetBackgroundColor),
             ) {
-                when (playerBackground) {
+                if (liveMeshBackground) {
+                    LiveMeshBackground(colors = gradientColors)
+                } else when (playerBackground) {
                     PlayerBackgroundStyle.BLUR -> {
                         val visual = mixVisual
                         if (visual != null) {

@@ -60,6 +60,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -91,6 +93,8 @@ import com.metrolist.music.constants.ThumbnailCornerRadius
 import com.metrolist.music.ui.component.CastButton
 import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.constants.ReduceBlurEffectsKey
+import com.metrolist.music.ui.component.SmoothCornerShape
+import com.metrolist.music.constants.PlayerSquircleArtworkKey
 import com.metrolist.music.utils.rememberPreference
 import kotlinx.coroutines.delay
 
@@ -487,6 +491,14 @@ private fun ThumbnailItem(
     val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
     val reduceBlur by rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
     val blurOn = !reduceBlur
+    val squircleArtwork by rememberPreference(PlayerSquircleArtworkKey, defaultValue = false)
+    val isPlayingNow by playerConnection.isPlaying.collectAsState()
+    val isCurrentItem = item.mediaId == currentMediaId
+    val artworkScale by animateFloatAsState(
+        targetValue = if (squircleArtwork && isCurrentItem && !isPlayingNow) 0.84f else 1f,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f),
+        label = "artworkPauseScale",
+    )
     var skipMultiplier by remember { mutableIntStateOf(1) }
     var lastTapTime by remember { mutableLongStateOf(0L) }
 
@@ -569,7 +581,11 @@ private fun ThumbnailItem(
                     layout(w, h) { placeable.place(0, 0) }
                 }
             })
-                .clip(RoundedCornerShape(dimensions.cornerRadius))
+                .graphicsLayer {
+                    scaleX = artworkScale
+                    scaleY = artworkScale
+                }
+                .clip(if (squircleArtwork) SmoothCornerShape(28.dp) else RoundedCornerShape(dimensions.cornerRadius))
                 .then(if (isLandscape) Modifier else Modifier.fadeBottomEdge(0.2f))
         ) {
             if (hidePlayerThumbnail) {

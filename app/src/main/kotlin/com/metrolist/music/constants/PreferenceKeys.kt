@@ -208,6 +208,8 @@ val ListenTogetherBlockedUsersKey = stringPreferencesKey("listenTogetherBlockedU
 val ListenTogetherInTopBarKey = booleanPreferencesKey("listenTogetherInTopBar")
 val GlassBlurKey = floatPreferencesKey("glassBlurDp")
 val GlassDragEffectKey = booleanPreferencesKey("glassDragEffect")
+val PlayerSquircleArtworkKey = booleanPreferencesKey("playerSquircleArtwork")
+val PlayerLiveMeshBackgroundKey = booleanPreferencesKey("playerLiveMeshBackground")
 val ReduceBlurEffectsKey = booleanPreferencesKey("reduceBlurEffects")
 
 // Session persistence for reconnection
