@@ -16,13 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Live mesh background in the spirit of Apple Music: soft blobs in the cover colours drift
- * slowly over a dark base, with a shade at the bottom for text legibility.
+ * Live mesh background in the spirit of Apple Music: many soft blobs, one per cover colour,
+ * drift over a base tinted from the dominant colour. Every motion term completes a whole number
+ * of cycles per loop, so the restart is invisible.
  */
 @Composable
 fun LiveMeshBackground(
@@ -37,21 +39,22 @@ fun LiveMeshBackground(
         animationSpec = infiniteRepeatable(tween(24000, easing = LinearEasing), RepeatMode.Restart),
         label = "liveMeshTime",
     )
-    Box(modifier = modifier.fillMaxSize().background(Color.Black)) {
+    val base = lerp(palette.first(), Color.Black, 0.7f)
+    Box(modifier = modifier.fillMaxSize().background(base)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val w = size.width
             val h = size.height
-            val radius = maxOf(w, h) * 0.75f
-            // Every term uses an integer number of cycles per loop, so the value at t=1 equals t=0
-            // and the restart is invisible. Different integers per blob keep the motion uneven.
-            palette.take(4).forEachIndexed { i, color ->
-                val phase = i * 1.7
-                val cx = w * (0.5f + 0.4f * sin(2 * PI * (1 + i % 2) * time + phase).toFloat())
-                val cy = h * (0.45f + 0.3f * cos(2 * PI * (2 + i % 3) * time + phase * 0.5).toFloat())
+            val radius = maxOf(w, h) * 0.6f
+            val blobCount = 6
+            for (i in 0 until blobCount) {
+                val color = palette[i % palette.size]
+                val phase = i * 1.3
+                val cx = w * (0.5f + 0.45f * sin(2 * PI * (1 + i % 2) * time + phase).toFloat())
+                val cy = h * (0.5f + 0.4f * cos(2 * PI * (2 + i % 3) * time + phase * 0.6).toFloat())
                 drawRect(
                     brush =
                         Brush.radialGradient(
-                            colors = listOf(color.copy(alpha = 0.85f), color.copy(alpha = 0f)),
+                            colors = listOf(color.copy(alpha = 0.9f), color.copy(alpha = 0f)),
                             center = Offset(cx, cy),
                             radius = radius,
                         ),
@@ -64,9 +67,9 @@ fun LiveMeshBackground(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            0f to Color.Black.copy(alpha = 0.1f),
-                            0.55f to Color.Black.copy(alpha = 0.25f),
-                            1f to Color.Black.copy(alpha = 0.5f),
+                            0f to Color.Black.copy(alpha = 0f),
+                            0.6f to Color.Black.copy(alpha = 0.15f),
+                            1f to Color.Black.copy(alpha = 0.4f),
                         ),
                     ),
         )

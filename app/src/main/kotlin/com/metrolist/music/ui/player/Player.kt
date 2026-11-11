@@ -454,9 +454,46 @@ fun BottomSheetPlayer(
     val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
 
     val (liveMeshBackground) = rememberPreference(PlayerLiveMeshBackgroundKey, defaultValue = false)
+    var meshColors by remember { mutableStateOf<List<Color>>(emptyList()) }
+    val meshColorsCache = remember { mutableMapOf<String, List<Color>>() }
 
-    LaunchedEffect(mediaMetadata?.id, playerBackground, liveMeshBackground) {
-        if (playerBackground == PlayerBackgroundStyle.GRADIENT || liveMeshBackground) {
+    LaunchedEffect(mediaMetadata?.id, liveMeshBackground) {
+        val currentMetadata = mediaMetadata
+        if (liveMeshBackground && currentMetadata?.thumbnailUrl != null) {
+            val cached = meshColorsCache[currentMetadata.id]
+            if (cached != null) {
+                meshColors = cached
+                return@LaunchedEffect
+            }
+            withContext(Dispatchers.IO) {
+                val request =
+                    ImageRequest
+                        .Builder(context)
+                        .data(currentMetadata.thumbnailUrl)
+                        .size(100, 100)
+                        .allowHardware(false)
+                        .memoryCacheKey("gradient_${currentMetadata.id}")
+                        .build()
+                val bitmap = runCatching { context.imageLoader.execute(request) }.getOrNull()?.image?.toBitmap()
+                if (bitmap != null) {
+                    val palette =
+                        withContext(Dispatchers.Default) {
+                            Palette
+                                .from(bitmap)
+                                .maximumColorCount(12)
+                                .resizeBitmapArea(100 * 100)
+                                .generate()
+                        }
+                    val extracted = PlayerColorExtractor.extractMeshColors(palette, fallbackColor)
+                    meshColorsCache[currentMetadata.id] = extracted
+                    withContext(Dispatchers.Main) { meshColors = extracted }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(mediaMetadata?.id, playerBackground) {
+        if (playerBackground == PlayerBackgroundStyle.GRADIENT) {
             val currentMetadata = mediaMetadata
             if (currentMetadata != null && currentMetadata.thumbnailUrl != null) {
                 val cachedColors = gradientColorsCache[currentMetadata.id]
@@ -902,7 +939,7 @@ fun BottomSheetPlayer(
                         .background(bottomSheetBackgroundColor),
             ) {
                 if (liveMeshBackground) {
-                    LiveMeshBackground(colors = gradientColors)
+                    LiveMeshBackground(colors = meshColors)
                 } else when (playerBackground) {
                     PlayerBackgroundStyle.BLUR -> {
                         val visual = mixVisual

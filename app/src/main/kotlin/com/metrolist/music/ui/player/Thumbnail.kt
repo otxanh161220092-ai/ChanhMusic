@@ -63,7 +63,6 @@ import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.shadow
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -496,15 +495,22 @@ private fun ThumbnailItem(
     val squircleArtwork by rememberPreference(PlayerSquircleArtworkKey, defaultValue = false)
     val isPlayingNow by playerConnection.isPlaying.collectAsState()
     val isCurrentItem = item.mediaId == currentMediaId
-    val artworkScale by animateFloatAsState(
-        targetValue = when {
-            !squircleArtwork || !isCurrentItem -> 1f
-            isPlayingNow -> 0.84f
-            else -> 0.7f
-        },
-        animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f),
-        label = "artworkPauseScale",
-    )
+    val artworkTarget = when {
+        !squircleArtwork || !isCurrentItem -> 1f
+        isPlayingNow -> 0.84f
+        else -> 0.7f
+    }
+    val artworkScale = remember { Animatable(artworkTarget) }
+    var artworkWasCurrent by remember { mutableStateOf(isCurrentItem) }
+    LaunchedEffect(artworkTarget) {
+        if (artworkWasCurrent != isCurrentItem) {
+            // Track change or first open: move to the new size without a bounce
+            artworkWasCurrent = isCurrentItem
+            artworkScale.snapTo(artworkTarget)
+        } else {
+            artworkScale.animateTo(artworkTarget, spring(dampingRatio = 0.7f, stiffness = 400f))
+        }
+    }
     var skipMultiplier by remember { mutableIntStateOf(1) }
     var lastTapTime by remember { mutableLongStateOf(0L) }
 
@@ -595,8 +601,8 @@ private fun ThumbnailItem(
                 }
             })
                 .graphicsLayer {
-                    scaleX = artworkScale
-                    scaleY = artworkScale
+                    scaleX = artworkScale.value
+                    scaleY = artworkScale.value
                 }
                 .zIndex(if (squircleArtwork) 1f else 0f)
                 .then(

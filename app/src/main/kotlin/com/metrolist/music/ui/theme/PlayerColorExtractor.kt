@@ -24,4 +24,16 @@ object PlayerColorExtractor {
             Color.Black,
         )
     }
+
+    fun extractMeshColors(
+        palette: Palette,
+        fallbackColor: Int,
+    ): List<Color> {
+        val colors =
+            (palette.swatches.sortedByDescending { it.population }.map { it.rgb } + palette.rankedColors(6, fallbackColor).toList())
+                .map { Color(it) }
+                .distinct()
+                .take(6)
+        return colors.ifEmpty { listOf(Color(fallbackColor)) }
+    }
 }
