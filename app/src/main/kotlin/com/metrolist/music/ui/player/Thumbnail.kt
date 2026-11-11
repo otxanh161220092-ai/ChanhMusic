@@ -496,8 +496,8 @@ private fun ThumbnailItem(
     val isPlayingNow by playerConnection.isPlaying.collectAsState()
     val isCurrentItem = item.mediaId == currentMediaId
     val artworkTarget = when {
-        !squircleArtwork || !isCurrentItem -> 1f
-        isPlayingNow -> 0.84f
+        !squircleArtwork -> 1f
+        !isCurrentItem || isPlayingNow -> 0.84f
         else -> 0.7f
     }
     val artworkScale = remember { Animatable(artworkTarget) }
