@@ -9,7 +9,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
@@ -35,7 +34,7 @@ import com.kyant.backdrop.backdrops.LayerBackdrop
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.matchParentSize
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
@@ -74,14 +73,16 @@ fun FloatingGlassPill(
                 ),
     ) {
         Row(
-            modifier = Modifier.height(48.dp),
+            modifier =
+                Modifier
+                    .height(48.dp)
+                    .drawWithContent {
+                        drawContent()
+                        drawRingPill(ImageBitmap.imageResource(R.drawable.glass_ring_overlay))
+                    },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             content()
-        }
-        val ring = ImageBitmap.imageResource(R.drawable.glass_ring_overlay)
-        Canvas(modifier = Modifier.matchParentSize()) {
-            drawRingPill(ring)
         }
     }
 }
@@ -196,13 +197,14 @@ fun OriginalBackSlot(content: @Composable () -> Unit) {
 
 /** Places the floating actions at the top-right, level with the floating back button. */
 @Composable
-fun BoxScope.FloatingActionsSlot(actions: @Composable () -> Unit) {
+fun FloatingActionsSlot(actions: @Composable () -> Unit) {
     Box(
         modifier =
             Modifier
-                .align(Alignment.TopEnd)
+                .fillMaxWidth()
                 .statusBarsPadding()
                 .padding(end = 16.dp, top = 8.dp),
+        contentAlignment = Alignment.TopEnd,
     ) {
         actions()
     }
