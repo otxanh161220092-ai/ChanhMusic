@@ -45,7 +45,10 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.CompositingStrategy
+import com.metrolist.music.constants.PlayerLiveMeshBackgroundKey
+import com.metrolist.music.utils.rememberPreference
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -146,6 +149,7 @@ internal fun LyricsLine(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val (liveMeshBackground) = rememberPreference(PlayerLiveMeshBackgroundKey, defaultValue = false)
     val density = LocalDensity.current
     
     val itemModifier = modifier
@@ -522,6 +526,7 @@ private fun WordLevelLyrics(
             .graphicsLayer(
                 clip = false,
                 compositingStrategy = CompositingStrategy.Offscreen,
+                blendMode = if (liveMeshBackground) BlendMode.Overlay else BlendMode.SrcOver,
             )
             .vibrant(enabled = true)
         ) {

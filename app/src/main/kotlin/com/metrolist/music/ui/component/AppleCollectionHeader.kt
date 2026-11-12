@@ -387,14 +387,14 @@ fun AppleCollectionHeader(
                             onClick = onShuffle,
                             shape = CircleShape,
                             color = Color.Transparent,
-                            modifier = Modifier.size(52.dp).graphicsLayer { blendMode = BlendMode.Overlay }.highlightBorder().screenHighlight(sideHighlightAlpha),
+                            modifier = Modifier.size(52.dp).background(Color.White.copy(alpha = 0.25f), CircleShape).highlightBorder().screenHighlight(sideHighlightAlpha),
                         ) {
                             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                                 Icon(
                                     painter = painterResource(R.drawable.shuffle),
                                     contentDescription = stringResource(R.string.shuffle_home),
                                     tint = buttonInk,
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(24.dp).graphicsLayer { blendMode = BlendMode.Overlay },
                                 )
                             }
                         }
@@ -438,14 +438,14 @@ fun AppleCollectionHeader(
                         onClick = onMore,
                         shape = CircleShape,
                         color = Color.Transparent,
-                        modifier = Modifier.size(52.dp).graphicsLayer { blendMode = BlendMode.Overlay }.highlightBorder().screenHighlight(sideHighlightAlpha),
+                        modifier = Modifier.size(52.dp).background(Color.White.copy(alpha = 0.25f), CircleShape).highlightBorder().screenHighlight(sideHighlightAlpha),
                     ) {
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                             Icon(
                                 painter = painterResource(R.drawable.more_vert),
                                 contentDescription = null,
                                 tint = buttonInk,
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(24.dp).graphicsLayer { blendMode = BlendMode.Overlay },
                             )
                         }
                     }
