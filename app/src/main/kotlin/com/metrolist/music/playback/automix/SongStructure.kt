@@ -30,8 +30,9 @@ fun TrackFeatures.toSongStructure(vocalGaps: List<LongRange>? = null): SongStruc
     SongStructure(
         durationMs = durationMs,
         segments = LoudnessSegmenter.segment(durationMs, loudnessDb) ?: HeuristicSegmenter.segment(durationMs, loudnessDb),
-        bpm = bpm,
-        hasTempo = hasTempo,
+        // The tempo ratio and the beat grid must come from the same measurement, or B drifts off A's beats.
+        bpm = neural?.beatMs?.takeIf { it > 0.0 }?.let { (60_000.0 / it).toFloat() } ?: bpm,
+        hasTempo = hasTempo || (neural?.beatMs ?: 0.0) > 0.0,
         // Same gate as tempo matching: a usable BPM is enough to measure the grid.
         gridNear = { positionMs -> if (bpm > 0f) gridNear(positionMs.toDouble()) else null },
         vocalGaps = vocalGaps,

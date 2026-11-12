@@ -10,6 +10,7 @@ import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.floor
 import kotlin.math.roundToLong
+import kotlin.math.min
 import kotlin.math.sin
 
 /** Sample-level helpers: beat grid in samples, downbeat locking, 16-bit stereo mixing with bass swap. */
@@ -80,7 +81,8 @@ object SampleMixDsp {
                 val p = ((frameOffset + f).toDouble() / n).coerceIn(0.0, 1.0)
                 val theta = p * PI / 2
                 val gA = cos(theta)
-                val gB = sin(theta)
+                // B comes in early (full level by 70% of the overlap) so the blend never dips in the middle.
+                val gB = sin(min(1.0, p / 0.7) * PI / 2)
                 // Low-band weights: B bass in during second half, A bass out during second half.
                 val bassB = if (bassSwap) ((p - 0.5) * 2).coerceIn(0.0, 1.0) else 1.0
                 val bassA = if (bassSwap) (1.0 - ((p - 0.5) * 2).coerceIn(0.0, 1.0)) else 1.0
