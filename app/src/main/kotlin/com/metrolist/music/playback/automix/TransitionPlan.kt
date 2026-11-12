@@ -7,6 +7,7 @@ package com.metrolist.music.playback.automix
 
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.min
 import kotlin.math.sin
 
 enum class TransitionKind {
@@ -58,7 +59,9 @@ class TransitionPlan(
     fun gainsAt(relMs: Double): Pair<Float, Float> {
         val outP = ((relMs - (mixOutPositionA - startA)) / fadeOutDurationA).coerceIn(0.0, 1.0)
         val inP = ((relMs - (bFadeInStartA - startA)) / fadeInDurationB).coerceIn(0.0, 1.0)
-        return cos(outP * PI / 2).toFloat() to sin(inP * PI / 2).toFloat()
+        // B reaches full level by 70% of its fade-in, so the blend does not sink in the middle.
+        val inEarly = min(1.0, inP / 0.7)
+        return cos(outP * PI / 2).toFloat() to sin(inEarly * PI / 2).toFloat()
     }
 
     val handoverEndA: Long get() = mixOutPositionA + fadeOutDurationA
