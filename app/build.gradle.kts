@@ -251,6 +251,8 @@ configurations.configureEach {
 }
 
 dependencies {
+    // ONNX Runtime for the Beat This! downbeat/beat model (automix grid).
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.28.0")
     implementation("io.github.kyant0:backdrop:2.0.0")
     implementation(libs.guava)
     implementation(libs.coroutines.guava)
