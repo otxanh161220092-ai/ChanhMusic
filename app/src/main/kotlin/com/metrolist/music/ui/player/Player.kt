@@ -1150,7 +1150,7 @@ fun BottomSheetPlayer(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        if (mediaMetadata.explicit) MIcon.Explicit()
+                        if (mediaMetadata.explicit) MIcon.Explicit(blendOverlay = true)
 
                         if (mediaMetadata.artists.any { it.name.isNotBlank() }) {
                             val annotatedString =
@@ -1940,7 +1940,7 @@ fun BottomSheetPlayer(
                                         } else {
                                             if (effectiveIsPlaying) stringResource(R.string.player_pause) else stringResource(R.string.play)
                                         },
-                                    modifier = Modifier.size(playPauseSize),
+                                    modifier = Modifier.size(playPauseSize * 0.6f),
                                 )
                             }
 

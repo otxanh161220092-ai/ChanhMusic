@@ -127,14 +127,9 @@ object GlassPressTracker {
         open.remove(menu)
     }
 
+    /** Only records the press position. Menus close from their own dimmed scrim, not from taps elsewhere. */
     fun onPress(position: Offset) {
         lastPress = position
-        open.toList().forEach { menu ->
-            val c = menu.coords
-            if (c != null && c.isAttached && !c.boundsInRoot().contains(position)) {
-                menu.dismiss()
-            }
-        }
     }
 }
 

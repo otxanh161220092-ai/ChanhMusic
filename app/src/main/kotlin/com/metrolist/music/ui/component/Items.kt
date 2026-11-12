@@ -1996,13 +1996,23 @@ object Icon {
     }
 
     @Composable
-    fun Explicit() {
+    fun Explicit(blendOverlay: Boolean = false) {
         Icon(
             painter = painterResource(R.drawable.ic_explicit),
             contentDescription = null,
             modifier = Modifier
                 .size(18.dp)
                 .padding(end = 2.dp)
+                .then(
+                    if (blendOverlay) {
+                        Modifier.graphicsLayer {
+                            compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
+                            blendMode = androidx.compose.ui.graphics.BlendMode.Overlay
+                        }
+                    } else {
+                        Modifier
+                    }
+                )
         )
     }
 }
