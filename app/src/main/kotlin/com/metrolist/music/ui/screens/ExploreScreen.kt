@@ -66,6 +66,7 @@ fun ExploreScreen(viewModel: HomeViewModel = hiltViewModel()) {
     val releases = explorePage?.newReleaseAlbums.orEmpty()
     val discover = dailyDiscover.orEmpty().map { it.recommendation }.distinctBy { it.id }
     val discoverSongs = discover.filterIsInstance<SongItem>()
+    val discoverTitle = stringResource(R.string.your_daily_discover)
 
     LazyColumn(contentPadding = tabScreenContentPadding()) {
         item(key = "explore_mood_title") {
@@ -117,7 +118,7 @@ fun ExploreScreen(viewModel: HomeViewModel = hiltViewModel()) {
                                 .clickable {
                                     playerConnection.playQueue(
                                         ListQueue(
-                                            title = stringResource(R.string.your_daily_discover),
+                                            title = discoverTitle,
                                             items = discoverSongs.map { it.toMediaItem() },
                                         ),
                                     )
