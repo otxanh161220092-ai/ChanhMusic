@@ -162,7 +162,8 @@ object SmartTransitionCalculator {
                 pickBars(cap, barA, BARS_MEDIUM).coerceAtLeast(minOf(cap, 1_000L))
             }
         val handover = floorToBar(endA, gridA).let { if (it - fade >= earliestMixMs) it else endA }
-        val entryB = gridB?.firstBarAtOrAfter(0.0)?.toLong()?.takeIf { it < 4_000L } ?: 0L
+        // B starts where its beat starts, so an ambient or sound-effect intro is skipped.
+        val entryB = songB.beatEntryMs ?: gridB?.firstBarAtOrAfter(0.0)?.toLong()?.takeIf { it < 4_000L } ?: 0L
         val trackPhase = tempo.matched
         Timber.tag("MusicService").d("Phase v2: matched=%b folded=%b gridA=%b gridB=%b", tempo.matched, tempo.octaveFolded, gridA != null, gridB != null)
         return TransitionPlan(
@@ -250,7 +251,7 @@ object SmartTransitionCalculator {
         when (kind) {
             TransitionKind.DROP_TO_CALM, TransitionKind.CALM_TO_CALM -> {
                 val symmetric = kind == TransitionKind.CALM_TO_CALM
-                entryB = barAlignedStart(b, gridB)
+                entryB = beatEntry(b, songB, gridB)
                 val cap = if (symmetric) longFadeMs * 2 else longFadeMs
                 val room = minOf(cap, sectionA, ((b.endTimeMs - entryB) / factor).toLong())
                 val bars = if (symmetric) BARS_LONG else BARS_MEDIUM
@@ -377,6 +378,21 @@ object SmartTransitionCalculator {
         if (grid == null) return timeMs
         val bars = floor((timeMs - grid.downbeatMs) / grid.barMs)
         return (grid.downbeatMs + bars * grid.barMs).toLong()
+    }
+
+    /**
+     * Where B enters a segment: the bar line inside it, but never before B's beat starts, so an intro with
+     * no beat (ambience, sound effects) is skipped. Falls back to the bar-aligned start when the beat
+     * starts before the segment or too close to its end.
+     */
+    private fun beatEntry(
+        segment: SongSegment,
+        songB: SongStructure,
+        grid: BeatGrid?,
+    ): Long {
+        val base = barAlignedStart(segment, grid)
+        val beatStart = songB.beatEntryMs ?: return base
+        return if (beatStart > base && beatStart < segment.endTimeMs - MIN_FADE_MS) beatStart else base
     }
 
     /** A calm section starts on the first bar line inside it, so B does not enter mid-bar. */
