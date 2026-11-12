@@ -37,6 +37,7 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -1711,6 +1712,14 @@ fun BottomSheetPlayer(
                 }
 
                 SliderStyle.DEFAULT, SliderStyle.SLIM -> {
+                    val progressInteraction = remember { MutableInteractionSource() }
+                    val progressPressed by progressInteraction.collectIsPressedAsState()
+                    val progressDragged by progressInteraction.collectIsDraggedAsState()
+                    val progressTrackHeight by animateDpAsState(
+                        targetValue = if (progressPressed || progressDragged) 10.dp else 6.dp,
+                        animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
+                        label = "progressTrackHeight",
+                    )
                     val sliderValue = (sliderPosition ?: effectivePosition).toFloat()
                     val sliderRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat())
                     val sliderState = remember(sliderRange) {
@@ -1739,12 +1748,13 @@ fun BottomSheetPlayer(
                             }
                         },
                         enabled = !isListenTogetherGuest,
+                        interactionSource = progressInteraction,
                         thumb = { Spacer(modifier = Modifier.size(0.dp)) },
                         track = { sliderState ->
                             PlayerSliderTrack(
                                 sliderState = sliderState,
                                 colors = PlayerSliderColors.getSliderColors(textButtonColor, playerBackground, useDarkTheme),
-                                trackHeight = 4.dp,
+                                trackHeight = progressTrackHeight,
                             )
                         },
                         modifier = Modifier.padding(horizontal = PlayerHorizontalPadding),

@@ -13,7 +13,12 @@
 
 package com.metrolist.music.ui.component
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -40,7 +45,8 @@ import com.metrolist.music.R
  * Material 3 Expressive Volume Slider dimensions (Size M)
  */
 private object VolumeSliderDefaults {
-    val TrackHeight: Dp = 40.dp
+    val TrackHeight: Dp = 46.dp
+    val TrackHeightPressed: Dp = 58.dp
     val HandleHeight: Dp = 52.dp
     val HandleWidth: Dp = 4.dp
     val TrackCornerRadius: Dp = 12.dp
@@ -61,6 +67,13 @@ fun VolumeSlider(
     accentColor: Color = MaterialTheme.colorScheme.primary
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val volumePressed by interactionSource.collectIsPressedAsState()
+    val volumeDragged by interactionSource.collectIsDraggedAsState()
+    val volumeTrackHeight by animateDpAsState(
+        targetValue = if (volumePressed || volumeDragged) VolumeSliderDefaults.TrackHeightPressed else VolumeSliderDefaults.TrackHeight,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
+        label = "volumeTrackHeight",
+    )
     val sliderState = rememberSliderState(value = value)
     sliderState.value = value
 
@@ -102,7 +115,7 @@ fun VolumeSlider(
             SliderDefaults.Track(
                 sliderState = sliderState,
                 modifier = Modifier
-                    .height(VolumeSliderDefaults.TrackHeight)
+                    .height(volumeTrackHeight)
                     .drawWithContent {
                         drawContent()
                         val yOffset = size.height / 2 - iconSize.toSize().height / 2
