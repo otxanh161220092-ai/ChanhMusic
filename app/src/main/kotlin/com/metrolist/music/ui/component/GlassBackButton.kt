@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.draw.drawWithContent
@@ -58,6 +59,7 @@ fun FloatingGlassPill(
     content: @Composable () -> Unit,
 ) {
     val shape = RoundedCornerShape(50)
+    val ring = ImageBitmap.imageResource(R.drawable.glass_ring_overlay)
     Box(
         modifier =
             modifier
@@ -78,7 +80,7 @@ fun FloatingGlassPill(
                     .height(48.dp)
                     .drawWithContent {
                         drawContent()
-                        drawRingPill(ImageBitmap.imageResource(R.drawable.glass_ring_overlay))
+                        drawRingPill(ring)
                     },
             verticalAlignment = Alignment.CenterVertically,
         ) {
