@@ -27,7 +27,7 @@ class CachedAnalysis(
  */
 object AutomixFeatureCodec {
     /** Bump when the analyzer changes meaningfully; older files are then ignored and re-analyzed. */
-    const val ANALYSIS_VERSION = 1
+    const val ANALYSIS_VERSION = 2
 
     private const val DECIMATION = 4
     private const val SHORT_SCALE = 32767f
@@ -45,6 +45,7 @@ object AutomixFeatureCodec {
             writeFloats(out, f.loudnessDb)
             writeQuantized(out, decimate(f.onset))
             writeQuantized(out, decimate(f.lowOnset))
+            writeNeural(out, f.neural)
             out.writeUTF(encodeSegments(analysis.segments))
         }
         return bytes.toByteArray()
@@ -65,6 +66,7 @@ object AutomixFeatureCodec {
                         loudnessDb = readFloats(input),
                         onset = readQuantized(input),
                         lowOnset = readQuantized(input),
+                        neural = readNeural(input),
                     )
                 CachedAnalysis(features, decodeSegments(input.readUTF()))
             }
@@ -110,6 +112,26 @@ object AutomixFeatureCodec {
     }
 
     private fun readFloats(input: DataInputStream): FloatArray = FloatArray(input.readInt()) { input.readFloat() }
+
+    private fun writeNeural(
+        out: DataOutputStream,
+        grid: NeuralBeatGrid?,
+    ) {
+        out.writeBoolean(grid != null)
+        if (grid == null) return
+        writeFloats(out, FloatArray(grid.beatsMs.size) { grid.beatsMs[it].toFloat() })
+        writeFloats(out, FloatArray(grid.downbeatsMs.size) { grid.downbeatsMs[it].toFloat() })
+    }
+
+    private fun readNeural(input: DataInputStream): NeuralBeatGrid? {
+        if (!input.readBoolean()) return null
+        val beats = readFloats(input)
+        val downbeats = readFloats(input)
+        return NeuralBeatGrid(
+            beatsMs = DoubleArray(beats.size) { beats[it].toDouble() },
+            downbeatsMs = DoubleArray(downbeats.size) { downbeats[it].toDouble() },
+        )
+    }
 
     /** Layout: sample count, 4-byte scale, then one signed 16-bit value per sample. */
     private fun writeQuantized(

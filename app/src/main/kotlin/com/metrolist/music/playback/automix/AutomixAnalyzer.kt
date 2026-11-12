@@ -33,6 +33,8 @@ import kotlin.coroutines.coroutineContext
 class AutomixAnalyzer(
     private val dataSourceFactory: DataSource.Factory,
     private val store: AutomixFeatureStore? = null,
+    /** When set, the Beat This! model runs on each track to find its beats and downbeats. */
+    private val context: android.content.Context? = null,
 ) {
     private val results =
         object : LinkedHashMap<String, TrackFeatures>(16, 0.75f, true) {
@@ -106,6 +108,7 @@ class AutomixAnalyzer(
 
             val info = MediaCodec.BufferInfo()
             var features: FeatureExtractor? = null
+            var beatInput: BeatInputBuffer? = null
             var mono = FloatArray(0)
             var inputDone = false
             var outputDone = false
@@ -165,13 +168,30 @@ class AutomixAnalyzer(
                             }
                         }
                         if (features == null) features = FeatureExtractor(sampleRate)
+                        if (beatInput == null && context != null) beatInput = BeatInputBuffer(sampleRate)
+                        beatInput?.feed(mono, frames)
                         features.feed(mono, frames)
                     }
                     codec.releaseOutputBuffer(outputIndex, false)
                     if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) outputDone = true
                 }
             }
-            return features?.finish()
+            val result = features?.finish() ?: return null
+            val neural =
+                context?.let { ctx ->
+                    beatInput?.toFloatArray()?.let { BeatThisTracker.track(ctx, it) }
+                }
+            return TrackFeatures(
+                result.durationMs,
+                result.loudnessDb,
+                result.bpm,
+                result.bpmConfidence,
+                result.onset,
+                result.lowOnset,
+                result.periodHops,
+                result.hopMs,
+                neural,
+            )
         } finally {
             try {
                 codec?.stop()

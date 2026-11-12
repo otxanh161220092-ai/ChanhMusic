@@ -43,6 +43,8 @@ class TrackFeatures(
     val lowOnset: FloatArray,
     val periodHops: Double,
     val hopMs: Double,
+    /** Beats and downbeats from the Beat This! model, or null when it did not run for this track. */
+    val neural: NeuralBeatGrid? = null,
 ) {
     val hasTempo: Boolean get() = bpm > 0f && bpmConfidence >= MIN_TEMPO_CONFIDENCE
 
@@ -54,6 +56,11 @@ class TrackFeatures(
         centerMs: Double,
         spanMs: Double = 16_000.0,
     ): BeatGrid? {
+        neural?.let { model ->
+            val beat = model.beatMs
+            val downbeat = model.downbeatNear(centerMs)
+            if (beat > 0.0 && downbeat != null) return BeatGrid(downbeatMs = downbeat, beatMs = beat)
+        }
         val center = (centerMs / hopMs).roundToInt()
         val half = (spanMs / hopMs / 2.0).roundToInt()
         val lo = max(0, center - half)

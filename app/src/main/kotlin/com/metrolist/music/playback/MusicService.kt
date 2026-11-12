@@ -455,6 +455,7 @@ class MusicService :
         AutomixAnalyzer(
             createDataSourceFactory(VolumeNormalizationAudioProcessor()) { null },
             FileAutomixFeatureStore(File(cacheDir, "automix")),
+            context = applicationContext,
         )
     }
     private val automixPrescanner by lazy { AutomixPrescanner(automixAnalyzer, scope) }
