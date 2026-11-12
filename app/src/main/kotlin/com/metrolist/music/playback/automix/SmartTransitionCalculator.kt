@@ -33,6 +33,13 @@ object SmartTransitionCalculator {
     /** Fade lengths in bars, longest first; the longest that fits the sections involved is used. */
     private val BARS_LONG = intArrayOf(16, 8, 6, 4, 2)
     private val BARS_MEDIUM = intArrayOf(8, 6, 4, 2)
+
+    /**
+     * Auto-mix length in beats, longest first, and its overall ceiling. Counting in beats keeps the mix
+     * on the phrase the ear follows; the 12 s ceiling stops slow songs from blending for too long.
+     */
+    private val BEATS_AUTO = intArrayOf(16, 12, 8, 4)
+    private const val AUTO_MAX_FADE_MS = 12_000L
     private val BARS_SHORT = intArrayOf(4, 2)
 
     // Folded ratios sit in [0.707, 1.414], so every pair is within this delta and gets matched.
@@ -147,7 +154,13 @@ object SmartTransitionCalculator {
 
         val cap = minOf(longFadeMs, maxOf(room, 500L), songA.durationMs / 2, songB.durationMs / 2).coerceAtLeast(500L)
         val fade =
-            if (quickCut) minOf((QUICK_CALM_BEATS * beatA).toLong(), cap) else pickBars(cap, barA, BARS_MEDIUM).coerceAtLeast(minOf(cap, 1_000L))
+            if (quickCut) {
+                minOf((QUICK_CALM_BEATS * beatA).toLong(), cap)
+            } else if (beatA > 0.0) {
+                pickBeats(minOf(cap, AUTO_MAX_FADE_MS), beatA).coerceAtLeast(minOf(cap, 1_000L))
+            } else {
+                pickBars(cap, barA, BARS_MEDIUM).coerceAtLeast(minOf(cap, 1_000L))
+            }
         val handover = floorToBar(endA, gridA).let { if (it - fade >= earliestMixMs) it else endA }
         val entryB = gridB?.firstBarAtOrAfter(0.0)?.toLong()?.takeIf { it < 4_000L } ?: 0L
         val trackPhase = tempo.matched
@@ -387,6 +400,18 @@ object SmartTransitionCalculator {
             if (length <= roomMs) return length
         }
         return roundDownToBars(roomMs, barMs)
+    }
+
+    /** The longest whole number of beats in [BEATS_AUTO] that fits in [roomMs]; otherwise the room itself. */
+    private fun pickBeats(
+        roomMs: Long,
+        beatMs: Double,
+    ): Long {
+        for (beats in BEATS_AUTO) {
+            val length = (beats * beatMs).toLong()
+            if (length <= roomMs) return length
+        }
+        return roomMs
     }
 
     private fun roundDownToBars(
