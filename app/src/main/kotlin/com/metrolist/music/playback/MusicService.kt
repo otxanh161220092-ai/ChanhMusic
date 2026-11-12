@@ -1758,7 +1758,7 @@ class MusicService :
                                 REPEAT_MODE_OFF -> R.string.repeat_mode_off
                                 REPEAT_MODE_ONE -> R.string.repeat_mode_one
                                 REPEAT_MODE_ALL -> R.string.repeat_mode_all
-                                else -> throw IllegalStateException()
+                                else -> R.string.repeat_mode_off
                             },
                         ),
                     ).setIconResId(
@@ -1766,7 +1766,7 @@ class MusicService :
                             REPEAT_MODE_OFF -> R.drawable.repeat
                             REPEAT_MODE_ONE -> R.drawable.repeat_one_on
                             REPEAT_MODE_ALL -> R.drawable.repeat_on
-                            else -> throw IllegalStateException()
+                            else -> R.drawable.repeat
                         },
                     ).setSessionCommand(CommandToggleRepeatMode)
                     .build(),
