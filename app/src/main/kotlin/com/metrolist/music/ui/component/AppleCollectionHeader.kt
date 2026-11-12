@@ -386,7 +386,7 @@ fun AppleCollectionHeader(
                             onClick = onShuffle,
                             shape = CircleShape,
                             color = Color.Transparent,
-                            modifier = Modifier.size(52.dp).screenHighlight(sideHighlightAlpha),
+                            modifier = Modifier.size(52.dp).highlightBorder().screenHighlight(sideHighlightAlpha),
                         ) {
                             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                                 Icon(
@@ -399,16 +399,23 @@ fun AppleCollectionHeader(
                         }
                     }
 
-                    Surface(
-                        onClick = onPlay,
-                        shape = CircleShape,
-                        color = Color.Transparent,
-                        modifier = Modifier.height(52.dp).width(148.dp).screenHighlight(playHighlightAlpha),
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier =
+                            Modifier
+                                .height(52.dp)
+                                .width(148.dp)
+                                .screenHighlight(playHighlightAlpha)
+                                .clip(CircleShape)
+                                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                                .drawBehind { drawRect(Color.White) }
+                                .clickable(onClick = onPlay),
                     ) {
+                        // Icon and label are cleared out of the white pill, so the page shows through them.
                         Row(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize().graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen; blendMode = BlendMode.Clear },
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.play),
@@ -430,7 +437,7 @@ fun AppleCollectionHeader(
                         onClick = onMore,
                         shape = CircleShape,
                         color = Color.Transparent,
-                        modifier = Modifier.size(52.dp).screenHighlight(sideHighlightAlpha),
+                        modifier = Modifier.size(52.dp).highlightBorder().screenHighlight(sideHighlightAlpha),
                     ) {
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                             Icon(
