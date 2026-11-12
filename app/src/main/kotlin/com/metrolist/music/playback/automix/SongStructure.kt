@@ -23,6 +23,8 @@ class SongStructure(
     val onsetSliceAt: (Long, Long) -> OnsetSlice? = { _, _ -> null },
     /** Where the beat starts (first downbeat, or first beat) from the Beat This! model; null when unknown. */
     val beatEntryMs: Long? = null,
+    /** Last beat the model found, or null. Mixing out past it means the mix runs over beatless audio. */
+    val beatEndMs: Long? = null,
 )
 
 /** Builds a structure from analysis results from the loudness curve (falling back to the length-based heuristic when it is flat). */
@@ -36,6 +38,7 @@ fun TrackFeatures.toSongStructure(vocalGaps: List<LongRange>? = null): SongStruc
         // Same gate as tempo matching: a usable BPM is enough to measure the grid.
         gridNear = { positionMs -> if (bpm > 0f) gridNear(positionMs.toDouble()) else null },
         vocalGaps = vocalGaps,
+        beatEndMs = neural?.beatsMs?.lastOrNull()?.toLong(),
         beatEntryMs = neural?.let { model -> (model.downbeatsMs.firstOrNull() ?: model.beatsMs.firstOrNull())?.toLong() },
         onsetSliceAt = { startMs, lengthMs ->
             if (!hasTempo || hopMs <= 0.0 || lowOnset.isEmpty()) {

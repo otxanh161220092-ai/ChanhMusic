@@ -68,6 +68,8 @@ object SmartTransitionCalculator {
     const val DEFAULT_MIN_PLAYED_FRACTION = 0.25
 
     private const val ECHO_BEATS = 0.75
+    private const val LATE_MIX_WEIGHT = 3.0
+    private const val BEATLESS_MIX_COST = 2.0
     private const val END_MARGIN_MS = 300L
     private const val FALLBACK_COST = 99.0
     private const val RELAXED_MIN_FADE_MS = 1_500L
@@ -122,13 +124,34 @@ object SmartTransitionCalculator {
         relaxed: Boolean,
     ): TransitionPlan? {
         var best: TransitionPlan? = null
+        var bestScore = Double.MAX_VALUE
         for (a in songA.segments) {
             for (b in songB.segments) {
                 val plan = candidate(a, b, songA, songB, tempo, earliestMixMs, longFadeMs, quickCut, relaxed) ?: continue
-                if (best == null || plan.cost < best.cost) best = plan
+                val score = plan.cost + lateMixCost(plan, songA)
+                if (score < bestScore) {
+                    bestScore = score
+                    best = plan
+                }
             }
         }
         return best
+    }
+
+    /**
+     * Prefers mixing out near the end of A: the earlier the mix starts, the higher the cost. A mix that
+     * runs past A's last beat also costs extra, so it moves earlier until it stays on the beat.
+     */
+    private fun lateMixCost(
+        plan: TransitionPlan,
+        songA: SongStructure,
+    ): Double {
+        val duration = songA.durationMs.coerceAtLeast(1L).toDouble()
+        val early = 1.0 - (plan.mixOutPositionA + plan.fadeOutDurationA).toDouble() / duration
+        var cost = LATE_MIX_WEIGHT * early.coerceAtLeast(0.0)
+        val lastBeat = songA.beatEndMs
+        if (lastBeat != null && plan.mixOutPositionA + plan.fadeOutDurationA > lastBeat) cost += BEATLESS_MIX_COST
+        return cost
     }
 
     /**
@@ -218,8 +241,9 @@ object SmartTransitionCalculator {
     ): TransitionPlan? {
         // An outro is written as a hand-off to the next track on the album: the normal pass never uses it,
         // and the relaxed pass uses it only when no other section pair fits.
-        if (!relaxed && (a.type == SegmentType.OUTRO || b.type == SegmentType.OUTRO)) return null
-        val outroCost = if (a.type == SegmentType.OUTRO || b.type == SegmentType.OUTRO) OUTRO_SEGUE_COST else 0.0
+        // A's outro is allowed, so the mix can run to the end of A; B's outro is still a hand-off only.
+        if (!relaxed && b.type == SegmentType.OUTRO) return null
+        val outroCost = if (b.type == SegmentType.OUTRO) OUTRO_SEGUE_COST else 0.0
         val minFade = if (relaxed) RELAXED_MIN_FADE_MS else MIN_FADE_MS
         val bCalm = b.isCalmEntry || (relaxed && b.type == SegmentType.OUTRO)
         // The four cases: where A is (high energy or calm) and where B has to land (calm entry or high energy).
