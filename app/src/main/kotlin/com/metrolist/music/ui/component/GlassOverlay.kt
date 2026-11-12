@@ -1,5 +1,8 @@
 package com.metrolist.music.ui.component
 
+import com.metrolist.music.constants.ReduceBlurEffectsKey
+import com.metrolist.music.utils.rememberPreference
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
@@ -225,6 +228,7 @@ private fun GlassAlertCard(
     val backdrop = LocalGlassBackdrop.current
     val palette = rememberGlassPalette()
     val stretch = rememberGlassStretch(10.dp)
+    val (reduceBlur) = rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
     val visibleState = remember { MutableTransitionState(false).apply { targetState = true } }
     AnimatedVisibility(
         visibleState = visibleState,
@@ -247,6 +251,7 @@ private fun GlassAlertCard(
                                 mask = palette.mask,
                                 lensDp = 28f,
                                 lensAmount = 2.5f,
+                                blurOnly = reduceBlur,
                             ).pointerInput(Unit) { detectTapGestures { } }
                             .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,

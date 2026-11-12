@@ -5,6 +5,9 @@
 
 package com.metrolist.music.ui.component
 
+import com.metrolist.music.constants.ReduceBlurEffectsKey
+import com.metrolist.music.utils.rememberPreference
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -209,6 +212,7 @@ fun BoxScope.BottomSheetMenu(
         val backdrop = remember(state.isVisible) { GlassBackdropOverride.active } ?: LocalGlassBackdrop.current
         val palette = rememberGlassPalette()
         val stretch = rememberGlassStretch()
+        val (reduceBlur) = rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
 
         if (present) {
             Column(
@@ -255,6 +259,7 @@ fun BoxScope.BottomSheetMenu(
                             mask = palette.mask,
                             lensDp = 28f,
                             lensAmount = 2.5f,
+                            blurOnly = reduceBlur,
                         ).padding(vertical = 8.dp),
             ) {
                 MaterialTheme(colorScheme = glassScheme(MaterialTheme.colorScheme, palette)) {

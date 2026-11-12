@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.component
 
+
 import androidx.compose.foundation.background
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -36,6 +37,7 @@ fun Modifier.glassSurface(
     mask: Color = Color.Transparent,
     lensDp: Float = 36f,
     lensAmount: Float = 1f,
+    blurOnly: Boolean = false,
 ): Modifier =
     composed {
     val blurDp = LocalGlassBlur.current
@@ -46,9 +48,13 @@ fun Modifier.glassSurface(
             backdrop = backdrop,
             shape = { shape },
             effects = {
-                vibrancy()
-                blur(blurDp.dp.toPx())
-                lens(lensDp.dp.toPx(), lensDp.dp.toPx() * lensAmount, chromaticAberration = true)
+                if (blurOnly) {
+                    blur(blurDp.dp.toPx())
+                } else {
+                    vibrancy()
+                    blur(blurDp.dp.toPx())
+                    lens(lensDp.dp.toPx(), lensDp.dp.toPx() * lensAmount, chromaticAberration = true)
+                }
             },
             highlight = { Highlight.Default },
             shadow = { Shadow(alpha = 0.2f) },
