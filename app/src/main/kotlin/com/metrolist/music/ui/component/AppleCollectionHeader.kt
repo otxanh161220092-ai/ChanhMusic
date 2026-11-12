@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
