@@ -4,6 +4,7 @@
  */
 
 package com.metrolist.music.ui.screens.settings
+import com.metrolist.music.constants.CollectionDominantBackgroundKey
 
 import android.os.Build
 import androidx.compose.foundation.border
@@ -198,6 +199,7 @@ fun AppearanceSettings(
         )
     val (squircleArtwork, onSquircleArtworkChange) = rememberPreference(PlayerSquircleArtworkKey, defaultValue = false)
     val (liveMeshBackground, onLiveMeshBackgroundChange) = rememberPreference(PlayerLiveMeshBackgroundKey, defaultValue = false)
+    val (dominantCollectionBackground, onDominantCollectionBackgroundChange) = rememberPreference(CollectionDominantBackgroundKey, defaultValue = false)
 
     val (defaultOpenTab, onDefaultOpenTabChange) =
         rememberEnumPreference(
@@ -1134,6 +1136,15 @@ fun AppearanceSettings(
                             Switch(checked = liveMeshBackground, onCheckedChange = onLiveMeshBackgroundChange)
                         },
                         onClick = { onLiveMeshBackgroundChange(!liveMeshBackground) },
+                    ),
+                    Material3SettingsItem(
+                        icon = painterResource(R.drawable.gradient),
+                        title = { Text(stringResource(R.string.collection_dominant_background)) },
+                        description = { Text(stringResource(R.string.collection_dominant_background_desc)) },
+                        trailingContent = {
+                            Switch(checked = dominantCollectionBackground, onCheckedChange = onDominantCollectionBackgroundChange)
+                        },
+                        onClick = { onDominantCollectionBackgroundChange(!dominantCollectionBackground) },
                     ),
                     Material3SettingsItem(
                         icon = painterResource(R.drawable.hide_image),

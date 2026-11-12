@@ -639,6 +639,8 @@
     <string name="squircle_artwork_desc">Square 1:1 artwork with a soft shadow, on top; shrinks when paused and grows back when playing</string>
     <string name="live_mesh_background">Live mesh background</string>
     <string name="live_mesh_background_desc">Animated gradient from the cover colours, like Apple Music</string>
+    <string name="collection_dominant_background">Dominant colour background</string>
+    <string name="collection_dominant_background_desc">Playlist, album and artist pages use the cover's dominant colour instead of the blurred cover</string>
     <string name="glass_drag_effect_desc">Menus stretch and follow the finger when held and dragged</string>
     <string name="listen_together_in_top_bar">Listen Together in top bar</string>
     <string name="listen_together_in_top_bar_desc">Show Listen Together in the top app bar instead of the navigation bar</string>

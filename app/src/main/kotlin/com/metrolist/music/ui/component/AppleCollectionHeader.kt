@@ -4,6 +4,9 @@
  */
 
 package com.metrolist.music.ui.component
+import androidx.compose.ui.graphics.lerp
+import com.metrolist.music.constants.CollectionDominantBackgroundKey
+import com.metrolist.music.utils.rememberPreference
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -141,8 +144,17 @@ fun appleCollectionContentPadding(base: PaddingValues, enabled: Boolean): Paddin
 @Composable
 fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
     val artColor by rememberArtworkColor(artworkUrl?.resize(100, 100))
-    val heroColor = artColor ?: MaterialTheme.colorScheme.surfaceVariant
+    val (dominant) = rememberPreference(CollectionDominantBackgroundKey, defaultValue = false)
     val pageColor = MaterialTheme.colorScheme.background
+    // Dark pages pull the cover colour toward black and light pages toward white, so it sits comfortably.
+    val pageIsDark = pageColor.luminance() < 0.5f
+    val heroColor =
+        when {
+            artColor == null -> MaterialTheme.colorScheme.surfaceVariant
+            !dominant -> artColor!!
+            pageIsDark -> lerp(artColor!!, Color.Black, 0.5f)
+            else -> lerp(artColor!!, Color.White, 0.35f)
+        }
     return remember(heroColor, pageColor) {
         Brush.verticalGradient(
             0f to heroColor,
@@ -207,6 +219,8 @@ private fun Modifier.screenHighlight(alpha: Float): Modifier = this.drawBehind {
 /** Blurred artwork covering the whole collection screen, fading out toward the bottom. */
 @Composable
 fun BoxScope.AppleCollectionBackdrop(thumbnailUrl: String?) {
+    val (dominant) = rememberPreference(CollectionDominantBackgroundKey, defaultValue = false)
+    if (dominant) return
     AsyncImage(
         model = thumbnailUrl?.resize(200, 200),
         contentDescription = null,
