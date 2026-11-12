@@ -1344,7 +1344,7 @@ fun BottomSheetPlayer(
                                                                 },
                                                                 icon = {
                                                                     Icon(
-                                                                        painter = painterResource(R.drawable.shuffle),
+                                                                        painter = painterResource(R.drawable.ic_shuffle),
                                                                         contentDescription = null,
                                                                         modifier = Modifier.size(24.dp),
                                                                     )
@@ -1373,7 +1373,7 @@ fun BottomSheetPlayer(
                                                                     Icon(
                                                                         painter =
                                                                             painterResource(
-                                                                                if (menuRepeat == Player.REPEAT_MODE_ONE) R.drawable.repeat_one else R.drawable.repeat,
+                                                                                if (menuRepeat == Player.REPEAT_MODE_ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat,
                                                                             ),
                                                                         contentDescription = null,
                                                                         modifier = Modifier.size(24.dp),
@@ -1432,7 +1432,7 @@ fun BottomSheetPlayer(
                                                                 title = { Text(text = stringResource(R.string.player_lyrics_options)) },
                                                                 icon = {
                                                                     Icon(
-                                                                        painter = painterResource(R.drawable.lyrics),
+                                                                        painter = painterResource(R.drawable.ic_lyrics),
                                                                         contentDescription = null,
                                                                         modifier = Modifier.size(24.dp),
                                                                     )
@@ -1991,8 +1991,8 @@ fun BottomSheetPlayer(
                                 ResizableIconButton(
                                     icon =
                                         when (repeatMode) {
-                                            Player.REPEAT_MODE_OFF, Player.REPEAT_MODE_ALL -> R.drawable.repeat
-                                            Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
+                                            Player.REPEAT_MODE_OFF, Player.REPEAT_MODE_ALL -> R.drawable.ic_repeat
+                                            Player.REPEAT_MODE_ONE -> R.drawable.ic_repeat_one
                                             else -> throw IllegalStateException()
                                         },
                                     color = TextBackgroundColor,
@@ -2013,7 +2013,7 @@ fun BottomSheetPlayer(
 
                             Box(modifier = Modifier.weight(1f)) {
                                 ResizableIconButton(
-                                    icon = R.drawable.skip_previous,
+                                    icon = R.drawable.ic_player_prev,
                                     enabled = canSkipPrevious && !isListenTogetherGuest,
                                     color = TextBackgroundColor,
                                     modifier =
@@ -2065,9 +2065,9 @@ fun BottomSheetPlayer(
                                             ) {
                                                 R.drawable.replay
                                             } else if (effectiveIsPlaying) {
-                                                R.drawable.pause
+                                                R.drawable.ic_player_pause
                                             } else {
-                                                R.drawable.play
+                                                R.drawable.ic_player_play
                                             },
                                         ),
                                     contentDescription = null,
@@ -2083,7 +2083,7 @@ fun BottomSheetPlayer(
 
                             Box(modifier = Modifier.weight(1f)) {
                                 ResizableIconButton(
-                                    icon = R.drawable.skip_next,
+                                    icon = R.drawable.ic_player_next,
                                     enabled = canSkipNext && !isListenTogetherGuest,
                                     color = TextBackgroundColor,
                                     modifier =

@@ -346,7 +346,7 @@ fun Queue(
                                     ).clickable { onToggleLyrics() },
                         ) {
                             Icon(
-                                painter = painterResource(id = R.drawable.lyrics),
+                                painter = painterResource(id = R.drawable.ic_lyrics),
                                 contentDescription = stringResource(R.string.lyrics),
                                 modifier = Modifier.size(24.dp),
                                 tint = TextBackgroundColor,
@@ -400,7 +400,7 @@ fun Queue(
                                     .clickable { state.expandSoft() },
                         ) {
                             Icon(
-                                painter = painterResource(id = R.drawable.queue_music),
+                                painter = painterResource(id = R.drawable.ic_queue),
                                 contentDescription = stringResource(R.string.queue),
                                 modifier = Modifier.size(24.dp),
                                 tint = TextBackgroundColor,
@@ -409,7 +409,7 @@ fun Queue(
                                 Icon(
                                     painter =
                                         painterResource(
-                                            id = if (repeatMode == Player.REPEAT_MODE_ONE) R.drawable.repeat_one else R.drawable.repeat,
+                                            id = if (repeatMode == Player.REPEAT_MODE_ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat,
                                         ),
                                     contentDescription = null,
                                     modifier =
@@ -446,7 +446,7 @@ fun Queue(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Icon(
-                                painter = painterResource(id = R.drawable.queue_music),
+                                painter = painterResource(id = R.drawable.ic_queue),
                                 contentDescription = null,
                                 modifier = Modifier.size(20.dp),
                                 tint = TextBackgroundColor,
@@ -527,7 +527,7 @@ fun Queue(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Icon(
-                                painter = painterResource(id = R.drawable.lyrics),
+                                painter = painterResource(id = R.drawable.ic_lyrics),
                                 contentDescription = null,
                                 modifier = Modifier.size(20.dp),
                                 tint = TextBackgroundColor,
@@ -848,7 +848,7 @@ fun Queue(
                     ) {
                         QueueControlPill(
                             modifier = Modifier.weight(1f),
-                            iconRes = R.drawable.shuffle,
+                            iconRes = R.drawable.ic_shuffle,
                             active = shuffleModeEnabled,
                             enabled = !isListenTogetherGuest,
                             onClick = {
@@ -865,7 +865,7 @@ fun Queue(
                         )
                         QueueControlPill(
                             modifier = Modifier.weight(1f),
-                            iconRes = if (repeatMode == Player.REPEAT_MODE_ONE) R.drawable.repeat_one else R.drawable.repeat,
+                            iconRes = if (repeatMode == Player.REPEAT_MODE_ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat,
                             active = repeatMode != Player.REPEAT_MODE_OFF,
                             enabled = !isListenTogetherGuest,
                             onClick = playerConnection.player::toggleRepeatMode,
@@ -1119,7 +1119,7 @@ fun Queue(
                                             },
                                         ) {
                                             Icon(
-                                                painter = painterResource(R.drawable.queue_music),
+                                                painter = painterResource(R.drawable.ic_queue),
                                                 contentDescription = null,
                                             )
                                         }

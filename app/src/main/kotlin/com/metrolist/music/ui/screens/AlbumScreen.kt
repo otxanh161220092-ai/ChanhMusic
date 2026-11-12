@@ -528,14 +528,14 @@ fun AlbumScreen(
                             modifier = rowModifier,
                             trailingContent = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    rowTrailing()
                                     Text(
                                         text = makeTimeString(song.song.duration.toLong() * 1000L),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color.White.copy(alpha = 0.7f),
                                         textAlign = androidx.compose.ui.text.style.TextAlign.End,
-                                        modifier = Modifier.width(44.dp).padding(start = 4.dp),
+                                        modifier = Modifier.width(44.dp),
                                     )
+                                    rowTrailing()
                                 }
                             },
                         )
@@ -642,7 +642,7 @@ fun AlbumScreen(
         title = {
             if (inSelectMode) {
                 Text(pluralStringResource(R.plurals.n_selected, selection.size, selection.size))
-            } else {
+            } else if (!appleStyle) {
                 Text(
                     text = albumWithSongs?.album?.title.orEmpty(),
                     style = MaterialTheme.typography.titleLarge,

@@ -767,7 +767,7 @@ fun ContentSettings(
                     onClick = { showContentCountryDialog = true }
                 ),
                 Material3SettingsItem(
-                    icon = painterResource(R.drawable.explicit),
+                    icon = painterResource(R.drawable.ic_explicit),
                     title = { Text(stringResource(R.string.hide_explicit)) },
                     trailingContent = {
                         Switch(

@@ -19,33 +19,40 @@ sealed class Screens(
 ) {
     object Home : Screens(
         titleId = R.string.home,
-        iconIdInactive = R.drawable.home_outlined,
-        iconIdActive = R.drawable.home_filled,
+        iconIdInactive = R.drawable.ic_tab_home,
+        iconIdActive = R.drawable.ic_tab_home,
         route = "home"
+    )
+
+    object Explore : Screens(
+        titleId = R.string.explore,
+        iconIdInactive = R.drawable.ic_tab_explore,
+        iconIdActive = R.drawable.ic_tab_explore,
+        route = "explore"
     )
 
     object Search : Screens(
         titleId = R.string.search,
-        iconIdInactive = R.drawable.search,
-        iconIdActive = R.drawable.search,
+        iconIdInactive = R.drawable.ic_tab_search,
+        iconIdActive = R.drawable.ic_tab_search,
         route = "search_input"
     )
 
     object ListenTogether : Screens(
         titleId = R.string.together,
-        iconIdInactive = R.drawable.group_outlined,
-        iconIdActive = R.drawable.group_filled,
+        iconIdInactive = R.drawable.ic_tab_together,
+        iconIdActive = R.drawable.ic_tab_together,
         route = "listen_together"
     )
 
     object Library : Screens(
         titleId = R.string.filter_library,
-        iconIdInactive = R.drawable.library_music_outlined,
-        iconIdActive = R.drawable.library_music_filled,
+        iconIdInactive = R.drawable.ic_tab_library,
+        iconIdActive = R.drawable.ic_tab_library,
         route = "library"
     )
 
     companion object {
-        val MainScreens = listOf(Home, Search, ListenTogether, Library)
+        val MainScreens = listOf(Home, Explore, Search, ListenTogether, Library)
     }
 }

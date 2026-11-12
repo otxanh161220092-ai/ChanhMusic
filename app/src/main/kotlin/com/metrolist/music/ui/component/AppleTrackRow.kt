@@ -71,7 +71,7 @@ fun AppleTrackRow(
                 if (song.song.explicit) {
                     Spacer(modifier = Modifier.width(6.dp))
                     Icon(
-                        painter = painterResource(R.drawable.explicit),
+                        painter = painterResource(R.drawable.ic_explicit),
                         contentDescription = null,
                         tint = Color.White.copy(alpha = 0.7f),
                         modifier = Modifier.size(16.dp),

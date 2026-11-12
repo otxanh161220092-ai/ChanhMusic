@@ -1998,7 +1998,7 @@ object Icon {
     @Composable
     fun Explicit() {
         Icon(
-            painter = painterResource(R.drawable.explicit),
+            painter = painterResource(R.drawable.ic_explicit),
             contentDescription = null,
             modifier = Modifier
                 .size(18.dp)

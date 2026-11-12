@@ -382,7 +382,7 @@ fun AppleCollectionHeader(
                     modifier = Modifier.size(56.dp).clip(CircleShape).background(fill).clickable(onClick = onShuffle),
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.shuffle),
+                        painter = painterResource(R.drawable.ic_shuffle),
                         contentDescription = stringResource(R.string.shuffle_home),
                         tint = Color.White,
                         modifier = Modifier.size(24.dp),

@@ -363,7 +363,7 @@ private fun AppleStyleNavigationBar(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.shuffle),
+                        painter = painterResource(id = R.drawable.ic_shuffle),
                         contentDescription = stringResource(R.string.shuffle_home),
                         tint = accent,
                         modifier = Modifier.size(24.dp),
