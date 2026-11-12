@@ -38,8 +38,8 @@ object SmartTransitionCalculator {
      * Auto-mix length in beats, longest first, and its overall ceiling. Counting in beats keeps the mix
      * on the phrase the ear follows; the 12 s ceiling stops slow songs from blending for too long.
      */
-    private val BEATS_AUTO = intArrayOf(16, 12, 8, 4)
-    private const val AUTO_MAX_FADE_MS = 12_000L
+    private val BEATS_AUTO = intArrayOf(32, 24, 16, 8)
+    private const val AUTO_MAX_FADE_MS = 16_000L
     private val BARS_SHORT = intArrayOf(4, 2)
 
     // Folded ratios sit in [0.707, 1.414], so every pair is within this delta and gets matched.
