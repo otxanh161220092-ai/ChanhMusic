@@ -91,4 +91,19 @@ fun smoothCornerShape(
     )
 
 /** Percentage radius, same as RoundedCornerShape(percent). */
-fun smoothCornerShape(percent: Int): CornerBasedShape = SmoothCornerShape(CornerSize(percent))
+fun smoothCornerShape(percent: Int): CornerBasedShape =
+    SmoothCornerShape(CornerSize(percent), CornerSize(percent), CornerSize(percent), CornerSize(percent))
+
+/** Pixel radii (px), same as RoundedCornerShape(topStart = px, ...). */
+fun smoothCornerShape(
+    topStart: Float = 0f,
+    topEnd: Float = 0f,
+    bottomEnd: Float = 0f,
+    bottomStart: Float = 0f,
+): CornerBasedShape =
+    SmoothCornerShape(
+        CornerSize(topStart),
+        CornerSize(topEnd),
+        CornerSize(bottomEnd),
+        CornerSize(bottomStart),
+    )
