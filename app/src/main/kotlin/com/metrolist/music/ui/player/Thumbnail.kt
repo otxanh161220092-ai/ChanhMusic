@@ -500,10 +500,12 @@ private fun ThumbnailItem(
         !isCurrentItem || isPlayingNow -> 0.84f
         else -> 0.7f
     }
-    val artworkScale = remember { Animatable(artworkTarget) }
+    val artworkScale = remember { Animatable(if (squircleArtwork) 0.84f else 1f) }
     var artworkWasCurrent by remember { mutableStateOf(isCurrentItem) }
+    var artworkSettled by remember { mutableStateOf(false) }
     LaunchedEffect(artworkTarget) {
-        if (artworkWasCurrent != isCurrentItem) {
+        if (!artworkSettled || artworkWasCurrent != isCurrentItem) {
+            artworkSettled = true
             // Track change or first open: move to the new size without a bounce
             artworkWasCurrent = isCurrentItem
             artworkScale.snapTo(artworkTarget)
