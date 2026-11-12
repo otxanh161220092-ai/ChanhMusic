@@ -9,6 +9,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -29,6 +32,93 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.backdrops.LayerBackdrop
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.matchParentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import com.metrolist.music.R
+import kotlin.math.roundToInt
+
+/**
+ * Floating glass pill for two or more actions, drawn on the same layer as [GlassBackButton].
+ * The glass is the back button's glass; the rim is [R.drawable.glass_ring_overlay] split into
+ * left cap, right cap and a one-pixel centre column stretched across, so the rim keeps its
+ * circular ends at any width instead of turning into an ellipse.
+ */
+@Composable
+fun FloatingGlassPill(
+    backdrop: LayerBackdrop?,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val shape = RoundedCornerShape(50)
+    Box(
+        modifier =
+            modifier
+                .height(48.dp)
+                .clip(shape)
+                .glassSurface(
+                    backdrop = backdrop,
+                    shape = shape,
+                    fallbackColor = Color.White.copy(alpha = 0.15f),
+                    tint = Color.White,
+                    mask = Color(0xFFD9D9D9).copy(alpha = 0.3f),
+                    lensDp = 6f,
+                ),
+    ) {
+        Row(
+            modifier = Modifier.height(48.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            content()
+        }
+        val ring = ImageBitmap.imageResource(R.drawable.glass_ring_overlay)
+        Canvas(modifier = Modifier.matchParentSize()) {
+            drawRingPill(ring)
+        }
+    }
+}
+
+private fun DrawScope.drawRingPill(ring: ImageBitmap) {
+    val h = size.height.roundToInt()
+    val w = size.width.roundToInt()
+    val src = ring.width
+    val half = src / 2
+    val cap = h / 2
+    // Left cap: left half of the ring at its natural proportion.
+    drawImage(
+        image = ring,
+        srcOffset = IntOffset(0, 0),
+        srcSize = IntSize(half, ring.height),
+        dstOffset = IntOffset(0, 0),
+        dstSize = IntSize(cap, h),
+    )
+    // Right cap: right half.
+    drawImage(
+        image = ring,
+        srcOffset = IntOffset(half, 0),
+        srcSize = IntSize(half, ring.height),
+        dstOffset = IntOffset(w - cap, 0),
+        dstSize = IntSize(cap, h),
+    )
+    // Middle: the top/bottom arc sits in the centre column; stretch that column across the gap.
+    if (w - 2 * cap > 0) {
+        drawImage(
+            image = ring,
+            srcOffset = IntOffset(half - 1, 0),
+            srcSize = IntSize(2, ring.height),
+            dstOffset = IntOffset(cap, 0),
+            dstSize = IntSize(w - 2 * cap, h),
+        )
+    }
+}
 
 /**
  * Floating back button in the top-left corner. It is real liquid glass: it samples the root backdrop
@@ -88,6 +178,8 @@ fun GlassBackButton(
 /** Global switch for the per-screen top-bar back icons. Off: only the floating glass back button navigates back. */
 object FloatingBackState {
     var showOriginalBack by mutableStateOf(false)
+    /** Actions a screen wants shown in the floating pill on the top-right, on the same layer as the back button. */
+    var floatingActions: (@Composable () -> Unit)? by mutableStateOf(null)
     /** True while the floating back button is on screen; the title slot then leaves room for it. */
     var floatingVisible by mutableStateOf(false)
 }
@@ -99,5 +191,19 @@ fun OriginalBackSlot(content: @Composable () -> Unit) {
         content()
     } else if (FloatingBackState.floatingVisible) {
         Spacer(Modifier.size(72.dp))
+    }
+}
+
+/** Places the floating actions at the top-right, level with the floating back button. */
+@Composable
+fun BoxScope.FloatingActionsSlot(actions: @Composable () -> Unit) {
+    Box(
+        modifier =
+            Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(end = 16.dp, top = 8.dp),
+    ) {
+        actions()
     }
 }

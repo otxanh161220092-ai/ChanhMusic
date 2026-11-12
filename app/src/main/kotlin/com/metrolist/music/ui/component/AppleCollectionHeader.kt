@@ -434,70 +434,35 @@ fun AppleCollectionHeader(
     }
 }
 
-/**
- * Circle used by the Apple-style top bar. It is NOT sampled glass: the album screen sits inside the
- * root glass backdrop, so a glass surface here would read the layer it is drawn into (feedback loop,
- * freeze and crash). It uses a translucent fill with the same highlight rim instead.
- */
-@Composable
-fun AppleGlassCircleButton(
-    icon: Int,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    onLongClick: (() -> Unit)? = null,
-) {
-    Box(
-        modifier =
-            modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.18f), CircleShape)
-                .highlightBorder()
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(22.dp),
-        )
-    }
-}
-
-/** Round glass back button for Apple-style collection screens. */
-@Composable
-fun AppleTopBarBackButton(
-    onClick: () -> Unit,
-    onLongClick: () -> Unit = {},
-) {
-    AppleGlassCircleButton(
-        icon = R.drawable.arrow_back,
-        onClick = onClick,
-        onLongClick = onLongClick,
-        modifier = Modifier.padding(start = 16.dp),
-    )
-}
-
-/** Two glass circles on the right of Apple-style collection screens: add-to-library and more. */
+/** Actions shown in the floating pill: add to library and more. Each slot is 48dp, same as the back button. */
 @Composable
 fun AppleTopBarActionButtons(
     isInLibrary: Boolean,
     onAdd: () -> Unit,
     onMore: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier.padding(end = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AppleGlassCircleButton(
-            icon = if (isInLibrary) R.drawable.check else R.drawable.add,
-            onClick = onAdd,
-        )
-        AppleGlassCircleButton(
-            icon = R.drawable.more_horiz,
-            onClick = onMore,
-        )
+    FloatingGlassPill(backdrop = LocalGlassBackdrop.current) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.size(48.dp).clip(CircleShape).clickable(onClick = onAdd),
+        ) {
+            Icon(
+                painter = painterResource(if (isInLibrary) R.drawable.check else R.drawable.add),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(22.dp),
+            )
+        }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.size(48.dp).clip(CircleShape).clickable(onClick = onMore),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.more_horiz),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(22.dp),
+            )
+        }
     }
 }

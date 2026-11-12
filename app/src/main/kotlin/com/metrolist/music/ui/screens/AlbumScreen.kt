@@ -40,6 +40,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -92,7 +94,7 @@ import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.NavigationTitle
 import com.metrolist.music.ui.component.AppleTrackRow
 import com.metrolist.music.ui.component.AppleTopBarActionButtons
-import com.metrolist.music.ui.component.AppleTopBarBackButton
+import com.metrolist.music.ui.component.FloatingBackState
 import com.metrolist.music.ui.component.SongListItem
 import com.metrolist.music.ui.component.YouTubeGridItem
 import com.metrolist.music.ui.menu.AlbumMenu
@@ -582,6 +584,36 @@ fun AlbumScreen(
     }
     }
 
+    val appleActionsReady = appleStyle && !inSelectMode && albumWithSongs != null
+    SideEffect {
+        FloatingBackState.floatingActions =
+            if (appleActionsReady) {
+                {
+                    AppleTopBarActionButtons(
+                        isInLibrary = albumWithSongs?.album?.bookmarkedAt != null,
+                        onAdd = {
+                            albumWithSongs?.album?.let { current -> database.query { update(current.toggleLike()) } }
+                        },
+                        onMore = {
+                            albumWithSongs?.let { current ->
+                                menuState.show {
+                                    AlbumMenu(
+                                        originalAlbum = Album(current.album, current.artists),
+                                        onDismiss = menuState::dismiss,
+                                    )
+                                }
+                            }
+                        },
+                    )
+                }
+            } else {
+                null
+            }
+    }
+    DisposableEffect(Unit) {
+        onDispose { FloatingBackState.floatingActions = null }
+    }
+
     TopAppBar(
         title = {
             if (inSelectMode) {
@@ -596,12 +628,7 @@ fun AlbumScreen(
             }
         },
         navigationIcon = {
-            if (appleStyle && !inSelectMode) {
-                AppleTopBarBackButton(
-                    onClick = { navController.navigateUp() },
-                    onLongClick = { navController.backToMain() },
-                )
-            } else com.metrolist.music.ui.component.OriginalBackSlot {
+            com.metrolist.music.ui.component.OriginalBackSlot {
             if (inSelectMode) {
                 IconButton(onClick = onExitSelectionMode) {
                     Icon(
@@ -623,26 +650,7 @@ fun AlbumScreen(
         }
             },
         actions = {
-            if (appleStyle && !inSelectMode) {
-                AppleTopBarActionButtons(
-                    isInLibrary = albumWithSongs?.album?.bookmarkedAt != null,
-                    onAdd = {
-                        albumWithSongs?.album?.let { current ->
-                            database.query { update(current.toggleLike()) }
-                        }
-                    },
-                    onMore = {
-                        albumWithSongs?.let { current ->
-                            menuState.show {
-                                AlbumMenu(
-                                    originalAlbum = Album(current.album, current.artists),
-                                    onDismiss = menuState::dismiss,
-                                )
-                            }
-                        }
-                    },
-                )
-            } else if (inSelectMode) {
+            if (inSelectMode) {
                 Checkbox(
                     checked = selection.size == filteredSongs.size && selection.isNotEmpty(),
                     onCheckedChange = {

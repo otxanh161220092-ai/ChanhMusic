@@ -1347,6 +1347,10 @@ class MainActivity : FragmentActivity() {
                                                 .padding(start = 16.dp, top = 8.dp),
                                     )
                                 }
+
+                                    com.metrolist.music.ui.component.FloatingBackState.floatingActions?.let { actions ->
+                                        com.metrolist.music.ui.component.FloatingActionsSlot(actions)
+                                    }
                                 Box {
                                     if (activePlayerConnection != null) {
                                         Box(Modifier.fillMaxSize().layerBackdrop(glassPlayerBackdrop)) {
@@ -1432,6 +1436,10 @@ class MainActivity : FragmentActivity() {
                                                     .padding(start = 16.dp, top = 8.dp),
                                         )
                                     }
+
+                                        com.metrolist.music.ui.component.FloatingBackState.floatingActions?.let { actions ->
+                                            com.metrolist.music.ui.component.FloatingActionsSlot(actions)
+                                        }
 
                                 if (currentRoute != "wrapped") {
                                     if (activePlayerConnection != null) {
