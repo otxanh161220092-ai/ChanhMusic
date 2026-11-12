@@ -316,13 +316,13 @@ fun AppleCollectionHeader(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AsyncImage(
-            model = thumbnailUrl?.resize(600, 600),
+            model = thumbnailUrl?.resize(900, 1200),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f)
+                    .aspectRatio(3f / 4f)
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                     .drawWithContent {
                         drawContent()
