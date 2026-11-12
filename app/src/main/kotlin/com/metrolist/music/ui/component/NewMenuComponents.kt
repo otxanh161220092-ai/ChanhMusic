@@ -54,7 +54,7 @@ private fun NewActionButton(
     )
 
     val animatedContent by animateColorAsState(
-        targetValue = if (enabled) contentColor else contentColor.copy(alpha = 0.5f),
+        targetValue = (if (plain) MaterialTheme.colorScheme.onSurface else contentColor).let { if (enabled) it else it.copy(alpha = 0.5f) },
         animationSpec = tween(200),
         label = "content",
     )
@@ -135,7 +135,6 @@ fun NewActionGrid(
                         modifier = Modifier.weight(1f),
                         enabled = action.enabled,
                         plain = plain,
-                        contentColor = if (plain) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                         backgroundColor =
                             if (action.backgroundColor !=
                                 Color.Unspecified
