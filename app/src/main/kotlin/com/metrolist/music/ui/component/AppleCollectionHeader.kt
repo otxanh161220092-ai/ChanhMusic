@@ -99,10 +99,7 @@ val LocalAppleBackdropIsLight = compositionLocalOf<androidx.compose.runtime.Muta
 
 /** Black over bright artwork, white over dark, so text and icons stay readable on the backdrop. */
 @Composable
-fun rememberAppleTextColor(thumbnailUrl: String?): Color {
-    val artColor by rememberArtworkColor(thumbnailUrl?.resize(100, 100))
-    return if ((artColor?.luminance() ?: 0f) > 0.6f) Color.Black else Color.White
-}
+fun rememberAppleTextColor(thumbnailUrl: String?): Color = Color.White
 
 /** Secondary text color: the theme's secondary outside Apple collections, a softened text color inside. */
 @Composable
@@ -296,8 +293,9 @@ private fun albumTitleFontSize(title: String): TextUnit {
 }
 
 /**
- * Apple Music style collection header (album, playlist): edge-to-edge artwork over a blurred
- * backdrop, with highlight-style buttons whose icons flip between white and black.
+ * Apple Music style collection header (album, playlist), replicating the reference layout: square
+ * artwork fading into the page, centred bold title, grey artist and meta lines, a row of round
+ * side buttons around a solid white Play pill, then the description.
  */
 @Composable
 fun AppleCollectionHeader(
@@ -312,154 +310,121 @@ fun AppleCollectionHeader(
     onShuffle: (() -> Unit)? = null,
     onArtistClick: (() -> Unit)? = null,
 ) {
-    val heroColor by rememberArtworkColor(thumbnailUrl?.resize(100, 100))
-    val onColor = LocalAppleCollectionTextColor.current.takeIf { it != Color.Unspecified } ?: Color.White
-    val playHighlightAlpha = 0.6f
-    val sideHighlightAlpha = 0.25f
-    val heroLuminance = heroColor?.luminance() ?: 0f
-    val onButton =
-        if (heroLuminance + playHighlightAlpha * (1f - heroLuminance) > 0.75f) Color.Black else Color.White
-    // Button ink follows the real pixels directly beneath the button row.
-    var buttonsBounds by remember { mutableStateOf<Rect?>(null) }
-    val buttonsLight by rememberBackdropIsLight(buttonsBounds)
-    val sharedLight = LocalAppleBackdropIsLight.current
-    LaunchedEffect(buttonsLight) { sharedLight?.value = buttonsLight }
-    val buttonInk = if (buttonsLight) Color.Black else Color.White
-    val titleFontFamily = albumTitleFontFamily(heroColor, title)
-    val titleFontSize = albumTitleFontSize(title)
-
-    Box(modifier = modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            AsyncImage(
-                model = thumbnailUrl?.resize(1080, 1080),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
+    val fill = Color.White.copy(alpha = 0.18f)
+    Column(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        AsyncImage(
+            model = thumbnailUrl?.resize(600, 600),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier =
+                Modifier
                     .fillMaxWidth()
-                    .aspectRatio(3f / 4f)
+                    .aspectRatio(1f)
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                     .drawWithContent {
                         drawContent()
                         drawRect(
-                            brush = Brush.verticalGradient(
-                                0f to Color.Black,
-                                0.55f to Color.Black,
-                                1f to Color.Transparent,
-                            ),
+                            brush = Brush.verticalGradient(0f to Color.Black, 0.7f to Color.Black, 1f to Color.Transparent),
                             blendMode = BlendMode.DstIn,
                         )
                     },
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        if (!artistText.isNullOrBlank()) {
+            Text(
+                text = artistText,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White.copy(alpha = 0.85f),
+                textAlign = TextAlign.Center,
+                modifier = if (onArtistClick != null) Modifier.clickable(onClick = onArtistClick) else Modifier,
             )
+        }
 
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = title,
-                    fontFamily = titleFontFamily,
-                    fontSize = titleFontSize,
-                    lineHeight = titleFontSize * 1.15f,
-                    fontWeight = FontWeight.Bold,
-                    color = onColor,
-                    textAlign = TextAlign.Center,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
+        if (!metaText.isNullOrBlank()) {
+            Text(
+                text = metaText,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center,
+            )
+        }
 
-                if (!artistText.isNullOrBlank()) {
-                    Text(
-                        text = artistText,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = onColor.copy(alpha = 0.85f),
-                        textAlign = TextAlign.Center,
-                        modifier = if (onArtistClick != null) Modifier.clickable(onClick = onArtistClick) else Modifier,
-                    )
-                }
+        Spacer(modifier = Modifier.height(20.dp))
 
-                if (!metaText.isNullOrBlank()) {
-                    Text(
-                        text = metaText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = onColor.copy(alpha = 0.7f),
-                        textAlign = TextAlign.Center,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Reference layout: solid pill for Play in the page's contrast colour, round tinted side buttons.
-                val circleFill = if (buttonsLight) Color.Black.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.15f)
-                val pillFill = if (buttonsLight) Color.Black else Color.White
-                val pillInk = if (buttonsLight) Color.White else Color.Black
-                Row(
-                    modifier = Modifier.fillMaxWidth().onGloballyPositioned { buttonsBounds = it.windowRect() },
-                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-                    verticalAlignment = Alignment.CenterVertically,
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (onShuffle != null) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(56.dp).clip(CircleShape).background(fill).clickable(onClick = onShuffle),
                 ) {
-                    if (onShuffle != null) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.size(56.dp).clip(CircleShape).background(circleFill).clickable(onClick = onShuffle),
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.shuffle),
-                                contentDescription = stringResource(R.string.shuffle_home),
-                                tint = buttonInk,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-                    }
-
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.height(56.dp).width(168.dp).clip(CircleShape).background(pillFill).clickable(onClick = onPlay),
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.play),
-                                contentDescription = null,
-                                tint = pillInk,
-                                modifier = Modifier.size(22.dp),
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.play),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = pillInk,
-                            )
-                        }
-                    }
-
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.size(56.dp).clip(CircleShape).background(circleFill).clickable(onClick = onMore),
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.more_vert),
-                            contentDescription = null,
-                            tint = buttonInk,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
-                }
-
-                if (!description.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    ExpandableText(
-                        text = description,
-                        modifier = Modifier.fillMaxWidth(),
-                        collapsedMaxLines = 3,
+                    Icon(
+                        painter = painterResource(R.drawable.shuffle),
+                        contentDescription = stringResource(R.string.shuffle_home),
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp),
                     )
                 }
             }
+
+            Row(
+                modifier = Modifier.height(56.dp).width(180.dp).clip(CircleShape).background(Color.White).clickable(onClick = onPlay),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.play),
+                    contentDescription = null,
+                    tint = Color.Black,
+                    modifier = Modifier.size(22.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.play),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                )
+            }
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(56.dp).clip(CircleShape).background(fill).clickable(onClick = onMore),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.more_vert),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+        }
+
+        if (!description.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(20.dp))
+            ExpandableText(
+                text = description,
+                modifier = Modifier.fillMaxWidth(),
+                collapsedMaxLines = 3,
+            )
         }
     }
 }
