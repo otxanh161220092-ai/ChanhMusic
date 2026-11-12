@@ -149,7 +149,6 @@ internal fun LyricsLine(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val (liveMeshBackground) = rememberPreference(PlayerLiveMeshBackgroundKey, defaultValue = false)
     val density = LocalDensity.current
     
     val itemModifier = modifier
@@ -341,6 +340,7 @@ private fun WordLevelLyrics(
     focusedAlpha: Float,
     alignment: TextAlign
 ) {
+    val (liveMeshBackground) = rememberPreference(PlayerLiveMeshBackgroundKey, defaultValue = false)
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()
     val glowPaint = remember {
