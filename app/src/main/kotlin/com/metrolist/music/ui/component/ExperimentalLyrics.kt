@@ -519,7 +519,7 @@ fun ExperimentalLyrics(
     var rootWindowPos by remember { mutableStateOf(Offset.Zero) }
     BoxWithConstraints(
         contentAlignment = Alignment.TopCenter,
-        modifier = modifier.fillMaxSize().padding(bottom = 0.dp).onGloballyPositioned { rootWindowPos = it.positionInWindow() }.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        modifier = modifier.fillMaxSize().padding(bottom = 0.dp).onGloballyPositioned { rootWindowPos = it.positionInWindow() }.then(if (liveMeshBackground) Modifier else Modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen })
     ) {
         val maxHeightPx = constraints.maxHeight.toFloat()
         val anchorY = maxHeightPx * LYRICS_ANCHOR_RATIO
