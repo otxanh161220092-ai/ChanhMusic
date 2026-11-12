@@ -5,6 +5,8 @@
 
 package com.metrolist.music.utils
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
@@ -275,7 +277,7 @@ object ComposeToImage {
                     isAntiAlias = true
                 }
             val logoBoxRect = RectF(padding, footerY, padding + logoBoxSize, footerY + logoBoxSize)
-            // Since it's a circle in preview: .clip(RoundedCornerShape(50)) which is usually circle for square box
+            // Since it's a circle in preview: .clip(smoothCornerShape(50)) which is usually circle for square box
             canvas.drawOval(logoBoxRect, logoBgPaint)
 
             // Draw Logo Icon

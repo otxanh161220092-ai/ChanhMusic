@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.artist
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -77,7 +79,7 @@ fun ChannelVideoCarousel(
                     model = video.thumbnail.resize(320, 320),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(160.dp).clip(RoundedCornerShape(12.dp)),
+                    modifier = Modifier.size(160.dp).clip(smoothCornerShape(12.dp)),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -105,7 +107,7 @@ private fun ChannelVideoRow(
             model = video.thumbnail.resize(160, 160),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.size(56.dp).clip(RoundedCornerShape(6.dp)),
+            modifier = Modifier.size(56.dp).clip(smoothCornerShape(6.dp)),
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {

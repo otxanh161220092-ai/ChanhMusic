@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.recognition
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -504,7 +506,7 @@ private fun SuccessState(
                 Modifier
                     .size(180.dp)
                     .aspectRatio(1f),
-            shape = RoundedCornerShape(com.metrolist.music.constants.ThumbnailCornerRadius),
+            shape = smoothCornerShape(com.metrolist.music.constants.ThumbnailCornerRadius),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         ) {
             AsyncImage(

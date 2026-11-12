@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.component.shimmer
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -20,7 +22,7 @@ fun ButtonPlaceholder(modifier: Modifier = Modifier) {
     Spacer(
         modifier
             .height(ButtonDefaults.MinHeight)
-            .clip(RoundedCornerShape(50))
+            .clip(smoothCornerShape(50))
             .background(MaterialTheme.colorScheme.onSurface),
     )
 }

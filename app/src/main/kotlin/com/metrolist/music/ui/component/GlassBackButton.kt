@@ -58,7 +58,7 @@ fun FloatingGlassPill(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val shape = RoundedCornerShape(50)
+    val shape = smoothCornerShape(50)
     val ring = ImageBitmap.imageResource(R.drawable.glass_ring_overlay)
     Box(
         modifier =

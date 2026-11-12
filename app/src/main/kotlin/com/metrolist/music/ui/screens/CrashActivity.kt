@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -172,7 +174,7 @@ fun CrashScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(smoothCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                     .padding(16.dp)
             ) {

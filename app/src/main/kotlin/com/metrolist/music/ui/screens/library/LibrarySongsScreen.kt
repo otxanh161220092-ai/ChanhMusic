@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.library
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -339,7 +341,7 @@ fun LibrarySongsScreen(
                         selected = true,
                         colors = FilterChipDefaults.filterChipColors(containerColor = MaterialTheme.colorScheme.surface),
                         onClick = onDeselect,
-                        shape = RoundedCornerShape(16.dp),
+                        shape = smoothCornerShape(16.dp),
                         leadingIcon = {
                             Icon(
                                 painter = painterResource(R.drawable.close),

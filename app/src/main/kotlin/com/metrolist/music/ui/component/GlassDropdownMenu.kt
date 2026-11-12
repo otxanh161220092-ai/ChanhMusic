@@ -137,7 +137,7 @@ private fun GlassMenuList(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier =
                         Modifier
-                            .clip(RoundedCornerShape(14.dp))
+                            .clip(smoothCornerShape(14.dp))
                             .background(if (action.selected) content.copy(alpha = 0.12f) else Color.Transparent)
                             .clickable { onTopAction(action) }
                             .padding(horizontal = 14.dp, vertical = 8.dp),

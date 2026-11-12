@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.player
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalDensity
@@ -778,7 +780,7 @@ fun Queue(
                                     model = nowMeta.thumbnailUrl?.resize(160, 160),
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.size(56.dp).clip(RoundedCornerShape(10.dp)),
+                                    modifier = Modifier.size(56.dp).clip(smoothCornerShape(10.dp)),
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
@@ -1260,7 +1262,7 @@ private fun QueueControlPill(
     Surface(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(26.dp),
+        shape = smoothCornerShape(26.dp),
         color = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
         modifier = modifier.height(52.dp).graphicsLayer { blendMode = BlendMode.Overlay },
     ) {

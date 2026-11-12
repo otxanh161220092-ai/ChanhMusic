@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -243,7 +245,7 @@ fun AboutScreen(
 
         // App Header Section
         ElevatedCard(
-            shape = RoundedCornerShape(32.dp),
+            shape = smoothCornerShape(32.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -286,7 +288,7 @@ fun AboutScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Surface(
-                            shape = RoundedCornerShape(8.dp),
+                            shape = smoothCornerShape(8.dp),
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                         ) {
                             Text(
@@ -299,7 +301,7 @@ fun AboutScreen(
                         }
                         
                         Surface(
-                            shape = RoundedCornerShape(8.dp),
+                            shape = smoothCornerShape(8.dp),
                             color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
                         ) {
                             Text(
@@ -313,7 +315,7 @@ fun AboutScreen(
 
                         if (BuildConfig.DEBUG) {
                             Surface(
-                                shape = RoundedCornerShape(8.dp),
+                                shape = smoothCornerShape(8.dp),
                                 color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
                             ) {
                                 Text(
@@ -334,7 +336,7 @@ fun AboutScreen(
 
         // Lead Developer Hero Card
         ElevatedCard(
-            shape = RoundedCornerShape(32.dp),
+            shape = smoothCornerShape(32.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(

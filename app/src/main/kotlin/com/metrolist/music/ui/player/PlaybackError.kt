@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.player
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -177,7 +179,7 @@ fun PlaybackError(
         ) {
             Button(
                 onClick = retry,
-                shape = RoundedCornerShape(20.dp),
+                shape = smoothCornerShape(20.dp),
                 colors =
                 ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -197,7 +199,7 @@ fun PlaybackError(
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     clipboard.setPrimaryClip(ClipData.newPlainText("Metrolist Playback Error", errorReport))
                 },
-                shape = RoundedCornerShape(20.dp),
+                shape = smoothCornerShape(20.dp),
             ) {
                 Icon(
                     painter = painterResource(R.drawable.content_copy),

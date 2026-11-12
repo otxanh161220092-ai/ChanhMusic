@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.component.shimmer
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,7 +27,7 @@ import kotlin.random.Random
 fun TextPlaceholder(
     modifier: Modifier = Modifier,
     height: Dp = 16.dp,
-    shape: CornerBasedShape = RoundedCornerShape(0.dp)
+    shape: CornerBasedShape = smoothCornerShape(0.dp)
 ) {
     Box(
         modifier = modifier

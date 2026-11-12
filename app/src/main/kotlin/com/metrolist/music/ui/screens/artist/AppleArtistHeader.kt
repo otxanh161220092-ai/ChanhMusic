@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.artist
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import com.metrolist.music.ui.component.GlassAlertDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -263,7 +265,7 @@ private fun LatestCard(
 ) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
+        shape = smoothCornerShape(14.dp),
         color = onColor.copy(alpha = 0.12f),
         modifier = modifier,
     ) {
@@ -275,7 +277,7 @@ private fun LatestCard(
                 model = thumbnail?.resize(160, 160),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(56.dp).clip(RoundedCornerShape(6.dp)),
+                modifier = Modifier.size(56.dp).clip(smoothCornerShape(6.dp)),
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {

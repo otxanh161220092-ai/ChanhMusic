@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.library
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.content.Intent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -187,7 +189,7 @@ fun LibraryPodcastsScreen(
                             containerColor = MaterialTheme.colorScheme.surface,
                         ),
                     onClick = onDeselect,
-                    shape = RoundedCornerShape(16.dp),
+                    shape = smoothCornerShape(16.dp),
                     border = null,
                     leadingIcon = {
                         Icon(
@@ -511,7 +513,7 @@ private fun AutoPlaylistCard(
             modifier =
                 Modifier
                     .size(56.dp)
-                    .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                    .clip(smoothCornerShape(ThumbnailCornerRadius))
                     .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center,
         ) {
@@ -523,7 +525,7 @@ private fun AutoPlaylistCard(
                     modifier =
                         Modifier
                             .size(56.dp)
-                            .clip(RoundedCornerShape(ThumbnailCornerRadius)),
+                            .clip(smoothCornerShape(ThumbnailCornerRadius)),
                 )
             } else {
                 Icon(
@@ -581,7 +583,7 @@ private fun PodcastEpisodePlaylistItem(
             modifier =
                 Modifier
                     .size(56.dp)
-                    .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                    .clip(smoothCornerShape(ThumbnailCornerRadius))
                     .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center,
         ) {
@@ -593,7 +595,7 @@ private fun PodcastEpisodePlaylistItem(
                     modifier =
                         Modifier
                             .size(56.dp)
-                            .clip(RoundedCornerShape(ThumbnailCornerRadius)),
+                            .clip(smoothCornerShape(ThumbnailCornerRadius)),
                 )
             } else {
                 Icon(

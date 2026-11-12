@@ -4,6 +4,8 @@
  */
 
 package com.metrolist.music.ui.screens.settings
+
+import com.metrolist.music.ui.component.smoothCornerShape
 import com.metrolist.music.constants.CollectionDominantBackgroundKey
 
 import android.os.Build
@@ -736,7 +738,7 @@ fun AppearanceSettings(
                             Modifier
                                 .aspectRatio(1f)
                                 .weight(1f)
-                                .clip(RoundedCornerShape(16.dp))
+                                .clip(smoothCornerShape(16.dp))
                                 .border(
                                     1.dp,
                                     if (sliderStyle == SliderStyle.DEFAULT &&
@@ -746,7 +748,7 @@ fun AppearanceSettings(
                                     } else {
                                         MaterialTheme.colorScheme.outlineVariant
                                     },
-                                    RoundedCornerShape(16.dp),
+                                    smoothCornerShape(16.dp),
                                 ).clickable {
                                     onSliderStyleChange(SliderStyle.DEFAULT)
                                     onSquigglySliderChange(false)
@@ -776,7 +778,7 @@ fun AppearanceSettings(
                             Modifier
                                 .aspectRatio(1f)
                                 .weight(1f)
-                                .clip(RoundedCornerShape(16.dp))
+                                .clip(smoothCornerShape(16.dp))
                                 .border(
                                     1.dp,
                                     if (sliderStyle == SliderStyle.WAVY &&
@@ -786,7 +788,7 @@ fun AppearanceSettings(
                                     } else {
                                         MaterialTheme.colorScheme.outlineVariant
                                     },
-                                    RoundedCornerShape(16.dp),
+                                    smoothCornerShape(16.dp),
                                 ).clickable {
                                     onSliderStyleChange(SliderStyle.WAVY)
                                     onSquigglySliderChange(false)
@@ -821,7 +823,7 @@ fun AppearanceSettings(
                             Modifier
                                 .aspectRatio(1f)
                                 .weight(1f)
-                                .clip(RoundedCornerShape(16.dp))
+                                .clip(smoothCornerShape(16.dp))
                                 .border(
                                     1.dp,
                                     if (sliderStyle ==
@@ -831,7 +833,7 @@ fun AppearanceSettings(
                                     } else {
                                         MaterialTheme.colorScheme.outlineVariant
                                     },
-                                    RoundedCornerShape(16.dp),
+                                    smoothCornerShape(16.dp),
                                 ).clickable {
                                     onSliderStyleChange(SliderStyle.SLIM)
                                     onSquigglySliderChange(false)
@@ -867,7 +869,7 @@ fun AppearanceSettings(
                             Modifier
                                 .aspectRatio(1f)
                                 .weight(1f)
-                                .clip(RoundedCornerShape(16.dp))
+                                .clip(smoothCornerShape(16.dp))
                                 .border(
                                     1.dp,
                                     if (sliderStyle == SliderStyle.WAVY &&
@@ -877,7 +879,7 @@ fun AppearanceSettings(
                                     } else {
                                         MaterialTheme.colorScheme.outlineVariant
                                     },
-                                    RoundedCornerShape(16.dp),
+                                    smoothCornerShape(16.dp),
                                 ).clickable {
                                     onSliderStyleChange(SliderStyle.WAVY)
                                     onSquigglySliderChange(true)

@@ -79,7 +79,7 @@ fun <E> ChipsRow(
                     containerColor = containerColor,
                 ),
                 onClick = { onValueUpdate(value) },
-                shape = RoundedCornerShape(16.dp),
+                shape = smoothCornerShape(16.dp),
                 border = null
             )
 
@@ -140,7 +140,7 @@ fun <Int> ChoiceChipsRow(
                         modifier = Modifier.graphicsLayer(rotationZ = rotationAnimation),
                     )
                 },
-                shape = RoundedCornerShape(16.dp),
+                shape = smoothCornerShape(16.dp),
                 border = null,
                 colors = AssistChipDefaults.assistChipColors(
                     containerColor = containerColor,
@@ -198,7 +198,7 @@ fun <Int> ChoiceChipsRow(
                             containerColor = containerColor,
                         ),
                         onClick = { onValueUpdate(value) },
-                        shape = RoundedCornerShape(16.dp),
+                        shape = smoothCornerShape(16.dp),
                         border = null
                     )
                 }

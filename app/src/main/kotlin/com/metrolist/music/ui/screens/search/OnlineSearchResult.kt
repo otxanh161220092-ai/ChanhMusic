@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.search
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -418,7 +420,7 @@ fun OnlineSearchResult(
                     },
                 ),
             singleLine = true,
-            shape = RoundedCornerShape(28.dp),
+            shape = smoothCornerShape(28.dp),
             colors =
                 OutlinedTextFieldDefaults.colors(
                     focusedContainerColor =

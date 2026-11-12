@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.menu
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import com.metrolist.music.ui.component.GlassAlertDialog
 import android.content.Context
 import android.content.Intent
@@ -618,7 +620,7 @@ fun PlayerMenu(
                                         )
                                         if (pendingSuggestions.isNotEmpty()) {
                                             Surface(
-                                                shape = RoundedCornerShape(12.dp),
+                                                shape = smoothCornerShape(12.dp),
                                                 color = MaterialTheme.colorScheme.primary,
                                                 modifier =
                                                     Modifier
@@ -1066,7 +1068,7 @@ fun ListenTogetherDialog(
                                 selectedUserForMenu = null
                                 selectedUsername = null
                             },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = smoothCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.errorContainer,
                 ) {
                     Row(
@@ -1116,7 +1118,7 @@ fun ListenTogetherDialog(
                                 selectedUserForMenu = null
                                 selectedUsername = null
                             },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = smoothCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant,
                 ) {
                     Row(
@@ -1163,7 +1165,7 @@ fun ListenTogetherDialog(
                                 selectedUserForMenu = null
                                 selectedUsername = null
                             },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = smoothCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.primaryContainer,
                 ) {
                     Row(
@@ -1283,7 +1285,7 @@ fun ListenTogetherDialog(
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
+                shape = smoothCornerShape(16.dp),
                 color =
                     when (connectionState) {
                         ConnectionState.CONNECTED -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
@@ -1312,7 +1314,7 @@ fun ListenTogetherDialog(
                                                 ConnectionState.ERROR -> MaterialTheme.colorScheme.error
                                                 ConnectionState.DISCONNECTED -> MaterialTheme.colorScheme.outline
                                             },
-                                        shape = RoundedCornerShape(50),
+                                        shape = smoothCornerShape(50),
                                     ),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -1409,7 +1411,7 @@ fun ListenTogetherDialog(
                             Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = smoothCornerShape(16.dp),
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                     ) {
                         Column(
@@ -1537,7 +1539,7 @@ fun ListenTogetherDialog(
                                     ) {
                                         Surface(
                                             modifier = Modifier.size(52.dp),
-                                            shape = RoundedCornerShape(50),
+                                            shape = smoothCornerShape(50),
                                             color =
                                                 if (user.isHost) {
                                                     MaterialTheme.colorScheme.primary
@@ -1575,7 +1577,7 @@ fun ListenTogetherDialog(
                                                         .align(Alignment.BottomEnd)
                                                         .offset(x = 4.dp, y = 4.dp)
                                                         .size(18.dp),
-                                                shape = RoundedCornerShape(50),
+                                                shape = smoothCornerShape(50),
                                                 color = if (user.isHost) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
                                             ) {
                                                 Box(
@@ -1656,7 +1658,7 @@ fun ListenTogetherDialog(
                                 Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp, vertical = 4.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = smoothCornerShape(12.dp),
                             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
                         ) {
                             Row(
@@ -1671,7 +1673,7 @@ fun ListenTogetherDialog(
                                 ) {
                                     Surface(
                                         modifier = Modifier.size(36.dp),
-                                        shape = RoundedCornerShape(50),
+                                        shape = smoothCornerShape(50),
                                         color = MaterialTheme.colorScheme.secondary,
                                     ) {
                                         Box(
@@ -1743,7 +1745,7 @@ fun ListenTogetherDialog(
                                 Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp, vertical = 4.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = smoothCornerShape(12.dp),
                             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
                         ) {
                             Row(
@@ -1858,7 +1860,7 @@ fun ListenTogetherDialog(
                         Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = smoothCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 ) {
                     Column(
@@ -1892,7 +1894,7 @@ fun ListenTogetherDialog(
                                 }
                             },
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
+                            shape = smoothCornerShape(12.dp),
                             colors =
                                 OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -1931,7 +1933,7 @@ fun ListenTogetherDialog(
                                 )
                             },
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
+                            shape = smoothCornerShape(12.dp),
                             colors =
                                 OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -1966,7 +1968,7 @@ fun ListenTogetherDialog(
                         joinErrorMessage?.let { msg ->
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(8.dp),
+                                shape = smoothCornerShape(8.dp),
                                 color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
                             ) {
                                 Row(

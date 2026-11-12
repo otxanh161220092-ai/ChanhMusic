@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.menu
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -178,7 +180,7 @@ fun AddToPlaylistDialog(
                 )
                 FilledTonalButton(
                     onClick = { showCreatePlaylistDialog = true},
-                    shape = RoundedCornerShape(50),
+                    shape = smoothCornerShape(50),
                     interactionSource = interactionSource,
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -223,7 +225,7 @@ fun AddToPlaylistDialog(
                                 FilterChip(
                                     selected = selected,
                                     onClick = { onSortTypeChange(type) },
-                                    shape = RoundedCornerShape(50),
+                                    shape = smoothCornerShape(50),
                                     border = FilterChipDefaults.filterChipBorder(
                                         enabled = true,
                                         selected = selected,
@@ -267,7 +269,7 @@ fun AddToPlaylistDialog(
                             checked = sortDescending,
                             onCheckedChange = { onSortDescendingChange(it) },
                             modifier = Modifier
-                                .clip(RoundedCornerShape(50))
+                                .clip(smoothCornerShape(50))
                                 .background(arrowBg)
                                 .size(36.dp)
                         ) {
@@ -299,7 +301,7 @@ fun AddToPlaylistDialog(
                     playlist = playlist,
                     modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 2.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(smoothCornerShape(16.dp))
                     .background(rowBg)
                     .clickable {
                         selectedPlaylist = playlist

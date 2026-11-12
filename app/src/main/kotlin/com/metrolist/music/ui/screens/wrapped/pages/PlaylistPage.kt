@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.wrapped.pages
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -98,7 +100,7 @@ fun PlaylistPage() {
                 contentDescription = stringResource(R.string.album_cover_desc),
                 modifier = Modifier
                     .size(256.dp)
-                    .clip(RoundedCornerShape(3.dp))
+                    .clip(smoothCornerShape(3.dp))
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(

@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.podcast
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -325,7 +327,7 @@ private fun PodcastHeader(
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(200.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(smoothCornerShape(8.dp))
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -370,7 +372,7 @@ private fun PodcastHeader(
                     else
                         Color.Transparent
                 ),
-                shape = RoundedCornerShape(50),
+                shape = smoothCornerShape(50),
                 modifier = Modifier.height(40.dp)
             ) {
                 Icon(
@@ -386,7 +388,7 @@ private fun PodcastHeader(
 
             OutlinedButton(
                 onClick = onViewChannelClick,
-                shape = RoundedCornerShape(50),
+                shape = smoothCornerShape(50),
                 modifier = Modifier.height(40.dp)
             ) {
                 Icon(

@@ -267,7 +267,7 @@ inline fun ListItem(
             modifier // playing highlight
                 .height(ListItemHeight)
                 .padding(horizontal = 8.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(smoothCornerShape(8.dp))
                 .background(
                     color = // selected active
                         if (isSelected == true) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
@@ -277,7 +277,7 @@ inline fun ListItem(
             modifier // inactive selected
                 .height(ListItemHeight)
                 .padding(horizontal = 8.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(smoothCornerShape(8.dp))
                 .background(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.4f))
         } else {
             modifier // default
@@ -297,7 +297,7 @@ inline fun ListItem(
                         .align(Alignment.Center)
                         .background(
                             Color.Black.copy(alpha = 0.25f),
-                            RoundedCornerShape(ThumbnailCornerRadius)
+                            smoothCornerShape(ThumbnailCornerRadius)
                         )
                 ) {
                     Icon(
@@ -572,7 +572,7 @@ fun SongListItem(
                      isSelected = isSelected,
                      isActive = isActive,
                      isPlaying = isPlaying,
-                     shape = RoundedCornerShape(ThumbnailCornerRadius),
+                     shape = smoothCornerShape(ThumbnailCornerRadius),
                      modifier = Modifier.size(ListThumbnailSize)
                  )
              },
@@ -650,7 +650,7 @@ fun SongGridItem(
             thumbnailUrl = song.song.thumbnailUrl,
             isActive = isActive,
             isPlaying = isPlaying,
-            shape = RoundedCornerShape(ThumbnailCornerRadius),
+            shape = smoothCornerShape(ThumbnailCornerRadius),
             modifier = Modifier.size(gridHeight)
         )
         if (!isActive) {
@@ -798,7 +798,7 @@ fun AlbumListItem(
             thumbnailUrl = album.album.thumbnailUrl,
             isActive = isActive,
             isPlaying = isPlaying,
-            shape = RoundedCornerShape(ThumbnailCornerRadius),
+            shape = smoothCornerShape(ThumbnailCornerRadius),
             modifier = Modifier.size(ListThumbnailSize)
         )
     },
@@ -878,7 +878,7 @@ fun AlbumGridItem(
             thumbnailUrl = album.album.thumbnailUrl,
             isActive = isActive,
             isPlaying = isPlaying,
-            shape = RoundedCornerShape(ThumbnailCornerRadius),
+            shape = smoothCornerShape(ThumbnailCornerRadius),
         )
 
         AlbumPlayButton(
@@ -973,7 +973,7 @@ fun PlaylistListItem(
                     modifier = Modifier.size(ListThumbnailSize / 2)
                 )
             },
-            shape = RoundedCornerShape(ThumbnailCornerRadius)
+            shape = smoothCornerShape(ThumbnailCornerRadius)
         )
     },
     trailingContent = trailingContent,
@@ -1079,7 +1079,7 @@ fun PlaylistGridItem(
                     )
                 }
             },
-            shape = thumbnailShape ?: RoundedCornerShape(ThumbnailCornerRadius)
+            shape = thumbnailShape ?: smoothCornerShape(ThumbnailCornerRadius)
         )
     },
     fillMaxWidth = fillMaxWidth,
@@ -1128,7 +1128,7 @@ fun MediaMetadataListItem(
                 isSelected = isSelected,
                 isActive = isActive,
                 isPlaying = isPlaying,
-                shape = RoundedCornerShape(ThumbnailCornerRadius),
+                shape = smoothCornerShape(ThumbnailCornerRadius),
                 modifier = Modifier.size(ListThumbnailSize)
             )
         },
@@ -1233,7 +1233,7 @@ fun YouTubeListItem(
                     isSelected = isSelected,
                     isActive = isActive,
                     isPlaying = isPlaying,
-                    shape = if (item is ArtistItem) CircleShape else RoundedCornerShape(ThumbnailCornerRadius),
+                    shape = if (item is ArtistItem) CircleShape else smoothCornerShape(ThumbnailCornerRadius),
                     modifier = Modifier.size(ListThumbnailSize)
                 )
             },
@@ -1335,7 +1335,7 @@ fun YouTubeGridItem(
             thumbnailUrl = item.thumbnail,
             isActive = isActive,
             isPlaying = isPlaying,
-            shape = if (item is ArtistItem) CircleShape else RoundedCornerShape(LocalGridThumbnailCornerRadius.current),
+            shape = if (item is ArtistItem) CircleShape else smoothCornerShape(LocalGridThumbnailCornerRadius.current),
         )
 
         if (item is SongItem && !isActive) {
@@ -1401,7 +1401,7 @@ fun LocalSongsGrid(
             thumbnailUrl = thumbnailUrl,
             isActive = isActive,
             isPlaying = isPlaying,
-            shape = RoundedCornerShape(ThumbnailCornerRadius),
+            shape = smoothCornerShape(ThumbnailCornerRadius),
             modifier = if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier,
             showCenterPlay = true,
             playButtonVisible = false
@@ -1485,7 +1485,7 @@ fun LocalAlbumsGrid(
             thumbnailUrl = thumbnailUrl,
             isActive = isActive,
             isPlaying = isPlaying,
-            shape = RoundedCornerShape(ThumbnailCornerRadius),
+            shape = smoothCornerShape(ThumbnailCornerRadius),
             modifier = if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier,
             showCenterPlay = false,
             playButtonVisible = true

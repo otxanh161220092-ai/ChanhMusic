@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.component.shimmer
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +33,7 @@ import com.metrolist.music.utils.rememberEnumPreference
 @Composable
 fun GridItemPlaceHolder(
     modifier: Modifier = Modifier,
-    thumbnailShape: Shape = RoundedCornerShape(ThumbnailCornerRadius),
+    thumbnailShape: Shape = smoothCornerShape(ThumbnailCornerRadius),
     fillMaxWidth: Boolean = false,
 ) {
     val gridItemSize by rememberEnumPreference(GridItemsSizeKey, GridItemSize.BIG)

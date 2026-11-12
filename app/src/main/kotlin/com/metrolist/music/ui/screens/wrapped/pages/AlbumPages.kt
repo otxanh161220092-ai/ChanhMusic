@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.wrapped.pages
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -188,7 +190,7 @@ fun WrappedTopAlbumScreen(topAlbum: Album?, isVisible: Boolean) {
                     contentDescription = stringResource(R.string.album_art_for, topAlbum?.title ?: ""),
                     modifier = Modifier
                         .size(200.dp)
-                        .clip(RoundedCornerShape(3.dp)),
+                        .clip(smoothCornerShape(3.dp)),
                     contentScale = ContentScale.Crop
                 )
             }
@@ -283,7 +285,7 @@ fun WrappedTop5AlbumsScreen(topAlbums: List<Album>, isVisible: Boolean) {
                                 contentDescription = stringResource(R.string.album_art_for, album.title),
                                 modifier = Modifier
                                     .size(64.dp)
-                                    .clip(RoundedCornerShape(3.dp)),
+                                    .clip(smoothCornerShape(3.dp)),
                                 contentScale = ContentScale.Crop
                             )
                             Spacer(modifier = Modifier.width(16.dp))

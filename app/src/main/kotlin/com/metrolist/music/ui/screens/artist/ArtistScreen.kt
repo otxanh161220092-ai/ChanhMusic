@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.artist
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -302,7 +304,7 @@ fun ArtistScreen(
                                                 .shimmer()
                                                 .background(
                                                     MaterialTheme.colorScheme.onSurface,
-                                                    RoundedCornerShape(24.dp),
+                                                    smoothCornerShape(24.dp),
                                                 ),
                                     )
                                 }
@@ -439,7 +441,7 @@ fun ArtistScreen(
                                                         Color.Transparent
                                                     },
                                             ),
-                                        shape = RoundedCornerShape(50),
+                                        shape = smoothCornerShape(50),
                                         modifier = Modifier.height(40.dp),
                                     ) {
                                         Text(
@@ -462,7 +464,7 @@ fun ArtistScreen(
                                                     onClick = {
                                                         playerConnection.playQueue(YouTubeQueue(radioEndpoint))
                                                     },
-                                                    shape = RoundedCornerShape(50),
+                                                    shape = smoothCornerShape(50),
                                                     modifier = Modifier.height(40.dp),
                                                 ) {
                                                     Icon(
@@ -491,7 +493,7 @@ fun ArtistScreen(
                                                             .size(48.dp)
                                                             .background(
                                                                 MaterialTheme.colorScheme.primary,
-                                                                RoundedCornerShape(24.dp),
+                                                                smoothCornerShape(24.dp),
                                                             ),
                                                 ) {
                                                     Icon(

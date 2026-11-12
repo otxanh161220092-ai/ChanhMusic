@@ -108,7 +108,7 @@ fun GlassHighlightGroup(
                         .padding(horizontal = 8.dp)
                         .graphicsLayer { translationY = top }
                         .height(with(density) { rect.height.toDp() })
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(smoothCornerShape(12.dp))
                         .background(tint),
             )
         }

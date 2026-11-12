@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.menu
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
@@ -372,7 +374,7 @@ fun YouTubePlaylistMenu(
                                 modifier =
                                     Modifier
                                         .fillMaxSize()
-                                        .clip(RoundedCornerShape(ThumbnailCornerRadius)),
+                                        .clip(smoothCornerShape(ThumbnailCornerRadius)),
                             )
                         }
                     },

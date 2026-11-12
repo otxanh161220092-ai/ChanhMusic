@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.app.Activity
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
@@ -344,7 +346,7 @@ fun DiscordSettings(
         }
 
         Card(
-            shape = RoundedCornerShape(28.dp),
+            shape = smoothCornerShape(28.dp),
             colors =
                 CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -1033,14 +1035,14 @@ fun RichPresence(
                         modifier =
                             Modifier
                                 .size(96.dp)
-                                .clip(RoundedCornerShape(3.dp))
+                                .clip(smoothCornerShape(3.dp))
                                 .align(Alignment.TopStart)
                                 .run {
                                     if (song == null) {
                                         border(
                                             2.dp,
                                             MaterialTheme.colorScheme.onSurface,
-                                            RoundedCornerShape(3.dp),
+                                            smoothCornerShape(3.dp),
                                         )
                                     } else {
                                         this

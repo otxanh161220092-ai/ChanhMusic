@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.menu
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
@@ -209,14 +211,14 @@ fun YouTubeSongMenu(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(ListThumbnailSize)
-                    .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                    .clip(smoothCornerShape(ThumbnailCornerRadius))
             ) {
                 AsyncImage(
                     model = song.thumbnail.resize(200, 200),
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                        .clip(smoothCornerShape(ThumbnailCornerRadius))
                 )
             }
         },

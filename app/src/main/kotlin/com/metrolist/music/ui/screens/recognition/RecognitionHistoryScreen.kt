@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.recognition
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -247,7 +249,7 @@ private fun RecognitionHistoryItem(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .clickable { onClick() },
-        shape = RoundedCornerShape(ThumbnailCornerRadius),
+        shape = smoothCornerShape(ThumbnailCornerRadius),
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -267,7 +269,7 @@ private fun RecognitionHistoryItem(
                 modifier =
                     Modifier
                         .size(60.dp)
-                        .clip(RoundedCornerShape(ThumbnailCornerRadius)),
+                        .clip(smoothCornerShape(ThumbnailCornerRadius)),
                 contentScale = ContentScale.Crop,
             )
 

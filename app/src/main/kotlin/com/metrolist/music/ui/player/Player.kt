@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.player
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import com.metrolist.music.ui.component.GlassAlertDialog
 import androidx.compose.ui.draw.clipToBounds
 import androidx.activity.compose.BackHandler
@@ -1074,7 +1076,7 @@ fun BottomSheetPlayer(
                                     modifier =
                                         Modifier
                                             .size(56.dp)
-                                            .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                                            .clip(smoothCornerShape(ThumbnailCornerRadius))
                                             .background(MaterialTheme.colorScheme.surfaceVariant),
                                     contentAlignment = Alignment.Center,
                                 ) {
@@ -1095,7 +1097,7 @@ fun BottomSheetPlayer(
                                     modifier =
                                         Modifier
                                             .size(56.dp)
-                                            .clip(RoundedCornerShape(ThumbnailCornerRadius)),
+                                            .clip(smoothCornerShape(ThumbnailCornerRadius)),
                                 )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
@@ -1486,7 +1488,7 @@ fun BottomSheetPlayer(
                                 modifier =
                                     Modifier
                                         .size(40.dp)
-                                        .clip(RoundedCornerShape(24.dp))
+                                        .clip(smoothCornerShape(24.dp))
                                         .background(textButtonColor)
                                         .clickable { isFullScreen = !isFullScreen },
                             ) {
@@ -1505,7 +1507,7 @@ fun BottomSheetPlayer(
                                 modifier =
                                     Modifier
                                         .size(40.dp)
-                                        .clip(RoundedCornerShape(24.dp))
+                                        .clip(smoothCornerShape(24.dp))
                                         .background(textButtonColor)
                                         .clickable {
                                             val intent =
@@ -1542,7 +1544,7 @@ fun BottomSheetPlayer(
                                 modifier =
                                     Modifier
                                         .size(40.dp)
-                                        .clip(RoundedCornerShape(24.dp))
+                                        .clip(smoothCornerShape(24.dp))
                                         .background(textButtonColor)
                                         .clickable {
                                             menuState.show {
@@ -1815,7 +1817,7 @@ fun BottomSheetPlayer(
                             Modifier
                                 .background(
                                     TextBackgroundColor.copy(alpha = 0.18f),
-                                    RoundedCornerShape(50),
+                                    smoothCornerShape(50),
                                 ).padding(horizontal = 8.dp, vertical = 2.dp),
                     )
                 }
@@ -1880,7 +1882,7 @@ fun BottomSheetPlayer(
                             FilledIconButton(
                                 onClick = playerConnection::seekToPrevious,
                                 enabled = canSkipPrevious && !isListenTogetherGuest,
-                                shape = RoundedCornerShape(50),
+                                shape = smoothCornerShape(50),
                                 interactionSource = backInteractionSource,
                                 colors =
                                     IconButtonDefaults.filledIconButtonColors(
@@ -1920,7 +1922,7 @@ fun BottomSheetPlayer(
                                         playerConnection.togglePlayPause()
                                     }
                                 },
-                                shape = RoundedCornerShape(50),
+                                shape = smoothCornerShape(50),
                                 interactionSource = playPauseInteractionSource,
                                 colors =
                                     IconButtonDefaults.filledIconButtonColors(
@@ -1957,7 +1959,7 @@ fun BottomSheetPlayer(
                             FilledIconButton(
                                 onClick = playerConnection::seekToNext,
                                 enabled = canSkipNext && !isListenTogetherGuest,
-                                shape = RoundedCornerShape(50),
+                                shape = smoothCornerShape(50),
                                 interactionSource = nextInteractionSource,
                                 colors =
                                     IconButtonDefaults.filledIconButtonColors(
@@ -2042,8 +2044,8 @@ fun BottomSheetPlayer(
                                 modifier =
                                     Modifier
                                         .size(72.dp)
-                                        .clip(RoundedCornerShape(playPauseRoundness))
-                                        .liquidGlassSurface(RoundedCornerShape(playPauseRoundness))
+                                        .clip(smoothCornerShape(playPauseRoundness))
+                                        .liquidGlassSurface(smoothCornerShape(playPauseRoundness))
                                         .background(textButtonColor)
                                         .clickable {
                                             if (isListenTogetherGuest) {
@@ -2396,7 +2398,7 @@ fun InlineLyricsView(
         modifier =
             Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(smoothCornerShape(12.dp))
                 .fadeVerticalEdges(0.04f),
         contentAlignment = Alignment.Center,
     ) {
@@ -2536,7 +2538,7 @@ private fun PlayerMoreMenuButton(
         modifier =
             Modifier
                 .size(40.dp)
-                .clip(RoundedCornerShape(24.dp))
+                .clip(smoothCornerShape(24.dp))
                 .background(textButtonColor)
                 .clickable {
                     menuState.show {

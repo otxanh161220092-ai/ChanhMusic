@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -98,7 +100,7 @@ fun LazyListScope.appleHomeSections(
                             Modifier
                                 .width(150.dp)
                                 .padding(horizontal = 4.dp)
-                                .clip(RoundedCornerShape(18.dp)),
+                                .clip(smoothCornerShape(18.dp)),
                     ) {
                         recentlyPlayedItem(item)
                     }
@@ -150,7 +152,7 @@ private fun TopPickCard(
     Box(
         modifier =
             modifier
-                .clip(RoundedCornerShape(20.dp))
+                .clip(smoothCornerShape(20.dp))
                 .background(colors)
                 .clickable(onClick = pick.onPlay),
     ) {

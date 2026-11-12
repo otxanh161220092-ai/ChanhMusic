@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import com.metrolist.music.ui.component.GlassAlertDialog
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -491,7 +493,7 @@ private fun YouTubeAccountPickerItem(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = smoothCornerShape(12.dp),
         colors =
             CardDefaults.cardColors(
                 containerColor =

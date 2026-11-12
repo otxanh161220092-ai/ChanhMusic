@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -254,7 +256,7 @@ fun CommunityPlaylistCard(
             CardDefaults.cardColors(
                 containerColor = containerColor,
             ),
-        shape = RoundedCornerShape(28.dp),
+        shape = smoothCornerShape(28.dp),
         onClick = onClick,
     ) {
         Column(
@@ -272,7 +274,7 @@ fun CommunityPlaylistCard(
                     modifier =
                         Modifier
                             .size(100.dp)
-                            .clip(RoundedCornerShape(12.dp)),
+                            .clip(smoothCornerShape(12.dp)),
                 ) {
                     Column(modifier = Modifier.fillMaxSize()) {
                         Row(modifier = Modifier.weight(1f)) {
@@ -370,7 +372,7 @@ fun CommunityPlaylistCard(
                             Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(smoothCornerShape(12.dp))
                                 .combinedClickable(onClick = { onSongClick(song) }),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -381,7 +383,7 @@ fun CommunityPlaylistCard(
                             modifier =
                                 Modifier
                                     .size(56.dp)
-                                    .clip(RoundedCornerShape(12.dp)),
+                                    .clip(smoothCornerShape(12.dp)),
                             contentScale = ContentScale.Crop,
                         )
                         Column(modifier = Modifier.weight(1f)) {
@@ -539,7 +541,7 @@ fun DailyDiscoverCard(
         modifier =
             modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(28.dp))
+                .clip(smoothCornerShape(28.dp))
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = {
@@ -558,7 +560,7 @@ fun DailyDiscoverCard(
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
             ),
-        shape = RoundedCornerShape(28.dp),
+        shape = smoothCornerShape(28.dp),
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
@@ -1219,7 +1221,7 @@ fun HomeScreen(
                         items = keepListening.orEmpty().distinctBy { it.id },
                         key = { "recent_page_${it.id}" },
                     ) { item ->
-                        Box(modifier = Modifier.clip(RoundedCornerShape(18.dp))) {
+                        Box(modifier = Modifier.clip(smoothCornerShape(18.dp))) {
                             localGridItem(item)
                         }
                     }
@@ -1357,7 +1359,7 @@ fun HomeScreen(
                                 items(5) {
                                     TextPlaceholder(
                                         height = 30.dp,
-                                        shape = RoundedCornerShape(16.dp),
+                                        shape = smoothCornerShape(16.dp),
                                         modifier = Modifier.width(72.dp),
                                     )
                                 }
@@ -1463,7 +1465,7 @@ fun HomeScreen(
                                                     if (sectionData.endpoint?.isArtistEndpoint == true) {
                                                         CircleShape
                                                     } else {
-                                                        RoundedCornerShape(
+                                                        smoothCornerShape(
                                                             ThumbnailCornerRadius,
                                                         )
                                                     }
@@ -2354,7 +2356,7 @@ fun HomeScreen(
                                                         if (recommendation.title is Artist) {
                                                             CircleShape
                                                         } else {
-                                                            RoundedCornerShape(
+                                                            smoothCornerShape(
                                                                 ThumbnailCornerRadius,
                                                             )
                                                         }
@@ -2430,7 +2432,7 @@ fun HomeScreen(
                                                         if (sectionData.endpoint?.isArtistEndpoint == true) {
                                                             CircleShape
                                                         } else {
-                                                            RoundedCornerShape(
+                                                            smoothCornerShape(
                                                                 ThumbnailCornerRadius,
                                                             )
                                                         }
@@ -2663,7 +2665,7 @@ fun HomeScreen(
                                     repeat(2) {
                                         TextPlaceholder(
                                             height = MoodAndGenresButtonHeight,
-                                            shape = RoundedCornerShape(6.dp),
+                                            shape = smoothCornerShape(6.dp),
                                             modifier =
                                                 Modifier
                                                     .padding(horizontal = 12.dp)

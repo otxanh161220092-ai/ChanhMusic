@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
 import kotlin.math.min
 
@@ -72,3 +73,22 @@ class SmoothCornerShape(
         const val HANDLE = 0.64f
     }
 }
+
+/** Drop-in replacement for [androidx.compose.foundation.shape.RoundedCornerShape] using smooth corners. */
+fun smoothCornerShape(radius: Dp): CornerBasedShape = SmoothCornerShape(radius)
+
+fun smoothCornerShape(
+    topStart: Dp = 0.dp,
+    topEnd: Dp = 0.dp,
+    bottomEnd: Dp = 0.dp,
+    bottomStart: Dp = 0.dp,
+): CornerBasedShape =
+    SmoothCornerShape(
+        CornerSize(topStart),
+        CornerSize(topEnd),
+        CornerSize(bottomEnd),
+        CornerSize(bottomStart),
+    )
+
+/** Percentage radius, same as RoundedCornerShape(percent). */
+fun smoothCornerShape(percent: Int): CornerBasedShape = SmoothCornerShape(CornerSize(percent))

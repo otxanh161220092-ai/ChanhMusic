@@ -715,7 +715,7 @@ fun OriginalLyrics(
                             CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                             ),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = smoothCornerShape(16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                     ) {
                         Row(
@@ -743,7 +743,7 @@ fun OriginalLyrics(
                             CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.errorContainer,
                             ),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = smoothCornerShape(16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                     ) {
                         Row(
@@ -772,7 +772,7 @@ fun OriginalLyrics(
                             CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                             ),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = smoothCornerShape(16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                     ) {
                         Row(
@@ -912,7 +912,7 @@ fun OriginalLyrics(
                         val itemModifier =
                             Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp)) // Clip for background
+                                .clip(smoothCornerShape(8.dp)) // Clip for background
                                 .combinedClickable(
                                     enabled = true,
                                     onClick = {
@@ -2021,7 +2021,7 @@ fun OriginalLyrics(
 
             BasicAlertDialog(onDismissRequest = { showColorPickerDialog = false }) {
                 Card(
-                    shape = RoundedCornerShape(20.dp),
+                    shape = smoothCornerShape(20.dp),
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -2071,7 +2071,7 @@ fun OriginalLyrics(
                                     .fillMaxWidth()
                                     .aspectRatio(1f)
                                     .padding(8.dp)
-                                    .clip(RoundedCornerShape(12.dp)),
+                                    .clip(smoothCornerShape(12.dp)),
                         ) {
                             LyricsImageCard(
                                 lyricText = lyricsText,
@@ -2102,7 +2102,7 @@ fun OriginalLyrics(
                                     modifier =
                                         Modifier
                                             .size(32.dp)
-                                            .background(color, shape = RoundedCornerShape(8.dp))
+                                            .background(color, shape = smoothCornerShape(8.dp))
                                             .clickable { previewBackgroundColor = color }
                                             .border(
                                                 2.dp,
@@ -2113,7 +2113,7 @@ fun OriginalLyrics(
                                                 } else {
                                                     Color.Transparent
                                                 },
-                                                RoundedCornerShape(8.dp),
+                                                smoothCornerShape(8.dp),
                                             ),
                                 )
                             }
@@ -2126,12 +2126,12 @@ fun OriginalLyrics(
                                     modifier =
                                         Modifier
                                             .size(32.dp)
-                                            .background(color, shape = RoundedCornerShape(8.dp))
+                                            .background(color, shape = smoothCornerShape(8.dp))
                                             .clickable { previewTextColor = color }
                                             .border(
                                                 2.dp,
                                                 if (previewTextColor == color) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                                RoundedCornerShape(8.dp),
+                                                smoothCornerShape(8.dp),
                                             ),
                                 )
                             }
@@ -2147,7 +2147,7 @@ fun OriginalLyrics(
                                     modifier =
                                         Modifier
                                             .size(32.dp)
-                                            .background(color, shape = RoundedCornerShape(8.dp))
+                                            .background(color, shape = smoothCornerShape(8.dp))
                                             .clickable { previewSecondaryTextColor = color }
                                             .border(
                                                 2.dp,
@@ -2158,7 +2158,7 @@ fun OriginalLyrics(
                                                 } else {
                                                     Color.Transparent
                                                 },
-                                                RoundedCornerShape(8.dp),
+                                                smoothCornerShape(8.dp),
                                             ),
                                 )
                             }

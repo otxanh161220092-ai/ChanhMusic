@@ -5,6 +5,8 @@
 
 package com.metrolist.music
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import com.metrolist.music.ui.component.GlassAlertDialog
 import android.Manifest
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -1499,7 +1501,7 @@ class MainActivity : FragmentActivity() {
                             ) {
                                 Surface(
                                     modifier = Modifier.padding(24.dp),
-                                    shape = RoundedCornerShape(16.dp),
+                                    shape = smoothCornerShape(16.dp),
                                     color = AlertDialogDefaults.containerColor,
                                     tonalElevation = AlertDialogDefaults.TonalElevation,
                                 ) {

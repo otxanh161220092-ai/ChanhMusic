@@ -248,7 +248,7 @@ fun LyricsImageCard(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(cardCornerRadius))
+                .clip(smoothCornerShape(cardCornerRadius))
                 // For the card itself, we can make it slightly transparent or match the background style
                 // but usually the card IS the background cut out.
                 // Here we simulate the card being transparent so the background shows through,
@@ -289,7 +289,7 @@ fun LyricsImageCard(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .border(1.dp, mainTextColor.copy(alpha = 0.09f), RoundedCornerShape(cardCornerRadius))
+                    .border(1.dp, mainTextColor.copy(alpha = 0.09f), smoothCornerShape(cardCornerRadius))
             )
 
             Column(
@@ -311,8 +311,8 @@ fun LyricsImageCard(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(coverArtSize)
-                            .clip(RoundedCornerShape(3.dp))
-                            .border(1.dp, mainTextColor.copy(alpha = 0.16f), RoundedCornerShape(3.dp))
+                            .clip(smoothCornerShape(3.dp))
+                            .border(1.dp, mainTextColor.copy(alpha = 0.16f), smoothCornerShape(3.dp))
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(
@@ -398,7 +398,7 @@ fun LyricsImageCard(
                     Box(
                         modifier = Modifier
                             .size(44.dp)
-                            .clip(RoundedCornerShape(50))
+                            .clip(smoothCornerShape(50))
                             .background(secondaryColor),
                         contentAlignment = Alignment.Center
                     ) {

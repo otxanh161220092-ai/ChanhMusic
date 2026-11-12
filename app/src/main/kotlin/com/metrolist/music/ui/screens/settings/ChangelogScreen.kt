@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -67,7 +69,7 @@ fun ChangelogScreen(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        shape = smoothCornerShape(topStart = 28.dp, topEnd = 28.dp),
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -180,7 +182,7 @@ fun ReleaseItem(release: ReleaseInfo) {
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer
             ),
-            shape = RoundedCornerShape(16.dp)
+            shape = smoothCornerShape(16.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 MarkdownText(release.description)

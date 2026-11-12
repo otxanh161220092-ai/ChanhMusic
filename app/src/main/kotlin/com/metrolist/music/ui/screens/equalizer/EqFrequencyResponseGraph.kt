@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.equalizer
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -79,7 +81,7 @@ fun EqFrequencyResponseGraph(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(12.dp),
+        shape = smoothCornerShape(12.dp),
         color = surfaceColor,
         tonalElevation = 2.dp
     ) {

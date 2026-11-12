@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.player
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.layout.layout
 import androidx.compose.animation.AnimatedVisibility
@@ -620,7 +622,7 @@ private fun ThumbnailItem(
                         Modifier
                     },
                 )
-                .clip(if (squircleArtwork) SmoothCornerShape(20.dp) else RoundedCornerShape(dimensions.cornerRadius))
+                .clip(if (squircleArtwork) SmoothCornerShape(20.dp) else smoothCornerShape(dimensions.cornerRadius))
                 .then(if (isLandscape || squircleArtwork) Modifier else Modifier.fadeBottomEdge(0.2f))
         ) {
             if (hidePlayerThumbnail) {
@@ -738,7 +740,7 @@ private fun SeekEffectOverlay(
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
         modifier = modifier
-            .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
+            .background(Color.Black.copy(alpha = 0.7f), smoothCornerShape(8.dp))
             .padding(8.dp)
     )
 }

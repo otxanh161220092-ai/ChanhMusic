@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.wrapped.pages
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -187,7 +189,7 @@ fun WrappedIntro(onNext: () -> Unit) {
         ) {
             Button(
                 onClick = onNext,
-                shape = RoundedCornerShape(50),
+                shape = smoothCornerShape(50),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White)
             ) {
                 Text(

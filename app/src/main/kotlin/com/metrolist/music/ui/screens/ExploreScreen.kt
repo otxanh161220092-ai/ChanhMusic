@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -113,7 +115,7 @@ fun ExploreScreen(viewModel: HomeViewModel = hiltViewModel()) {
                         contentAlignment = Alignment.Center,
                         modifier =
                             Modifier
-                                .clip(RoundedCornerShape(50))
+                                .clip(smoothCornerShape(50))
                                 .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .clickable {
                                     playerConnection.playQueue(
@@ -142,7 +144,7 @@ fun ExploreScreen(viewModel: HomeViewModel = hiltViewModel()) {
                         model = song.thumbnail,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(56.dp).clip(RoundedCornerShape(8.dp)),
+                        modifier = Modifier.size(56.dp).clip(smoothCornerShape(8.dp)),
                     )
                     Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
                         Text(text = song.title, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -181,7 +183,7 @@ fun ExploreScreen(viewModel: HomeViewModel = hiltViewModel()) {
                                 model = album.thumbnail,
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier.size(160.dp).clip(RoundedCornerShape(16.dp)),
+                                modifier = Modifier.size(160.dp).clip(smoothCornerShape(16.dp)),
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(text = album.title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)

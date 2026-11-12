@@ -7,6 +7,8 @@
 
 package com.metrolist.music.ui.player
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.content.res.Configuration
 import com.metrolist.music.ui.component.LocalGlassBackdrop
 import com.metrolist.music.ui.component.glassSurface
@@ -450,7 +452,7 @@ private fun NewMiniPlayer(
                     model = mediaMetadata?.thumbnailUrl?.resize(160, 160),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(40.dp).aspectRatio(1f).clip(RoundedCornerShape(8.dp)),
+                    modifier = Modifier.size(40.dp).aspectRatio(1f).clip(smoothCornerShape(8.dp)),
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -763,7 +765,7 @@ private fun LegacyMiniPlayer(
                 .then(if (isTabletLandscape) Modifier.width(500.dp) else Modifier.fillMaxWidth())
                 .height(MiniPlayerHeight)
                 .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                .clip(smoothCornerShape(topStart = 16.dp, topEnd = 16.dp))
                 .background(
                     if (pureBlack && isSystemInDarkTheme()) {
                         Color.Black
@@ -969,7 +971,7 @@ private fun LegacyMiniMediaInfo(
                 Modifier
                     .padding(start = 12.dp, top = 6.dp, end = 6.dp, bottom = 6.dp)
                     .size(48.dp)
-                    .clip(RoundedCornerShape(ThumbnailCornerRadius)),
+                    .clip(smoothCornerShape(ThumbnailCornerRadius)),
         ) {
             Box(
                 modifier =
@@ -989,7 +991,7 @@ private fun LegacyMiniMediaInfo(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .clip(RoundedCornerShape(ThumbnailCornerRadius)),
+                        .clip(smoothCornerShape(ThumbnailCornerRadius)),
             )
 
             androidx.compose.animation.AnimatedVisibility(visible = error != null, enter = fadeIn(), exit = fadeOut()) {
@@ -998,7 +1000,7 @@ private fun LegacyMiniMediaInfo(
                         .fillMaxSize()
                         .background(
                             color = if (pureBlack) Color.Black else Color.Black.copy(alpha = 0.6f),
-                            shape = RoundedCornerShape(ThumbnailCornerRadius),
+                            shape = smoothCornerShape(ThumbnailCornerRadius),
                         ),
                 ) {
                     Icon(

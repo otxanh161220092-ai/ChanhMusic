@@ -76,7 +76,7 @@ private fun NewActionButton(
             CardDefaults.cardColors(
                 containerColor = if (plain) Color.Transparent else animatedBackground,
             ),
-        shape = RoundedCornerShape(16.dp),
+        shape = smoothCornerShape(16.dp),
         elevation =
             if (plain) CardDefaults.cardElevation(0.dp) else CardDefaults.cardElevation(),
     ) {

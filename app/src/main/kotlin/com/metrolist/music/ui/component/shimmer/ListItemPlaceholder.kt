@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.component.shimmer
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,7 +29,7 @@ import com.metrolist.music.constants.ThumbnailCornerRadius
 @Composable
 fun ListItemPlaceHolder(
     modifier: Modifier = Modifier,
-    thumbnailShape: Shape = RoundedCornerShape(ThumbnailCornerRadius),
+    thumbnailShape: Shape = smoothCornerShape(ThumbnailCornerRadius),
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,

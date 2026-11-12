@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -648,7 +650,7 @@ private fun ServerChooserDialog(
                         Modifier
                             .fillMaxWidth()
                             .clickable { onSelect(server) },
-                    shape = RoundedCornerShape(16.dp),
+                    shape = smoothCornerShape(16.dp),
                     colors =
                         CardDefaults.cardColors(
                             containerColor =
@@ -717,7 +719,7 @@ private fun ServerChooserDialog(
                 onClick = { onUseCustom(trimmedCustomUrl) },
                 enabled = trimmedCustomUrl.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = smoothCornerShape(12.dp),
             ) {
                 Text(stringResource(R.string.listen_together_use_custom_server))
             }
@@ -747,7 +749,7 @@ fun LogEntryItem(log: LogEntry) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Surface(
-                shape = RoundedCornerShape(8.dp),
+                shape = smoothCornerShape(8.dp),
                 color =
                     when (log.level) {
                         LogLevel.ERROR -> MaterialTheme.colorScheme.errorContainer
@@ -835,7 +837,7 @@ fun BlockedUsersDialog(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
+                                    .clip(smoothCornerShape(12.dp))
                                     .background(MaterialTheme.colorScheme.surfaceVariant)
                                     .padding(12.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,

@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import android.content.res.Configuration
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
@@ -293,7 +295,7 @@ fun ThemeControls(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = smoothCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         ),
@@ -580,7 +582,7 @@ fun PaletteItem(
         label = "scale"
     )
     
-    val shape = RoundedCornerShape(cornerRadius)
+    val shape = smoothCornerShape(cornerRadius)
     val interactionSource = remember { MutableInteractionSource() }
     
     val paletteName = stringResource(palette.nameRes)
@@ -678,7 +680,7 @@ fun ThemeMockup(
             modifier = Modifier
                 .fillMaxSize()
                 .aspectRatio(9f / 18f),
-            shape = RoundedCornerShape(16.dp),
+            shape = smoothCornerShape(16.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
@@ -724,7 +726,7 @@ fun ThemeMockup(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(32.dp)
-                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.primary, smoothCornerShape(6.dp))
                     )
                     
                     Row(
@@ -735,14 +737,14 @@ fun ThemeMockup(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(40.dp)
-                                .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.secondary, smoothCornerShape(6.dp))
                         )
                         
                         Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(40.dp)
-                                .background(MaterialTheme.colorScheme.tertiary, RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.tertiary, smoothCornerShape(6.dp))
                         )
                     }
                 }
@@ -785,7 +787,7 @@ fun ThemeMockupPortrait(
         Card(
             modifier = Modifier
                 .fillMaxSize(),
-            shape = RoundedCornerShape(12.dp),
+            shape = smoothCornerShape(12.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
@@ -833,7 +835,7 @@ fun ThemeMockupPortrait(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.primary, smoothCornerShape(4.dp))
                     )
                     
                     Row(
@@ -846,14 +848,14 @@ fun ThemeMockupPortrait(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(4.dp))
+                                .background(MaterialTheme.colorScheme.secondary, smoothCornerShape(4.dp))
                         )
                         
                         Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                .background(MaterialTheme.colorScheme.tertiary, RoundedCornerShape(4.dp))
+                                .background(MaterialTheme.colorScheme.tertiary, smoothCornerShape(4.dp))
                         )
                     }
                 }

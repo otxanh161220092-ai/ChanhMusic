@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.smoothCornerShape
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -169,7 +171,7 @@ fun ChartsScreen(
                                             modifier =
                                                 Modifier
                                                     .size(ListItemHeight - 16.dp)
-                                                    .clip(RoundedCornerShape(4.dp))
+                                                    .clip(smoothCornerShape(4.dp))
                                                     .background(MaterialTheme.colorScheme.onSurface),
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))

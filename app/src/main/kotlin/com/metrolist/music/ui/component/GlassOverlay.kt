@@ -287,7 +287,7 @@ private fun GlassActionPill(content: @Composable () -> Unit) {
             Modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .clip(RoundedCornerShape(24.dp))
+                .clip(smoothCornerShape(24.dp))
                 .background(LocalContentColor.current.copy(alpha = 0.08f)),
         contentAlignment = Alignment.Center,
     ) {
