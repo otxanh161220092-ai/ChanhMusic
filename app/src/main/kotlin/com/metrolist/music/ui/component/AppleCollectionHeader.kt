@@ -308,6 +308,7 @@ fun AppleCollectionHeader(
     onPlay: () -> Unit,
     onMore: () -> Unit,
     modifier: Modifier = Modifier,
+    onDownload: (() -> Unit)? = null,
     description: String? = null,
     onShuffle: (() -> Unit)? = null,
     onArtistClick: (() -> Unit)? = null,
@@ -411,10 +412,10 @@ fun AppleCollectionHeader(
 
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.size(56.dp).clip(CircleShape).background(fill).clickable(onClick = onMore),
+                modifier = Modifier.size(56.dp).clip(CircleShape).background(fill).clickable(onClick = onDownload ?: {}),
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.more_vert),
+                    painter = painterResource(R.drawable.download),
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(24.dp),
@@ -433,59 +434,73 @@ fun AppleCollectionHeader(
     }
 }
 
-/** Round dark back button used on Apple-style collection screens. */
+/** Liquid-glass circle used by the Apple-style top bar (same glass as the floating back button). */
+@Composable
+fun AppleGlassCircleButton(
+    icon: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
+) {
+    val backdrop = LocalGlassBackdrop.current
+    Box(
+        modifier =
+            modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .glassSurface(
+                    backdrop = backdrop,
+                    shape = CircleShape,
+                    fallbackColor = Color.White.copy(alpha = 0.15f),
+                    tint = Color.White,
+                    mask = Color(0xFFD9D9D9).copy(alpha = 0.3f),
+                    lensDp = 6f,
+                ).highlightBorder()
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(22.dp),
+        )
+    }
+}
+
+/** Round glass back button for Apple-style collection screens. */
 @Composable
 fun AppleTopBarBackButton(
     onClick: () -> Unit,
     onLongClick: () -> Unit = {},
 ) {
-    Box(
-        modifier =
-            Modifier
-                .padding(start = 16.dp)
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.35f))
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.arrow_back),
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(20.dp),
-        )
-    }
+    AppleGlassCircleButton(
+        icon = R.drawable.arrow_back,
+        onClick = onClick,
+        onLongClick = onLongClick,
+        modifier = Modifier.padding(start = 16.dp),
+    )
 }
 
-/** Dark pill with a "+" and an ellipsis, shown on the right of Apple-style collection screens. */
+/** Two glass circles on the right of Apple-style collection screens: add-to-library and more. */
 @Composable
-fun AppleTopBarActionPill(
+fun AppleTopBarActionButtons(
+    isInLibrary: Boolean,
     onAdd: () -> Unit,
     onMore: () -> Unit,
 ) {
     Row(
-        modifier =
-            Modifier
-                .padding(end = 16.dp)
-                .height(40.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Color.Black.copy(alpha = 0.35f))
-                .padding(horizontal = 14.dp),
+        modifier = Modifier.padding(end = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Icon(
-            painter = painterResource(R.drawable.add),
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(20.dp).clickable(onClick = onAdd),
+        AppleGlassCircleButton(
+            icon = if (isInLibrary) R.drawable.check else R.drawable.add,
+            onClick = onAdd,
         )
-        Icon(
-            painter = painterResource(R.drawable.more_horiz),
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(20.dp).clickable(onClick = onMore),
+        AppleGlassCircleButton(
+            icon = R.drawable.more_horiz,
+            onClick = onMore,
         )
     }
 }

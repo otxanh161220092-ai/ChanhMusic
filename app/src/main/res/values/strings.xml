@@ -343,4 +343,8 @@
     <string name="new_version_available">New version available</string>
     <string name="translation_models">Translation Models</string>
     <string name="clear_translation_models">Clear translation models</string>
+    <string name="favorite">Favorite</string>
+    <string name="pin_album">Pin Album</string>
+    <string name="unpin_album">Unpin Album</string>
+    <string name="add_to_a_playlist">Add to a Playlist…</string>
 </resources>

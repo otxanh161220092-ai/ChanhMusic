@@ -91,7 +91,7 @@ import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.NavigationTitle
 import com.metrolist.music.ui.component.AppleTrackRow
-import com.metrolist.music.ui.component.AppleTopBarActionPill
+import com.metrolist.music.ui.component.AppleTopBarActionButtons
 import com.metrolist.music.ui.component.AppleTopBarBackButton
 import com.metrolist.music.ui.component.SongListItem
 import com.metrolist.music.ui.component.YouTubeGridItem
@@ -221,6 +221,9 @@ fun AlbumScreen(
                                 playerConnection.service.getAutomix(playlistId)
                                 playerConnection.playQueue(LocalAlbumRadio(albumWithSongs))
                             }
+                        },
+                        onDownload = {
+                            albumWithSongs.songs.forEach { downloadUtil.download(it) }
                         },
                         onMore = {
                             menuState.show {
@@ -621,8 +624,13 @@ fun AlbumScreen(
             },
         actions = {
             if (appleStyle && !inSelectMode) {
-                AppleTopBarActionPill(
-                    onAdd = {},
+                AppleTopBarActionButtons(
+                    isInLibrary = albumWithSongs?.album?.bookmarkedAt != null,
+                    onAdd = {
+                        albumWithSongs?.album?.let { current ->
+                            database.query { update(current.toggleLike()) }
+                        }
+                    },
                     onMore = {
                         albumWithSongs?.let { current ->
                             menuState.show {

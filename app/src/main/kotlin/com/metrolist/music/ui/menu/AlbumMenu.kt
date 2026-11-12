@@ -298,58 +298,30 @@ fun AlbumMenu(
             NewActionGrid(
                 actions =
                     listOfNotNull(
-                        if (!isGuest) {
-                            NewAction(
-                                icon = {
-                                    Icon(
-                                        painter = painterResource(R.drawable.play),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(28.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                },
-                                text = stringResource(R.string.play),
-                                onClick = {
-                                    onDismiss()
-                                    if (songs.isNotEmpty()) {
-                                        playerConnection.playQueue(
-                                            ListQueue(
-                                                title = album.album.title,
-                                                items = songs.map(Song::toMediaItem),
-                                            ),
-                                        )
-                                    }
-                                },
-                            )
-
-                            NewAction(
-                                icon = {
-                                    Icon(
-                                        painter = painterResource(R.drawable.shuffle),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(28.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                },
-                                text = stringResource(R.string.shuffle),
-                                onClick = {
-                                    onDismiss()
-                                    if (songs.isNotEmpty()) {
-                                        album.album.playlistId?.let { playlistId ->
-                                            playerConnection.service.getAutomix(playlistId)
-                                        }
-                                        playerConnection.playQueue(
-                                            ListQueue(
-                                                title = album.album.title,
-                                                items = songs.shuffled().map(Song::toMediaItem),
-                                            ),
-                                        )
-                                    }
-                                },
-                            )
-                        } else {
-                            null
-                        },
+                        NewAction(
+                            icon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.download),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(28.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            },
+                            text = stringResource(R.string.action_download),
+                            onClick = { songs.forEach { downloadUtil.download(it) } },
+                        ),
+                        NewAction(
+                            icon = {
+                                Icon(
+                                    painter = painterResource(if (album.album.bookmarkedAt != null) R.drawable.favorite else R.drawable.favorite_border),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(28.dp),
+                                    tint = if (album.album.bookmarkedAt != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            },
+                            text = stringResource(R.string.favorite),
+                            onClick = { database.query { update(album.album.toggleLike()) } },
+                        ),
                         NewAction(
                             icon = {
                                 Icon(
@@ -382,57 +354,32 @@ fun AlbumMenu(
                     listOfNotNull(
                         if (!isGuest) {
                             Material3MenuItemData(
-                                title = { Text(text = stringResource(R.string.play_next)) },
-                                description = { Text(text = stringResource(R.string.play_next_desc)) },
+                                title = { Text(text = stringResource(R.string.play)) },
                                 icon = {
                                     Icon(
-                                        painter = painterResource(R.drawable.playlist_play),
+                                        painter = painterResource(R.drawable.play),
                                         contentDescription = null,
                                     )
                                 },
                                 onClick = {
                                     onDismiss()
-                                    playerConnection.playNext(songs.map { it.toMediaItem() })
+                                    if (songs.isNotEmpty()) {
+                                        playerConnection.playQueue(
+                                            ListQueue(
+                                                title = album.album.title,
+                                                items = songs.map(Song::toMediaItem),
+                                            ),
+                                        )
+                                    }
                                 },
                             )
                         } else {
                             null
                         },
-                        if (!isGuest) {
-                            Material3MenuItemData(
-                                title = { Text(text = stringResource(R.string.add_to_queue)) },
-                                description = { Text(text = stringResource(R.string.add_to_queue_desc)) },
-                                icon = {
-                                    Icon(
-                                        painter = painterResource(R.drawable.queue_music),
-                                        contentDescription = null,
-                                    )
-                                },
-                                onClick = {
-                                    onDismiss()
-                                    playerConnection.addToQueue(songs.map { it.toMediaItem() })
-                                },
-                            )
-                        } else {
-                            null
-                        },
-                        Material3MenuItemData(
-                            title = { Text(text = stringResource(R.string.add_to_playlist)) },
-                            description = { Text(text = stringResource(R.string.add_to_playlist_desc)) },
-                            icon = {
-                                Icon(
-                                    painter = painterResource(R.drawable.playlist_add),
-                                    contentDescription = null,
-                                )
-                            },
-                            onClick = {
-                                showChoosePlaylistDialog = true
-                            },
-                        ),
                         Material3MenuItemData(
                             title = {
                                 Text(
-                                    text = if (isPinned) stringResource(R.string.unpin_from_speed_dial) else stringResource(R.string.pin_to_speed_dial),
+                                    text = if (isPinned) stringResource(R.string.unpin_album) else stringResource(R.string.pin_album),
                                 )
                             },
                             icon = {
@@ -463,6 +410,35 @@ fun AlbumMenu(
                                 onDismiss()
                             },
                         ),
+                        Material3MenuItemData(
+                            title = { Text(text = stringResource(R.string.add_to_a_playlist)) },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.playlist_add),
+                                    contentDescription = null,
+                                )
+                            },
+                            onClick = {
+                                showChoosePlaylistDialog = true
+                            },
+                        ),
+                        if (!isGuest) {
+                            Material3MenuItemData(
+                                title = { Text(text = stringResource(R.string.play_next)) },
+                                icon = {
+                                    Icon(
+                                        painter = painterResource(R.drawable.playlist_play),
+                                        contentDescription = null,
+                                    )
+                                },
+                                onClick = {
+                                    onDismiss()
+                                    playerConnection.playNext(songs.map { it.toMediaItem() })
+                                },
+                            )
+                        } else {
+                            null
+                        },
                     ),
             )
         }
