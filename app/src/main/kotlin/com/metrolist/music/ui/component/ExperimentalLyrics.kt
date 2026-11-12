@@ -135,6 +135,7 @@ import com.metrolist.music.ui.screens.settings.defaultList
 import com.metrolist.music.ui.utils.fadingEdge
 import com.metrolist.music.utils.ComposeToImage
 import com.metrolist.music.utils.rememberEnumPreference
+import com.metrolist.music.constants.PlayerLiveMeshBackgroundKey
 import com.metrolist.music.constants.ReduceBlurEffectsKey
 import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.viewmodels.LyricsViewModel
@@ -182,6 +183,7 @@ fun ExperimentalLyrics(
     val lyricsTextPositionPref by rememberEnumPreference(LyricsTextPositionKey, LyricsPosition.CENTER)
     val lyricsTextSizePref by rememberPreference(LyricsTextSizeKey, 24f)
     val reduceBlur by rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
+    val (liveMeshBackground) = rememberPreference(PlayerLiveMeshBackgroundKey, defaultValue = false)
     val lyricsTextPosition = textPositionOverride ?: lyricsTextPositionPref
     val changeLyrics by rememberPreference(LyricsClickKey, true)
     val romanizeLyricsList = rememberPreference(LyricsRomanizeList, "")
@@ -680,7 +682,7 @@ fun ExperimentalLyrics(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .fadingEdge(top = LYRICS_FADE_TOP_DP, bottom = LYRICS_FADE_BOTTOM_DP)
+                    .then(if (liveMeshBackground) Modifier else Modifier.fadingEdge(top = LYRICS_FADE_TOP_DP, bottom = LYRICS_FADE_BOTTOM_DP))
                     .clipToBounds()
                     .nestedScroll(remember {
                         object : NestedScrollConnection {
@@ -770,7 +772,7 @@ fun ExperimentalLyrics(
                                 modifier = Modifier
                                     .then(if (!reduceBlur && distance >= 1) Modifier.blur((distance * 1.6f).coerceAtMost(9f).dp) else Modifier)
                                     .then(
-                                        if (listIndex < activeListIndex) {
+                                        if (listIndex < activeListIndex && !liveMeshBackground) {
                                             Modifier
                                                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                                                 .drawWithContent {
@@ -849,7 +851,7 @@ fun ExperimentalLyrics(
             }
         }
 
-        mediaMetadata?.thumbnailUrl?.let { thumb ->
+        mediaMetadata?.thumbnailUrl?.takeUnless { liveMeshBackground }?.let { thumb ->
             Box(
                 modifier = Modifier
                     .requiredSize(configuration.screenWidthDp.dp, configuration.screenHeightDp.dp)
