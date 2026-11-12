@@ -387,7 +387,7 @@ fun AppleCollectionHeader(
                             onClick = onShuffle,
                             shape = CircleShape,
                             color = Color.Transparent,
-                            modifier = Modifier.size(52.dp).highlightBorder().screenHighlight(sideHighlightAlpha),
+                            modifier = Modifier.size(52.dp).graphicsLayer { blendMode = BlendMode.Overlay }.highlightBorder().screenHighlight(sideHighlightAlpha),
                         ) {
                             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                                 Icon(
@@ -409,7 +409,7 @@ fun AppleCollectionHeader(
                                 .screenHighlight(playHighlightAlpha)
                                 .clip(CircleShape)
                                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                                .drawBehind { drawRect(Color.White) }
+                                .drawBehind { drawRect(Color.White.copy(alpha = 0.85f)) }
                                 .clickable(onClick = onPlay),
                     ) {
                         // Icon and label are cleared out of the white pill, so the page shows through them.
@@ -438,7 +438,7 @@ fun AppleCollectionHeader(
                         onClick = onMore,
                         shape = CircleShape,
                         color = Color.Transparent,
-                        modifier = Modifier.size(52.dp).highlightBorder().screenHighlight(sideHighlightAlpha),
+                        modifier = Modifier.size(52.dp).graphicsLayer { blendMode = BlendMode.Overlay }.highlightBorder().screenHighlight(sideHighlightAlpha),
                     ) {
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                             Icon(
