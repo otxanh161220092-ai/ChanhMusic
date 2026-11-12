@@ -475,7 +475,7 @@ fun AlbumScreen(
                                             onCheckedChange(true)
                                         }
                                     },
-                                ),
+                                )
                     val rowTrailing: @Composable () -> Unit = {
                             if (inSelectMode) {
                                 Checkbox(
