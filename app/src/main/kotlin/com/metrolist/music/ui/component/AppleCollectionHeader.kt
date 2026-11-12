@@ -391,51 +391,41 @@ fun AppleCollectionHeader(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
+                // Reference layout: solid pill for Play in the page's contrast colour, round tinted side buttons.
+                val circleFill = if (buttonsLight) Color.Black.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.15f)
+                val pillFill = if (buttonsLight) Color.Black else Color.White
+                val pillInk = if (buttonsLight) Color.White else Color.Black
                 Row(
                     modifier = Modifier.fillMaxWidth().onGloballyPositioned { buttonsBounds = it.windowRect() },
                     horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (onShuffle != null) {
-                        Surface(
-                            onClick = onShuffle,
-                            shape = CircleShape,
-                            color = Color.Transparent,
-                            modifier = Modifier.size(52.dp).background(Color.White.copy(alpha = 0.25f), CircleShape).highlightBorder().screenHighlight(sideHighlightAlpha),
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.size(56.dp).clip(CircleShape).background(circleFill).clickable(onClick = onShuffle),
                         ) {
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                Icon(
-                                    painter = painterResource(R.drawable.shuffle),
-                                    contentDescription = stringResource(R.string.shuffle_home),
-                                    tint = buttonInk,
-                                    modifier = Modifier.size(24.dp).graphicsLayer { blendMode = BlendMode.Overlay },
-                                )
-                            }
+                            Icon(
+                                painter = painterResource(R.drawable.shuffle),
+                                contentDescription = stringResource(R.string.shuffle_home),
+                                tint = buttonInk,
+                                modifier = Modifier.size(24.dp),
+                            )
                         }
                     }
 
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier =
-                            Modifier
-                                .height(52.dp)
-                                .width(148.dp)
-                                .screenHighlight(playHighlightAlpha)
-                                .clip(CircleShape)
-                                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                                .drawBehind { drawRect(Color.White.copy(alpha = 0.85f)) }
-                                .clickable(onClick = onPlay),
+                        modifier = Modifier.height(56.dp).width(168.dp).clip(CircleShape).background(pillFill).clickable(onClick = onPlay),
                     ) {
-                        // Icon and label are cleared out of the white pill, so the page shows through them.
                         Row(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxSize().graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen; blendMode = BlendMode.Clear },
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.play),
                                 contentDescription = null,
-                                tint = buttonInk,
+                                tint = pillInk,
                                 modifier = Modifier.size(22.dp),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -443,25 +433,21 @@ fun AppleCollectionHeader(
                                 text = stringResource(R.string.play),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = buttonInk,
+                                color = pillInk,
                             )
                         }
                     }
 
-                    Surface(
-                        onClick = onMore,
-                        shape = CircleShape,
-                        color = Color.Transparent,
-                        modifier = Modifier.size(52.dp).background(Color.White.copy(alpha = 0.25f), CircleShape).highlightBorder().screenHighlight(sideHighlightAlpha),
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.size(56.dp).clip(CircleShape).background(circleFill).clickable(onClick = onMore),
                     ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                            Icon(
-                                painter = painterResource(R.drawable.more_vert),
-                                contentDescription = null,
-                                tint = buttonInk,
-                                modifier = Modifier.size(24.dp).graphicsLayer { blendMode = BlendMode.Overlay },
-                            )
-                        }
+                        Icon(
+                            painter = painterResource(R.drawable.more_vert),
+                            contentDescription = null,
+                            tint = buttonInk,
+                            modifier = Modifier.size(24.dp),
+                        )
                     }
                 }
 
