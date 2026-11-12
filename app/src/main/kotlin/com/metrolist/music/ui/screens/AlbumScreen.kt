@@ -515,7 +515,7 @@ fun AlbumScreen(
                             isActive = song.id == mediaMetadata?.id,
                             isPlaying = isPlaying,
                             showInLibraryIcon = true,
-                            trailingContent = rowTrailing,
+                            trailingContent = { rowTrailing() },
                             modifier = rowModifier,
                         )
                     }
