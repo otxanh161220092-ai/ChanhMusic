@@ -312,7 +312,7 @@ fun AppleCollectionHeader(
 ) {
     val fill = Color.White.copy(alpha = 0.18f)
     Column(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AsyncImage(
@@ -343,6 +343,7 @@ fun AppleCollectionHeader(
             textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 24.dp),
         )
 
         if (!artistText.isNullOrBlank()) {
@@ -351,7 +352,7 @@ fun AppleCollectionHeader(
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.White.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center,
-                modifier = if (onArtistClick != null) Modifier.clickable(onClick = onArtistClick) else Modifier,
+                modifier = Modifier.padding(horizontal = 24.dp).then(if (onArtistClick != null) Modifier.clickable(onClick = onArtistClick) else Modifier),
             )
         }
 
@@ -361,13 +362,14 @@ fun AppleCollectionHeader(
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 24.dp),
             )
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -422,7 +424,7 @@ fun AppleCollectionHeader(
             Spacer(modifier = Modifier.height(20.dp))
             ExpandableText(
                 text = description,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                 collapsedMaxLines = 3,
             )
         }
