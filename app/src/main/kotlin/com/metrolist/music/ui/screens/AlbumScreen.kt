@@ -90,6 +90,7 @@ import com.metrolist.music.ui.component.ClickableArtistText
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.NavigationTitle
+import com.metrolist.music.ui.component.AppleTrackRow
 import com.metrolist.music.ui.component.SongListItem
 import com.metrolist.music.ui.component.YouTubeGridItem
 import com.metrolist.music.ui.menu.AlbumMenu
@@ -448,37 +449,7 @@ fun AlbumScreen(
                         }
                     }
 
-                    SongListItem(
-                        song = song,
-                        albumIndex = index + 1,
-                        isActive = song.id == mediaMetadata?.id,
-                        isPlaying = isPlaying,
-                        showInLibraryIcon = true,
-                        trailingContent = {
-                            if (inSelectMode) {
-                                Checkbox(
-                                    checked = song.id in selection,
-                                    onCheckedChange = onCheckedChange,
-                                )
-                            } else {
-                                IconButton(
-                                    onClick = {
-                                        menuState.show {
-                                            SongMenu(
-                                                originalSong = song,
-                                                onDismiss = menuState::dismiss,
-                                            )
-                                        }
-                                    },
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.more_vert),
-                                        contentDescription = null,
-                                    )
-                                }
-                            }
-                        },
-                        modifier =
+                    val rowModifier =
                             Modifier
                                 .fillMaxWidth()
                                 .animateItem()
@@ -505,7 +476,49 @@ fun AlbumScreen(
                                         }
                                     },
                                 ),
-                    )
+                    val rowTrailing: @Composable () -> Unit = {
+                            if (inSelectMode) {
+                                Checkbox(
+                                    checked = song.id in selection,
+                                    onCheckedChange = onCheckedChange,
+                                )
+                            } else {
+                                IconButton(
+                                    onClick = {
+                                        menuState.show {
+                                            SongMenu(
+                                                originalSong = song,
+                                                onDismiss = menuState::dismiss,
+                                            )
+                                        }
+                                    },
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.more_vert),
+                                        contentDescription = null,
+                                    )
+                                }
+                            }
+                    }
+                    if (appleStyle) {
+                        AppleTrackRow(
+                            index = index + 1,
+                            song = song,
+                            isActive = song.id == mediaMetadata?.id,
+                            modifier = rowModifier,
+                            trailingContent = rowTrailing,
+                        )
+                    } else {
+                        SongListItem(
+                            song = song,
+                            albumIndex = index + 1,
+                            isActive = song.id == mediaMetadata?.id,
+                            isPlaying = isPlaying,
+                            showInLibraryIcon = true,
+                            trailingContent = rowTrailing,
+                            modifier = rowModifier,
+                        )
+                    }
                 }
             }
 
