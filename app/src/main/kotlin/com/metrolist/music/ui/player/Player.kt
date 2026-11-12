@@ -2482,18 +2482,27 @@ private fun PlayerVolumeRow(
                 SliderState(value = level, trackRange = sliderRange)
             }
         sliderState.value = level
+        val volumeInteraction = remember { MutableInteractionSource() }
+        val volumePressed by volumeInteraction.collectIsPressedAsState()
+        val volumeDragged by volumeInteraction.collectIsDraggedAsState()
+        val volumeTrackHeight by animateDpAsState(
+            targetValue = if (volumePressed || volumeDragged) 10.dp else 6.dp,
+            animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
+            label = "playerVolumeTrackHeight",
+        )
         Slider(
             state = sliderState,
             onValueChange = {
                 level = it
                 runCatching { player.setDeviceVolume(it.roundToInt(), 0) }
             },
+            interactionSource = volumeInteraction,
             thumb = { Spacer(modifier = Modifier.size(0.dp)) },
             track = { sliderState ->
                 PlayerSliderTrack(
                     sliderState = sliderState,
                     colors = colors,
-                    trackHeight = 4.dp,
+                    trackHeight = volumeTrackHeight,
                 )
             },
             modifier =
