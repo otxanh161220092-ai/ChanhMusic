@@ -45,6 +45,7 @@ private fun NewActionButton(
     enabled: Boolean = true,
     backgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant,
     contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    plain: Boolean = false,
 ) {
     val animatedBackground by animateColorAsState(
         targetValue = if (enabled) backgroundColor else backgroundColor.copy(alpha = 0.5f),
@@ -73,11 +74,11 @@ private fun NewActionButton(
                 .clickable(enabled = enabled) { performAction = true },
         colors =
             CardDefaults.cardColors(
-                containerColor = animatedBackground,
+                containerColor = if (plain) Color.Transparent else animatedBackground,
             ),
         shape = RoundedCornerShape(16.dp),
         elevation =
-            CardDefaults.cardElevation(),
+            if (plain) CardDefaults.cardElevation(0.dp) else CardDefaults.cardElevation(),
     ) {
         Column(
             modifier =
@@ -103,7 +104,7 @@ private fun NewActionButton(
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.basicMarquee(),
+                modifier = if (plain) Modifier else Modifier.basicMarquee(),
             )
         }
     }
@@ -114,6 +115,7 @@ fun NewActionGrid(
     actions: List<NewAction>,
     modifier: Modifier = Modifier,
     columns: Int = 3,
+    plain: Boolean = false,
 ) {
     val rows = actions.chunked(columns)
 
@@ -132,6 +134,8 @@ fun NewActionGrid(
                         onClick = action.onClick,
                         modifier = Modifier.weight(1f),
                         enabled = action.enabled,
+                        plain = plain,
+                        contentColor = if (plain) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                         backgroundColor =
                             if (action.backgroundColor !=
                                 Color.Unspecified

@@ -449,8 +449,8 @@ fun AppleTopBarActionButtons(
             Icon(
                 painter = painterResource(if (isInLibrary) R.drawable.check else R.drawable.add),
                 contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(22.dp),
+                tint = Color.Black,
+                modifier = Modifier.size(26.dp),
             )
         }
         Box(
@@ -460,8 +460,8 @@ fun AppleTopBarActionButtons(
             Icon(
                 painter = painterResource(R.drawable.more_horiz),
                 contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(22.dp),
+                tint = Color.Black,
+                modifier = Modifier.size(26.dp),
             )
         }
     }

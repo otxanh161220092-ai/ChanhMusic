@@ -321,6 +321,7 @@ fun AlbumMenu(
                     ),
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 16.dp),
                 columns = if (isGuest) 1 else 3,
+                plain = true,
             )
         }
         item {

@@ -93,6 +93,7 @@ import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.NavigationTitle
 import com.metrolist.music.ui.component.AppleTrackRow
+import com.metrolist.music.utils.makeTimeString
 import com.metrolist.music.extensions.toMediaItem
 import com.metrolist.music.ui.component.AppleTopBarActionButtons
 import com.metrolist.music.ui.component.FloatingBackState
@@ -523,7 +524,18 @@ fun AlbumScreen(
                             song = song,
                             isActive = song.id == mediaMetadata?.id,
                             modifier = rowModifier,
-                            trailingContent = rowTrailing,
+                            trailingContent = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    rowTrailing()
+                                    Text(
+                                        text = makeTimeString(song.song.duration.toLong() * 1000L),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.White.copy(alpha = 0.7f),
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                                        modifier = Modifier.width(44.dp).padding(start = 4.dp),
+                                    )
+                                }
+                            },
                         )
                     } else {
                         SongListItem(
