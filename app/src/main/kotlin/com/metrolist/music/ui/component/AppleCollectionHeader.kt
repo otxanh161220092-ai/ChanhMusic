@@ -434,7 +434,11 @@ fun AppleCollectionHeader(
     }
 }
 
-/** Liquid-glass circle used by the Apple-style top bar (same glass as the floating back button). */
+/**
+ * Circle used by the Apple-style top bar. It is NOT sampled glass: the album screen sits inside the
+ * root glass backdrop, so a glass surface here would read the layer it is drawn into (feedback loop,
+ * freeze and crash). It uses a translucent fill with the same highlight rim instead.
+ */
 @Composable
 fun AppleGlassCircleButton(
     icon: Int,
@@ -442,20 +446,13 @@ fun AppleGlassCircleButton(
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null,
 ) {
-    val backdrop = LocalGlassBackdrop.current
     Box(
         modifier =
             modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .glassSurface(
-                    backdrop = backdrop,
-                    shape = CircleShape,
-                    fallbackColor = Color.White.copy(alpha = 0.15f),
-                    tint = Color.White,
-                    mask = Color(0xFFD9D9D9).copy(alpha = 0.3f),
-                    lensDp = 6f,
-                ).highlightBorder()
+                .background(Color.White.copy(alpha = 0.18f), CircleShape)
+                .highlightBorder()
                 .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         contentAlignment = Alignment.Center,
     ) {
