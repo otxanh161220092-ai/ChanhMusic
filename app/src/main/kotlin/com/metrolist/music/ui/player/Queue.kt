@@ -1177,7 +1177,7 @@ private fun PlayerQueueButton(
     onClick: () -> Unit,
     isActive: Boolean,
     enabled: Boolean = true,
-    shape: RoundedCornerShape,
+    shape: androidx.compose.foundation.shape.CornerBasedShape,
     modifier: Modifier = Modifier,
     text: String? = null,
     textButtonColor: Color,
