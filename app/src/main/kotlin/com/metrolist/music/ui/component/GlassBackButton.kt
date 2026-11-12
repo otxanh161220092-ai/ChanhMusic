@@ -70,7 +70,7 @@ fun FloatingGlassPill(
                     shape = shape,
                     fallbackColor = Color.White.copy(alpha = 0.15f),
                     tint = Color.White,
-                    mask = Color(0xFFD9D9D9).copy(alpha = 0.3f),
+                    mask = Color.Transparent,
                     lensDp = 6f,
                 ),
     ) {
@@ -80,7 +80,7 @@ fun FloatingGlassPill(
                     .height(48.dp)
                     .drawWithContent {
                         drawContent()
-                        drawRingPill(ring)
+                        drawRingPill(ring, alpha = 0.5f)
                     },
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -89,7 +89,7 @@ fun FloatingGlassPill(
     }
 }
 
-private fun DrawScope.drawRingPill(ring: ImageBitmap) {
+private fun DrawScope.drawRingPill(ring: ImageBitmap, alpha: Float = 1f) {
     val h = size.height.roundToInt()
     val w = size.width.roundToInt()
     val src = ring.width
@@ -102,6 +102,7 @@ private fun DrawScope.drawRingPill(ring: ImageBitmap) {
         srcSize = IntSize(half, ring.height),
         dstOffset = IntOffset(0, 0),
         dstSize = IntSize(cap, h),
+alpha = alpha,
     )
     // Right cap: right half.
     drawImage(
@@ -110,6 +111,7 @@ private fun DrawScope.drawRingPill(ring: ImageBitmap) {
         srcSize = IntSize(half, ring.height),
         dstOffset = IntOffset(w - cap, 0),
         dstSize = IntSize(cap, h),
+alpha = alpha,
     )
     // Middle: the top/bottom arc sits in the centre column; stretch that column across the gap.
     if (w - 2 * cap > 0) {
@@ -119,6 +121,7 @@ private fun DrawScope.drawRingPill(ring: ImageBitmap) {
             srcSize = IntSize(2, ring.height),
             dstOffset = IntOffset(cap, 0),
             dstSize = IntSize(w - 2 * cap, h),
+alpha = alpha,
         )
     }
 }
@@ -149,7 +152,7 @@ fun GlassBackButton(
                     shape = CircleShape,
                     fallbackColor = Color.White.copy(alpha = 0.15f),
                     tint = Color.White,
-                    mask = Color(0xFFD9D9D9).copy(alpha = 0.3f),
+                    mask = Color.Transparent,
                     // A small lens keeps the edge refraction without magnifying the content behind the button.
                     lensDp = 6f,
                 )

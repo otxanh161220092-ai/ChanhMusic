@@ -93,6 +93,7 @@ import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.NavigationTitle
 import com.metrolist.music.ui.component.AppleTrackRow
+import com.metrolist.music.extensions.toMediaItem
 import com.metrolist.music.ui.component.AppleTopBarActionButtons
 import com.metrolist.music.ui.component.FloatingBackState
 import com.metrolist.music.ui.component.SongListItem
@@ -226,6 +227,15 @@ fun AlbumScreen(
                         },
                         onDownload = {
                             albumWithSongs.songs.forEach { downloadUtil.download(it) }
+                        },
+                        onShuffle = {
+                            albumWithSongs.album.playlistId?.let { playerConnection.service.getAutomix(it) }
+                            playerConnection.playQueue(
+                                com.metrolist.music.playback.queues.ListQueue(
+                                    title = albumWithSongs.album.title,
+                                    items = albumWithSongs.songs.shuffled().map { it.toMediaItem() },
+                                ),
+                            )
                         },
                         onMore = {
                             menuState.show {

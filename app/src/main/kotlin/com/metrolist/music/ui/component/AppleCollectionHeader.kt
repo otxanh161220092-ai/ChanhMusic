@@ -150,7 +150,7 @@ fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
     val heroColor =
         when {
             artColor == null -> MaterialTheme.colorScheme.surfaceVariant
-            !dominant -> artColor!!
+            !dominant -> if (pageIsDark) lerp(artColor!!, Color.White, 0.2f) else artColor!!
             pageIsDark -> lerp(artColor!!, Color.Black, 0.5f)
             else -> lerp(artColor!!, Color.White, 0.35f)
         }
