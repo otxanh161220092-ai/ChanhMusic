@@ -9,6 +9,8 @@ import com.metrolist.music.constants.CollectionDominantBackgroundKey
 import com.metrolist.music.utils.rememberPreference
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -428,5 +430,62 @@ fun AppleCollectionHeader(
                 collapsedMaxLines = 3,
             )
         }
+    }
+}
+
+/** Round dark back button used on Apple-style collection screens. */
+@Composable
+fun AppleTopBarBackButton(
+    onClick: () -> Unit,
+    onLongClick: () -> Unit = {},
+) {
+    Box(
+        modifier =
+            Modifier
+                .padding(start = 16.dp)
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.35f))
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.arrow_back),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
+/** Dark pill with a "+" and an ellipsis, shown on the right of Apple-style collection screens. */
+@Composable
+fun AppleTopBarActionPill(
+    onAdd: () -> Unit,
+    onMore: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .padding(end = 16.dp)
+                .height(40.dp)
+                .clip(RoundedCornerShape(50))
+                .background(Color.Black.copy(alpha = 0.35f))
+                .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.add),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(20.dp).clickable(onClick = onAdd),
+        )
+        Icon(
+            painter = painterResource(R.drawable.more_horiz),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(20.dp).clickable(onClick = onMore),
+        )
     }
 }

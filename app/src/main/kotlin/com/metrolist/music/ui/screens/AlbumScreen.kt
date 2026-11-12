@@ -91,6 +91,8 @@ import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.NavigationTitle
 import com.metrolist.music.ui.component.AppleTrackRow
+import com.metrolist.music.ui.component.AppleTopBarActionPill
+import com.metrolist.music.ui.component.AppleTopBarBackButton
 import com.metrolist.music.ui.component.SongListItem
 import com.metrolist.music.ui.component.YouTubeGridItem
 import com.metrolist.music.ui.menu.AlbumMenu
@@ -591,7 +593,12 @@ fun AlbumScreen(
             }
         },
         navigationIcon = {
-                com.metrolist.music.ui.component.OriginalBackSlot {
+            if (appleStyle && !inSelectMode) {
+                AppleTopBarBackButton(
+                    onClick = { navController.navigateUp() },
+                    onLongClick = { navController.backToMain() },
+                )
+            } else com.metrolist.music.ui.component.OriginalBackSlot {
             if (inSelectMode) {
                 IconButton(onClick = onExitSelectionMode) {
                     Icon(
@@ -613,7 +620,21 @@ fun AlbumScreen(
         }
             },
         actions = {
-            if (inSelectMode) {
+            if (appleStyle && !inSelectMode) {
+                AppleTopBarActionPill(
+                    onAdd = {},
+                    onMore = {
+                        albumWithSongs?.let { current ->
+                            menuState.show {
+                                AlbumMenu(
+                                    originalAlbum = Album(current.album, current.artists),
+                                    onDismiss = menuState::dismiss,
+                                )
+                            }
+                        }
+                    },
+                )
+            } else if (inSelectMode) {
                 Checkbox(
                     checked = selection.size == filteredSongs.size && selection.isNotEmpty(),
                     onCheckedChange = {
