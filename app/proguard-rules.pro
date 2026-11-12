@@ -195,3 +195,7 @@
 -keepclasseswithmembers class com.metrolist.shazamkit.models.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
+
+# ONNX Runtime calls back into its Java classes through JNI (constructors, fields),
+# so R8 must keep them or the release build aborts inside OrtSession.run.
+-keep class ai.onnxruntime.** { *; }
