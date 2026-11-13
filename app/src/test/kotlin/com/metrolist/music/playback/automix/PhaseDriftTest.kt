@@ -55,4 +55,20 @@ class TempoMeetingTest {
         assertEquals(1.10, (b / a).toDouble(), 1e-4)
         assertTrue(a < 1f && b > 1f)
     }
+
+    @Test
+    fun `phase loop speeds up B when behind and stays put when locked`() {
+        val loop = PhaseLoop(500.0)
+        assertTrue(loop.update(0.1, 50.0) > 1.0)
+        assertEquals(1.0, PhaseLoop(500.0).update(0.001, 50.0), 0.0)
+    }
+
+    @Test
+    fun `phase loop integral removes a constant bias that proportional alone leaves`() {
+        val loop = PhaseLoop(500.0)
+        var multiplier = 1.0
+        repeat(400) { multiplier = loop.update(0.02, 50.0) }
+        // A steady 10 ms lead must keep pushing B back, not settle at a small offset.
+        assertTrue(multiplier > 1.0)
+    }
 }

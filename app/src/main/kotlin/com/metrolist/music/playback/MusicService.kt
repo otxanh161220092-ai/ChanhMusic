@@ -29,7 +29,6 @@ import com.metrolist.music.playback.automix.AutomixAnalyzer
 import com.metrolist.music.playback.automix.AutomixPrescanner
 import com.metrolist.music.playback.automix.AutomixStatus
 import com.metrolist.music.playback.automix.FileAutomixFeatureStore
-import com.metrolist.music.playback.automix.PhaseController
 import com.metrolist.music.playback.automix.TailFxAudioProcessor
 import com.metrolist.music.playback.automix.TailFxMix
 import com.metrolist.music.playback.automix.VocalGaps
@@ -5344,6 +5343,8 @@ class MusicService :
     private var mixSyncListener: Player.Listener? = null
     private var mixTargetSpeedB = 1f
     private var mixSpeedFactor = 1f
+    private var phaseLoop: com.metrolist.music.playback.automix.PhaseLoop? = null
+    private var phaseLastNanos: Long? = null
 
     private fun performCrossfadeSwap(plan: TransitionPlan? = null) {
         val incoming = secondaryPlayer ?: return
@@ -5356,6 +5357,8 @@ class MusicService :
         // A must stop at its end instead of advancing to B on its own, which would start a second copy of B.
         outgoing.pauseAtEndOfMediaItems = true
         mixSpeedFactor = plan?.incomingTempoFactor ?: 1f
+        phaseLoop = plan?.gridA?.beatMs?.takeIf { it > 0.0 }?.let { com.metrolist.music.playback.automix.PhaseLoop(it) }
+        phaseLastNanos = null
         handOverOutgoingTempo(plan)
         // This mix is consumed: the next plan is made for the new current song once it is over.
         mixPlan = null
@@ -5682,8 +5685,11 @@ class MusicService :
         val predicted = plan.predictedPhaseErrorMs()
         if (first) Timber.tag(TAG).i("Beat phase at start: %.1f ms (predicted %.1f ms)", errorMs, predicted?.first ?: 0.0)
         if (last) Timber.tag(TAG).i("Beat phase at end: %.1f ms (predicted %.1f ms)", errorMs, predicted?.second ?: 0.0)
+        val now = System.nanoTime()
+        val dtMs = phaseLastNanos?.let { (now - it) / 1_000_000.0 } ?: 0.0
+        phaseLastNanos = now
         val multiplier =
-            if (last) 1.0 else PhaseController.speedMultiplier(plan.phaseErrorBeats(positionA, positionB) ?: 0.0, plan.gridA?.beatMs ?: return)
+            if (last) 1.0 else phaseLoop?.update(plan.phaseErrorBeats(positionA, positionB) ?: 0.0, dtMs) ?: return
         incoming.playbackParameters = PlaybackParameters(targetSpeedB * multiplier.toFloat(), incoming.playbackParameters.pitch)
     }
 

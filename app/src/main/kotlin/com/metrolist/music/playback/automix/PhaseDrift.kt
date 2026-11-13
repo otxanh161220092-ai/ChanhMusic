@@ -49,3 +49,28 @@ object PhaseController {
         return 1.0 + nudge
     }
 }
+
+/**
+ * PI loop over the beat phase error. The proportional part pulls B onto A's beat; the integral part
+ * learns the constant tempo bias that a proportional nudge alone leaves behind, so the error settles
+ * at zero instead of at a small steady offset.
+ */
+class PhaseLoop(private val beatMs: Double) {
+    private var integralMsSec = 0.0
+
+    /** Speed multiplier for B given the current phase error (in beats) and the time since the last update. */
+    fun update(errorBeats: Double, dtMs: Double): Double {
+        val errorMs = errorBeats * beatMs
+        integralMsSec = (integralMsSec + errorMs * dtMs / 1000.0).coerceIn(-INTEGRAL_LIMIT_MS_SEC, INTEGRAL_LIMIT_MS_SEC)
+        if (abs(errorMs) <= PhaseController.LOCK_TOLERANCE_MS) return 1.0
+        val proportional = errorMs / PhaseController.TIME_CONSTANT_MS
+        val integral = integralMsSec / INTEGRAL_TIME_CONSTANT_SEC / PhaseController.TIME_CONSTANT_MS
+        val nudge = (proportional + integral).coerceIn(-PhaseController.MAX_NUDGE, PhaseController.MAX_NUDGE)
+        return 1.0 + nudge
+    }
+
+    companion object {
+        const val INTEGRAL_TIME_CONSTANT_SEC = 4.0
+        const val INTEGRAL_LIMIT_MS_SEC = 2_000.0
+    }
+}
