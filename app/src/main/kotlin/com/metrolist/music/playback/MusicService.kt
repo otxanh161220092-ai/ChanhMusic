@@ -5345,6 +5345,7 @@ class MusicService :
     private var mixSpeedFactor = 1f
     private var phaseLoop: com.metrolist.music.playback.automix.PhaseLoop? = null
     private var phaseLastNanos: Long? = null
+    private var phaseLastSeekNanos = 0L
 
     private fun performCrossfadeSwap(plan: TransitionPlan? = null) {
         val incoming = secondaryPlayer ?: return
@@ -5688,6 +5689,14 @@ class MusicService :
         val now = System.nanoTime()
         val dtMs = phaseLastNanos?.let { (now - it) / 1_000_000.0 } ?: 0.0
         phaseLastNanos = now
+        // A lead or lag this big cannot be closed by speed alone without an audible pitch wobble: jump B onto the beat.
+        // The cooldown stops a seek from being repeated before the previous one has taken effect.
+        if (!last && !first && abs(errorMs) > HARD_PHASE_SEEK_MS && now - phaseLastSeekNanos > HARD_PHASE_SEEK_COOLDOWN_NS) {
+            phaseLastSeekNanos = now
+            Timber.tag(TAG).i("Beat phase off by %.1f ms: seeking B onto the beat", errorMs)
+            incoming.seekTo((positionB + errorMs.toLong()).coerceAtLeast(0L))
+            return
+        }
         val multiplier =
             if (last) 1.0 else phaseLoop?.update(plan.phaseErrorBeats(positionA, positionB) ?: 0.0, dtMs) ?: return
         incoming.playbackParameters = PlaybackParameters(targetSpeedB * multiplier.toFloat(), incoming.playbackParameters.pitch)
@@ -5749,6 +5758,8 @@ class MusicService :
     }
 
     companion object {
+        private const val HARD_PHASE_SEEK_MS = 60.0
+        private const val HARD_PHASE_SEEK_COOLDOWN_NS = 1_500_000_000L
         const val ACTION_ALARM_TRIGGER = "com.metrolist.music.action.ALARM_TRIGGER"
         const val EXTRA_ALARM_ID = "extra_alarm_id"
         const val EXTRA_ALARM_PLAYLIST_ID = "extra_alarm_playlist_id"
