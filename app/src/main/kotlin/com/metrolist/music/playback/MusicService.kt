@@ -5445,6 +5445,9 @@ class MusicService :
                 // Same cadence for every mix (~50 ms per step), so a longer mix never jumps in bigger steps.
                 val steps = (duration / 50L).toInt().coerceIn(20, 400)
                 val stepTime = duration / steps
+                // Measured once, as B becomes audible: both players report their own position, so any start-up
+                // delay of the incoming player shows up here and can be removed before the ear hears it.
+                var phaseChecked = false
                 val startVolume =
                     try {
                         outgoing.volume
@@ -5491,6 +5494,23 @@ class MusicService :
 
                     // The screen follows the ear: switch when the incoming song becomes the louder one.
 
+                    if (plan != null && !phaseChecked && fadeIn > 0f && fadeIn < 0.2f) {
+                        phaseChecked = true
+                        try {
+                            // Where B should be, given where A is, by the plan's own mapping. A mismatch is the
+                            // player start-up delay; seek B onto the expected position while it is still quiet.
+                            val expectedB =
+                                plan.mixInPositionB +
+                                    ((outgoing.currentPosition - plan.bFadeInStartA) * plan.speedFactorB.toDouble()).toLong()
+                            val error = incoming.currentPosition - expectedB
+                            if (kotlin.math.abs(error) in 8L..400L) {
+                                Timber.tag("Automix").d("Phase correction: B off by %d ms, seeking to %d", error, expectedB)
+                                incoming.seekTo(expectedB.coerceAtLeast(0L))
+                            }
+                        } catch (e: Exception) {
+                            Timber.tag("Automix").w(e, "Phase check skipped")
+                        }
+                    }
                     try {
                         incoming.volume = startVolume * fadeIn
                         // With the tail in A's audio chain the fade-out happens there, so the echo can ring on.
