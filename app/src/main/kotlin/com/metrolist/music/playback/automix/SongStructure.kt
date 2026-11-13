@@ -26,7 +26,18 @@ class SongStructure(
 )
 
 /** Builds a structure from analysis results from the loudness curve (falling back to the length-based heuristic when it is flat). */
-fun TrackFeatures.toSongStructure(vocalGaps: List<LongRange>? = null): SongStructure =
+fun TrackFeatures.toSongStructure(vocalGaps: List<LongRange>? = null): SongStructure {
+    timber.log.Timber.tag("MusicService").d(
+        "Features to structure: duration=%d neural=%b neuralBeats=%d tempoBpm=%.1f",
+        durationMs,
+        neural != null,
+        neural?.beatsMs?.size ?: 0,
+        bpm,
+    )
+    return songStructure(vocalGaps)
+}
+
+private fun TrackFeatures.songStructure(vocalGaps: List<LongRange>?): SongStructure =
     SongStructure(
         durationMs = durationMs,
         segments = LoudnessSegmenter.segment(durationMs, loudnessDb) ?: HeuristicSegmenter.segment(durationMs, loudnessDb),
@@ -34,7 +45,7 @@ fun TrackFeatures.toSongStructure(vocalGaps: List<LongRange>? = null): SongStruc
         bpm = neural?.beatMs?.takeIf { it > 0.0 }?.let { (60_000.0 / it).toFloat() } ?: bpm,
         hasTempo = hasTempo || (neural?.beatMs ?: 0.0) > 0.0,
         // Same gate as tempo matching: a usable BPM is enough to measure the grid.
-        gridNear = { positionMs -> if (bpm > 0f) gridNear(positionMs.toDouble()) else null },
+        gridNear = { positionMs -> if ((neural?.beatMs ?: 0.0) > 0.0 || bpm > 0f) gridNear(positionMs.toDouble()) else null },
         vocalGaps = vocalGaps,
         beatEntryMs = neural?.let { model -> (model.downbeatsMs.firstOrNull() ?: model.beatsMs.firstOrNull())?.toLong() },
         onsetSliceAt = { startMs, lengthMs ->
