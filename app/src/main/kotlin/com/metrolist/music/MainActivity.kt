@@ -1017,7 +1017,6 @@ class MainActivity : FragmentActivity() {
                     remember(navBackStackEntry) {
                         when (navBackStackEntry?.destination?.route) {
                             Screens.Home.route -> R.string.home
-                            Screens.Explore.route -> R.string.explore
                             Screens.Search.route -> R.string.search
                             Screens.Library.route -> R.string.filter_library
                             Screens.ListenTogether.route -> R.string.together
