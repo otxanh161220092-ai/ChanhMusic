@@ -717,6 +717,14 @@ class MusicService :
     override fun onCreate() {
         super.onCreate()
         com.metrolist.music.bcmix.AudioCache.init(this)
+        // Analysis reads the head of each track through Metrolist's own resolving
+        // source, so the bytes come from the same stream the player would use.
+        com.metrolist.music.bcmix.AudioCache.setUpstream(
+            object : DataSource.Factory {
+                override fun createDataSource(): DataSource =
+                    createDataSourceFactory(VolumeNormalizationAudioProcessor()) { null }.createDataSource()
+            },
+        )
         isRunning = true
         shutdownDeferred = kotlinx.coroutines.CompletableDeferred<Unit>()
 
