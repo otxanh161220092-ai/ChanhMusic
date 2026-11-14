@@ -199,3 +199,7 @@
 # ONNX Runtime calls back into its Java classes through JNI (constructors, fields),
 # so R8 must keep them or the release build aborts inside OrtSession.run.
 -keep class ai.onnxruntime.** { *; }
+
+# Rhino ships a JSR-223 script engine that references javax.script, which Android does not provide.
+-dontwarn javax.script.**
+-dontwarn org.mozilla.javascript.engine.**
