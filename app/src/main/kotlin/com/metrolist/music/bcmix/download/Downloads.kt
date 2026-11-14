@@ -5,7 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaMetadataRetriever
 import android.net.Uri
-import com.metrolist.music.bcmix.compat.TrackLog as Log
+import com.metrolist.music.bcmix.data.TrackLog as Log
 import androidx.core.content.ContextCompat
 import com.metrolist.music.bcmix.data.innertube.StreamResolver
 import com.metrolist.music.bcmix.data.model.Song

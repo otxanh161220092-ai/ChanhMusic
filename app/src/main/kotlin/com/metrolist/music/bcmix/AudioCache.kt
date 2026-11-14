@@ -1,5 +1,7 @@
 package com.metrolist.music.bcmix
 
+import com.metrolist.music.bcmix.data.mediaIdIn
+
 import android.content.Context
 import android.media.MediaDataSource
 import android.net.ConnectivityManager
@@ -7,7 +9,7 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.SystemClock
 import com.metrolist.music.R
-import com.metrolist.music.bcmix.compat.TrackLog
+import com.metrolist.music.bcmix.data.TrackLog
 import com.metrolist.music.bcmix.smart.AutomixAnalysisSource
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi

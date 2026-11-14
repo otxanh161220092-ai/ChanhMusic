@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import com.metrolist.music.bcmix.compat.TrackLog as Log
+import com.metrolist.music.bcmix.data.TrackLog as Log
 import com.metrolist.music.bcmix.data.Http
 import com.metrolist.music.bcmix.data.model.Song
 import com.metrolist.music.bcmix.data.model.artworkAt

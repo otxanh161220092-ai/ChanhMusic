@@ -1,6 +1,6 @@
 package com.metrolist.music.bcmix.download
 
-import com.metrolist.music.bcmix.compat.TrackLog as Log
+import com.metrolist.music.bcmix.data.TrackLog as Log
 import com.metrolist.music.bcmix.data.lyrics.LyricsRepository
 import com.metrolist.music.bcmix.data.lyrics.toEnhancedLrc
 import com.metrolist.music.bcmix.data.lyrics.toLrc

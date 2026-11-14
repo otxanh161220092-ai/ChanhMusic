@@ -7,7 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import com.metrolist.music.bcmix.compat.TrackLog as Log
+import com.metrolist.music.bcmix.data.TrackLog as Log
 import com.metrolist.music.bcmix.settings.AppSettings
 import androidx.annotation.RequiresApi
 import com.metrolist.music.bcmix.data.model.Song

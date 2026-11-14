@@ -5,7 +5,7 @@ import android.media.MediaDataSource
 import android.net.Uri
 import android.util.Log
 import androidx.media3.common.util.UnstableApi
-import com.metrolist.music.bcmix.compat.TrackLog
+import com.metrolist.music.bcmix.data.TrackLog
 import com.metrolist.music.bcmix.data.model.Song
 import com.metrolist.music.bcmix.AudioCache
 import kotlinx.coroutines.Dispatchers

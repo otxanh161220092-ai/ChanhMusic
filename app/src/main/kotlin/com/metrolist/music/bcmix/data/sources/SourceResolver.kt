@@ -2,7 +2,7 @@ package com.metrolist.music.bcmix.data.sources
 
 import android.net.Uri
 import android.util.Log
-import com.metrolist.music.bcmix.compat.TrackLog
+import com.metrolist.music.bcmix.data.TrackLog
 import com.metrolist.music.bcmix.data.model.Song
 import com.metrolist.music.bcmix.settings.AppSettings
 import com.metrolist.music.bcmix.settings.AudioQuality
