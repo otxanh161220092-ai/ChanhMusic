@@ -134,6 +134,10 @@ import com.metrolist.music.constants.AutoplayKey
 import com.metrolist.music.constants.AutomixCreativeKey
 import com.metrolist.music.constants.AutomixEnabledKey
 import com.metrolist.music.constants.AutomixStyleKey
+import com.metrolist.music.constants.JioSaavnSubstituteKey
+import com.metrolist.music.bcmix.sources.SourceResolver as BcSourceResolver
+import com.metrolist.music.bcmix.sources.StreamFormat as BcStreamFormat
+import com.metrolist.music.bcmix.sources.TrackMatcher as BcTrackMatcher
 import com.metrolist.music.bcmix.CrossfadeController
 import com.metrolist.music.bcmix.settings.AppSettings as BcmixSettings
 import com.metrolist.music.bcmix.smart.TrackAnalyzer as BcmixTrackAnalyzer
@@ -4062,6 +4066,39 @@ class MusicService :
                 }
             } else {
                 Timber.tag(TAG).i("BYPASSING CACHE for $mediaId due to quality change")
+            }
+
+            // BitChord substitution: with the BitChord engine on and the JioSaavn
+            // option enabled, a JioSaavn rendition replaces YouTube's stream when it
+            // is the same recording and clears BitChord's gain bar.
+            if (automixBitChord && automixPref && dataStore.get(JioSaavnSubstituteKey, false)) {
+                val row = runBlocking(Dispatchers.IO) { database.song(mediaId).first() }
+                if (row != null) {
+                    val song = row.song
+                    val substitute = runBlocking(Dispatchers.IO) {
+                        BcSourceResolver.substituteFromJioSaavn(
+                            target = BcTrackMatcher.Target(
+                                title = song.title,
+                                artist = row.artists.joinToString(", ") { it.name },
+                                durationSec = song.duration.takeIf { it > 0 },
+                                album = song.albumName,
+                                isExplicit = song.explicit,
+                                isVideo = song.isVideo,
+                            ),
+                            playing = BcStreamFormat(codec = "opus", kbps = 160),
+                        )
+                    }
+                    if (substitute != null) {
+                        Timber.tag(TAG).i("BITCHORD substitute JioSaavn for $mediaId at ${substitute.kbps}kbps")
+                        return@Factory dataSpec.withResolvedStream(
+                            CachedStreamUrl(
+                                url = substitute.url,
+                                requestHeaders = substitute.headers,
+                                clientName = "jiosaavn",
+                            ),
+                        )
+                    }
+                }
             }
 
             val cacheGeneration = songUrlCache.generation(mediaId)

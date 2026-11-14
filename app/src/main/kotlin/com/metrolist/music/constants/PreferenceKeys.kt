@@ -167,6 +167,7 @@ val AutomixEnabledKey = booleanPreferencesKey("automixEnabled")
 val AutomixCreativeKey = booleanPreferencesKey("automixCreative")
 /** Which Automix engine runs: "caihat" (the existing one) or "bitchord" (the BitChord port). */
 val AutomixStyleKey = stringPreferencesKey("automixStyle")
+val JioSaavnSubstituteKey = booleanPreferencesKey("jioSaavnSubstitute")
 val TransitionPrefersAutomixKey = booleanPreferencesKey("transitionPrefersAutomix")
 
 val MaxImageCacheSizeKey = intPreferencesKey("maxImageCacheSize")

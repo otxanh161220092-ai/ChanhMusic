@@ -48,6 +48,7 @@ import com.metrolist.music.constants.OutputPrecision
 import com.metrolist.music.constants.OutputPrecisionKey
 import com.metrolist.music.constants.AutoDownloadOnLikeKey
 import com.metrolist.music.constants.AutomixCreativeKey
+import com.metrolist.music.constants.JioSaavnSubstituteKey
 import com.metrolist.music.constants.AutomixEnabledKey
 import com.metrolist.music.constants.AutomixStyleKey
 import com.metrolist.music.constants.CrossfadeDurationKey
@@ -135,6 +136,10 @@ fun PlayerSettings(
     val (automixStyle, onAutomixStyleChange) = rememberPreference(
         AutomixStyleKey,
         defaultValue = "caihat"
+    )
+    val (jioSaavnSubstitute, onJioSaavnSubstituteChange) = rememberPreference(
+        JioSaavnSubstituteKey,
+        defaultValue = false
     )
     val (preferAutomix, onPreferAutomixChange) = rememberPreference(
         TransitionPrefersAutomixKey,
@@ -439,6 +444,20 @@ fun PlayerSettings(
                             RadioButton(selected = automixStyle == "bitchord", onClick = { onAutomixStyleChange("bitchord") })
                         },
                         onClick = { onAutomixStyleChange("bitchord") }
+                    ))
+                }
+                if (automixEnabled && automixStyle == "bitchord") {
+                    add(Material3SettingsItem(
+                        icon = painterResource(R.drawable.graphic_eq),
+                        title = { Text("JioSaavn substitute") },
+                        description = { Text("Use JioSaavn 320kbps when it is the same recording. Catalogue matches can pick the wrong song.") },
+                        trailingContent = {
+                            Switch(
+                                checked = jioSaavnSubstitute,
+                                onCheckedChange = onJioSaavnSubstituteChange,
+                            )
+                        },
+                        onClick = { onJioSaavnSubstituteChange(!jioSaavnSubstitute) }
                     ))
                 }
                 if (automixEnabled && automixStyle == "caihat") {
