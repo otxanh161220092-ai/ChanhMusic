@@ -1,7 +1,7 @@
 package com.metrolist.music.bcmix.download
 
 import com.metrolist.music.bcmix.data.TrackLog as Log
-import com.metrolist.music.bcmix.data.DebugLog as Log
+import com.metrolist.music.bcmix.data.TrackLog as Log
 import com.metrolist.music.bcmix.data.Http
 import com.metrolist.music.bcmix.data.innertube.PlayerClient
 import com.metrolist.music.bcmix.data.innertube.StreamResolver
