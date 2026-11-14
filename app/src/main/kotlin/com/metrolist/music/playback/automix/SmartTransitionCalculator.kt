@@ -238,6 +238,8 @@ object SmartTransitionCalculator {
         val minFade = if (relaxed) RELAXED_MIN_FADE_MS else MIN_FADE_MS
         val bCalm = b.isCalmEntry || (relaxed && b.type == SegmentType.OUTRO)
         // The four cases: where A is (high energy or calm) and where B has to land (calm entry or high energy).
+        // Only the two cases where A's energy is replaced by B's (a drop to a calm entry, or a calm part to a
+        // chorus) are used on the normal pass: at the moment A is gone, B is already at its entry point.
         val kind =
             when {
                 a.isHighEnergy && bCalm -> TransitionKind.DROP_TO_CALM
@@ -246,6 +248,8 @@ object SmartTransitionCalculator {
                 bCalm -> TransitionKind.CALM_TO_CALM
                 else -> return null
             }
+
+        if (!relaxed && (kind == TransitionKind.HIGH_TO_HIGH || kind == TransitionKind.CALM_TO_CALM)) return null
 
         val factor = tempo.factor.toDouble()
         val gridA = songA.gridNear(a.endTimeMs)
@@ -275,7 +279,8 @@ object SmartTransitionCalculator {
                 // A leaves quickly from a drop; from a calm part it leaves as slowly as B arrives.
                 fadeOut =
                     if (symmetric) fadeIn else ((if (quickCut) QUICK_FADE_BEATS else SHORT_FADE_BEATS) * beatA).roundToLong().coerceAtLeast(1L)
-                handoverB = entryB + (fadeIn * factor).toLong()
+                // B is at full level exactly at its entry point, the moment A has gone.
+                handoverB = entryB
             }
             TransitionKind.CALM_TO_HIGH, TransitionKind.HIGH_TO_HIGH -> {
                 handoverB = gridB?.nearestBar(b.startTimeMs.toDouble())?.toLong()?.coerceAtLeast(0L) ?: b.startTimeMs
@@ -373,7 +378,11 @@ object SmartTransitionCalculator {
             Timber.tag("MusicService").d("Tempo unavailable: A bpm=%.1f hasTempo=%b, B bpm=%.1f hasTempo=%b", songA.bpm, songA.hasTempo, songB.bpm, songB.hasTempo)
             return TempoMatch(1f, false, false, NO_TEMPO_COST)
         }
-        val raw = songA.bpm.toDouble() / songB.bpm
+        // Speed comes from the beat periods when both grids have them: the median beat interval is far more
+        // precise than a rounded BPM, and a small BPM error grows into a drift across the whole overlap.
+        val periodA = songA.gridNear(0L)?.beatMs?.takeIf { it > 0.0 }
+        val periodB = songB.gridNear(0L)?.beatMs?.takeIf { it > 0.0 }
+        val raw = if (periodA != null && periodB != null) periodB / periodA else songA.bpm.toDouble() / songB.bpm
         var ratio = raw
         while (ratio > 1.4142) ratio /= 2.0
         while (ratio < 0.7071) ratio *= 2.0
