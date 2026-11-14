@@ -134,7 +134,7 @@ class TransitionPlan(
             gridA = gridA,
             gridB = gridB?.let { BeatGrid(it.downbeatMs + shiftMs, it.beatMs) },
             tailFxA = tailFxA,
-            alignmentShiftMs = shiftMs,
+            alignmentShiftMs = alignmentShiftMs + shiftMs,
             tailEchoMs = tailEchoMs,
         )
 }

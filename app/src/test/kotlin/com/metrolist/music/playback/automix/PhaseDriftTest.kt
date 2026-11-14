@@ -71,4 +71,14 @@ class TempoMeetingTest {
         // A steady 10 ms lead must keep pushing B back, not settle at a small offset.
         assertTrue(multiplier > 1.0)
     }
+
+    @Test
+    fun `snapping B by minus the phase error puts its beat on A's beat`() {
+        val gridA = BeatGrid(downbeatMs = 0.0, beatMs = 500.0)
+        val gridB = BeatGrid(downbeatMs = 0.0, beatMs = 500.0)
+        val error = BeatPhase.errorBeats(1_000.0, gridA, 1_100.0, gridB)
+        val shiftMs = -error * 500.0
+        val snapped = BeatGrid(gridB.downbeatMs + shiftMs, gridB.beatMs)
+        assertEquals(0.0, BeatPhase.errorBeats(1_000.0, gridA, 1_100.0, snapped), 1e-9)
+    }
 }

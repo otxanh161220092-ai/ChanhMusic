@@ -109,7 +109,7 @@ object SmartTransitionCalculator {
         if (best == null) pass = "structure-free"
         val plan = best ?: structureFreePlan(songA, songB, tempo, originalEarliest, longFadeMs, quickCut)
         Timber.tag("MusicService").d("Mix plan: %s, mixOutA=%d ms of %d ms", pass, plan?.mixOutPositionA ?: -1L, songA.durationMs)
-        return plan?.let { refineWithCrossCorrelation(it, songA, songB) }
+        return plan?.let { refineWithCrossCorrelation(snapToBeat(it), songA, songB) }
     }
 
     private fun bestCandidate(
@@ -186,6 +186,21 @@ object SmartTransitionCalculator {
      * Fine-tunes B's start so its kicks land on A's kicks: cross-correlates the two kick curves around
      * the overlap and moves B by the lag of the correlation peak, instead of trusting the beat grid alone.
      */
+    /**
+     * Snaps B onto A's beat grid at the start of the overlap. The phase error is measured from both grids
+     * and B is moved by the smallest amount (at most half a beat) that makes its beat fall on A's beat.
+     * With matched tempo the error stays constant through the overlap, so this one shift holds for the mix.
+     */
+    private fun snapToBeat(plan: TransitionPlan): TransitionPlan {
+        if (!plan.tempoMatched || !plan.canTrackPhase) return plan
+        val beatMs = plan.gridA?.beatMs ?: return plan
+        val error = plan.phaseErrorBeats(plan.startA, plan.secondaryStartPositionMs) ?: return plan
+        val shift = (-error * beatMs).roundToLong()
+        if (shift == 0L || plan.secondaryStartPositionMs + shift < 0) return plan
+        Timber.tag("MusicService").d("Beat snap: error %.3f beats, B moved %d ms", error, shift)
+        return plan.withBShift(shift)
+    }
+
     private fun refineWithCrossCorrelation(
         plan: TransitionPlan,
         songA: SongStructure,
