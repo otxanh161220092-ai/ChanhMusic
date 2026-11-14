@@ -35,20 +35,17 @@ object AudioCache {
     private val headInFlight = ConcurrentHashMap.newKeySet<String>()
 
     @Volatile private var playerCache: Cache? = null
-    @Volatile private var streamUrl: (suspend (String) -> String?)? = null
     @Volatile private var upstream: DataSource.Factory? = null
 
     /**
-     * Wires the adapter to Metrolist's player cache. [streamUrl] resolves a
-     * video id to a playable URL; [upstream] fetches it on a cache miss.
+     * Wires the adapter to Metrolist's player cache. [upstream] is the playback
+     * data source chain, used to read a track's head on a cache miss.
      */
     fun init(
         cache: Cache,
-        streamUrl: suspend (String) -> String?,
         upstream: DataSource.Factory,
     ) {
         playerCache = cache
-        this.streamUrl = streamUrl
         this.upstream = upstream
     }
 
@@ -77,22 +74,23 @@ object AudioCache {
         return CachedRenditionSource(cache, rendition)
     }
 
-    /** Starts reading the head of a track into the cache, if it is not there yet. */
+    /**
+     * Reads the head of a track through the same data source chain playback uses,
+     * so the stream resolves exactly as it does for the player and the bytes land
+     * under the track's cache key.
+     */
     fun requestAnalysisHead(uri: Uri) {
-        val cache = playerCache ?: return
-        val key = cacheKeyOf(uri)
-        val resolve = streamUrl ?: return
         val fetch = upstream ?: return
+        val key = cacheKeyOf(uri)
         if (key.isEmpty() || !headInFlight.add(key)) return
         scope.launch {
             try {
-                val url = resolve(key) ?: return@launch
-                val source = CacheDataSource.Factory()
-                    .setCache(cache)
-                    .setUpstreamDataSourceFactory(fetch)
-                    .setCacheKeyFactory { key }
-                    .createDataSource()
-                val spec = DataSpec.Builder().setUri(url).setKey(key).setLength(HEAD_PROBE_BYTES).build()
+                val source = fetch.createDataSource()
+                val spec = DataSpec.Builder()
+                    .setUri(Uri.parse("https://music.youtube.com/watch?v=$key"))
+                    .setKey(key)
+                    .setLength(HEAD_PROBE_BYTES)
+                    .build()
                 val buffer = ByteArray(64 * 1024)
                 source.open(spec)
                 var total = 0L

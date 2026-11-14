@@ -59,6 +59,9 @@ import androidx.media3.common.Format
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
+import androidx.compose.runtime.snapshotFlow
+import com.metrolist.music.bcmix.audio.TransitionFilterProcessor
+import com.metrolist.music.bcmix.TransitionFilters
 import androidx.media3.common.Player
 import androidx.media3.common.Player.EVENT_POSITION_DISCONTINUITY
 import androidx.media3.common.Player.EVENT_TIMELINE_CHANGED
@@ -466,6 +469,7 @@ class MusicService :
                 }
             },
             analysisRunningFor = { item -> bcmixAnalyzer.isAnalysing(item.mediaId) },
+            filters = bcmixFilters,
         )
     }
     private var mixPlan: TransitionPlan? = null
@@ -539,6 +543,7 @@ class MusicService :
     private val playerNormalizationProcessors = HashMap<Player, VolumeNormalizationAudioProcessor>()
     private val playerEqualizerProcessors = HashMap<Player, CustomEqualizerAudioProcessor>()
     private val playerTailFxProcessors = HashMap<Player, TailFxAudioProcessor>()
+    private val playerTransitionFilters = HashMap<Player, TransitionFilterProcessor>()
 
     private var loudnessSetupJob: Job? = null
     private var loudnessSetupGeneration: Long = 0L
@@ -716,13 +721,19 @@ class MusicService :
 
     override fun onCreate() {
         super.onCreate()
+        // The BitChord engine's sleep-after-track and cancel hooks, bridged to Metrolist's sleep timer.
+        com.metrolist.music.bcmix.compat.SleepTimer.onCancel = { sleepTimer?.clear() }
+        scope.launch {
+            snapshotFlow { sleepTimer?.pauseWhenSongEnd == true }.collect {
+                com.metrolist.music.bcmix.compat.SleepTimer.afterTrack.value = it
+            }
+        }
         com.metrolist.music.bcmix.AudioCache.init(
             cache = playerCache,
-            streamUrl = { id -> getStreamUrl(id) },
-            upstream = DefaultDataSource.Factory(
-                this,
-                OkHttpDataSource.Factory(OkHttpClient.Builder().proxy(YouTube.proxy).build()),
-            ),
+            upstream = object : androidx.media3.datasource.DataSource.Factory {
+                override fun createDataSource() =
+                    createDataSourceFactory(VolumeNormalizationAudioProcessor()) { null }.createDataSource()
+            },
         )
         isRunning = true
         shutdownDeferred = kotlinx.coroutines.CompletableDeferred<Unit>()
@@ -1454,6 +1465,7 @@ class MusicService :
 
         val silenceProcessor = SilenceDetectorAudioProcessor { handleLongSilenceDetected() }
         val tailFxProcessor = TailFxAudioProcessor()
+        val transitionFilter = TransitionFilterProcessor()
 
         val useFloatOutput =
             (
@@ -1486,7 +1498,7 @@ class MusicService :
                 .setMediaSourceFactory(
                     createMediaSourceFactory(normalizationProcessor) { createdPlayer },
                 )
-                .setRenderersFactory(createRenderersFactory(normalizationProcessor, eqProcessor, silenceProcessor, tailFxProcessor, useAudioTrackPlaybackParams, useFloatOutput))
+                .setRenderersFactory(createRenderersFactory(normalizationProcessor, eqProcessor, silenceProcessor, tailFxProcessor, transitionFilter, useAudioTrackPlaybackParams, useFloatOutput))
                 .setLoadControl(
                     // Start playback once ~750ms is buffered (media3's default is 1000ms) so first
                     // audio is audible a touch sooner. min/max/after-rebuffer match the media3 1.x
@@ -1515,6 +1527,7 @@ class MusicService :
         playerSilenceProcessors[player] = silenceProcessor
         playerEqualizerProcessors[player] = eqProcessor
         playerTailFxProcessors[player] = tailFxProcessor
+        playerTransitionFilters[player] = transitionFilter
         equalizerService.addAudioProcessor(eqProcessor)
 
         if (prefs != null) {
@@ -3107,6 +3120,9 @@ class MusicService :
 
     override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
         super.onPlaybackParametersChanged(playbackParameters)
+        // The BitChord engine plays at the same speed as the rest of the app.
+        BcmixSettings.playbackSpeed.value = playbackParameters.speed
+        if (bcmixControllerCreated()) bcmixController.applyPlaybackSpeed(playbackParameters.speed)
         if (playbackParameters.speed != lastPlaybackSpeed) {
             Timber.tag("DiscordSvc").d("onPlaybackParametersChanged: speed changed %s -> %s", lastPlaybackSpeed, playbackParameters.speed)
             lastPlaybackSpeed = playbackParameters.speed
@@ -4191,6 +4207,7 @@ class MusicService :
         eqProcessor: CustomEqualizerAudioProcessor,
         silenceProcessor: SilenceDetectorAudioProcessor,
         tailFxProcessor: TailFxAudioProcessor,
+        transitionFilter: TransitionFilterProcessor,
         useAudioTrackPlaybackParams: Boolean,
         useFloatOutput: Boolean,
     ) = object : DefaultRenderersFactory(this) {
@@ -4253,6 +4270,7 @@ class MusicService :
                         eqProcessor,
                         silenceProcessor,
                         tailFxProcessor,
+                        transitionFilter,
                     ),
                     SilenceSkippingAudioProcessor(2_000_000, 20_000, 256),
                     SonicAudioProcessor(),
@@ -4472,7 +4490,44 @@ class MusicService :
 
     /** The idle player the BitChord engine loads the next track onto. */
     private fun bcmixStandby(): ExoPlayer =
-        bcmixSpare ?: createExoPlayer(publish = false).also { bcmixSpare = it }
+        bcmixSpare ?: createExoPlayer(publish = false).also {
+            it.setPlaybackSpeed(BcmixSettings.playbackSpeed.value)
+            bcmixSpare = it
+        }
+
+    /**
+     * The transition filters of the two engine players. The audible player's
+     * filter is the incoming side and the idle one the outgoing side; the roles
+     * follow the players, so they stay right across each handoff.
+     */
+    private val bcmixFilters = object : TransitionFilters {
+        private fun filterOf(p: ExoPlayer?): TransitionFilterProcessor? = p?.let { playerTransitionFilters[it] }
+
+        override fun incoming(lowPassHz: Float, highPassHz: Float) {
+            filterOf(player)?.setCutoffs(lowPassHz, highPassHz)
+        }
+
+        override fun outgoing(lowPassHz: Float, highPassHz: Float) {
+            filterOf(bcmixSpare)?.setCutoffs(lowPassHz, highPassHz)
+        }
+
+        override fun incomingLeadMs(): Long = (filterOf(player)?.leadUs ?: 0L) / 1000
+
+        override fun outgoingLeadMs(): Long = (filterOf(bcmixSpare)?.leadUs ?: 0L) / 1000
+
+        override fun incomingEcho(delaySeconds: Float, send: Float, dry: Float) {
+            filterOf(player)?.setEcho(delaySeconds, send, dry)
+        }
+
+        override fun outgoingEcho(delaySeconds: Float, send: Float, dry: Float) {
+            filterOf(bcmixSpare)?.setEcho(delaySeconds, send, dry)
+        }
+
+        override fun parkEchoes() {
+            filterOf(player)?.parkEcho()
+            filterOf(bcmixSpare)?.parkEcho()
+        }
+    }
 
     /**
      * Moves the session onto the player that has just started the incoming
@@ -5850,6 +5905,7 @@ class MusicService :
         playerNormalizationProcessors.remove(player)
         playerSilenceProcessors.remove(player)
         playerTailFxProcessors.remove(player)
+        playerTransitionFilters.remove(player)
         playerEqualizerProcessors.remove(player)?.let(equalizerService::removeAudioProcessor)
         player.release()
     }

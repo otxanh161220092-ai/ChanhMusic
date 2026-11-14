@@ -49,12 +49,14 @@ object BitPerfectOutput {
 }
 
 /**
- * Sleep-after-track state the transition engine checks before it blends into
- * the next track. Metrolist's own sleep timer is not connected to it yet.
+ * Sleep-after-track state the transition engine reads. MusicService keeps it in
+ * step with Metrolist's sleep timer and routes [cancel] back to that timer.
  */
 object SleepTimer {
-    val afterTrack: kotlinx.coroutines.flow.StateFlow<Boolean> =
+    val afterTrack: kotlinx.coroutines.flow.MutableStateFlow<Boolean> =
         kotlinx.coroutines.flow.MutableStateFlow(false)
 
-    fun cancel() {}
+    var onCancel: () -> Unit = {}
+
+    fun cancel() = onCancel()
 }
