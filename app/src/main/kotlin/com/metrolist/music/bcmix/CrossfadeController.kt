@@ -14,7 +14,9 @@ import com.metrolist.music.bcmix.settings.AppSettings
 import com.metrolist.music.bcmix.settings.MixBlend
 import com.metrolist.music.bcmix.settings.MixDeck
 import com.metrolist.music.bcmix.settings.MixTransitionView
-import com.metrolist.music.bcmix.audio.bitperfect.BitPerfectOutput
+import com.metrolist.music.bcmix.compat.BitPerfectOutput
+import com.metrolist.music.bcmix.compat.SleepTimer
+import com.metrolist.music.bcmix.compat.isVideoOrigin
 import com.metrolist.music.bcmix.settings.SmartAnalysis
 import com.metrolist.music.bcmix.settings.TrackAnalysisState
 import com.metrolist.music.bcmix.settings.TransitionWindow

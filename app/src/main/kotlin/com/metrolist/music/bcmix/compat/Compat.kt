@@ -21,10 +21,32 @@ object TrackLog {
 }
 
 /** Only the fields the automix reads from a track. */
-data class Song(val videoId: String, val title: String)
+data class Song(
+    val videoId: String,
+    val title: String,
+    val localUri: android.net.Uri? = null,
+)
 
 /** Only the fields the transition engine reads from a lyric line. */
-data class LyricLine(val timeMs: Long, val text: String)
+data class LyricWord(val startMs: Long, val endMs: Long, val text: String)
+
+data class LyricLine(
+    val timeMs: Long,
+    val text: String,
+    val words: List<LyricWord> = emptyList(),
+    val sungUntilMs: Long? = null,
+    val isGap: Boolean = false,
+)
+
+/** Metrolist has no video-origin rows, so no item is one. */
+val androidx.media3.common.MediaItem.isVideoOrigin: Boolean get() = false
+
+/** Bit-perfect output is not part of Metrolist, so it is never active. */
+object BitPerfectOutput {
+    data class Status(val active: Boolean = false)
+    val status: kotlinx.coroutines.flow.StateFlow<Status> =
+        kotlinx.coroutines.flow.MutableStateFlow(Status())
+}
 
 /**
  * Sleep-after-track state the transition engine checks before it blends into

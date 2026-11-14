@@ -72,8 +72,8 @@ object AudioCache {
         return if (prefix > 0L) Rendition(key, length, prefix) else null
     }
 
-    fun renditionDataSource(uri: Uri, rendition: Rendition): android.media.MediaDataSource? {
-        val cache = playerCache ?: return null
+    fun renditionDataSource(uri: Uri, rendition: Rendition): android.media.MediaDataSource {
+        val cache = checkNotNull(playerCache) { "AudioCache is not initialised" }
         return CachedRenditionSource(cache, rendition)
     }
 
