@@ -1038,5 +1038,5 @@
     <string name="automix_style_caihat">CaiHat</string>
     <string name="automix_style_caihat_desc">The original Automix engine</string>
     <string name="automix_style_bitchord">BitChord</string>
-    <string name="automix_style_bitchord_desc">BitChord's Automix: beat-matched mixes with EQ and filter transitions</string>
+    <string name="automix_style_bitchord_desc">BitChord\'s Automix: beat-matched mixes with EQ and filter transitions</string>
 </resources>
