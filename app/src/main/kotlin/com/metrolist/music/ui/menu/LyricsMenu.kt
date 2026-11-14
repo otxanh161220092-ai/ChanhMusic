@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.menu
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import android.app.SearchManager
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -632,7 +634,7 @@ fun LyricsMenu(
                                 Text(
                                     text = "${if (lyricsOffset >= 0) "+" else ""}${lyricsOffset}ms",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = subtitleGrayColor()
                                 )
                             }
                         )

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -418,7 +420,7 @@ fun AboutScreen(
             text = stringResource(R.string.stands_with_palestine),
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = subtitleGrayColor(),
         )
         
         Spacer(Modifier.height(48.dp))

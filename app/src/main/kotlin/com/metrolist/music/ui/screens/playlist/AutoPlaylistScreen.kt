@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.playlist
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -451,7 +453,7 @@ fun AutoPlaylistScreen(
             Text(
                 text = currentFileName,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
             )
             Spacer(modifier = Modifier.height(16.dp))
             LinearProgressIndicator(

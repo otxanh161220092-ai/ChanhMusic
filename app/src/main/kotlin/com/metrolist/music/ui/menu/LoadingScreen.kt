@@ -6,6 +6,8 @@
 
 package com.metrolist.music.ui.menu
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.compose.foundation.background
@@ -101,7 +103,7 @@ fun LoadingScreen(
             Text(
                 text = stringResource(R.string.progress_percent, value.toString()),
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
             )
 
             if (onCancel != null) {

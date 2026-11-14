@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.compose.animation.*
@@ -171,7 +173,7 @@ fun ReleaseItem(release: ReleaseInfo) {
             Text(
                 text = release.releaseDate.split("T").firstOrNull() ?: "",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = subtitleGrayColor()
             )
         }
 

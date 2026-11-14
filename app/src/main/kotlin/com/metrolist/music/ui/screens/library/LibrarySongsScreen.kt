@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.library
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.net.Uri
@@ -313,7 +315,7 @@ fun LibrarySongsScreen(
             Text(
                 text = currentFileName,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
             )
             Spacer(modifier = Modifier.height(16.dp))
             LinearProgressIndicator(

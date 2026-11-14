@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -297,7 +299,7 @@ fun DiscordSettings(
             Text(
                 text = statusText,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
                 modifier = Modifier.padding(bottom = 8.dp),
             )
         }
@@ -410,14 +412,14 @@ fun DiscordSettings(
                         Text(
                             text = "@$displayUsername",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = subtitleGrayColor(),
                         )
                     }
                     if (!isLoggedIn) {
                         Text(
                             text = stringResource(R.string.discord_connect_description),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = subtitleGrayColor(),
                         )
                     }
                 }

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.recognition
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -201,7 +203,7 @@ fun RecognitionHistoryScreen(navController: NavController) {
                     Text(
                         text = "No recognition history",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleGrayColor(),
                     )
                 }
             }
@@ -291,14 +293,14 @@ private fun RecognitionHistoryItem(
                 Text(
                     text = item.artist,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = subtitleGrayColor(),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = item.recognizedAt.format(dateFormatter),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    color = subtitleGrayColor().copy(alpha = 0.7f),
                 )
             }
 

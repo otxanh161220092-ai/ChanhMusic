@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.equalizer
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.GlassAlertDialog
@@ -291,7 +293,7 @@ private fun EqScreenContent(
                             Text(
                                 text = stringResource(R.string.no_profiles),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = subtitleGrayColor()
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(onClick = onAddClicked) {

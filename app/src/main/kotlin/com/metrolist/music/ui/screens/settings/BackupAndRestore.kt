@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -350,7 +352,7 @@ fun BackupAndRestore(
             // Supporting text
             Text(
                 text = stringResource(R.string.restore_confirm_message),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
                 style = MaterialTheme.typography.bodyMedium,
             )
 
@@ -382,7 +384,7 @@ fun BackupAndRestore(
                     Text(
                         text = stringResource(R.string.checking_previous_account),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleGrayColor(),
                     )
                 }
 
@@ -403,7 +405,7 @@ fun BackupAndRestore(
                 Text(
                     text = stringResource(R.string.no_account_found),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = subtitleGrayColor(),
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

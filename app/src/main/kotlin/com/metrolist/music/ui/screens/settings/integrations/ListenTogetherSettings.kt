@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -263,7 +265,7 @@ fun ListenTogetherSettings(navController: NavController) {
                 Text(
                     text = stringResource(R.string.listen_together_create_room_desc),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = subtitleGrayColor(),
                 )
                 OutlinedTextField(
                     value = createUsername,
@@ -600,7 +602,7 @@ fun LogsDialog(
                 ) {
                     Text(
                         text = stringResource(R.string.listen_together_no_logs),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleGrayColor(),
                     )
                 }
             } else {
@@ -679,12 +681,12 @@ private fun ServerChooserDialog(
                             Text(
                                 text = "${server.location} - ${server.operator}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = subtitleGrayColor(),
                             )
                             Text(
                                 text = server.url,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = subtitleGrayColor(),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -747,7 +749,7 @@ fun LogEntryItem(log: LogEntry) {
                 text = log.timestamp,
                 style = MaterialTheme.typography.labelSmall,
                 fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
             )
             Spacer(modifier = Modifier.width(8.dp))
             Surface(
@@ -785,7 +787,7 @@ fun LogEntryItem(log: LogEntry) {
                 text = details,
                 style = MaterialTheme.typography.bodySmall,
                 fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -824,7 +826,7 @@ fun BlockedUsersDialog(
                 ) {
                     Text(
                         text = stringResource(R.string.listen_together_no_blocked_users),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleGrayColor(),
                     )
                 }
             } else {

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.search
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.activity.compose.BackHandler
@@ -380,7 +382,7 @@ fun OnlineSearchResult(
                 Text(
                     text = stringResource(R.string.search_yt_music),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = subtitleGrayColor(),
                 )
             },
             leadingIcon = {

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.artist
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -549,7 +551,7 @@ fun ArtistScreen(
                                     Text(
                                         text = subscriberCount,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        color = subtitleGrayColor(),
                                         modifier = Modifier.padding(bottom = 4.dp),
                                     )
                                 }
@@ -558,7 +560,7 @@ fun ArtistScreen(
                                     Text(
                                         text = monthlyListeners,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        color = subtitleGrayColor(),
                                         modifier =
                                             Modifier.padding(
                                                 bottom =

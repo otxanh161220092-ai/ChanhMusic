@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.component
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -179,7 +181,7 @@ private fun Material3MenuItemRow(
                 Spacer(modifier = Modifier.height(2.dp))
                 ProvideTextStyle(
                     MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = subtitleGrayColor()
                     )
                 ) {
                     desc()

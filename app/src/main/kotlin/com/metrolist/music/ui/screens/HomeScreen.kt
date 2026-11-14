@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.activity.compose.BackHandler
@@ -353,7 +355,7 @@ fun CommunityPlaylistCard(
                                 ArtistNameAliases.resolve(artistNameAliases, it.id, it.name)
                             }.orEmpty(),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        color = subtitleGrayColor().copy(alpha = 0.8f),
                         maxLines = 1,
                     )
                 }
@@ -398,7 +400,7 @@ fun CommunityPlaylistCard(
                                     ArtistNameAliases.resolve(artistNameAliases, it.id, it.name)
                                 },
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                color = subtitleGrayColor().copy(alpha = 0.8f),
                                 maxLines = 1,
                                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                             )

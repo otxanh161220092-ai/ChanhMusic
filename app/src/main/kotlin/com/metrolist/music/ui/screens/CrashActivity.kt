@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -167,7 +169,7 @@ fun CrashScreen(
             Text(
                 text = stringResource(R.string.crash_description),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = subtitleGrayColor()
             )
             
             Spacer(modifier = Modifier.height(16.dp))

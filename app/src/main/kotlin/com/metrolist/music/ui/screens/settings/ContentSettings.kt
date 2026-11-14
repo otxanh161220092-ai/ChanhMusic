@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.GlassAlertDialog
@@ -392,7 +394,7 @@ fun ContentSettings(
                             Text(
                                 text = stringResource(R.string.enable_lrclib_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = subtitleGrayColor()
                             )
                         }
                         Switch(
@@ -421,7 +423,7 @@ fun ContentSettings(
                             Text(
                                 text = stringResource(R.string.enable_kugou_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = subtitleGrayColor()
                             )
                         }
                         Switch(
@@ -450,7 +452,7 @@ fun ContentSettings(
                             Text(
                                 text = stringResource(R.string.enable_better_lyrics_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = subtitleGrayColor()
                             )
                         }
                         Switch(
@@ -479,7 +481,7 @@ fun ContentSettings(
                             Text(
                                 text = stringResource(R.string.enable_paxsenix_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = subtitleGrayColor()
                             )
                         }
                         Switch(
@@ -508,7 +510,7 @@ fun ContentSettings(
                             Text(
                                 text = stringResource(R.string.enable_lyricsplus_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = subtitleGrayColor()
                             )
                         }
                         Switch(
@@ -537,7 +539,7 @@ fun ContentSettings(
                             Text(
                                 text = stringResource(R.string.enable_zemer_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = subtitleGrayColor()
                             )
                         }
                         Switch(
@@ -558,7 +560,7 @@ fun ContentSettings(
                         Text(
                             text = stringResource(R.string.youtube_music_lyrics_note),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = subtitleGrayColor()
                         )
                     }
                 }
@@ -712,7 +714,7 @@ fun ContentSettings(
                         stringResource(R.string.lyrics_provider_priority_desc),
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(bottom = 8.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = subtitleGrayColor()
                     )
                     DraggableLyricsProviderList(
                         items = draggableItems,

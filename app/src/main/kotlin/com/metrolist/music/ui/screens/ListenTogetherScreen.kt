@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -294,7 +296,7 @@ fun ListenTogetherScreen(
                 Text(
                     text = stringResource(R.string.listen_together_background_disconnect_note),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = subtitleGrayColor(),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -510,7 +512,7 @@ private fun NotConfiguredContent() {
                 text = stringResource(R.string.listen_together_not_configured),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
             )
         }
     }
@@ -551,7 +553,7 @@ private fun HeaderSection(isInRoom: Boolean = false) {
             text = stringResource(R.string.listen_together_description),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = subtitleGrayColor(),
         )
     }
 }
@@ -716,7 +718,7 @@ private fun RoomStatusCard(
             Text(
                 text = stringResource(R.string.room_code),
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -737,7 +739,7 @@ private fun RoomStatusCard(
                         stringResource(R.string.listen_together_you_are_guest)
                     },
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
                 textAlign = TextAlign.Center,
             )
 
@@ -1070,7 +1072,7 @@ private fun PendingSuggestionsSection(
                         Text(
                             text = suggestion.fromUsername,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = subtitleGrayColor(),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -1356,7 +1358,7 @@ private fun SettingsLinkCard(onClick: () -> Unit) {
                 Text(
                     text = stringResource(R.string.listen_together_settings_desc),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = subtitleGrayColor(),
                 )
             }
             Icon(
@@ -1395,7 +1397,7 @@ private fun UserActionDialog(
                 Text(
                     text = username,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = subtitleGrayColor(),
                 )
             }
         },
@@ -1438,7 +1440,7 @@ private fun UserActionDialog(
                         Text(
                             text = stringResource(R.string.kick_user_desc),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = subtitleGrayColor(),
                         )
                     }
                 }
@@ -1473,7 +1475,7 @@ private fun UserActionDialog(
                         Text(
                             text = stringResource(R.string.permanently_kick_user_desc),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = subtitleGrayColor(),
                         )
                     }
                 }
@@ -1509,7 +1511,7 @@ private fun UserActionDialog(
                         Text(
                             text = stringResource(R.string.transfer_ownership_desc),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = subtitleGrayColor(),
                         )
                     }
                 }

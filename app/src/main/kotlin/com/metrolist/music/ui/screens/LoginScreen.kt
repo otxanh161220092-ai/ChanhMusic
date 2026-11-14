@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -407,7 +409,7 @@ fun LoginScreen(
                     Text(
                         text = stringResource(R.string.choose_youtube_channel_description),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleGrayColor(),
                     )
                     Spacer(Modifier.height(16.dp))
                     Column(
@@ -543,7 +545,7 @@ private fun YouTubeAccountPickerItem(
                     Text(
                         text = channelHandle,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleGrayColor(),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -552,7 +554,7 @@ private fun YouTubeAccountPickerItem(
                     Text(
                         text = byline,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleGrayColor(),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )

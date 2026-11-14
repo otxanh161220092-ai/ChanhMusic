@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.player
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.compose.runtime.mutableIntStateOf
@@ -794,7 +796,7 @@ fun Queue(
                                     Text(
                                         text = nowMeta.artists.joinToString { it.name },
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        color = subtitleGrayColor(),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                     )
@@ -815,7 +817,7 @@ fun Queue(
                                 Text(
                                     text = "Từ hàng đợi hiện tại",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = subtitleGrayColor(),
                                 )
                             }
                             TextButton(

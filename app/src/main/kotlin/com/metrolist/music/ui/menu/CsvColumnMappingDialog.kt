@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.menu
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.compose.foundation.background
@@ -97,7 +99,7 @@ fun CsvColumnMappingDialog(
                     Text(
                         text = "Preview",
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleGrayColor(),
                     )
 
                     Row(
@@ -325,7 +327,7 @@ fun CsvImportProgressDialog(
             Text(
                 text = stringResource(R.string.percentage_format, progress),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
             )
 
             if (recentLogs.isNotEmpty()) {
@@ -341,7 +343,7 @@ fun CsvImportProgressDialog(
                     Text(
                         text = stringResource(R.string.recently_converted),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleGrayColor(),
                     )
 
                     recentLogs.forEach { log ->
@@ -364,7 +366,7 @@ fun CsvImportProgressDialog(
                             Text(
                                 text = log.artists,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = subtitleGrayColor(),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )

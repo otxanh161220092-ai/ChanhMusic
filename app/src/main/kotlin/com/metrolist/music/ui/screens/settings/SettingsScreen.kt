@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import android.content.ActivityNotFoundException
@@ -200,7 +202,7 @@ fun SettingsScreen(
                                     Text(
                                         text = latestVersionName,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = subtitleGrayColor()
                                     )
                                 },
                                 showBadge = true,

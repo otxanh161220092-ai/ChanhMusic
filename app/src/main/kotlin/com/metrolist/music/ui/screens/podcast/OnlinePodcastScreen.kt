@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.podcast
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -348,7 +350,7 @@ private fun PodcastHeader(
             Text(
                 text = authorName,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
                 textAlign = TextAlign.Center
             )
         }
@@ -357,7 +359,7 @@ private fun PodcastHeader(
         Text(
             text = podcast.episodeCountText ?: "$episodeCount episodes",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = subtitleGrayColor()
         )
 
         Spacer(modifier = Modifier.height(16.dp))

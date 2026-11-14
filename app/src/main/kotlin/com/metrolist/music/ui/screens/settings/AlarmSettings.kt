@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import android.app.AlarmManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -419,7 +421,7 @@ private fun AlarmEditorDialog(
                                             playlist.songCount
                                         ),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = subtitleGrayColor()
                                     )
                                 }
                                 if (selected) {

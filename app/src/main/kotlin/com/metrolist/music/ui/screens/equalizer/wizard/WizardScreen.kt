@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.equalizer.wizard
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import androidx.compose.animation.*
@@ -174,7 +176,7 @@ private fun ModelSelectionStep(
                     Text(
                         text = stringResource(R.string.eq_downloading),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = subtitleGrayColor()
                     )
                 }
             } else {
@@ -232,7 +234,7 @@ private fun ModelSelectionStep(
                 Text(
                     text = stringResource(R.string.wizard_no_models),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = subtitleGrayColor()
                 )
             }
         } else {
@@ -286,7 +288,7 @@ private fun ModelItem(
                     Text(
                         text = stringResource(R.string.wizard_multiple_variants),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = subtitleGrayColor()
                     )
                 }
             }

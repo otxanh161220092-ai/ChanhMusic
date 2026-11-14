@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.library
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.content.Intent
@@ -335,7 +337,7 @@ fun LibraryPodcastsScreen(
                                 Text(
                                     text = stringResource(R.string.no_subscribed_channels),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = subtitleGrayColor(),
                                 )
                             }
                         }
@@ -458,7 +460,7 @@ fun LibraryPodcastsScreen(
                                 Text(
                                     text = stringResource(R.string.no_downloaded_episodes),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = subtitleGrayColor(),
                                 )
                             }
                         }
@@ -556,7 +558,7 @@ private fun AutoPlaylistCard(
                         }
                     },
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -620,7 +622,7 @@ private fun PodcastEpisodePlaylistItem(
                 Text(
                     text = podcast.author,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = subtitleGrayColor(),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.utils
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -161,7 +163,7 @@ fun ShowOffsetDialog(songProvider: () -> SongEntity?) {
             Text(
                 text = "ms",
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleGrayColor(),
                 fontWeight = FontWeight.Medium
             )
 
@@ -237,12 +239,12 @@ fun ShowOffsetDialog(songProvider: () -> SongEntity?) {
             Text(
                 text = "-3000ms",
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = subtitleGrayColor()
             )
             Text(
                 text = "+3000ms",
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = subtitleGrayColor()
             )
         }
     }

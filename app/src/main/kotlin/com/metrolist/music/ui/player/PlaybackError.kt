@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.player
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.content.ClipData
@@ -136,7 +138,7 @@ fun PlaybackError(
         Text(
             text = errorMessage,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = subtitleGrayColor(),
             textAlign = TextAlign.Center,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
@@ -151,7 +153,7 @@ fun PlaybackError(
                 fontFamily = FontFamily.Monospace,
                 fontSize = 11.sp,
             ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            color = subtitleGrayColor().copy(alpha = 0.7f),
             textAlign = TextAlign.Center,
         )
 
@@ -164,7 +166,7 @@ fun PlaybackError(
                     fontFamily = FontFamily.Monospace,
                     fontSize = 10.sp,
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                color = subtitleGrayColor().copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.menu
 
+import com.metrolist.music.ui.theme.subtitleGrayColor
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import com.metrolist.music.ui.component.GlassAlertDialog
@@ -969,7 +971,7 @@ fun ListenTogetherDialog(
                         text = stringResource(R.string.listen_together_not_configured),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleGrayColor(),
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
@@ -1046,7 +1048,7 @@ fun ListenTogetherDialog(
                         Text(
                             text = selectedUsername ?: "",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = subtitleGrayColor(),
                         )
                     }
                 }
@@ -1092,7 +1094,7 @@ fun ListenTogetherDialog(
                             Text(
                                 text = stringResource(R.string.kick_user_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = subtitleGrayColor(),
                             )
                         }
                     }
@@ -1142,7 +1144,7 @@ fun ListenTogetherDialog(
                             Text(
                                 text = stringResource(R.string.permanently_kick_user_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = subtitleGrayColor(),
                             )
                         }
                     }
@@ -1189,7 +1191,7 @@ fun ListenTogetherDialog(
                             Text(
                                 text = stringResource(R.string.transfer_ownership_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = subtitleGrayColor(),
                             )
                         }
                     }
@@ -1394,7 +1396,7 @@ fun ListenTogetherDialog(
                 Text(
                     text = stringResource(R.string.listen_together_background_disconnect_note),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = subtitleGrayColor(),
                     modifier = Modifier.padding(horizontal = 24.dp),
                     textAlign = TextAlign.Center,
                 )
@@ -1776,7 +1778,7 @@ fun ListenTogetherDialog(
                                         Text(
                                             text = suggestion.fromUsername,
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            color = subtitleGrayColor(),
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
                                         )
@@ -1870,7 +1872,7 @@ fun ListenTogetherDialog(
                         Text(
                             text = stringResource(R.string.listen_together_description),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = subtitleGrayColor(),
                             textAlign = TextAlign.Center,
                         )
 
@@ -1922,7 +1924,7 @@ fun ListenTogetherDialog(
                                 Text(
                                     text = "${roomCodeInput.length}/8",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = subtitleGrayColor(),
                                 )
                             },
                             leadingIcon = {
@@ -2091,7 +2093,7 @@ fun ListenTogetherDialog(
                         Text(
                             stringResource(R.string.cancel),
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = subtitleGrayColor(),
                         )
                     }
                 }
