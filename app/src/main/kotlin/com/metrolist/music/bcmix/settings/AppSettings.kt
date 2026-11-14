@@ -1,8 +1,6 @@
 package com.metrolist.music.bcmix.settings
 
 import com.metrolist.music.bcmix.playback.DirectSourceGate
-import com.metrolist.music.bcmix.data.webdav.update
-import com.metrolist.music.bcmix.ui.components.VideoThumbnails
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.ConnectivityManager
@@ -11,7 +9,6 @@ import android.net.NetworkCapabilities
 import androidx.media3.common.Player
 import com.metrolist.music.BuildConfig
 import com.metrolist.music.bcmix.auth.AuthStore
-import com.metrolist.music.bcmix.data.canvas.SpotifyToken
 import com.metrolist.music.bcmix.data.lyrics.LyricsSource
 import com.metrolist.music.bcmix.data.sources.SourceKind
 import com.metrolist.music.bcmix.EqLayout
@@ -935,11 +932,6 @@ object AppSettings {
     fun init(context: Context, authStore: AuthStore) {
         prefs = context.getSharedPreferences("bitchord_settings", Context.MODE_PRIVATE)
         this.authStore = authStore
-        com.metrolist.music.bcmix.data.spotify.LocalPlaylistStore.init(context)
-        com.metrolist.music.bcmix.data.OfflinePlaylists.init(
-            context,
-            likedTitle = context.getString(com.metrolist.music.bcmix.R.string.auto_liked),
-        )
         readAll()
         watchConnection(context)
     }
@@ -1040,7 +1032,6 @@ object AppSettings {
         hideTopPicks.value = prefs.getBoolean(KEY_HIDE_TOP_PICKS, false)
         hideHomeMoods.value = prefs.getBoolean(KEY_HIDE_HOME_MOODS, false)
         squareVideoThumbnails.value = prefs.getBoolean(KEY_SQUARE_VIDEO_THUMBNAILS, false)
-        VideoThumbnails.square = squareVideoThumbnails.value
         smartVersionAlignment.value = prefs.getBoolean(KEY_SMART_VERSION_ALIGNMENT, true)
         reduceDynamicBlur.value = prefs.getBoolean(KEY_REDUCE_BLUR, false)
         disableBlendEffects.value = prefs.getBoolean(KEY_DISABLE_BLEND_EFFECTS, false)
@@ -1117,18 +1108,6 @@ object AppSettings {
         smbBasePath.value = prefs.getString(KEY_SMB_BASE_PATH, "").orEmpty()
         smbUsername.value = prefs.getString(KEY_SMB_USERNAME, "").orEmpty()
         smbPassword.value = authStore.smbPassword.orEmpty()
-        com.metrolist.music.bcmix.data.smb.SmbAuth.update(
-            smbHost.value,
-            smbShare.value,
-            smbBasePath.value,
-            smbUsername.value,
-            smbPassword.value,
-        )
-        com.metrolist.music.bcmix.data.webdav.WebDavAuth.update(
-            webdavUrl.value,
-            webdavUsername.value,
-            webdavPassword.value,
-        )
         pinnedPlaylists.value = readPinnedPlaylists()
         discordToken.value = authStore.discordToken.orEmpty()
         discordUsername.value = prefs.getString(KEY_DISCORD_USERNAME, "").orEmpty()
@@ -1492,7 +1471,6 @@ object AppSettings {
 
     fun setSquareVideoThumbnails(value: Boolean) {
         squareVideoThumbnails.value = value
-        VideoThumbnails.square = value
         prefs.edit().putBoolean(KEY_SQUARE_VIDEO_THUMBNAILS, value).apply()
     }
 
@@ -1775,7 +1753,6 @@ object AppSettings {
     fun setSpotifySpdcToken(value: String) {
         spotifySpdcToken.value = value
         prefs.edit().putString(KEY_SPOTIFY_SPDC_TOKEN, value).apply()
-        SpotifyToken.invalidate()
     }
 
     fun setLastfmScrobbleEnabled(value: Boolean) {
@@ -2070,22 +2047,10 @@ object AppSettings {
 
     private fun publishSmbAuth() {
         if (!this::prefs.isInitialized || !this::authStore.isInitialized) return
-        com.metrolist.music.bcmix.data.smb.SmbAuth.update(
-            smbHost.value,
-            smbShare.value,
-            smbBasePath.value,
-            smbUsername.value,
-            smbPassword.value,
-        )
     }
 
     private fun publishWebDavAuth() {
         if (!this::prefs.isInitialized || !this::authStore.isInitialized) return
-        com.metrolist.music.bcmix.data.webdav.WebDavAuth.update(
-            webdavUrl.value,
-            webdavUsername.value,
-            webdavPassword.value,
-        )
     }
 
     private fun readLocalMusicSort(key: String): LocalMusicSort =
