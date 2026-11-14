@@ -171,6 +171,11 @@ import com.metrolist.music.constants.SleepTimerDefaultKey
 import com.metrolist.music.constants.SleepTimerFadeOutKey
 import com.metrolist.music.constants.SleepTimerStopAfterCurrentSongKey
 import com.metrolist.music.constants.SliderStyle
+import com.metrolist.music.constants.AutomixStyleKey
+import com.metrolist.music.bcmix.ui.BcAutomixStatus
+import com.metrolist.music.bcmix.ui.BcScrubber
+import com.metrolist.music.bcmix.ui.MixViewOverlay
+import com.metrolist.music.bcmix.ui.HazeState
 import com.metrolist.music.constants.SliderStyleKey
 import com.metrolist.music.constants.SquigglySliderKey
 import com.metrolist.music.constants.ThumbnailCornerRadius
@@ -366,6 +371,9 @@ fun BottomSheetPlayer(
     val mixZone by playerConnection.service.mixZone.collectAsStateWithLifecycle()
     val automixStatus by playerConnection.service.automixStatus.collectAsStateWithLifecycle()
     val automixOn by rememberPreference(AutomixEnabledKey, defaultValue = false)
+    val automixStyle by rememberPreference(AutomixStyleKey, defaultValue = "caihat")
+    // BitChord Automix replaces the CaiHat status line, progress bar and mix popup while selected.
+    val bcAutomixOn = automixOn && automixStyle == "bitchord"
     val isMixing by playerConnection.service.isMixing.collectAsStateWithLifecycle()
     val mixVisual by playerConnection.service.mixVisual.collectAsStateWithLifecycle()
     val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()
@@ -1056,6 +1064,9 @@ fun BottomSheetPlayer(
             )
         },
     ) {
+        if (bcAutomixOn) {
+            MixViewOverlay(hazeState = remember { HazeState() })
+        }
         val controlsTopRow: @Composable (MediaMetadata) -> Unit = { mediaMetadata ->
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1237,7 +1248,9 @@ fun BottomSheetPlayer(
                             }
                         }
                     }
-                    if (automixOn) {
+                    if (bcAutomixOn) {
+                        BcAutomixStatus(color = TextBackgroundColor.copy(alpha = 0.6f))
+                    } else if (automixOn) {
                         AutomixStatusLine(
                             status = automixStatus,
                             color = TextBackgroundColor.copy(alpha = 0.6f),
@@ -1662,7 +1675,18 @@ fun BottomSheetPlayer(
             }
 
             Box(contentAlignment = Alignment.Center, modifier = Modifier.vibrant(useVibrantText)) {
-            when (sliderStyle) {
+            if (bcAutomixOn) {
+                BcScrubber(
+                    positionMs = sliderPosition ?: effectivePosition,
+                    durationMs = if (duration == C.TIME_UNSET) 0L else duration,
+                    onScrub = { if (!isListenTogetherGuest) sliderPosition = it },
+                    onScrubFinished = {
+                        sliderPosition?.let { playerConnection.player.seekTo(it) }
+                        sliderPosition = null
+                    },
+                )
+            }
+            if (!bcAutomixOn) when (sliderStyle) {
                 SliderStyle.WAVY -> {
                     if (squigglySlider) {
                         SquigglySlider(
