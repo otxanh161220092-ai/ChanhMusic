@@ -55,7 +55,7 @@ fun ConclusionPage(onClose: () -> Unit) {
                 text = stringResource(R.string.wrapped_special_thanks),
                 style = TextStyle(
                     fontSize = 16.sp,
-                    color = Color.Gray
+                    color = com.metrolist.music.ui.theme.subtitleGrayColor()
                 )
             )
             Spacer(modifier = Modifier.height(48.dp))

@@ -104,7 +104,7 @@ fun SongSelectDropdown(
                                     Text(
                                         text = it,
                                         maxLines = 1,
-                                        color = androidx.compose.ui.graphics.Color.Gray,
+                                        color = com.metrolist.music.ui.theme.subtitleGrayColor(),
                                         overflow = TextOverflow.Ellipsis // Highly recommended for multi-artist names
                                     )
                                 }
