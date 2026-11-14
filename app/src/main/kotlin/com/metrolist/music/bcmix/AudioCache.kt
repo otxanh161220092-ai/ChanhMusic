@@ -6,8 +6,8 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.SystemClock
-import com.music.bitchord.R
-import com.music.bitchord.data.TrackLog
+import com.metrolist.music.R
+import com.metrolist.music.bcmix.compat.TrackLog
 import com.metrolist.music.bcmix.smart.AutomixAnalysisSource
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
@@ -22,16 +22,16 @@ import androidx.media3.datasource.cache.ContentMetadata
 import androidx.media3.datasource.cache.ContentMetadataMutations
 import androidx.media3.datasource.cache.SimpleCache
 import java.io.IOException
-import com.music.bitchord.data.innertube.StreamResolver
-import com.music.bitchord.data.model.Song
+import com.metrolist.music.bcmix.data.innertube.StreamResolver
+import com.metrolist.music.bcmix.data.model.Song
 import com.metrolist.music.bcmix.settings.AppSettings
-import com.music.bitchord.data.sources.DeviceCodecs
-import com.music.bitchord.data.sources.SourceKind
-import com.music.bitchord.data.sources.SourceRegistry
-import com.music.bitchord.data.sources.SourceResolver
-import com.music.bitchord.data.sources.SourceStream
-import com.music.bitchord.data.sources.TrackMatcher
-import com.music.bitchord.download.Downloads
+import com.metrolist.music.bcmix.data.sources.DeviceCodecs
+import com.metrolist.music.bcmix.data.sources.SourceKind
+import com.metrolist.music.bcmix.data.sources.SourceRegistry
+import com.metrolist.music.bcmix.data.sources.SourceResolver
+import com.metrolist.music.bcmix.data.sources.SourceStream
+import com.metrolist.music.bcmix.data.sources.TrackMatcher
+import com.metrolist.music.bcmix.download.Downloads
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -186,7 +186,7 @@ object AudioCache {
      * flight. Warming three tracks ahead therefore did not cost three cheap
      * resolves in the background, it cost the track the listener was waiting on
      * a thirty-second start. See
-     * [StreamResolver][com.music.bitchord.data.innertube.StreamResolver]'s
+     * [StreamResolver][com.metrolist.music.bcmix.data.innertube.StreamResolver]'s
      * extraction gate, which serialises what is left of that.
      */
     private const val QUEUE_LOOKAHEAD = 1

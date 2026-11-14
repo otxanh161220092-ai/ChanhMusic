@@ -1,6 +1,6 @@
-package com.music.bitchord.data.lyrics
+package com.metrolist.music.bcmix.data.lyrics
 
-import com.music.bitchord.data.innertube.Innertube
+import com.metrolist.music.bcmix.data.innertube.Innertube
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray

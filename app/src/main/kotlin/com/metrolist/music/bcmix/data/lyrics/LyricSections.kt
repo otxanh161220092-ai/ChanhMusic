@@ -1,4 +1,4 @@
-package com.music.bitchord.data.lyrics
+package com.metrolist.music.bcmix.data.lyrics
 
 /**
  * Whether a plain lyric line is one of Genius's section markers — `[Chorus]`,

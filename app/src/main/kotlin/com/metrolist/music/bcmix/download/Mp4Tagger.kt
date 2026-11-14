@@ -1,6 +1,6 @@
-package com.music.bitchord.download
+package com.metrolist.music.bcmix.download
 
-import com.music.bitchord.data.lyrics.WORD_LYRICS_FIELD
+import com.metrolist.music.bcmix.data.lyrics.WORD_LYRICS_FIELD
 
 /**
  * Writes iTunes-style metadata atoms — title, artist, album, lyrics, cover —
@@ -222,7 +222,7 @@ object Mp4Tagger {
      * player, and a reader without the A2 extension shows `<00:01.00>` rather
      * than skipping it. A player that doesn't know this item ignores it whole,
      * so the standard field stays clean and the timings still survive in the
-     * file — see [EmbeddedLyrics][com.music.bitchord.data.lyrics.EmbeddedLyrics],
+     * file — see [EmbeddedLyrics][com.metrolist.music.bcmix.data.lyrics.EmbeddedLyrics],
      * which reads them back.
      */
     private fun freeformItem(name: String, text: String): ByteArray {

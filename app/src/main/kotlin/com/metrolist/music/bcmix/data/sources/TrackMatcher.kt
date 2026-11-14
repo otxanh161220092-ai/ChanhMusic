@@ -1,6 +1,6 @@
-package com.music.bitchord.data.sources
+package com.metrolist.music.bcmix.data.sources
 
-import com.music.bitchord.data.model.Song
+import com.metrolist.music.bcmix.data.model.Song
 import kotlin.math.abs
 import java.text.Normalizer
 import java.util.Locale

@@ -1,11 +1,11 @@
-package com.music.bitchord.download
+package com.metrolist.music.bcmix.download
 
-import com.music.bitchord.download.Mp4Boxes.boxes
-import com.music.bitchord.download.Mp4Boxes.child
-import com.music.bitchord.download.Mp4Boxes.readU32
-import com.music.bitchord.download.Mp4Boxes.readU64
-import com.music.bitchord.download.Mp4Boxes.writeU32
-import com.music.bitchord.download.Mp4Boxes.writeU64
+import com.metrolist.music.bcmix.download.Mp4Boxes.boxes
+import com.metrolist.music.bcmix.download.Mp4Boxes.child
+import com.metrolist.music.bcmix.download.Mp4Boxes.readU32
+import com.metrolist.music.bcmix.download.Mp4Boxes.readU64
+import com.metrolist.music.bcmix.download.Mp4Boxes.writeU32
+import com.metrolist.music.bcmix.download.Mp4Boxes.writeU64
 
 /**
  * Gives a fragmented MP4 the segment index its player needs in order to seek.

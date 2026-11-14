@@ -1,9 +1,9 @@
-package com.music.bitchord.data.sources
+package com.metrolist.music.bcmix.data.sources
 
 import android.net.Uri
 import android.util.Log
-import com.music.bitchord.data.TrackLog
-import com.music.bitchord.data.model.Song
+import com.metrolist.music.bcmix.compat.TrackLog
+import com.metrolist.music.bcmix.data.model.Song
 import com.metrolist.music.bcmix.settings.AppSettings
 import com.metrolist.music.bcmix.settings.AudioQuality
 import com.metrolist.music.bcmix.settings.DownloadQuality
@@ -581,7 +581,7 @@ object SourceResolver {
      *
      * The download path has never come through here. It resolves YouTube
      * directly — see
-     * [resolveForDownload][com.music.bitchord.data.innertube.StreamResolver.resolveForDownload]
+     * [resolveForDownload][com.metrolist.music.bcmix.data.innertube.StreamResolver.resolveForDownload]
      * — so someone with a FLAC server ranked above YouTube was *streaming* the
      * FLAC and *downloading* a transcode of the same recording. This closes that
      * gap, and it is the only search in this class whose result becomes a file.

@@ -1,6 +1,6 @@
-package com.music.bitchord.data.lyrics
+package com.metrolist.music.bcmix.data.lyrics
 
-import com.music.bitchord.data.Http
+import com.metrolist.music.bcmix.data.Http
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

@@ -1,4 +1,4 @@
-package com.music.bitchord.data.lyrics
+package com.metrolist.music.bcmix.data.lyrics
 
 import org.w3c.dom.Element
 import org.w3c.dom.Node

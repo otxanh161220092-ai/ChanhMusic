@@ -85,7 +85,7 @@ data class Song(
     /**
      * Real filesystem path backing [localUri], when MediaStore exposes one.
      * Lets playback swap a content:// row for a raw file:// path on formats
-     * that need it — see [com.metrolist.music.bcmix.toMediaItem].
+     * that need it — see [com.music.bitchord.playback.toMediaItem].
      */
     val localPath: String? = null,
     /** MediaStore timestamps used only to sort device and downloaded libraries. */
@@ -555,7 +555,7 @@ data class LibraryPage(
      * The continuation token behind [likedSongs]' first page, when Liked Music
      * has more tracks than that one page held. Consumed by whoever owns the
      * library's lifecycle to finish syncing the liked collection into
-     * [com.metrolist.music.bcmix.data.LikeState]; never stored as page state.
+     * [com.music.bitchord.data.LikeState]; never stored as page state.
      */
     val likedContinuation: String? = null,
 ) {
@@ -577,7 +577,7 @@ data class DetailPage(
     val sections: List<HomeShelf> = emptyList(),
     /**
      * Tracks YouTube offers to round out a playlist but that were never
-     * added — see [com.metrolist.music.bcmix.data.innertube.InnertubeParser.parsePlaylistShelf].
+     * added — see [com.music.bitchord.data.innertube.InnertubeParser.parsePlaylistShelf].
      * Shown as their own section with a button to actually add them, rather
      * than folded into [songs] where they'd read as the user's own picks.
      */

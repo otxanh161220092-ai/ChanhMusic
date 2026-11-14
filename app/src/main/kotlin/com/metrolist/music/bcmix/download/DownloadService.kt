@@ -1,4 +1,4 @@
-package com.music.bitchord.download
+package com.metrolist.music.bcmix.download
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -10,8 +10,8 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.music.bitchord.R
-import com.music.bitchord.data.model.Song
+import com.metrolist.music.R
+import com.metrolist.music.bcmix.data.model.Song
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -253,7 +253,7 @@ class DownloadService : Service() {
         /** Distinct from playback's, which Media3 owns. */
         const val NOTIFICATION_ID = 0x8175
 
-        const val ACTION_CANCEL_ALL = "com.music.bitchord.download.CANCEL_ALL"
+        const val ACTION_CANCEL_ALL = "com.metrolist.music.bcmix.download.CANCEL_ALL"
 
         /** Four updates a second is smooth; the shade coalesces anything faster anyway. */
         const val PROGRESS_REFRESH_MS = 250L

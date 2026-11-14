@@ -1,6 +1,6 @@
-package com.music.bitchord.download
+package com.metrolist.music.bcmix.download
 
-import com.music.bitchord.data.lyrics.WORD_LYRICS_FIELD
+import com.metrolist.music.bcmix.data.lyrics.WORD_LYRICS_FIELD
 
 import java.io.ByteArrayOutputStream
 

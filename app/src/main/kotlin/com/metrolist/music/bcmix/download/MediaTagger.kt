@@ -1,13 +1,13 @@
-package com.music.bitchord.download
+package com.metrolist.music.bcmix.download
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import com.music.bitchord.data.DebugLog as Log
-import com.music.bitchord.data.Http
-import com.music.bitchord.data.model.Song
-import com.music.bitchord.data.model.artworkAt
+import com.metrolist.music.bcmix.compat.TrackLog as Log
+import com.metrolist.music.bcmix.data.Http
+import com.metrolist.music.bcmix.data.model.Song
+import com.metrolist.music.bcmix.data.model.artworkAt
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.ByteArrayOutputStream

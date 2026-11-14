@@ -1,8 +1,8 @@
-package com.music.bitchord.download
+package com.metrolist.music.bcmix.download
 
 import android.content.Context
 import android.net.Uri
-import com.music.bitchord.data.Http
+import com.metrolist.music.bcmix.data.Http
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
