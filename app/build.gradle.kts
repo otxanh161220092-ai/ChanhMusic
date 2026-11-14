@@ -257,8 +257,6 @@ configurations.configureEach {
 }
 
 dependencies {
-    // Automix (BitChord port): ONNX Runtime runs the Beat This! beat model.
-    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.28.0")
     // ONNX Runtime for the Beat This! downbeat/beat model (automix grid).
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.28.0")
     implementation("io.github.kyant0:backdrop:2.0.0")
