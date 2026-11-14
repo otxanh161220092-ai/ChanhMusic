@@ -5,7 +5,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
 import com.metrolist.music.bcmix.data.TrackLog
 import com.metrolist.music.bcmix.settings.AppSettings
-import com.metrolist.music.bcmix.audio.bitperfect.BitPerfectOutput
+import com.metrolist.music.bcmix.compat.BitPerfectOutput
 import java.util.Locale
 
 /**

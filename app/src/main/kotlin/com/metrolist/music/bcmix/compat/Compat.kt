@@ -43,6 +43,8 @@ val androidx.media3.common.MediaItem.isVideoOrigin: Boolean get() = false
 
 /** Bit-perfect output is not part of Metrolist, so it is never active. */
 object BitPerfectOutput {
+    val ready: kotlinx.coroutines.flow.StateFlow<Boolean> =
+        kotlinx.coroutines.flow.MutableStateFlow(false)
     data class Status(val active: Boolean = false)
     val status: kotlinx.coroutines.flow.StateFlow<Status> =
         kotlinx.coroutines.flow.MutableStateFlow(Status())

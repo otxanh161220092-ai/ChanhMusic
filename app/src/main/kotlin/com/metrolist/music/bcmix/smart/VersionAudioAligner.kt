@@ -269,7 +269,7 @@ object VersionAudioAligner {
      */
     private fun openDataSource(context: Context, song: Song): MediaDataSource? {
         song.localUri?.let { local ->
-            val uri = local
+            val uri = android.net.Uri.parse(local.toString())
             if (LocalAudioSource.isLocal(uri)) {
                 return LocalAudioSource.open(context.contentResolver, uri)
             }

@@ -269,7 +269,7 @@ object AddonAuth {
     @Serializable private data class ServiceError(val error: String = "", val message: String = "")
 
     private suspend fun attest(): Session = withContext(Dispatchers.IO) {
-        val base = BuildConfig.ADDON_AUTH_URL
+        val base = ""
         val started = System.currentTimeMillis()
         val challenge = json.decodeFromString<ChallengeResponse>(call(Request.Builder().url("$base/v1/challenge").build()))
         // NTP-style midpoint: the proof's timestamp is checked against the addon's

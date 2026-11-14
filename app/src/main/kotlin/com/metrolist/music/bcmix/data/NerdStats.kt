@@ -8,6 +8,7 @@ object NerdStats {
     fun pickedBitrateKbps(videoId: String): Int? = null
     fun onLosslessRaceEnd(videoId: String) {}
     fun onLosslessRaceStart(videoId: String) {}
+    fun onStreamPicked(videoId: String, kbps: Int?) {}
     fun racingLossless(videoId: String): Boolean = false
     fun isLosslessMime(mime: String?): Boolean = mime?.let { it.contains("flac") || it.contains("alac") || it.contains("wav") } ?: false
     fun isDolbyAtmosMime(mime: String?): Boolean = mime?.contains("eac3") == true

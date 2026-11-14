@@ -217,7 +217,7 @@ class DownloadService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification_logo)
+            .setSmallIcon(com.metrolist.music.R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText(text)
             // Indeterminate until something has a length to measure against.

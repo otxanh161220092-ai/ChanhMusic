@@ -716,14 +716,7 @@ class MusicService :
 
     override fun onCreate() {
         super.onCreate()
-        com.metrolist.music.bcmix.AudioCache.init(
-            cache = playerCache,
-            streamUrl = { id -> getStreamUrl(id) },
-            upstream = DefaultDataSource.Factory(
-                this,
-                OkHttpDataSource.Factory(OkHttpClient.Builder().proxy(YouTube.proxy).build()),
-            ),
-        )
+        com.metrolist.music.bcmix.AudioCache.init(this)
         isRunning = true
         shutdownDeferred = kotlinx.coroutines.CompletableDeferred<Unit>()
 

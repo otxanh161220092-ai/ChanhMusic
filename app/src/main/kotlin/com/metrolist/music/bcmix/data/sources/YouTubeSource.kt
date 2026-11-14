@@ -51,11 +51,8 @@ class YouTubeSource(
         waitForAll: Boolean,
         request: StreamRequest?,
     ): List<Song> =
-        YtMusicRepository.search(query, SearchFilter.SONGS)
-            .getOrDefault(emptyList())
-            .filterIsInstance<SearchResult.Track>()
-            .map { it.song }
-            .take(limit)
+        // NOT PORTED: BitChord searches through its own InnerTube repository.
+        emptyList()
 
     /**
      * [request] is not honoured here, and cannot be.
