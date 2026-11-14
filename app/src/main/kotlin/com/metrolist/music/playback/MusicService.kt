@@ -60,7 +60,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.PlaybackParameters
 import androidx.compose.runtime.snapshotFlow
-import com.metrolist.music.bcmix.audio.TransitionFilterProcessor
+import com.metrolist.music.bcmix.TransitionFilterProcessor
 import com.metrolist.music.bcmix.TransitionFilters
 import androidx.media3.common.Player
 import androidx.media3.common.Player.EVENT_POSITION_DISCONTINUITY
