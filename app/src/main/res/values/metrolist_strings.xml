@@ -1039,4 +1039,18 @@
     <string name="automix_style_caihat_desc">The original Automix engine</string>
     <string name="automix_style_bitchord">BitChord</string>
     <string name="automix_style_bitchord_desc">BitChord\'s Automix: beat-matched mixes with EQ and filter transitions</string>
+    <string name="bc_mix_view_bars">%1$d Bars</string>
+    <string name="bc_mix_view_one_bar">1 Bar</string>
+    <string name="bc_mix_view_seconds">%1$d sec</string>
+    <string name="bc_mix_view_bpm">%1$d bpm</string>
+    <string name="bc_automix_overview_unavailable">No Automix transition coming up</string>
+    <string name="bc_mixing">Mixing</string>
+    <string name="bc_automix_analysis_status">Automix · this song: %1$s · next: %2$s</string>
+    <string name="bc_automix_not_supported_video">Automix not supported on video songs</string>
+    <string name="bc_automix_stopped_in_party">Automix: stopped in listen together</string>
+    <string name="bc_analysis_complete">analysed</string>
+    <string name="bc_analysis_refining">analysed, refining…</string>
+    <string name="bc_analysis_in_progress">analysing…</string>
+    <string name="bc_waiting">waiting</string>
+    <string name="bc_failed">Failed</string>
 </resources>
