@@ -1,12 +1,3 @@
-/**
- * Metrolist Project (C) 2026
- * Licensed under GPL-3.0 | See git history for contributors
- *
- * Small stand-ins for the BitChord UI infrastructure the automix mix popup and
- * scrubber lean on: its string table, settings flows, the back handler and the
- * artwork pixel helpers. Behaviour matches BitChord's Android actuals.
- */
-
 package com.metrolist.music.bcmix.ui
 
 import androidx.activity.compose.BackHandler
@@ -14,16 +5,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.palette.graphics.Palette
 import coil3.Image
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
-import com.metrolist.music.bcmix.MixBlend
-import com.metrolist.music.bcmix.MixTransitionView
-import com.metrolist.music.bcmix.SmartAnalysis
 import com.metrolist.music.R
 import com.metrolist.music.bcmix.settings.AppSettings
+import com.metrolist.music.bcmix.settings.MixBlend
+import com.metrolist.music.bcmix.settings.MixTransitionView
+import com.metrolist.music.bcmix.settings.SmartAnalysis
+import com.metrolist.music.ui.theme.PlayerColorExtractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -63,10 +57,12 @@ object PlayerSettings {
 }
 
 /** The app-level message channel the mix popup uses for "not available" notices. */
+class PlayerHostShim {
+    fun showMessage(message: String) {}
+}
+
 object PlayerPlatform {
-    val host = object {
-        fun showMessage(message: String) {}
-    }
+    val host = PlayerHostShim()
 }
 
 /** Haze is not part of Metrolist; the popup is drawn with its plain tint. */
@@ -93,3 +89,10 @@ fun PlayerBackHandler(enabled: Boolean, onBack: () -> Unit) {
 fun ImageRequest.Builder.forPixelAccess(): ImageRequest.Builder = allowHardware(false)
 
 fun Image.toImageBitmap(): ImageBitmap = toBitmap().asImageBitmap()
+
+/** Mesh colours of the artwork, from Metrolist's own palette extraction. */
+fun artworkMeshColors(bitmap: ImageBitmap): List<Color> {
+    val argb = bitmap.asAndroidBitmap()
+    val palette = Palette.from(argb).generate()
+    return PlayerColorExtractor.extractMeshColors(palette, fallbackColor = 0xFF444444.toInt())
+}

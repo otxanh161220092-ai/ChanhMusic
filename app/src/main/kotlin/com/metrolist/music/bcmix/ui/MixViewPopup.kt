@@ -93,7 +93,7 @@ import com.metrolist.music.bcmix.ui.containSheetGestures
 import com.metrolist.music.bcmix.ui.HazeState
 import com.metrolist.music.bcmix.ui.ExperimentalHazeMaterialsApi
 import com.metrolist.music.bcmix.ui.HazeMaterials
-import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.delay
 import java.util.Locale
 import kotlin.math.abs
