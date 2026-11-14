@@ -1053,4 +1053,5 @@
     <string name="bc_analysis_in_progress">analysing…</string>
     <string name="bc_waiting">waiting</string>
     <string name="bc_failed">Failed</string>
+    <string name="cached_song_partial">Partial</string>
 </resources>

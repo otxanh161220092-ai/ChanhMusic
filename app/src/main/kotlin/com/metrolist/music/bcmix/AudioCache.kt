@@ -1,5 +1,7 @@
 package com.metrolist.music.bcmix
 
+import com.metrolist.music.bcmix.playback.DynamicLruCacheEvictor
+import com.metrolist.music.bcmix.playback.OriginalVersion
 import com.metrolist.music.bcmix.playback.QualityUpgrade
 import com.metrolist.music.bcmix.playback.DirectSourceGate
 import com.metrolist.music.bcmix.playback.StreamChoice
