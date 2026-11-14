@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.content.Context
@@ -459,7 +461,7 @@ fun ListenTogetherScreen(
     }
 
     if (shouldShowTopBar) {
-        TopAppBar(
+        GradientTopAppBar(
             modifier = Modifier.align(Alignment.TopCenter),
             title = { Text(stringResource(R.string.together)) },
             navigationIcon = {

@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.content.res.Configuration
@@ -163,7 +165,7 @@ fun ThemeScreen(
         )
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.theme_colors)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

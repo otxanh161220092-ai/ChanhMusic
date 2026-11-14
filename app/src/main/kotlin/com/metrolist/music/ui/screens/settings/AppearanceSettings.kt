@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 import com.metrolist.music.constants.CollectionDominantBackgroundKey
 
@@ -1903,7 +1905,7 @@ fun AppearanceSettings(
         }
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.appearance)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.GlassAlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -612,7 +614,7 @@ fun LastFMSettings(
         )
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.lastfm_integration)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

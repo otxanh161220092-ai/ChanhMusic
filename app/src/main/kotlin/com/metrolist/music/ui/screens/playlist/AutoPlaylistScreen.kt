@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.playlist
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.net.Uri
@@ -709,7 +711,7 @@ fun AutoPlaylistScreen(
             }
         }
 
-        TopAppBar(
+        GradientTopAppBar(
             title = {
                 when {
                     inSelectMode -> {

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -57,7 +59,7 @@ fun IntegrationScreen(
         )
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.integrations)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

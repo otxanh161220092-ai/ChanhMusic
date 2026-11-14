@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.app.Activity
@@ -879,7 +881,7 @@ fun DiscordSettings(
         )
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.discord_integration)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

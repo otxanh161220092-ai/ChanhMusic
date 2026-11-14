@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import com.metrolist.music.ui.component.GlassAlertDialog
@@ -367,7 +369,7 @@ fun LoginScreen(
             CircularProgressIndicator(Modifier.align(Alignment.Center))
         }
 
-        TopAppBar(
+        GradientTopAppBar(
             title = {
                 Text(
                     stringResource(

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.content.Intent
@@ -119,7 +121,7 @@ fun CrashScreen(
     
     Scaffold(
         topBar = {
-            TopAppBar(
+            GradientTopAppBar(
                 title = { 
                     Text(
                         text = stringResource(R.string.crash_title),

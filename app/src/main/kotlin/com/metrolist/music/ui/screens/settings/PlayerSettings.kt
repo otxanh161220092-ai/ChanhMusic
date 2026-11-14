@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -1203,7 +1205,7 @@ fun PlayerSettings(
         Spacer(modifier = Modifier.height(16.dp))
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.player_and_audio)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

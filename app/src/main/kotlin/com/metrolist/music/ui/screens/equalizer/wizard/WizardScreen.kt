@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.equalizer.wizard
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import androidx.compose.animation.*
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
@@ -64,7 +66,7 @@ private fun WizardScreenContent(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
+            GradientTopAppBar(
                 title = {
                     Text(
                         text = when (state.currentStep) {

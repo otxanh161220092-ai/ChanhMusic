@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.GlassAlertDialog
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
@@ -475,7 +477,7 @@ fun StorageSettings(
         )
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.storage)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

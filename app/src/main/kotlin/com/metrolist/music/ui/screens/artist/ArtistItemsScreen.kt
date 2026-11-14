@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.artist
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -374,7 +376,7 @@ fun ArtistItemsScreen(
         }
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(title) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.artist
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.content.ClipData
@@ -1103,7 +1105,7 @@ fun ArtistScreen(
         )
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { if (!transparentAppBar) Text(displayArtistName.orEmpty()) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

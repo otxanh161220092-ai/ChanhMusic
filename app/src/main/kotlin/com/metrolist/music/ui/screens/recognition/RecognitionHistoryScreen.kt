@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.recognition
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.compose.foundation.clickable
@@ -150,7 +152,7 @@ fun RecognitionHistoryScreen(navController: NavController) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            GradientTopAppBar(
                 title = { Text(stringResource(R.string.recognition_history)) },
                 navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

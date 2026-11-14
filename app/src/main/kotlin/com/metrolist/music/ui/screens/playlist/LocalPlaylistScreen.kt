@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.playlist
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.annotation.SuppressLint
@@ -741,7 +743,7 @@ fun LocalPlaylistScreen(
             headerItems = 2,
         )
 
-        TopAppBar(
+        GradientTopAppBar(
             title = {
                 if (inSelectMode) {
                     Text(pluralStringResource(R.plurals.n_selected, selection.size, selection.size))

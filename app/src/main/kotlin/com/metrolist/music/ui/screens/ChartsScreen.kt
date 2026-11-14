@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -109,7 +111,7 @@ fun ChartsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            GradientTopAppBar(
                 title = { Text(stringResource(R.string.charts)) },
                 navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

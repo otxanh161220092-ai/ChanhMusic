@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.playlist
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.activity.compose.BackHandler
@@ -407,7 +409,7 @@ fun TopPlaylistScreen(
             headerItems = 2
         )
 
-        TopAppBar(
+        GradientTopAppBar(
             title = {
                 when {
                     inSelectMode -> {

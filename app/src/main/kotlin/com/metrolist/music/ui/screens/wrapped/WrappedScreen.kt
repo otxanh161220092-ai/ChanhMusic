@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.wrapped
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
@@ -196,7 +198,7 @@ fun WrappedScreenContent() {
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            GradientTopAppBar(
                 title = { },
                 navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

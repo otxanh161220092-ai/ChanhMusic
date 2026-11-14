@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.GlassAlertDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -368,7 +370,7 @@ fun AndroidAutoSettings(
         Spacer(Modifier.height(27.dp))
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.android_auto)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

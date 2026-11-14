@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.recognition
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.Manifest
@@ -202,7 +204,7 @@ fun RecognitionScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            GradientTopAppBar(
                 title = { Text(stringResource(R.string.recognize_music)) },
                 navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

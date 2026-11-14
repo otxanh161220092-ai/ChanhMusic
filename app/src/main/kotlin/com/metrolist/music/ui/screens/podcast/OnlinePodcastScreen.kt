@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.podcast
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.activity.compose.BackHandler
@@ -236,7 +238,7 @@ fun OnlinePodcastScreen(
             }
         }
 
-        TopAppBar(
+        GradientTopAppBar(
             title = {
                 if (isSearching) {
                     TextField(

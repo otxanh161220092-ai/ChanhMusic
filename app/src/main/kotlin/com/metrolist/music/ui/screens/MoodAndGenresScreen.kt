@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -107,7 +109,7 @@ fun MoodAndGenresScreen(
         }
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.mood_and_genres)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

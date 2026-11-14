@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings.integrations
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.widget.Toast
@@ -515,7 +517,7 @@ fun ListenTogetherSettings(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.listen_together)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.asPaddingValues
@@ -144,7 +146,7 @@ fun BrowseScreen(
         }
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(title ?: "") },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

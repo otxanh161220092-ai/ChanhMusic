@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.search
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.asPaddingValues
@@ -178,7 +180,7 @@ fun SearchScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            GradientTopAppBar(
                 title = {
                     Row(
                         modifier = Modifier.fillMaxWidth(),

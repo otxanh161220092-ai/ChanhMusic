@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.playlist
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.activity.compose.BackHandler
@@ -373,7 +375,7 @@ fun OnlinePlaylistScreen(
             }
         }
 
-        TopAppBar(
+        GradientTopAppBar(
             title = {
                 if (inSelectMode) {
                     Text(

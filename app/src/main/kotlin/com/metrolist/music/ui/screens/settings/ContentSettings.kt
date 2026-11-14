@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.GlassAlertDialog
 import android.content.Intent
 import android.os.Build
@@ -1114,7 +1116,7 @@ fun ContentSettings(
         Spacer(modifier = Modifier.height(16.dp))
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.content)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

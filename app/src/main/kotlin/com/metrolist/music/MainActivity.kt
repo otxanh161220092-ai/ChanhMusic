@@ -5,6 +5,8 @@
 
 package com.metrolist.music
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import com.metrolist.music.ui.component.GlassAlertDialog
@@ -1064,7 +1066,7 @@ class MainActivity : FragmentActivity() {
                                 exit = fadeOut(animationSpec = tween(durationMillis = 200)),
                             ) {
                                 Row {
-                                    TopAppBar(
+                                    GradientTopAppBar(
                                         title = {
                                             Text(
                                                 text = currentTitleRes?.let { stringResource(it) } ?: "",

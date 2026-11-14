@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.compose.foundation.Image
@@ -422,7 +424,7 @@ fun AboutScreen(
         Spacer(Modifier.height(48.dp))
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.about)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

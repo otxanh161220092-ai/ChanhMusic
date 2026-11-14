@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.equalizer
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.GlassAlertDialog
 import com.metrolist.music.ui.component.GlassDropdownMenu
 import com.metrolist.music.ui.component.GlassMenuEntry
@@ -188,7 +190,7 @@ private fun EqScreenContent(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
+            GradientTopAppBar(
                 title = { Text(stringResource(R.string.equalizer_header)) },
                 navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {

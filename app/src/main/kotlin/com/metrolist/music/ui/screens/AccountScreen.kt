@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.GradientTopAppBar
+
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -320,7 +322,7 @@ fun AccountScreen(
         }
     }
 
-    TopAppBar(
+    GradientTopAppBar(
         title = { Text(stringResource(R.string.account)) },
         navigationIcon = {
                 com.metrolist.music.ui.component.OriginalBackSlot {
