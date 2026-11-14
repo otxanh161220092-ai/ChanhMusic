@@ -130,6 +130,11 @@ import com.metrolist.music.constants.AutoSkipNextOnErrorKey
 import com.metrolist.music.constants.AutoplayKey
 import com.metrolist.music.constants.AutomixCreativeKey
 import com.metrolist.music.constants.AutomixEnabledKey
+import com.metrolist.music.constants.AutomixStyleKey
+import com.metrolist.music.bcmix.CrossfadeController
+import com.metrolist.music.bcmix.settings.AppSettings as BcmixSettings
+import com.metrolist.music.bcmix.smart.TrackAnalyzer as BcmixTrackAnalyzer
+import com.metrolist.music.bcmix.AudioCache as BcmixAudioCache
 import com.metrolist.music.constants.CrossfadeDurationKey
 import com.metrolist.music.constants.CrossfadeEnabledKey
 import com.metrolist.music.constants.CrossfadeGaplessKey
@@ -441,6 +446,28 @@ class MusicService :
     private var isCrossfading = false
     private var crossfadeJob: Job? = null
     private var automixEnabled = false
+
+    // BitChord Automix (com.metrolist.music.bcmix) runs as its own engine when
+    // selected in settings. The CaiHat flags above stay off while it runs.
+    private var automixPref = false
+    private var automixBitChord = false
+    private var bcmixSpare: ExoPlayer? = null
+    private val bcmixAnalyzer by lazy { BcmixTrackAnalyzer(this, BcmixAudioCache) }
+    private val bcmixController: CrossfadeController by lazy {
+        CrossfadeController(
+            scope = scope,
+            active = { player },
+            standby = { bcmixStandby() },
+            onHandoff = { outgoing, incoming -> bcmixAdopt(outgoing, incoming) },
+            analysisFor = { item -> bcmixAnalyzer.analysisFor(item.mediaId) },
+            requestAnalysis = { item, durationMs ->
+                item.localConfiguration?.uri?.let { uri ->
+                    bcmixAnalyzer.request(item.mediaId, uri, durationMs / 1000.0)
+                }
+            },
+            analysisRunningFor = { item -> bcmixAnalyzer.isAnalysing(item.mediaId) },
+        )
+    }
     private var mixPlan: TransitionPlan? = null
     private var mixPlanJob: Job? = null
 
@@ -1271,11 +1298,20 @@ class MusicService :
             .map { it[AutomixEnabledKey] ?: false }
             .distinctUntilChanged()
             .collect(scope) { enabled ->
-                automixEnabled = enabled
+                automixPref = enabled
+                applyAutomixEngine()
                 if (!enabled) {
                     abortMix(reschedule = false)
                     cancelMixPlanning()
                 }
+            }
+
+        dataStore.data
+            .map { it[AutomixStyleKey] ?: "caihat" }
+            .distinctUntilChanged()
+            .collect(scope) { style ->
+                automixBitChord = style == "bitchord"
+                applyAutomixEngine()
             }
 
         // Observe and cache common preferences to avoid runBlocking reads in playback callbacks
@@ -4419,8 +4455,61 @@ class MusicService :
             false
         }
 
+    /** Chooses between the CaiHat and BitChord Automix engines from the settings. */
+    private fun applyAutomixEngine() {
+        val bitchord = automixPref && automixBitChord
+        automixEnabled = automixPref && !automixBitChord
+        BcmixSettings.smartFadeEnabled.value = bitchord
+        if (bitchord) {
+            bcmixController.start()
+        } else if (::player.isInitialized && bcmixControllerCreated()) {
+            bcmixController.release()
+        }
+    }
+
+    private fun bcmixControllerCreated(): Boolean =
+        runCatching { bcmixController; true }.getOrDefault(false)
+
+    /** The idle player the BitChord engine loads the next track onto. */
+    private fun bcmixStandby(): ExoPlayer =
+        bcmixSpare ?: createExoPlayer(publish = false).also { bcmixSpare = it }
+
+    /**
+     * Moves the session onto the player that has just started the incoming
+     * track. Mirrors the CaiHat swap: listeners, the media session and the
+     * sleep timer follow the audible player.
+     */
+    private fun bcmixAdopt(outgoing: ExoPlayer, incoming: ExoPlayer) {
+        outgoing.removeListener(this)
+        sleepTimer?.let { outgoing.removeListener(it) }
+        outgoing.pauseAtEndOfMediaItems = false
+        outgoing.repeatMode = Player.REPEAT_MODE_OFF
+        val currentIndex = outgoing.currentMediaItemIndex
+        if (currentIndex < outgoing.mediaItemCount - 1) {
+            outgoing.removeMediaItems(currentIndex + 1, outgoing.mediaItemCount)
+        }
+
+        player = incoming
+        _playerFlow.value = player
+        bcmixSpare = outgoing
+
+        incoming.addListener(this)
+        sleepTimer?.let { incoming.addListener(it) }
+        sleepTimer?.player = player
+        try {
+            mediaSession?.let { (it as MediaSession).player = player }
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "BitChord automix: failed to move the media session")
+        }
+        onMediaItemTransition(player.currentMediaItem, Player.MEDIA_ITEM_TRANSITION_REASON_AUTO)
+        openAudioEffectSession()
+    }
+
     override fun onDestroy() {
         isRunning = false
+        runCatching { if (bcmixControllerCreated()) bcmixController.release() }
+        bcmixSpare?.let { runCatching { it.release() } }
+        bcmixSpare = null
 
         if (!::player.isInitialized) {
             try {

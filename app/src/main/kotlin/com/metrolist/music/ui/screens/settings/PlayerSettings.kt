@@ -49,6 +49,7 @@ import com.metrolist.music.constants.OutputPrecisionKey
 import com.metrolist.music.constants.AutoDownloadOnLikeKey
 import com.metrolist.music.constants.AutomixCreativeKey
 import com.metrolist.music.constants.AutomixEnabledKey
+import com.metrolist.music.constants.AutomixStyleKey
 import com.metrolist.music.constants.CrossfadeDurationKey
 import com.metrolist.music.constants.CrossfadeEnabledKey
 import com.metrolist.music.constants.CrossfadeGaplessKey
@@ -130,6 +131,10 @@ fun PlayerSettings(
     val (automixCreative, onAutomixCreativeChange) = rememberPreference(
         AutomixCreativeKey,
         defaultValue = true
+    )
+    val (automixStyle, onAutomixStyleChange) = rememberPreference(
+        AutomixStyleKey,
+        defaultValue = "caihat"
     )
     val (preferAutomix, onPreferAutomixChange) = rememberPreference(
         TransitionPrefersAutomixKey,
@@ -417,6 +422,26 @@ fun PlayerSettings(
                     ))
                 }
                 if (automixEnabled) {
+                    add(Material3SettingsItem(
+                        icon = painterResource(R.drawable.graphic_eq),
+                        title = { Text(stringResource(R.string.automix_style_caihat)) },
+                        description = { Text(stringResource(R.string.automix_style_caihat_desc)) },
+                        trailingContent = {
+                            RadioButton(selected = automixStyle == "caihat", onClick = { onAutomixStyleChange("caihat") })
+                        },
+                        onClick = { onAutomixStyleChange("caihat") }
+                    ))
+                    add(Material3SettingsItem(
+                        icon = painterResource(R.drawable.graphic_eq),
+                        title = { Text(stringResource(R.string.automix_style_bitchord)) },
+                        description = { Text(stringResource(R.string.automix_style_bitchord_desc)) },
+                        trailingContent = {
+                            RadioButton(selected = automixStyle == "bitchord", onClick = { onAutomixStyleChange("bitchord") })
+                        },
+                        onClick = { onAutomixStyleChange("bitchord") }
+                    ))
+                }
+                if (automixEnabled && automixStyle == "caihat") {
                     add(Material3SettingsItem(
                         icon = painterResource(R.drawable.graphic_eq),
                         title = { Text(stringResource(R.string.creative_transitions)) },

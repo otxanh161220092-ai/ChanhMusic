@@ -891,4 +891,8 @@
     <string name="recently_added">Mới thêm gần đây</string>
     <string name="reduce_blur_effects">Giảm hiệu ứng mờ</string>
     <string name="reduce_blur_effects_desc">Tắt mờ ở lời bài hát và khi đổi bìa</string>
+    <string name="automix_style_caihat">CaiHat</string>
+    <string name="automix_style_caihat_desc">Bộ Automix gốc</string>
+    <string name="automix_style_bitchord">BitChord</string>
+    <string name="automix_style_bitchord_desc">Automix của BitChord: trộn theo nhịp, có EQ và hiệu ứng lọc khi chuyển bài</string>
 </resources>

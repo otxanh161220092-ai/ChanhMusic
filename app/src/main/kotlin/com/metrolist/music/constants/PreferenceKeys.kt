@@ -8,6 +8,7 @@ package com.metrolist.music.constants
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import java.time.LocalDateTime
@@ -164,6 +165,8 @@ val CrossfadeDurationKey = floatPreferencesKey("crossfadeDurationFloat")
 val CrossfadeGaplessKey = booleanPreferencesKey("crossfadeGapless")
 val AutomixEnabledKey = booleanPreferencesKey("automixEnabled")
 val AutomixCreativeKey = booleanPreferencesKey("automixCreative")
+/** Which Automix engine runs: "caihat" (the existing one) or "bitchord" (the BitChord port). */
+val AutomixStyleKey = stringPreferencesKey("automixStyle")
 val TransitionPrefersAutomixKey = booleanPreferencesKey("transitionPrefersAutomix")
 
 val MaxImageCacheSizeKey = intPreferencesKey("maxImageCacheSize")
