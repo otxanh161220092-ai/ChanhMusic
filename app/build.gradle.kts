@@ -250,7 +250,36 @@ configurations.configureEach {
     exclude(group = "org.json", module = "json")
 }
 
+val newPipeExtractorRaw: Configuration by configurations.creating {
+    isTransitive = false
+    isCanBeConsumed = false
+}
 dependencies {
+    newPipeExtractorRaw("com.github.TeamNewPipe:NewPipeExtractor:v0.26.3")
+}
+val newPipeExtractorStripped = tasks.register<org.gradle.api.tasks.bundling.Jar>(
+    "stripNewPipeExtractorUtils"
+) {
+    archiveFileName.set("NewPipeExtractor-v0.26.3-noutils.jar")
+    destinationDirectory.set(layout.buildDirectory.dir("stripped-libs"))
+    from(provider { newPipeExtractorRaw.map { zipTree(it) } }) {
+        // The class itself, plus any nested or synthetic siblings the upstream
+        // compiler emitted alongside it, so nothing from the jar's Utils survives.
+        exclude("org/schabi/newpipe/extractor/utils/Utils.class")
+        exclude("org/schabi/newpipe/extractor/utils/Utils\$*.class")
+    }
+}
+
+dependencies {
+    // ---- NewPipe Extractor (YouTube stream solving), as BitChord wires it ----
+    implementation(files(newPipeExtractorStripped))
+    implementation("com.github.TeamNewPipe:nanojson:e9d656ddb49a412a5a0a5d5ef20ca7ef09549996")
+    implementation("org.jsoup:jsoup:1.22.2")
+    implementation("com.google.protobuf:protobuf-javalite:4.35.0")
+    implementation("org.mozilla:rhino:1.8.1")
+    implementation("org.mozilla:rhino-engine:1.8.1")
+    // ---- JS module execution: QuickJS VM ----
+    implementation("io.github.dokar3:quickjs-kt-android:1.0.14")
     // ONNX Runtime for the Beat This! downbeat/beat model (automix grid).
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.28.0")
     implementation("io.github.kyant0:backdrop:2.0.0")
