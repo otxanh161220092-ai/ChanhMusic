@@ -1,5 +1,6 @@
 package com.metrolist.music.bcmix.data.sources
 
+import com.metrolist.music.bcmix.playback.QualityUpgrade
 import com.metrolist.music.bcmix.data.TrackLog
 import com.metrolist.music.bcmix.data.model.Song
 import com.metrolist.music.bcmix.settings.AppSettings
