@@ -159,6 +159,15 @@ android {
         }
     }
 
+    // Automix (BitChord port): the native analyzer and loop-mix renderer. Without
+    // this block libbitchord_analysis.so and libbitchord_loopmix.so are never
+    // built, System.loadLibrary throws, and every track stays unanalysed.
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/bcmix/CMakeLists.txt")
+        }
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
