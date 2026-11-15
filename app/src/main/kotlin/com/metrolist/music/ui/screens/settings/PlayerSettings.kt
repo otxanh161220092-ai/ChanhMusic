@@ -50,6 +50,9 @@ import com.metrolist.music.constants.AutoDownloadOnLikeKey
 import com.metrolist.music.constants.AutomixCreativeKey
 import com.metrolist.music.constants.AutomixEnabledKey
 import com.metrolist.music.constants.AutomixStyleKey
+import androidx.compose.runtime.collectAsState
+import com.metrolist.music.bcmix.settings.AppSettings as BcmixSettings
+import com.metrolist.music.bcmix.settings.AutomixPerformanceMode
 import com.metrolist.music.constants.CrossfadeDurationKey
 import com.metrolist.music.constants.CrossfadeEnabledKey
 import com.metrolist.music.constants.CrossfadeGaplessKey
@@ -132,6 +135,7 @@ fun PlayerSettings(
         AutomixCreativeKey,
         defaultValue = true
     )
+    val bcPerformance by BcmixSettings.automixPerformanceMode.collectAsState()
     val (automixStyle, onAutomixStyleChange) = rememberPreference(
         AutomixStyleKey,
         defaultValue = "caihat"
@@ -439,6 +443,25 @@ fun PlayerSettings(
                             RadioButton(selected = automixStyle == "bitchord", onClick = { onAutomixStyleChange("bitchord") })
                         },
                         onClick = { onAutomixStyleChange("bitchord") }
+                    ))
+                }
+                if (automixEnabled && automixStyle == "bitchord") {
+                    add(Material3SettingsItem(
+                        icon = painterResource(R.drawable.graphic_eq),
+                        title = { Text("Automix performance") },
+                        description = {
+                            Text(
+                                when (bcPerformance) {
+                                    AutomixPerformanceMode.EFFICIENT -> "Efficient: 1 thread, lowest heat and battery use"
+                                    AutomixPerformanceMode.BALANCED -> "Balanced: 2 threads, recommended"
+                                    AutomixPerformanceMode.PERFORMANCE -> "Performance: 4 threads, fastest analysis"
+                                }
+                            )
+                        },
+                        onClick = {
+                            val all = AutomixPerformanceMode.entries
+                            BcmixSettings.setAutomixPerformanceMode(all[(all.indexOf(bcPerformance) + 1) % all.size])
+                        }
                     ))
                 }
                 if (automixEnabled && automixStyle == "caihat") {
