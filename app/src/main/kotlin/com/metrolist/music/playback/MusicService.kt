@@ -88,9 +88,9 @@ import androidx.media3.exoplayer.analytics.PlaybackStats
 import androidx.media3.exoplayer.analytics.PlaybackStatsListener
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import com.metrolist.music.bcmix.audio.DspChain
-import com.metrolist.music.bcmix.audio.LoudnessProcessor
+import com.metrolist.music.bcmix.LoudnessProcessor
 import com.metrolist.music.bcmix.audio.PrecisionAudioSink
-import com.metrolist.music.bcmix.audio.SpatialAudioProcessor
+import com.metrolist.music.bcmix.SpatialAudioProcessor
 import com.metrolist.music.bcmix.TransitionFilterProcessor
 import androidx.media3.exoplayer.audio.AudioRendererEventListener
 import androidx.media3.exoplayer.audio.AudioSink
