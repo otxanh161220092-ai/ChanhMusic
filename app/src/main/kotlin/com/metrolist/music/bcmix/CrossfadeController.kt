@@ -1157,6 +1157,16 @@ class CrossfadeController(
             return
         }
 
+        // Loop first, then the normal blend, then plain crossfade. While a loop
+        // is still possible but waiting on analysis, lyrics or the stream, hold
+        // off the blend instead of arming it: nothing reconsiders the loop once
+        // a blend is armed.
+        if (loop == null && loopRefusal?.startsWith("waiting") == true &&
+            (duration - player.currentPosition) > LOOP_ARM_LEAD_MS
+        ) {
+            return
+        }
+
         // Gated on *both* tracks being measured, not on the plan alone. Until
         // then the planner is still sizing the overlap from a fallback that
         // moves as evidence lands, and a marker that slides along the bar while
