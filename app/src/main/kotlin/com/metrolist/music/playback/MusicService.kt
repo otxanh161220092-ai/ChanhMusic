@@ -472,6 +472,18 @@ class MusicService :
             },
             analysisRunningFor = { item -> bcmixAnalyzer.isAnalysing(item.mediaId) },
             filters = bcmixFilters,
+            // Each sink's loop-mix port rides on its transition filter, so the
+            // player and the spare trade their ports at every handoff.
+            loopPortOf = { target ->
+                when {
+                    target === player -> playerBcTransition[target]?.loop
+                    target === bcmixSpare -> bcmixSpare?.let { playerBcTransition[it]?.loop }
+                    else -> null
+                }
+            },
+            loopRegion = { item, durationMs, from, to, rate ->
+                bcmixAnalyzer.loopRegion(item.mediaId, bcmixUriFor(item.mediaId), durationMs / 1000.0, from, to, rate)
+            },
             mixWaveform = { item, durationMs, from, to, bins ->
                 bcmixAnalyzer.mixWaveform(item.mediaId, bcmixUriFor(item.mediaId), durationMs / 1000.0, from, to, bins)
             },
