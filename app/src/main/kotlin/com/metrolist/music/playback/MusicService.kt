@@ -308,6 +308,8 @@ private const val AUTOMIX_ANALYSIS_TIMEOUT_MS = 60_000L
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @androidx.annotation.OptIn(UnstableApi::class)
 @AndroidEntryPoint
+private const val LOOP_LYRICS_TIMEOUT_MS = 8_000L
+
 class MusicService :
     MediaLibraryService(),
     Player.Listener,
@@ -479,6 +481,33 @@ class MusicService :
                     target === player -> playerBcTransition[target]?.loop
                     target === bcmixSpare -> bcmixSpare?.let { playerBcTransition[it]?.loop }
                     else -> null
+                }
+            },
+            // The loop mix only vouches for an instrumental with synced lyrics, so
+            // without this it waits on lyrics forever and never picks a loop.
+            syncedLines = { item, durationMs ->
+                if (!com.metrolist.music.bcmix.settings.AppSettings.syncedLyrics.value) {
+                    null
+                } else {
+                    kotlinx.coroutines.withTimeoutOrNull(LOOP_LYRICS_TIMEOUT_MS) {
+                        com.metrolist.music.bcmix.data.lyrics.LyricsRepository.lyrics(
+                            videoId = item.mediaId,
+                            title = item.mediaMetadata.title?.toString().orEmpty(),
+                            artist = item.mediaMetadata.artist?.toString().orEmpty(),
+                            durationMs = durationMs,
+                            sources = com.metrolist.music.bcmix.settings.AppSettings.lyricsSources.value,
+                            order = com.metrolist.music.bcmix.settings.AppSettings.lyricsSourceOrder.value,
+                        )?.lines?.map { line ->
+                            com.metrolist.music.bcmix.compat.LyricLine(
+                                timeMs = line.timeMs,
+                                text = line.text,
+                                words = line.words.map { w ->
+                                    com.metrolist.music.bcmix.compat.LyricWord(w.startMs, w.endMs, w.text)
+                                },
+                                sungUntilMs = line.sungUntilMs,
+                            )
+                        }
+                    }
                 }
             },
             loopRegion = { item, durationMs, from, to, rate ->
