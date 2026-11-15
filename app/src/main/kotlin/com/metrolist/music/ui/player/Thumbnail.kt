@@ -37,6 +37,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.metrolist.music.bcmix.canvas.CanvasArtworkPlayer
+import com.metrolist.music.bcmix.canvas.CanvasSettings
+import com.metrolist.music.bcmix.canvas.rememberCanvasArtwork
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -644,6 +647,15 @@ private fun ThumbnailItem(
                         modifier = Modifier.fillMaxSize(),
                     )
                 } else {
+                    val canvasEnabled by CanvasSettings.canvasEnabled.collectAsState()
+                    val canvas = rememberCanvasArtwork(
+                        mediaId = item.mediaId,
+                        title = item.mediaMetadata.title?.toString(),
+                        artist = item.mediaMetadata.artist?.toString(),
+                        album = item.mediaMetadata.albumTitle?.toString(),
+                        enabled = canvasEnabled && isCurrent,
+                    )
+                    val isPlayingNow by playerConnection.isPlaying.collectAsState()
                     ThumbnailImage(
                         artworkUri = artworkUriToUse,
                         cropArtwork = cropAlbumArt,
@@ -657,6 +669,15 @@ private fun ThumbnailItem(
                             Modifier
                         }
                     )
+                    if (canvas != null) {
+                        CanvasArtworkPlayer(
+                            canvas = canvas,
+                            isPlaying = isPlayingNow,
+                            modifier = Modifier.fillMaxSize(),
+                            contentMode = if (cropAlbumArt) com.metrolist.music.bcmix.canvas.CanvasContentMode.CROP
+                                else com.metrolist.music.bcmix.canvas.CanvasContentMode.FIT_PORTRAIT,
+                        )
+                    }
                 }
                 if (isCurrent && previousArtwork != null && mixVisual == null) {
                     ThumbnailImage(
