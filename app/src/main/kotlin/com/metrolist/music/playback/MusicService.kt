@@ -475,6 +475,12 @@ class MusicService :
             filters = bcmixFilters,
             // Each sink's loop-mix port rides on its transition filter, so the
             // player and the spare trade their ports at every handoff.
+            // A blend waits for the next track's audio when it is read directly from
+            // the source; off by default, so this is then always ready.
+            nextStreamReady = { item ->
+                !com.metrolist.music.bcmix.playback.DirectSourceGate.isActive() ||
+                    com.metrolist.music.bcmix.playback.DirectSourceGate.isStreamReady(item)
+            },
             // The loudness stage of the player that is taking the next track on.
             onArmIncoming = { item, nextId ->
                 bcmixSpare?.let { playerBcLoudness[it] }?.track(item.mediaId, nextId)
