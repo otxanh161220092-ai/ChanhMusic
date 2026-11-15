@@ -110,8 +110,9 @@
 ## Logging (does not affect Timber)
 -assumenosideeffects class android.util.Log {
     public static boolean isLoggable(java.lang.String, int);
-    public static int v(...);
-    public static int d(...);
+    ## v/d kept: Automix diagnostics (BitChordCrossfade, BitChordTrackAnalyzer) log at d.
+    #public static int v(...);
+    #public static int d(...);
     ## Leave in release builds
     #public static int i(...);
     #public static int w(...);
