@@ -461,9 +461,9 @@ class MusicService :
             onHandoff = { outgoing, incoming -> bcmixAdopt(outgoing, incoming) },
             analysisFor = { item -> bcmixAnalyzer.analysisFor(item.mediaId) },
             requestAnalysis = { item, durationMs ->
-                item.localConfiguration?.uri?.let { uri ->
-                    bcmixAnalyzer.request(item.mediaId, uri, durationMs / 1000.0)
-                }
+                // Metrolist's MediaItem uri is a bare video id, which the BitChord
+                // analyzer cannot read; it wants the `v=` form.
+                bcmixAnalyzer.request(item.mediaId, bcmixUriFor(item.mediaId), durationMs / 1000.0)
             },
             analysisRunningFor = { item -> bcmixAnalyzer.isAnalysing(item.mediaId) },
         )
@@ -721,8 +721,17 @@ class MusicService :
         // source, so the bytes come from the same stream the player would use.
         com.metrolist.music.bcmix.AudioCache.setUpstream(
             object : DataSource.Factory {
-                override fun createDataSource(): DataSource =
-                    createDataSourceFactory(VolumeNormalizationAudioProcessor()) { null }.createDataSource()
+                override fun createDataSource(): DataSource {
+                    val inner = createDataSourceFactory(VolumeNormalizationAudioProcessor()) { null }.createDataSource()
+                    // Metrolist's resolver reads the media id from the spec's key; the
+                    // analyzer's specs carry only the `v=` uri.
+                    return object : DataSource by inner {
+                        override fun open(dataSpec: androidx.media3.datasource.DataSpec): Long {
+                            val key = dataSpec.key ?: dataSpec.uri.getQueryParameter("v")
+                            return inner.open(dataSpec.buildUpon().setKey(key).build())
+                        }
+                    }
+                }
             },
         )
         isRunning = true
@@ -4470,6 +4479,12 @@ class MusicService :
 
     private fun bcmixControllerCreated(): Boolean =
         runCatching { bcmixController; true }.getOrDefault(false)
+
+    /** The BitChord-style YouTube uri for a Metrolist media id. */
+    private fun bcmixUriFor(mediaId: String): android.net.Uri =
+        android.net.Uri.parse("https://www.youtube.com/watch").buildUpon()
+            .appendQueryParameter("v", mediaId)
+            .build()
 
     /** The idle player the BitChord engine loads the next track onto. */
     private fun bcmixStandby(): ExoPlayer =
