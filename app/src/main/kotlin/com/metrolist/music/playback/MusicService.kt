@@ -4217,12 +4217,34 @@ class MusicService :
         }
     }
 
+    /**
+     * Playback reads through BitChord's audio cache, as BitChord's own does. Every
+     * track played is written out as a complete rendition, which is what the
+     * whole-track analysis reads when the track comes round again. Without it
+     * the only analysis a track ever gets is the head one, and the mix point
+     * chosen from that is the weaker one.
+     */
+    private fun bcmixPlaybackSource(upstream: DataSource.Factory): DataSource.Factory {
+        val cached = com.metrolist.music.bcmix.AudioCache.playbackFactory(upstream)
+        return DataSource.Factory {
+            val inner = cached.createDataSource()
+            object : DataSource by inner {
+                override fun open(dataSpec: androidx.media3.datasource.DataSpec): Long {
+                    // The cache keys YouTube renditions by their `v=` uri; the media
+                    // id stays on the spec for Metrolist's resolver.
+                    val id = dataSpec.key ?: return inner.open(dataSpec)
+                    return inner.open(dataSpec.buildUpon().setUri(bcmixUriFor(id)).build())
+                }
+            }
+        }
+    }
+
     private fun createMediaSourceFactory(
         normalizationProcessor: VolumeNormalizationAudioProcessor,
         playerProvider: () -> ExoPlayer?,
     ) =
         DefaultMediaSourceFactory(
-            createDataSourceFactory(normalizationProcessor, playerProvider),
+            bcmixPlaybackSource(createDataSourceFactory(normalizationProcessor, playerProvider)),
             ExtractorsFactory {
                 arrayOf(MatroskaExtractor(), FragmentedMp4Extractor(), Mp4Extractor())
             },
