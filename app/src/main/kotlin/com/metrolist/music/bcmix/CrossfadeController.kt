@@ -4309,7 +4309,9 @@ class CrossfadeController(
         const val LOOP_SETUP_SECONDS = 15.0
         const val LOOP_ARM_LEAD_MS = 12_000L
         const val LOOP_MIN_LEAD_MS = 9_000L
-        const val LOOP_KEEP_PAST_MS = 2_000L
+        // Long enough that a loop bailed out by a flushed sink keeps its plan for
+        // the retry; past it, the search only looks ahead and finds no bar lines.
+        const val LOOP_KEEP_PAST_MS = 8_000L
         const val LOOP_BUILD_TIMEOUT_MS = 8_000L
 
         /** After the incoming player starts, how long its clock settles before it is measured against the deck. */
