@@ -24,6 +24,6 @@ class EqualizerProcessor : BaseAudioProcessor() {
 
     fun configure(sampleRate: Int, channelCount: Int) = Unit
     fun process(block: com.metrolist.music.bcmix.audio.AudioBlock) = Unit
-    fun flush() = Unit
-    fun reset() = Unit
+    override fun flush() = Unit
+    override fun reset() = Unit
 }
