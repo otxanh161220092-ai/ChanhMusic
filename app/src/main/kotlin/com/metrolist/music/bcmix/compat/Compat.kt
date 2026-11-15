@@ -41,13 +41,12 @@ data class LyricLine(
 /** Metrolist has no video-origin rows, so no item is one. */
 val androidx.media3.common.MediaItem.isVideoOrigin: Boolean get() = false
 
-/** Bit-perfect output is not part of Metrolist, so it is never active. */
+/** The bit-perfect output's state, read from the real output. */
 object BitPerfectOutput {
-    val ready: kotlinx.coroutines.flow.StateFlow<Boolean> =
-        kotlinx.coroutines.flow.MutableStateFlow(false)
-    data class Status(val active: Boolean = false)
-    val status: kotlinx.coroutines.flow.StateFlow<Status> =
-        kotlinx.coroutines.flow.MutableStateFlow(Status())
+    val ready: kotlinx.coroutines.flow.StateFlow<Boolean>
+        get() = com.metrolist.music.bcmix.audio.bitperfect.BitPerfectOutput.ready
+    val status: kotlinx.coroutines.flow.StateFlow<com.metrolist.music.bcmix.audio.bitperfect.BitPerfectOutput.Status>
+        get() = com.metrolist.music.bcmix.audio.bitperfect.BitPerfectOutput.status
 }
 
 /**

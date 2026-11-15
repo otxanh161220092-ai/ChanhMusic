@@ -137,6 +137,7 @@ fun PlayerSettings(
     )
     val bcPerformance by BcmixSettings.automixPerformanceMode.collectAsState()
     val bcSpatial by BcmixSettings.spatialAudio.collectAsState()
+    val bcBitPerfect by BcmixSettings.bitPerfectMode.collectAsState()
     val (automixStyle, onAutomixStyleChange) = rememberPreference(
         AutomixStyleKey,
         defaultValue = "caihat"
@@ -458,6 +459,24 @@ fun PlayerSettings(
                             )
                         },
                         onClick = { BcmixSettings.setSpatialAudio(!bcSpatial) }
+                    ))
+                    add(Material3SettingsItem(
+                        icon = painterResource(R.drawable.graphic_eq),
+                        title = { Text("Bit-perfect output") },
+                        description = {
+                            Text(
+                                when (bcBitPerfect) {
+                                    com.metrolist.music.bcmix.settings.BitPerfectMode.OFF -> "Off: normal Android output"
+                                    com.metrolist.music.bcmix.settings.BitPerfectMode.USB_DIRECT -> "USB direct: BitChord's own USB driver. Needs USB permission"
+                                    com.metrolist.music.bcmix.settings.BitPerfectMode.DAP_EXCLUSIVE -> "DAP exclusive: for devices that expose it"
+                                    com.metrolist.music.bcmix.settings.BitPerfectMode.USB_ANDROID -> "USB via Android: any Android version"
+                                }
+                            )
+                        },
+                        onClick = {
+                            val all = com.metrolist.music.bcmix.settings.BitPerfectMode.entries
+                            BcmixSettings.setBitPerfectMode(all[(all.indexOf(bcBitPerfect) + 1) % all.size])
+                        }
                     ))
                     add(Material3SettingsItem(
                         icon = painterResource(R.drawable.graphic_eq),

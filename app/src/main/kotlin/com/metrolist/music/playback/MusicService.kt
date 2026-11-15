@@ -754,6 +754,7 @@ class MusicService :
         )
         isRunning = true
         shutdownDeferred = kotlinx.coroutines.CompletableDeferred<Unit>()
+        com.metrolist.music.bcmix.audio.bitperfect.BitPerfectOutput.watch(this)
         // Spatial widening follows its setting on every player, live.
         scope.launch {
             com.metrolist.music.bcmix.settings.AppSettings.spatialAudio.collect { enabled ->
@@ -4309,7 +4310,7 @@ class MusicService :
             // transition stages are off until a feature turns them on, and its
             // loudness stage is left at unity gain because Metrolist's
             // normalisation already runs in the delegate.
-            return PrecisionAudioSink(
+            val precision = PrecisionAudioSink(
                 delegate = metrolistSink,
                 dspChain = DspChain(
                     bcSpatial,
@@ -4319,6 +4320,14 @@ class MusicService :
                 ),
                 enableFloatOutput = useFloatOutput,
                 isAudible = { true },
+            )
+            // In front of everything: a track the bit-perfect output can carry
+            // skips the DSP chain and Media3's sink altogether.
+            return com.metrolist.music.bcmix.audio.bitperfect.BitPerfectRoutingSink(
+                precision,
+                com.metrolist.music.bcmix.audio.bitperfect.BitPerfectAudioSink(
+                    com.metrolist.music.bcmix.audio.bitperfect.BitPerfectOutput.forContext(this@MusicService),
+                ),
             )
         }
     }
