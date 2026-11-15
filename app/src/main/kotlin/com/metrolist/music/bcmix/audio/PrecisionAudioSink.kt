@@ -9,7 +9,7 @@ import androidx.media3.common.util.Util
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.audio.ForwardingAudioSink
-import com.music.bitchord.BuildConfig
+import com.metrolist.music.BuildConfig
 import com.metrolist.music.bcmix.AudioOutputStatus
 import com.metrolist.music.bcmix.loopmix.LoopMixPort
 import java.nio.ByteBuffer

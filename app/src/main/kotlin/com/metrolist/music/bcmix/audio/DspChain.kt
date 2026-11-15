@@ -1,7 +1,7 @@
 package com.metrolist.music.bcmix.audio
 
 import android.util.Log
-import com.music.bitchord.BuildConfig
+import com.metrolist.music.BuildConfig
 import com.metrolist.music.bcmix.EqualizerProcessor
 import com.metrolist.music.bcmix.LoudnessProcessor
 import com.metrolist.music.bcmix.SpatialAudioProcessor
