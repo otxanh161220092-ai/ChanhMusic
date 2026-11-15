@@ -1217,12 +1217,6 @@ class CrossfadeController(
         val transitionStartMs = (plan.transitionStart * 1000).roundToLong()
         plannedTransition = currentItem.mediaId to transitionStartMs
         val remaining = transitionStartMs - player.currentPosition
-        // The playhead is already past the planned start: a seek landed inside
-        // the window, or the window was reached late. Blending now would start
-        // the mix early with a fraction of its overlap, which is the short,
-        // weak transition this guards against. Leave this pair to play out
-        // and let the queue move on.
-        if (remaining < -MISSED_START_TOLERANCE_MS) return
         if (remaining <= MIX_PREFETCH_MS && currentAnalysis.isUsable && nextAnalysis.isUsable) {
             prefetchMixWaves(
                 currentItem, nextItem, duration, nextDuration,
@@ -3887,12 +3881,6 @@ class CrossfadeController(
          * gets dropped.
          */
         const val ARM_LEAD_MS = 4_000L
-
-        /**
-         * How far past a planned transition start the playhead may be and still
-         * begin it. Beyond this the mix would start with most of its overlap gone.
-         */
-        const val MISSED_START_TOLERANCE_MS = 1_000L
 
         /**
          * The earliest, in wall-clock ms before the next item starts, that
