@@ -1135,6 +1135,14 @@ class CrossfadeController(
         val loop = loopPlanFor(
             player, currentItem, nextItem, currentAnalysis, nextAnalysis, duration, nextDuration, analysisState,
         )
+        // A loop the next track is still caching for waits rather than losing
+        // to a normal blend: the blend would be armed for the same pair, and
+        // once armed nothing reconsiders the loop.
+        if (loop != null && !nextStreamReady(nextItem) &&
+            (loop.out.loopStart * 1000 - player.currentPosition) > LOOP_ARM_LEAD_MS
+        ) {
+            return
+        }
         if (loop != null && nextStreamReady(nextItem)) {
             val loopStartMs = (loop.out.loopStart * 1000).roundToLong()
             AppSettings.smartTransitionWindow.value = TransitionWindow(
@@ -2475,7 +2483,13 @@ class CrossfadeController(
         val cached = loopPlanned
         // Kept while its loop is still far enough ahead to set up; a seek past
         // that plans again from the new playhead.
-        if (key == loopPlanKey && (cached == null || cached.out.loopStart * 1000 - player.currentPosition >= LOOP_MIN_LEAD_MS)) {
+        // Once planned, the loop stays put while the playhead runs toward it.
+        // Replanning from a playhead LOOP_SETUP_SECONDS short of the loop start
+        // refuses every loop point and fell back to a normal blend — that was
+        // the flip seen when tua near or play into the normal mix point.
+        if (key == loopPlanKey && cached != null &&
+            cached.out.loopStart * 1000 - player.currentPosition >= -LOOP_KEEP_PAST_MS
+        ) {
             return cached
         }
         val why = StringBuilder()
@@ -4285,6 +4299,7 @@ class CrossfadeController(
         const val LOOP_SETUP_SECONDS = 15.0
         const val LOOP_ARM_LEAD_MS = 12_000L
         const val LOOP_MIN_LEAD_MS = 9_000L
+        const val LOOP_KEEP_PAST_MS = 2_000L
         const val LOOP_BUILD_TIMEOUT_MS = 8_000L
 
         /** After the incoming player starts, how long its clock settles before it is measured against the deck. */
