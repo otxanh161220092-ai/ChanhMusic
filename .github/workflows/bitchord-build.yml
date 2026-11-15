@@ -1,5 +1,7 @@
 name: BitChord verbatim build
 on:
+  push:
+    branches: [bitchord-verbatim]
   workflow_dispatch:
 jobs:
   build:
