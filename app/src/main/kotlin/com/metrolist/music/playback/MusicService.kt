@@ -471,7 +471,18 @@ class MusicService :
                 bcmixAnalyzer.request(item.mediaId, bcmixUriFor(item.mediaId), durationMs / 1000.0)
             },
             analysisRunningFor = { item -> bcmixAnalyzer.isAnalysing(item.mediaId) },
+            filters = bcmixFilters,
         )
+    }
+
+    /** The transition filters of the session player (incoming) and the spare (outgoing). */
+    private val bcmixFilters = object : com.metrolist.music.bcmix.TransitionFilters {
+        private fun sessionFilter() = playerBcTransition[player]
+        private fun spareFilter() = bcmixSpare?.let { playerBcTransition[it] }
+        override fun incoming(lowPassHz: Float, highPassHz: Float) { sessionFilter()?.setCutoffs(lowPassHz, highPassHz) }
+        override fun outgoing(lowPassHz: Float, highPassHz: Float) { spareFilter()?.setCutoffs(lowPassHz, highPassHz) }
+        override fun incomingLeadMs(): Long = (sessionFilter()?.leadUs ?: 0L) / 1000
+        override fun outgoingLeadMs(): Long = (spareFilter()?.leadUs ?: 0L) / 1000
     }
     private var mixPlan: TransitionPlan? = null
     private var mixPlanJob: Job? = null
@@ -544,6 +555,7 @@ class MusicService :
     private val playerNormalizationProcessors = HashMap<Player, VolumeNormalizationAudioProcessor>()
     private val playerEqualizerProcessors = HashMap<Player, CustomEqualizerAudioProcessor>()
     private val playerTailFxProcessors = HashMap<Player, TailFxAudioProcessor>()
+    private val playerBcTransition = HashMap<Player, com.metrolist.music.bcmix.TransitionFilterProcessor>()
 
     private var loudnessSetupJob: Job? = null
     private var loudnessSetupGeneration: Long = 0L
@@ -1469,6 +1481,9 @@ class MusicService :
 
         val silenceProcessor = SilenceDetectorAudioProcessor { handleLongSilenceDetected() }
         val tailFxProcessor = TailFxAudioProcessor()
+        val bcSpatial = com.metrolist.music.bcmix.SpatialAudioProcessor()
+        val bcTransition = com.metrolist.music.bcmix.TransitionFilterProcessor()
+        val bcLoudness = com.metrolist.music.bcmix.LoudnessProcessor()
 
         val useFloatOutput =
             (
@@ -1501,7 +1516,7 @@ class MusicService :
                 .setMediaSourceFactory(
                     createMediaSourceFactory(normalizationProcessor) { createdPlayer },
                 )
-                .setRenderersFactory(createRenderersFactory(normalizationProcessor, eqProcessor, silenceProcessor, tailFxProcessor, useAudioTrackPlaybackParams, useFloatOutput))
+                .setRenderersFactory(createRenderersFactory(normalizationProcessor, eqProcessor, silenceProcessor, tailFxProcessor, bcSpatial, bcTransition, bcLoudness, useAudioTrackPlaybackParams, useFloatOutput))
                 .setLoadControl(
                     // Start playback once ~750ms is buffered (media3's default is 1000ms) so first
                     // audio is audible a touch sooner. min/max/after-rebuffer match the media3 1.x
@@ -1530,6 +1545,7 @@ class MusicService :
         playerSilenceProcessors[player] = silenceProcessor
         playerEqualizerProcessors[player] = eqProcessor
         playerTailFxProcessors[player] = tailFxProcessor
+        playerBcTransition[player] = bcTransition
         equalizerService.addAudioProcessor(eqProcessor)
 
         if (prefs != null) {
@@ -4206,6 +4222,9 @@ class MusicService :
         eqProcessor: CustomEqualizerAudioProcessor,
         silenceProcessor: SilenceDetectorAudioProcessor,
         tailFxProcessor: TailFxAudioProcessor,
+        bcSpatial: com.metrolist.music.bcmix.SpatialAudioProcessor,
+        bcTransition: com.metrolist.music.bcmix.TransitionFilterProcessor,
+        bcLoudness: com.metrolist.music.bcmix.LoudnessProcessor,
         useAudioTrackPlaybackParams: Boolean,
         useFloatOutput: Boolean,
     ) = object : DefaultRenderersFactory(this) {
@@ -4283,10 +4302,10 @@ class MusicService :
             return PrecisionAudioSink(
                 delegate = metrolistSink,
                 dspChain = DspChain(
-                    SpatialAudioProcessor(),
+                    bcSpatial,
                     com.metrolist.music.bcmix.EqualizerProcessor(),
-                    TransitionFilterProcessor(),
-                    LoudnessProcessor(),
+                    bcTransition,
+                    bcLoudness,
                 ),
                 enableFloatOutput = useFloatOutput,
                 isAudible = { true },
