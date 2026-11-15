@@ -85,7 +85,7 @@ internal object SpotifyToken {
      * enough.
      */
     suspend fun accessToken(): String? {
-        val cookie = CanvasSettings.spotifySpdcToken.value
+        val cookie = CanvasSettings.spotifySpdcToken.value.orEmpty()
         if (cookie.isBlank()) return null
 
         val now = System.currentTimeMillis()
