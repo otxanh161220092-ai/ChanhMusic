@@ -304,12 +304,11 @@ private const val RETIRE_DELAY_MS = 300L
 private const val VISUAL_TRANSITION_MS = 900f
 private const val DEFAULT_UNKNOWN_DURATION_MS = 180_000L
 private const val AUTOMIX_ANALYSIS_TIMEOUT_MS = 60_000L
+private const val LOOP_LYRICS_TIMEOUT_MS = 8_000L
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @androidx.annotation.OptIn(UnstableApi::class)
 @AndroidEntryPoint
-private const val LOOP_LYRICS_TIMEOUT_MS = 8_000L
-
 class MusicService :
     MediaLibraryService(),
     Player.Listener,
