@@ -1104,12 +1104,7 @@ class CrossfadeController(
             nextAnalysis = nextAnalysis,
             currentTrack = currentItem.toTransitionInfo(duration),
             nextTrack = nextItem.toTransitionInfo(nextDuration),
-            // The plan is made from the analysis and the track lengths alone. The
-            // playhead used to be an input here, so tapping the seek bar near the
-            // mix point re-ranked the exits and moved the window; now the window
-            // stays where the analysis put it, and the playhead only decides
-            // whether the blend starts (see the guard below).
-            currentTime = 0.0,
+            currentTime = player.currentPosition / 1000.0,
             duration = duration / 1000.0,
             fadeSeconds = fallbackSeconds,
             mode = CrossfadeMode.SMART,
@@ -1222,10 +1217,6 @@ class CrossfadeController(
         val transitionStartMs = (plan.transitionStart * 1000).roundToLong()
         plannedTransition = currentItem.mediaId to transitionStartMs
         val remaining = transitionStartMs - player.currentPosition
-        // The playhead is already well past the planned start: a seek landed
-        // beyond the window. Blending now would start with most of the overlap
-        // gone, so this pair plays out and the queue moves on.
-        if (remaining < -MISSED_START_TOLERANCE_MS) return
         if (remaining <= MIX_PREFETCH_MS && currentAnalysis.isUsable && nextAnalysis.isUsable) {
             prefetchMixWaves(
                 currentItem, nextItem, duration, nextDuration,
@@ -3890,12 +3881,6 @@ class CrossfadeController(
          * gets dropped.
          */
         const val ARM_LEAD_MS = 4_000L
-
-        /**
-         * How far past a planned transition start the playhead may be and still
-         * begin it. Beyond this the blend would start with most of its overlap gone.
-         */
-        const val MISSED_START_TOLERANCE_MS = 1_000L
 
         /**
          * The earliest, in wall-clock ms before the next item starts, that
