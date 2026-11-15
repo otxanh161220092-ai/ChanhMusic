@@ -18,9 +18,8 @@ import java.nio.ByteBuffer
 
 /** JNI over `exclusive_output.cpp`. Handles are opaque ids, never pointers. */
 internal object ExclusiveNative {
-    init {
-        System.loadLibrary("bitchord_exclusive")
-    }
+    /** False when the native library is not packaged in this build; the factory then declines. */
+    val available: Boolean = runCatching { System.loadLibrary("bitchord_exclusive") }.isSuccess
 
     external fun open(rate: Int, channels: Int, bits: Int, device: Int): Long
     external fun bits(handle: Long): Int
@@ -126,6 +125,7 @@ internal class ExclusiveTransport private constructor(
         private const val MAX_RATE_ATTEMPTS = 3
 
         fun open(manager: AudioManager, rate: Int, channels: Int, sourceBits: Int, convert: Boolean): ExclusiveTransport {
+            if (!ExclusiveNative.available) throw BitPerfectTransportException("exclusive_unavailable")
             val outputs = manager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
             val wired = outputs.firstOrNull {
                 it.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES || it.type == AudioDeviceInfo.TYPE_WIRED_HEADSET

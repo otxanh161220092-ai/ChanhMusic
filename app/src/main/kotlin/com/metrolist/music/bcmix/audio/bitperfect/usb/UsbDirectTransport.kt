@@ -19,9 +19,8 @@ import java.nio.ByteBuffer
 
 /** JNI over `usb_transport.cpp`. Handles are opaque ids, never pointers. */
 internal object UsbDirectNative {
-    init {
-        System.loadLibrary("bitchord_usb")
-    }
+    /** False when the native library is not packaged in this build; the factory then declines. */
+    val available: Boolean = runCatching { System.loadLibrary("bitchord_usb") }.isSuccess
 
     /** [candidates] holds [CANDIDATE_INTS] values per candidate, in preference order. */
     external fun open(fd: Int, candidates: IntArray): Long
@@ -163,6 +162,7 @@ internal class UsbDirectTransport private constructor(
             allowFixedVolume: Boolean,
             rememberedDb: Double?,
         ): UsbDirectTransport {
+            if (!UsbDirectNative.available) throw BitPerfectTransportException("usb_unavailable")
             val connection = manager.openDevice(device) ?: throw BitPerfectTransportException("cannot_open_usb")
             var handle = 0L
             try {
