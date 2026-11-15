@@ -2915,7 +2915,7 @@ class CrossfadeController(
                 else -> {
                     val rate = plan.incomingPlaybackRate
                     val stretch = if (abs(rate - 1) < 0.0005) "same tempo" else "next at ${"%.3f".format(Locale.ROOT, rate)}×"
-                    "Automix · mixing $whenText · $length · $stretch$noLoop"
+                    "Automix · mixing $whenText · $length$noLoop · $stretch"
                 }
             }
         }
