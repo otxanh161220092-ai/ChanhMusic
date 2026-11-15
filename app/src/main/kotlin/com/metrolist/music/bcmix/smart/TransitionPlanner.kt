@@ -1540,12 +1540,11 @@ private fun planTransitionInner(
     }
 
     val preferredMixAnchor = min(length, mixOutAnchor.time)
-    val mixAnchor =
-        if (playbackTime >= preferredMixAnchor - 0.05 && preferredMixAnchor < finalMixAnchor - 1) {
-            finalMixAnchor
-        } else {
-            preferredMixAnchor
-        }
+    // The analysed mix-out point is used as found. Moving the anchor later
+    // once the playhead passes it (or after a seek lands near it) turned a
+    // good, measured join into a different and worse one; a playhead that is
+    // already past the point now simply does not mix there, see the controller.
+    val mixAnchor = preferredMixAnchor
 
     val policy = assessTransitionTier(analysis, nextAnalysis, advanced)
     if (policy.tier == TransitionTier.PLAIN_CROSSFADE) {
