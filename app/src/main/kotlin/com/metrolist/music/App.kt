@@ -76,6 +76,10 @@ class App :
             com.metrolist.music.bcmix.auth.AuthStore(),
         )
 
+        // Canvas (animated cover) disk cache and Spotify token context.
+        com.metrolist.music.bcmix.canvas.CanvasCache.init(this)
+        com.metrolist.music.bcmix.canvas.SpotifyToken.init(this)
+
         // CrashActivity runs in a separate process. Starting the full app there can make that
         // process claim WebView's data directory and crash the next main-process WebView.
         if (!isMainProcess()) return
