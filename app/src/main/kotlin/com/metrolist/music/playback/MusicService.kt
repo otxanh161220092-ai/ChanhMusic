@@ -475,6 +475,14 @@ class MusicService :
             filters = bcmixFilters,
             // Each sink's loop-mix port rides on its transition filter, so the
             // player and the spare trade their ports at every handoff.
+            // The loudness stage of the player that is taking the next track on.
+            onArmIncoming = { item, nextId ->
+                bcmixSpare?.let { playerBcLoudness[it] }?.track(item.mediaId, nextId)
+            },
+            // Both sides get the same trim: the trim is about what the pair sums to.
+            onBlendHeadroom = { trim ->
+                playerBcLoudness.values.forEach { it.setBlendTrim(trim) }
+            },
             loopPortOf = { target ->
                 when {
                     target === player -> playerBcTransition[target]?.loop
@@ -600,6 +608,7 @@ class MusicService :
     private val playerTailFxProcessors = HashMap<Player, TailFxAudioProcessor>()
     private val playerBcTransition = HashMap<Player, com.metrolist.music.bcmix.TransitionFilterProcessor>()
     private val playerBcSpatial = HashMap<Player, com.metrolist.music.bcmix.SpatialAudioProcessor>()
+    private val playerBcLoudness = HashMap<Player, com.metrolist.music.bcmix.LoudnessProcessor>()
 
     private var loudnessSetupJob: Job? = null
     private var loudnessSetupGeneration: Long = 0L
@@ -1600,6 +1609,7 @@ class MusicService :
         playerTailFxProcessors[player] = tailFxProcessor
         playerBcTransition[player] = bcTransition
         playerBcSpatial[player] = bcSpatial
+        playerBcLoudness[player] = bcLoudness
         equalizerService.addAudioProcessor(eqProcessor)
 
         if (prefs != null) {
