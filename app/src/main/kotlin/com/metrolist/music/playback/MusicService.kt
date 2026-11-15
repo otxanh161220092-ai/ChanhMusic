@@ -87,6 +87,11 @@ import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.analytics.PlaybackStats
 import androidx.media3.exoplayer.analytics.PlaybackStatsListener
 import androidx.media3.exoplayer.audio.DefaultAudioSink
+import com.metrolist.music.bcmix.audio.DspChain
+import com.metrolist.music.bcmix.audio.LoudnessProcessor
+import com.metrolist.music.bcmix.audio.PrecisionAudioSink
+import com.metrolist.music.bcmix.audio.SpatialAudioProcessor
+import com.metrolist.music.bcmix.TransitionFilterProcessor
 import androidx.media3.exoplayer.audio.AudioRendererEventListener
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.MediaCodecAudioRenderer
@@ -4252,22 +4257,41 @@ class MusicService :
             context: Context,
             enableFloatOutput: Boolean,
             enableAudioTrackPlaybackParams: Boolean,
-        ) = DefaultAudioSink
-            .Builder(this@MusicService)
-            .setEnableFloatOutput(useFloatOutput)
-            .setEnableAudioTrackPlaybackParams(useAudioTrackPlaybackParams)
-            .setAudioProcessorChain(
-                DefaultAudioSink.DefaultAudioProcessorChain(
-                    arrayOf(
-                        normalizationProcessor,
-                        eqProcessor,
-                        silenceProcessor,
-                        tailFxProcessor,
+        ): AudioSink {
+            // Metrolist's own chain, unchanged, is the delegate: its equaliser,
+            // normalisation, silence handling and tail effect all stay as they were.
+            val metrolistSink = DefaultAudioSink
+                .Builder(this@MusicService)
+                .setEnableFloatOutput(useFloatOutput)
+                .setEnableAudioTrackPlaybackParams(useAudioTrackPlaybackParams)
+                .setAudioProcessorChain(
+                    DefaultAudioSink.DefaultAudioProcessorChain(
+                        arrayOf(
+                            normalizationProcessor,
+                            eqProcessor,
+                            silenceProcessor,
+                            tailFxProcessor,
+                        ),
+                        SilenceSkippingAudioProcessor(2_000_000, 20_000, 256),
+                        SonicAudioProcessor(),
                     ),
-                    SilenceSkippingAudioProcessor(2_000_000, 20_000, 256),
-                    SonicAudioProcessor(),
+                ).build()
+            // BitChord's float DSP stage runs ahead of that chain. Its spatial and
+            // transition stages are off until a feature turns them on, and its
+            // loudness stage is left at unity gain because Metrolist's
+            // normalisation already runs in the delegate.
+            return PrecisionAudioSink(
+                delegate = metrolistSink,
+                dspChain = DspChain(
+                    SpatialAudioProcessor(),
+                    com.metrolist.music.bcmix.EqualizerProcessor(),
+                    TransitionFilterProcessor(),
+                    LoudnessProcessor(),
                 ),
-            ).build()
+                enableFloatOutput = useFloatOutput,
+                isAudible = { true },
+            )
+        }
     }
 
     override fun onPlaybackStatsReady(
