@@ -42,7 +42,7 @@ data class LyricLine(
 val androidx.media3.common.MediaItem.isVideoOrigin: Boolean get() = false
 
 /** The bit-perfect output's state, read from the real output. */
-object BitPerfectOutput {
+internal object BitPerfectOutput {
     val ready: kotlinx.coroutines.flow.StateFlow<Boolean>
         get() = com.metrolist.music.bcmix.audio.bitperfect.BitPerfectOutput.ready
     val status: kotlinx.coroutines.flow.StateFlow<com.metrolist.music.bcmix.audio.bitperfect.BitPerfectOutput.Status>
