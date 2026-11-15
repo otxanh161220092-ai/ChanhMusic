@@ -52,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -831,5 +832,7 @@ internal fun MixViewOverlay(hazeState: HazeState) {
         live = currentBlend != null,
         hazeState = hazeState,
         onDismiss = { MixViewRequest.open = false },
+        // Above everything the player draws, not only its own content.
+        modifier = Modifier.zIndex(100f),
     )
 }

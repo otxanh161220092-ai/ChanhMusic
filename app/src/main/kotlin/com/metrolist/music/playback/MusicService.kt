@@ -472,6 +472,9 @@ class MusicService :
             },
             analysisRunningFor = { item -> bcmixAnalyzer.isAnalysing(item.mediaId) },
             filters = bcmixFilters,
+            mixWaveform = { item, durationMs, from, to, bins ->
+                bcmixAnalyzer.mixWaveform(item.mediaId, bcmixUriFor(item.mediaId), durationMs / 1000.0, from, to, bins)
+            },
         )
     }
 

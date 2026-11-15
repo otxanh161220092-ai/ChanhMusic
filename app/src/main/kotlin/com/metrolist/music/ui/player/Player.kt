@@ -1684,6 +1684,7 @@ fun BottomSheetPlayer(
                         sliderPosition?.let { playerConnection.player.seekTo(it) }
                         sliderPosition = null
                     },
+                    modifier = Modifier.padding(horizontal = PlayerHorizontalPadding),
                 )
             }
             if (!bcAutomixOn) when (sliderStyle) {
