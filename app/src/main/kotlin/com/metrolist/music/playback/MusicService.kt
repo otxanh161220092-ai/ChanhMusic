@@ -556,6 +556,7 @@ class MusicService :
     private val playerEqualizerProcessors = HashMap<Player, CustomEqualizerAudioProcessor>()
     private val playerTailFxProcessors = HashMap<Player, TailFxAudioProcessor>()
     private val playerBcTransition = HashMap<Player, com.metrolist.music.bcmix.TransitionFilterProcessor>()
+    private val playerBcSpatial = HashMap<Player, com.metrolist.music.bcmix.SpatialAudioProcessor>()
 
     private var loudnessSetupJob: Job? = null
     private var loudnessSetupGeneration: Long = 0L
@@ -753,6 +754,12 @@ class MusicService :
         )
         isRunning = true
         shutdownDeferred = kotlinx.coroutines.CompletableDeferred<Unit>()
+        // Spatial widening follows its setting on every player, live.
+        scope.launch {
+            com.metrolist.music.bcmix.settings.AppSettings.spatialAudio.collect { enabled ->
+                playerBcSpatial.values.forEach { it.enabled = enabled }
+            }
+        }
 
         setListener(
             object : MediaSessionService.Listener {
@@ -1481,7 +1488,9 @@ class MusicService :
 
         val silenceProcessor = SilenceDetectorAudioProcessor { handleLongSilenceDetected() }
         val tailFxProcessor = TailFxAudioProcessor()
-        val bcSpatial = com.metrolist.music.bcmix.SpatialAudioProcessor()
+        val bcSpatial = com.metrolist.music.bcmix.SpatialAudioProcessor().apply {
+            enabled = com.metrolist.music.bcmix.settings.AppSettings.spatialAudio.value
+        }
         val bcTransition = com.metrolist.music.bcmix.TransitionFilterProcessor()
         val bcLoudness = com.metrolist.music.bcmix.LoudnessProcessor()
 
@@ -1546,6 +1555,7 @@ class MusicService :
         playerEqualizerProcessors[player] = eqProcessor
         playerTailFxProcessors[player] = tailFxProcessor
         playerBcTransition[player] = bcTransition
+        playerBcSpatial[player] = bcSpatial
         equalizerService.addAudioProcessor(eqProcessor)
 
         if (prefs != null) {

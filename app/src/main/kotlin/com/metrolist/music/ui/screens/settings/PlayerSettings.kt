@@ -136,6 +136,7 @@ fun PlayerSettings(
         defaultValue = true
     )
     val bcPerformance by BcmixSettings.automixPerformanceMode.collectAsState()
+    val bcSpatial by BcmixSettings.spatialAudio.collectAsState()
     val (automixStyle, onAutomixStyleChange) = rememberPreference(
         AutomixStyleKey,
         defaultValue = "caihat"
@@ -446,6 +447,18 @@ fun PlayerSettings(
                     ))
                 }
                 if (automixEnabled && automixStyle == "bitchord") {
+                    add(Material3SettingsItem(
+                        icon = painterResource(R.drawable.graphic_eq),
+                        title = { Text("Spatial audio") },
+                        description = { Text("Widens stereo output. Stereo tracks only; no effect on Dolby Atmos.") },
+                        trailingContent = {
+                            Switch(
+                                checked = bcSpatial,
+                                onCheckedChange = { BcmixSettings.setSpatialAudio(it) },
+                            )
+                        },
+                        onClick = { BcmixSettings.setSpatialAudio(!bcSpatial) }
+                    ))
                     add(Material3SettingsItem(
                         icon = painterResource(R.drawable.graphic_eq),
                         title = { Text("Automix performance") },
