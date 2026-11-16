@@ -1152,14 +1152,12 @@ class CrossfadeController(
             if (markerOnly) return
             plannedTransition = currentItem.mediaId to loopStartMs
             holdAhead(player, duration)
-            val leadMs = loopStartMs - player.currentPosition
-            if (leadMs > LOOP_BUILD_LEAD_MS) return
-            // Too close to the loop for the decks to build in time: the sink would
-            // already be past it when it arms. The blend takes the pair instead.
-            if (leadMs >= LOOP_MIN_LEAD_MS) {
-                beginLoop(player, loop, currentItem, nextItem, duration, nextDuration)
-                return
-            }
+            // Never fall through to the blend here: once a blend is armed nothing
+            // reconsiders the loop, so a pair that was close to its loop stayed a
+            // normal mix for good.
+            if (loopStartMs - player.currentPosition > LOOP_BUILD_LEAD_MS) return
+            beginLoop(player, loop, currentItem, nextItem, duration, nextDuration)
+            return
         }
 
         // Loop first, then the normal blend, then plain crossfade. While a loop
@@ -4324,7 +4322,6 @@ class CrossfadeController(
         const val LOOP_ARM_LEAD_MS = 12_000L
         /** Decks take 4–7 s to build; start them this far ahead so they are ready before the loop. */
         const val LOOP_BUILD_LEAD_MS = 20_000L
-        /** Fewer ms than this left before the loop: the decks can't be built in time, so don't try. */
         const val LOOP_MIN_LEAD_MS = 9_000L
         // Long enough that a loop bailed out by a flushed sink keeps its plan for
         // the retry; past it, the search only looks ahead and finds no bar lines.
