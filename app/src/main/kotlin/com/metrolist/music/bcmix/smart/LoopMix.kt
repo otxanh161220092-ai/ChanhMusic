@@ -77,7 +77,7 @@ object LoopMix {
     const val LYRIC_TAIL_SEC = 0.35
 
     /** A line with no stated end is taken as sung until the next line, at most this long. */
-    const val LYRIC_OPEN_LINE_SEC = 10.0
+    const val LYRIC_OPEN_LINE_SEC = 4.0
 
     /**
      * Of a line with no stated end, how much is surely sung: its opening words.
