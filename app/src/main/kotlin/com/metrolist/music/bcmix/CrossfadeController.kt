@@ -2408,6 +2408,8 @@ class CrossfadeController(
 
     /** The pair (and analyses) the cached loop plan belongs to, and that plan; null when none is possible. */
     private var loopPlanKey: String? = null
+    /** Seconds the audible clock runs ahead of the player position, measured in the last loop mix. */
+    private var audibleLeadSec = 0.0
     private var loopPlanned: LoopMix.Plan? = null
 
     /** Why the pair gets no loop mix, for the log and the stats line; null when it does. */
@@ -2894,6 +2896,13 @@ class CrossfadeController(
         val session = loopSession
         if (session != null) {
             val m = session.mixSeconds(System.nanoTime(), outgoing?.isPlaying ?: false)
+            // The sink's clock is the audible one. Where the player's position
+            // trails it, the planned countdown fires late; keep the measured
+            // difference so the countdown can be read on the audible clock.
+            if (m != null && outgoing?.isPlaying == true) {
+                val measured = m - (player.currentPosition / 1000.0 - session.plan.out.loopStart)
+                if (measured.isFinite() && kotlin.math.abs(measured) < 30.0) audibleLeadSec = measured
+            }
             val stage = when {
                 phase == Phase.LOOP_ARMING || m == null || m < 0 ->
                     "loop mix in ${ceil(-(m ?: -LOOP_ARM_LEAD_MS / 1000.0)).toInt().coerceAtLeast(0)} s"
@@ -2908,7 +2917,7 @@ class CrossfadeController(
         val next = if (nextIndex == C.INDEX_UNSET) null else player.getMediaItemAt(nextIndex)
         val planned = loopPlanned
         if (planned != null && next != null && loopPlanKey?.startsWith("${item.mediaId}->${next.mediaId}|") == true) {
-            val inSeconds = (planned.out.loopStart - player.currentPosition / 1000.0).coerceAtLeast(0.0)
+            val inSeconds = (planned.out.loopStart - player.currentPosition / 1000.0 - audibleLeadSec).coerceAtLeast(0.0)
             return "Automix · loop mix in ${ceil(inSeconds).toInt()} s · ${describeLoop(planned)}"
         }
         val plan = lastSmartPlan
