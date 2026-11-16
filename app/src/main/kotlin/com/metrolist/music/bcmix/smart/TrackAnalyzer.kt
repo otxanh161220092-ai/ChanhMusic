@@ -403,6 +403,9 @@ class TrackAnalyzer(private val context: Context, private val cache: AudioCache)
             // which is a no-op after the first call and for anything that isn't
             // a YouTube-backed track.
             cache.requestAnalysisHead(analysisUri)
+            // A whole-track pass needs the whole track on disk, and playback only
+            // gets there if the track is played through. Fetch it now.
+            if (!usableComplete) cache.requestAnalysisWhole(analysisUri)
             return
         }
         if (!running.add(trackId)) return

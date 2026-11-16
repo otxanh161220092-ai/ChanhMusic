@@ -1868,6 +1868,43 @@ object AudioCache {
         )
     }
 
+    private val analysisWholes = ConcurrentHashMap<String, Boolean>()
+
+    /**
+     * Downloads a whole track into the cache for analysis. A whole-track pass
+     * otherwise waited for playback to finish the download, which for a track
+     * never played through meant it never ran. One round per track per session.
+     */
+    fun requestAnalysisWhole(uri: Uri) {
+        if (!::cache.isInitialized || upstreamFactory == null) return
+        val videoId = uri.getQueryParameter("v") ?: return
+        if (analysisWholes.putIfAbsent(videoId, true) != null) return
+        scope.launch {
+            try {
+                val total = runCatching { StreamResolver.contentLength(videoId) }
+                    .onFailure { TrackLog.w(TAG, "whole contentLength failed for $videoId: ${it.message}", videoId) }
+                    .getOrNull() ?: 0L
+                if (total <= 0L) {
+                    analysisWholes.remove(videoId)
+                    return@launch
+                }
+                TrackLog.w(TAG, "analysis whole round for $videoId: total=$total", videoId)
+                fetch(
+                    cacheKey = videoId,
+                    uri = Uri.parse(AutomixAnalysisSource.opusUri(videoId)),
+                    position = 0,
+                    length = total,
+                    pinKey = true,
+                )
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Not retried this session: a failing track would otherwise refetch every tick.
+                TrackLog.w(TAG, "analysis whole round failed for $videoId: ${e.message}", videoId)
+            }
+        }
+    }
+
     fun requestAnalysisHead(uri: Uri) {
         // Each of these gates used to stop a head dead with nothing in the
         // log to show for it: an unwired cache or upstream looked from the
