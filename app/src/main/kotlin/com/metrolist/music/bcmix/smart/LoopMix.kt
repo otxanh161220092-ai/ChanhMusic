@@ -344,22 +344,25 @@ object LoopMix {
                 if (sung != null) {
                     val from = loop.start - LYRIC_GUARD_SEC
                     val touching = sung.filter { it.start < loop.end && it.end > from }
+                    if (touching.isEmpty()) return Clean(loop.start, loop.end, bars, 0.0, Check.LYRICS)
+                    // The separated vocal track decides wherever it has measured the
+                    // loop. Lyric lines only count when it hasn't, since their timing
+                    // can drift from the audio and a repeated sung line isn't a
+                    // problem the loop has to avoid on its own.
+                    val mask = maskStats(analysis.vocalWindows, loop.start - beatSec, loop.end)
+                    if (mask != null) {
+                        if (mask.share > MAX_SUNG_SHARE || mask.longestRunSec > MAX_SUNG_RUN_SEC) {
+                            count.sung++
+                            continue
+                        }
+                        return Clean(loop.start, loop.end, bars, mask.share, Check.LYRICS_AND_MASK)
+                    }
                     if (touching.any { it.start < loop.end && it.certainUntil > from }) {
                         count.lyrics++
                         continue
                     }
-                    if (touching.isEmpty()) return Clean(loop.start, loop.end, bars, 0.0, Check.LYRICS)
-                    // Only the guessed tails of open lines reach it: the mask decides those.
-                    val mask = maskStats(analysis.vocalWindows, loop.start - beatSec, loop.end)
-                    if (mask == null) {
-                        count.unmasked++
-                        continue
-                    }
-                    if (mask.share > MAX_SUNG_SHARE || mask.longestRunSec > MAX_SUNG_RUN_SEC) {
-                        count.sung++
-                        continue
-                    }
-                    return Clean(loop.start, loop.end, bars, mask.share, Check.LYRICS_AND_MASK)
+                    count.unmasked++
+                    continue
                 }
                 val mask = maskStats(analysis.vocalWindows, loop.start - beatSec, loop.end)
                 if (mask == null) {
