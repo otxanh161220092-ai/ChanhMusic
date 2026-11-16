@@ -188,7 +188,7 @@ object LoopMix {
             sung = sungOut,
             beatSec = outGrid.beatSec,
             count = outCount,
-        ) ?: return null.also { why?.append("outgoing: ")?.append(outCount) }
+        ) ?: return null.also { why?.append("outgoing: ")?.append(outCount)?.append(vocalCoverage(out, outDuration)) }
 
         // incoming: the earliest instrumental loop in its opening
         val inEnd = min(IN_SEARCH_SEC + LOOP_BARS * inGrid.barSec, inDuration - 20)
@@ -198,7 +198,7 @@ object LoopMix {
             sung = sungIn,
             beatSec = inGrid.beatSec,
             count = inCount,
-        ) ?: return null.also { why?.append("incoming: ")?.append(inCount) }
+        ) ?: return null.also { why?.append("incoming: ")?.append(inCount)?.append(vocalCoverage(inn, inDuration)) }
 
         val outBeat = (outPick.end - outPick.start) / (outPick.bars * 4)
         val inBeat = (inPick.end - inPick.start) / (inPick.bars * 4)
@@ -413,6 +413,14 @@ object LoopMix {
      * How much of [from]..[to] the vocal model calls sung, and its longest sung
      * run; null when its windows cover under [MIN_MASK_COVERAGE] of it.
      */
+    /** The vocal mask's measured spans, for the log when a search finds nothing: where it has and hasn't read. */
+    private fun vocalCoverage(analysis: TrackAnalysis, durationSec: Double): String {
+        val spans = analysis.vocalWindows.joinToString(", ") {
+            "%.0f-%.0f".format(java.util.Locale.ROOT, it.startTime, it.startTime + it.values.size / it.frameRate)
+        }
+        return " (vocal mask over ${if (spans.isEmpty()) "nothing" else spans} of ${"%.0f".format(java.util.Locale.ROOT, durationSec)}s)"
+    }
+
     fun maskStats(windows: List<CurveWindow>, from: Double, to: Double): MaskStats? {
         var sung = 0
         var n = 0
