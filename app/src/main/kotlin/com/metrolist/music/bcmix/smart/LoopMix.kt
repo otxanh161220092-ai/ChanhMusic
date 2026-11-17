@@ -199,6 +199,7 @@ object LoopMix {
             sung = sungIn,
             beatSec = inGrid.beatSec,
             count = inCount,
+            instrumentalOnly = true,
         ) ?: return null.also { why?.append("incoming: ")?.append(inCount)?.append(vocalCoverage(inn, inDuration)) }
 
         val outBeat = (outPick.end - outPick.start) / (outPick.bars * 4)
@@ -322,12 +323,17 @@ object LoopMix {
         }
     }
 
+    /**
+     * [instrumentalOnly] is the incoming song: its loop must carry no sung line at
+     * all, repeated or not, so a vocal passage plays through into the mix instead.
+     */
     private fun firstClean(
         candidates: (Int) -> List<Loop>,
         analysis: TrackAnalysis,
         sung: List<Span>?,
         beatSec: Double,
         count: Rejections,
+        instrumentalOnly: Boolean = false,
     ): Clean? {
         for (bars in LOOP_LENGTHS) {
             val loops = candidates(bars)
@@ -346,6 +352,10 @@ object LoopMix {
                     val from = loop.start - LYRIC_GUARD_SEC
                     val touching = sung.filter { it.start < loop.end && it.end > from }
                     if (touching.isEmpty()) return Clean(loop.start, loop.end, bars, 0.0, Check.LYRICS)
+                    if (instrumentalOnly) {
+                        count.lyrics++
+                        continue
+                    }
                     // Only a sung line the song repeats: the loop just repeats a phrase that is already repeated.
                     if (touching.all { it.repeated }) return Clean(loop.start, loop.end, bars, 0.0, Check.LYRICS)
                     // The separated vocal track decides wherever it has measured the
