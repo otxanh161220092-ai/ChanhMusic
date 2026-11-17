@@ -413,6 +413,23 @@ object LoopMix {
      * How much of [from]..[to] the vocal model calls sung, and its longest sung
      * run; null when its windows cover under [MIN_MASK_COVERAGE] of it.
      */
+    /**
+     * The latest downbeat at or before [nominal], within [lookBack] seconds, where the
+     * vocal mask reads the next bar as instrumental. Null when none is found, or the
+     * mask hasn't measured it.
+     */
+    fun cleanMixPoint(analysis: TrackAnalysis, nominal: Double, lookBack: Double): Double? {
+        val side = analysis.tailBeats ?: return null
+        if (side.bpm <= 0) return null
+        val bar = 4 * 60 / side.bpm
+        for (db in side.downbeats.asReversed()) {
+            if (db > nominal || db < nominal - lookBack) continue
+            val m = maskStats(analysis.vocalWindows, db, db + bar) ?: continue
+            if (m.share <= MAX_SUNG_SHARE && m.longestRunSec <= MAX_SUNG_RUN_SEC) return db
+        }
+        return null
+    }
+
     /** The vocal mask's measured spans, for the log when a search finds nothing: where it has and hasn't read. */
     private fun vocalCoverage(analysis: TrackAnalysis, durationSec: Double): String {
         val spans = analysis.vocalWindows.joinToString(", ") {

@@ -660,6 +660,9 @@ private const val MIN_FADE_BEATS = 4
 
 /** The shortest a plain crossfade is allowed to be, in seconds. */
 private const val PLAIN_CROSSFADE_MIN_SECONDS = 10.0
+
+/** How far back from the mix point a clean bar is looked for. */
+private const val CLEAN_MIX_LOOK_BACK_SECONDS = 16.0
 private const val MAX_FADE_BEATS = 16
 
 // A ceiling on the whole overlap regardless of how long the incoming intro is.
@@ -1543,12 +1546,15 @@ private fun planTransitionInner(
     }
 
     val preferredMixAnchor = min(length, mixOutAnchor.time)
-    val mixAnchor =
+    val rawMixAnchor =
         if (playbackTime >= preferredMixAnchor - 0.05 && preferredMixAnchor < finalMixAnchor - 1) {
             finalMixAnchor
         } else {
             preferredMixAnchor
         }
+    // Step 1 of the mix-to-instrumental change: the mix point moves back to the
+    // latest bar where the outgoing song isn't singing, when there is one nearby.
+    val mixAnchor = LoopMix.cleanMixPoint(analysis, rawMixAnchor, CLEAN_MIX_LOOK_BACK_SECONDS) ?: rawMixAnchor
 
     val policy = assessTransitionTier(analysis, nextAnalysis, advanced)
     if (policy.tier == TransitionTier.PLAIN_CROSSFADE) {
