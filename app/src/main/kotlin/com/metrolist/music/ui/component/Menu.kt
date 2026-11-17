@@ -129,9 +129,9 @@ fun GlassMenuDivider(modifier: Modifier = Modifier) {
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 18.dp)
                 .height(1.dp)
-                .background(LocalContentColor.current.copy(alpha = 0.15f)),
+                .background(LocalContentColor.current.copy(alpha = 0.10f)),
     )
 }
 

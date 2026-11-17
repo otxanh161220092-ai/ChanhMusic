@@ -31,6 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,22 +76,21 @@ private fun NewActionButton(
                 .clickable(enabled = enabled) { performAction = true },
         colors =
             CardDefaults.cardColors(
-                containerColor = if (plain) Color.Transparent else animatedBackground,
+                containerColor = Color.Transparent,
             ),
         shape = smoothCornerShape(16.dp),
-        elevation =
-            if (plain) CardDefaults.cardElevation(0.dp) else CardDefaults.cardElevation(),
+        elevation = CardDefaults.cardElevation(0.dp),
     ) {
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(horizontal = 4.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
             Box(
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(23.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 icon()
@@ -99,7 +100,7 @@ private fun NewActionButton(
 
             Text(
                 text = text,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, lineHeight = 15.sp, fontWeight = FontWeight.Medium),
                 color = animatedContent,
                 textAlign = TextAlign.Center,
                 maxLines = 2,

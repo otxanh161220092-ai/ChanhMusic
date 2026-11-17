@@ -53,6 +53,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import com.metrolist.music.ui.icons.SfIcons
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -173,7 +175,7 @@ fun SongMenu(
         TextFieldDialog(
             icon = {
                 Icon(
-                    painter = painterResource(R.drawable.edit),
+                    painter = rememberVectorPainter(SfIcons.Pencil),
                     contentDescription = null,
                 )
             },
@@ -257,7 +259,7 @@ fun SongMenu(
                     content = { Text(text = stringResource(R.string.already_in_playlist)) },
                     leadingContent = {
                         Image(
-                            painter = painterResource(R.drawable.close),
+                            painter = rememberVectorPainter(SfIcons.Close),
                             contentDescription = null,
                             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
                             modifier = Modifier.size(ListThumbnailSize),
@@ -287,7 +289,7 @@ fun SongMenu(
             onDismiss = { if (!isDeleting) showDeleteUploadedDialog = false },
             icon = {
                 Icon(
-                    painter = painterResource(R.drawable.delete),
+                    painter = rememberVectorPainter(SfIcons.Trash),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.error,
                 )
@@ -477,7 +479,7 @@ fun SongMenu(
                 },
             ) {
                 Icon(
-                    painter = painterResource(if (isFavorite) R.drawable.favorite else R.drawable.favorite_border),
+                    painter = rememberVectorPainter(if (isFavorite) SfIcons.StarFill else SfIcons.Star),
                     tint = if (isFavorite) MaterialTheme.colorScheme.error else LocalContentColor.current,
                     contentDescription = null,
                 )
@@ -511,7 +513,7 @@ fun SongMenu(
                         NewAction(
                             icon = {
                                 Icon(
-                                    painter = painterResource(R.drawable.edit),
+                                    painter = rememberVectorPainter(SfIcons.Pencil),
                                     contentDescription = null,
                                     modifier = Modifier.size(28.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -530,7 +532,7 @@ fun SongMenu(
                         NewAction(
                             icon = {
                                 Icon(
-                                    painter = painterResource(R.drawable.playlist_add),
+                                    painter = rememberVectorPainter(SfIcons.AddToPlaylist),
                                     contentDescription = null,
                                     modifier = Modifier.size(28.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -542,7 +544,7 @@ fun SongMenu(
                         NewAction(
                             icon = {
                                 Icon(
-                                    painter = painterResource(R.drawable.share),
+                                    painter = rememberVectorPainter(SfIcons.Share),
                                     contentDescription = null,
                                     modifier = Modifier.size(28.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -574,7 +576,7 @@ fun SongMenu(
                                 title = { Text(text = stringResource(R.string.suggest_to_host)) },
                                 icon = {
                                     Icon(
-                                        painter = painterResource(R.drawable.queue_music),
+                                        painter = rememberVectorPainter(SfIcons.Share),
                                         contentDescription = null,
                                     )
                                 },
@@ -602,7 +604,7 @@ fun SongMenu(
                                 description = { Text(text = stringResource(R.string.start_radio_desc)) },
                                 icon = {
                                     Icon(
-                                        painter = painterResource(R.drawable.radio),
+                                        painter = rememberVectorPainter(SfIcons.Radio),
                                         contentDescription = null,
                                     )
                                 },
@@ -620,7 +622,7 @@ fun SongMenu(
                                 description = { Text(text = stringResource(R.string.play_next_desc)) },
                                 icon = {
                                     Icon(
-                                        painter = painterResource(R.drawable.playlist_play),
+                                        painter = rememberVectorPainter(SfIcons.PlayNext),
                                         contentDescription = null,
                                     )
                                 },
@@ -638,7 +640,7 @@ fun SongMenu(
                                 description = { Text(text = stringResource(R.string.add_to_queue_desc)) },
                                 icon = {
                                     Icon(
-                                        painter = painterResource(R.drawable.queue_music),
+                                        painter = rememberVectorPainter(SfIcons.PlayLast),
                                         contentDescription = null,
                                     )
                                 },
@@ -669,7 +671,7 @@ fun SongMenu(
                                 },
                                 icon = {
                                     Icon(
-                                        painter = painterResource(if (isPinned) R.drawable.remove else R.drawable.add),
+                                        painter = rememberVectorPainter(if (isPinned) SfIcons.Close else SfIcons.Pin),
                                         contentDescription = null,
                                     )
                                 },
@@ -719,13 +721,7 @@ fun SongMenu(
                                     icon = {
                                         Icon(
                                             painter =
-                                                painterResource(
-                                                    if (isEpisodeSaved) {
-                                                        R.drawable.library_add_check
-                                                    } else {
-                                                        R.drawable.library_add
-                                                    },
-                                                ),
+                                                rememberVectorPainter(if (isEpisodeSaved) SfIcons.Check else SfIcons.Add),
                                             contentDescription = null,
                                         )
                                     },
@@ -770,13 +766,7 @@ fun SongMenu(
                                     icon = {
                                         Icon(
                                             painter =
-                                                painterResource(
-                                                    if (song.song.inLibrary == null) {
-                                                        R.drawable.library_add
-                                                    } else {
-                                                        R.drawable.library_add_check
-                                                    },
-                                                ),
+                                                rememberVectorPainter(if (song.song.inLibrary == null) SfIcons.Add else SfIcons.Check),
                                             contentDescription = null,
                                         )
                                     },
@@ -805,7 +795,7 @@ fun SongMenu(
                                     title = { Text(text = stringResource(R.string.remove_from_history)) },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.delete),
+                                            painter = rememberVectorPainter(SfIcons.History),
                                             contentDescription = null,
                                         )
                                     },
@@ -824,7 +814,7 @@ fun SongMenu(
                                     title = { Text(text = stringResource(R.string.remove_from_playlist)) },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.delete),
+                                            painter = rememberVectorPainter(SfIcons.RemoveFromPlaylist),
                                             contentDescription = null,
                                         )
                                     },
@@ -860,7 +850,7 @@ fun SongMenu(
                                     title = { Text(text = stringResource(R.string.remove_from_cache)) },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.delete),
+                                            painter = rememberVectorPainter(SfIcons.Trash),
                                             contentDescription = null,
                                         )
                                     },
@@ -878,7 +868,7 @@ fun SongMenu(
                                     title = { Text(text = stringResource(R.string.delete_uploaded_song)) },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.delete),
+                                            painter = rememberVectorPainter(SfIcons.Trash),
                                             contentDescription = null,
                                         )
                                     },
@@ -908,7 +898,7 @@ fun SongMenu(
                                     },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.offline),
+                                            painter = rememberVectorPainter(SfIcons.Downloaded),
                                             contentDescription = null,
                                         )
                                     },
@@ -949,7 +939,7 @@ fun SongMenu(
                                     description = { Text(text = stringResource(R.string.download_desc)) },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.download),
+                                            painter = rememberVectorPainter(SfIcons.Download),
                                             contentDescription = null,
                                         )
                                     },
@@ -977,7 +967,7 @@ fun SongMenu(
                                     description = { Text(text = song.orderedArtists.joinToString { it.name }) },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.artist),
+                                            painter = rememberVectorPainter(SfIcons.Artist),
                                             contentDescription = null,
                                         )
                                     },
@@ -1005,7 +995,7 @@ fun SongMenu(
                                     },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(if (isPodcast) R.drawable.mic else R.drawable.album),
+                                            painter = rememberVectorPainter(SfIcons.Album),
                                             contentDescription = null,
                                         )
                                     },
@@ -1044,13 +1034,7 @@ fun SongMenu(
                                     icon = {
                                         Icon(
                                             painter =
-                                                painterResource(
-                                                    if (isPodcastSubscribed) {
-                                                        R.drawable.library_add_check
-                                                    } else {
-                                                        R.drawable.library_add
-                                                    },
-                                                ),
+                                                rememberVectorPainter(if (isPodcastSubscribed) SfIcons.Check else SfIcons.Add),
                                             contentDescription = null,
                                         )
                                     },
@@ -1100,7 +1084,7 @@ fun SongMenu(
                                 description = { Text(text = stringResource(R.string.refetch_desc)) },
                                 icon = {
                                     Icon(
-                                        painter = painterResource(R.drawable.sync),
+                                        painter = rememberVectorPainter(SfIcons.Upgrade),
                                         contentDescription = null,
                                         modifier = Modifier.graphicsLayer(rotationZ = rotationAnimation),
                                     )
@@ -1126,7 +1110,7 @@ fun SongMenu(
                                 description = { Text(text = stringResource(R.string.details_desc)) },
                                 icon = {
                                     Icon(
-                                        painter = painterResource(R.drawable.info),
+                                        painter = rememberVectorPainter(SfIcons.Info),
                                         contentDescription = null,
                                     )
                                 },
