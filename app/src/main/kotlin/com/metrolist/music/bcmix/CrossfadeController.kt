@@ -2665,7 +2665,11 @@ class CrossfadeController(
         if (!out.playWhenReady) return loopBail("paused before the loop")
         val session = loopSession
         if (session == null) {
-            if (SystemClock.elapsedRealtime() > armDeadline) loopFallBack("the decks took too long")
+            // The decks may still be building while the loop point is ahead: only give
+            // up once the playhead has actually reached it, or there is no plan to wait for.
+            val loopStartSec = loopPlanned?.out?.loopStart
+            val pastLoop = loopStartSec == null || out.currentPosition / 1000.0 >= loopStartSec
+            if (SystemClock.elapsedRealtime() > armDeadline && pastLoop) loopFallBack("the decks took too long")
             return
         }
         if (session.outPort.interrupted) return loopBail("the outgoing sink was flushed", settle = false)
