@@ -66,7 +66,7 @@ const val MAX_BPM = 220.0
  * end the pair is not beatmatched (the filter mix). The web player uses the
  * same window.
  */
-const val MIN_INCOMING_RATE = 0.85
+const val MIN_INCOMING_RATE = 0.9
 const val MAX_INCOMING_RATE = 1.25
 
 /**
