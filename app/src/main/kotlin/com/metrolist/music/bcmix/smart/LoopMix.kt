@@ -111,10 +111,11 @@ object LoopMix {
      * [OPEN_LINE_CERTAIN_SEC] for one without, whose end is a guess (the next
      * line). The guessed tail is left to the vocal mask.
      */
-    data class Span(val start: Double, val end: Double, val certainUntil: Double = end)
+    /** [repeated]: the line's text comes back elsewhere in the song, so a loop over it repeats a phrase the song already repeats. */
+    data class Span(val start: Double, val end: Double, val certainUntil: Double = end, val repeated: Boolean = false)
 
     /** One synced lyric line, as [sungSpans] reads it. */
-    data class Line(val timeMs: Long, val endMs: Long?, val blank: Boolean)
+    data class Line(val timeMs: Long, val endMs: Long?, val blank: Boolean, val text: String = "")
 
     data class Pick(
         /** Track seconds. */
@@ -345,6 +346,8 @@ object LoopMix {
                     val from = loop.start - LYRIC_GUARD_SEC
                     val touching = sung.filter { it.start < loop.end && it.end > from }
                     if (touching.isEmpty()) return Clean(loop.start, loop.end, bars, 0.0, Check.LYRICS)
+                    // Only a sung line the song repeats: the loop just repeats a phrase that is already repeated.
+                    if (touching.all { it.repeated }) return Clean(loop.start, loop.end, bars, 0.0, Check.LYRICS)
                     // The separated vocal track decides wherever it has measured the
                     // loop. Lyric lines only count when it hasn't, since their timing
                     // can drift from the audio and a repeated sung line isn't a
@@ -478,6 +481,12 @@ object LoopMix {
      */
     fun sungSpans(lines: List<Line>): List<Span> {
         val sorted = lines.sortedBy { it.timeMs }
+        val counts = HashMap<String, Int>()
+        for (line in sorted) {
+            if (line.blank) continue
+            val key = normalizedLyric(line.text)
+            if (key.isNotEmpty()) counts[key] = (counts[key] ?: 0) + 1
+        }
         val spans = ArrayList<Span>()
         for ((index, line) in sorted.withIndex()) {
             if (line.blank) continue
@@ -490,10 +499,16 @@ object LoopMix {
                 min(start + LYRIC_OPEN_LINE_SEC, (next ?: (line.timeMs + 10_000)) / 1000.0)
             }
             val certain = if (stated) end else min(end, start + OPEN_LINE_CERTAIN_SEC)
-            spans += Span(start - LYRIC_LEAD_SEC, end + LYRIC_TAIL_SEC, certain + LYRIC_TAIL_SEC)
+            val key = normalizedLyric(line.text)
+            val repeated = key.isNotEmpty() && (counts[key] ?: 0) >= 2
+            spans += Span(start - LYRIC_LEAD_SEC, end + LYRIC_TAIL_SEC, certain + LYRIC_TAIL_SEC, repeated)
         }
         return spans
     }
+
+    /** Letters and digits only, lowercase: so "Oh, oh!" and "oh oh" are the same line. */
+    private fun normalizedLyric(text: String): String =
+        text.lowercase().filter { it.isLetterOrDigit() }
 
     // ---- Putting it on the clock -----------------------------------------------------------
 

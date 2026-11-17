@@ -2440,7 +2440,7 @@ class CrossfadeController(
                 LoopMix.sungSpans(
                     found.map { line ->
                         val end = line.sungUntilMs ?: line.words.lastOrNull()?.endMs
-                        LoopMix.Line(line.timeMs, end, blank = line.isGap || line.text.isBlank())
+                        LoopMix.Line(line.timeMs, end, blank = line.isGap || line.text.isBlank(), text = line.text)
                     },
                 )
             }
