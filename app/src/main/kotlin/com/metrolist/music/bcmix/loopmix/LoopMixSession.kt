@@ -108,6 +108,7 @@ class LoopMixSession private constructor(
 
         /** Seconds of each song decoded either side of what the decks play. */
         private const val PREROLL_SECONDS = 1.0
+        private const val ONE_HOUR_SECONDS = 3600.0
         private const val TAIL_SECONDS = 3.0
 
         /**
@@ -177,7 +178,8 @@ class LoopMixSession private constructor(
                     right = inRegion.right,
                     regionStart = inRegion.start,
                     loopStart = samplesOf(inRegion, plan.inn.loopStart).roundToLong(),
-                    loopEnd = samplesOf(inRegion, plan.inn.loopEnd).roundToLong(),
+                    // A sung incoming passage never wraps: its loop end lies past the song.
+                    loopEnd = if (plan.inLoops) samplesOf(inRegion, plan.inn.loopEnd).roundToLong() else samplesOf(inRegion, clock.inRunOnStart + ONE_HOUR_SECONDS).roundToLong(),
                     releaseAt = samplesOf(inRegion, clock.inReleasePosition),
                     knotFrames = inKnotFrames,
                     knotPositions = inKnotPositions,

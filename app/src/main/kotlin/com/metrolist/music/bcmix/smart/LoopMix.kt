@@ -143,6 +143,8 @@ object LoopMix {
         val exitBars: Int,
         /** Outgoing bars from the outgoing loop's start to the incoming loop's release. */
         val totalBars: Int,
+        /** False when the incoming passage is sung: it plays straight through instead of repeating. */
+        val inLoops: Boolean = true,
     ) {
         /** The tempo the ramp arrives at, in outgoing beats per minute. */
         val targetBpm: Double get() = inn.bpm / fold
@@ -202,7 +204,9 @@ object LoopMix {
         ) ?: return null.also { why?.append("incoming: ")?.append(inCount)?.append(vocalCoverage(inn, inDuration)) }
 
         val outBeat = (outPick.end - outPick.start) / (outPick.bars * 4)
-        val inBeat = (inPick.end - inPick.start) / (inPick.bars * 4)
+        // A sung incoming passage plays through, so its tempo is the song's own beat grid.
+        val inLoops = sungIn?.none { it.start < inPick.end && it.end > inPick.start - LYRIC_GUARD_SEC } != false
+        val inBeat = if (inLoops) (inPick.end - inPick.start) / (inPick.bars * 4) else inGrid.beatSec
         val outBpm = 60 / outBeat
         val inBpm = 60 / inBeat
 
@@ -210,7 +214,7 @@ object LoopMix {
         val target = inBpm / fold
         val rampBars = ceil(abs(target - outBpm) / MAX_BPM_PER_BAR).toInt().coerceIn(MIN_RAMP_BARS, MAX_RAMP_BARS)
         // the incoming loop lets go only at its own loop boundary: round the mix up to whole incoming loops
-        val inLoopOutBars = inPick.bars / fold
+        val inLoopOutBars = if (inLoops) inPick.bars / fold else 1.0
         val totalBars = (ceil((ENTER_BARS + rampBars + EXIT_BARS) / inLoopOutBars) * inLoopOutBars).roundToInt()
 
         fun pick(clean: Clean, beatSec: Double, bpm: Double) = Pick(
@@ -230,6 +234,7 @@ object LoopMix {
             rampBars = rampBars,
             exitBars = totalBars - ENTER_BARS - rampBars,
             totalBars = totalBars,
+            inLoops = inLoops,
         )
     }
 
@@ -549,7 +554,10 @@ object LoopMix {
 
         /** The incoming player takes over here, at this track position. */
         val elementAt: Double get() = beatTimes[beats + settleBeats]
-        val elementTrackTime: Double get() = plan.inn.loopEnd + (elementAt - releaseAt)
+        val elementTrackTime: Double get() = inRunOnStart + (elementAt - releaseAt)
+
+        /** Track position the incoming song runs on from once released. */
+        val inRunOnStart: Double get() = if (plan.inLoops) plan.inn.loopEnd else inReleasePosition
 
         /** The unwrapped track position each deck plays at beat [k] (for k up to [beats]). */
         fun outPositionAt(k: Int): Double = plan.out.loopStart + k * plan.out.beatSec
@@ -584,14 +592,15 @@ object LoopMix {
     fun positionAt(clock: Clock, side: Side, t: Double): Double? {
         val plan = clock.plan
         if (t < 0) return null
-        if (side == Side.IN && t >= clock.releaseAt) return plan.inn.loopEnd + (t - clock.releaseAt)
+        if (side == Side.IN && t >= clock.releaseAt) return clock.inRunOnStart + (t - clock.releaseAt)
         if (side == Side.OUT && t >= clock.releaseAt) return null
         val (k, frac) = clock.beatAt(t)
         if (k >= clock.beats) return null
         return if (side == Side.OUT) {
             plan.out.loopStart + ((k % plan.out.beats) + frac) * plan.out.beatSec
         } else {
-            plan.inn.loopStart + (((k * plan.fold) % plan.inn.beats) + frac * plan.fold) * plan.inn.beatSec
+            val beat = if (plan.inLoops) (k * plan.fold) % plan.inn.beats else k * plan.fold
+            plan.inn.loopStart + (beat + frac * plan.fold) * plan.inn.beatSec
         }
     }
 
