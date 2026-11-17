@@ -657,6 +657,9 @@ private fun phraseBarPlan(
 // bars is the ceiling and one bar the floor, the latter for tracks whose
 // intro cannot cover more.
 private const val MIN_FADE_BEATS = 4
+
+/** The shortest a plain crossfade is allowed to be, in seconds. */
+private const val PLAIN_CROSSFADE_MIN_SECONDS = 10.0
 private const val MAX_FADE_BEATS = 16
 
 // A ceiling on the whole overlap regardless of how long the incoming intro is.
@@ -1549,7 +1552,10 @@ private fun planTransitionInner(
 
     val policy = assessTransitionTier(analysis, nextAnalysis, advanced)
     if (policy.tier == TransitionTier.PLAIN_CROSSFADE) {
-        val transitionStart = max(0.0, mixAnchor - standardFade)
+        // A plain crossfade is what a listener hears as "the song changing", so
+        // it gets a long enough fade to pass as a mix rather than a cut.
+        val plainFade = max(standardFade, PLAIN_CROSSFADE_MIN_SECONDS)
+        val transitionStart = max(0.0, mixAnchor - plainFade)
         val started = playbackTime >= transitionStart
         return TransitionPlan(
             shouldStart = started,
