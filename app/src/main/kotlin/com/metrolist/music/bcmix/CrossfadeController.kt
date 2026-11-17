@@ -49,6 +49,7 @@ import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.roundToInt
@@ -2413,6 +2414,8 @@ class CrossfadeController(
     private var loopPlanKey: String? = null
     /** Seconds the audible clock runs ahead of the player position, measured in the last loop mix. */
     private var audibleLeadSec = 0.0
+    private var countdownKey: String? = null
+    private var countdownShown = 0.0
     private var loopPlanned: LoopMix.Plan? = null
 
     /** Why the pair gets no loop mix, for the log and the stats line; null when it does. */
@@ -2924,7 +2927,12 @@ class CrossfadeController(
         val next = if (nextIndex == C.INDEX_UNSET) null else player.getMediaItemAt(nextIndex)
         val planned = loopPlanned
         if (planned != null && next != null && loopPlanKey?.startsWith("${item.mediaId}->${next.mediaId}|") == true) {
-            val inSeconds = (planned.out.loopStart - player.currentPosition / 1000.0 - audibleLeadSec).coerceAtLeast(0.0)
+            val raw = (planned.out.loopStart - player.currentPosition / 1000.0 - audibleLeadSec).coerceAtLeast(0.0)
+            // The countdown only ever runs down for one planned loop: a re-measured lead
+            // must not make it jump back up.
+            val inSeconds = if (countdownKey == loopPlanKey) min(raw, countdownShown) else raw
+            countdownKey = loopPlanKey
+            countdownShown = inSeconds
             return "Automix · loop mix in ${ceil(inSeconds).toInt()} s · ${describeLoop(planned)}"
         }
         val plan = lastSmartPlan
