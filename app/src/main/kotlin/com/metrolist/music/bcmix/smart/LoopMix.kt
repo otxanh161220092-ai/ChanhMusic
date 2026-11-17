@@ -192,6 +192,7 @@ object LoopMix {
             beatSec = outGrid.beatSec,
             count = outCount,
         ) ?: return null.also { why?.append("outgoing: ")?.append(outCount)?.append(vocalCoverage(out, outDuration)) }
+        // Every pair gets a loop mix: with no clean bars, the least-sung ones are used.
 
         // incoming: the earliest instrumental loop in its opening
         val inEnd = min(IN_SEARCH_SEC + LOOP_BARS * inGrid.barSec, inDuration - 20)
@@ -206,7 +207,7 @@ object LoopMix {
         val outBeat = (outPick.end - outPick.start) / (outPick.bars * 4)
         // A sung incoming passage plays through, so its tempo is the song's own beat grid.
         val inLoops = sungIn?.none { it.start < inPick.end && it.end > inPick.start - LYRIC_GUARD_SEC } != false
-        val inBeat = if (inLoops) (inPick.end - inPick.start) / (inPick.bars * 4) else inGrid.beatSec
+        val inBeat = (inPick.end - inPick.start) / (inPick.bars * 4)
         val outBpm = 60 / outBeat
         val inBpm = 60 / inBeat
 
@@ -384,7 +385,15 @@ object LoopMix {
                 return Clean(loop.start, loop.end, bars, mask.share, Check.MASK)
             }
         }
-        return null
+        // Nothing passed: the least-sung loop still beats no loop mix at all.
+        var best: Clean? = null
+        for (bars in LOOP_LENGTHS) {
+            for (loop in candidates(bars)) {
+                val share = maskStats(analysis.vocalWindows, loop.start - beatSec, loop.end)?.share ?: 1.0
+                if (best == null || share < best.vocal) best = Clean(loop.start, loop.end, bars, share, Check.MASK)
+            }
+        }
+        return best
     }
 
     /** The RMS of the quietest of a loop's bars, from the level windows; NaN where they don't reach. */
