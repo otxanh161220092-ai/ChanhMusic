@@ -54,12 +54,15 @@ class LoopMixPort {
     fun armOutgoing(arm: OutArm) {
         inArm = null
         outArm = arm
+        // A reading left over from an earlier arm would read as "already past the loop".
+        positionUs = C.TIME_UNSET
         generation++
     }
 
     fun armIncoming(arm: InArm) {
         outArm = null
         inArm = arm
+        positionUs = C.TIME_UNSET
         pendingShift.set(0)
         generation++
     }

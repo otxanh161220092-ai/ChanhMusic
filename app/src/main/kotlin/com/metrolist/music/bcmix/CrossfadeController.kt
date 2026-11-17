@@ -1144,8 +1144,11 @@ class CrossfadeController(
         ) {
             return
         }
-        if (loop != null && nextStreamReady(nextItem)) {
-            val loopStartMs = (loop.out.loopStart * 1000).roundToLong()
+        // Once the playhead is past the loop point the loop is lost: a build started
+        // now can only arm after the point, and the sink can never reach it. Retrying
+        // that build every tick kept the countdown at 0 while the song played on.
+        val loopStartMs = loop?.let { (it.out.loopStart * 1000).roundToLong() }
+        if (loop != null && loopStartMs != null && loopStartMs > player.currentPosition && nextStreamReady(nextItem)) {
             AppSettings.smartTransitionWindow.value = TransitionWindow(
                 start = (loopStartMs.toFloat() / duration).coerceIn(0f, 1f),
                 end = 1f,
@@ -2692,7 +2695,14 @@ class CrossfadeController(
             return
         }
         val m = session.mixSeconds(System.nanoTime(), out.isPlaying) ?: return
-        if (m > 1.0) loopBail("the sink never reached the loop")
+        if (m > 1.0) {
+            Log.d(
+                TAG,
+                "loop sink reading: mix ${"%.2f".format(Locale.ROOT, m)}s, position ${session.outPort.positionUs}us, " +
+                    "stream offset ${session.outPort.streamOffsetUs}us, player ${out.currentPosition}ms",
+            )
+            loopBail("the sink never reached the loop")
+        }
     }
 
     /** The mix is running: starts the incoming player, aligns it, hands the session over, and ends. */
