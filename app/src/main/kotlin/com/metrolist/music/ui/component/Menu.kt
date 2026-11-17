@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,7 +36,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
@@ -153,27 +157,34 @@ private fun Material3MenuItemRow(
     item: Material3MenuItemData,
     modifier: Modifier = Modifier,
 ) {
+    // Laid out like the iOS-style menu rows: icon in a fixed column, a rounded fill on press.
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(if (pressed) LocalContentColor.current.copy(alpha = 0.10f) else Color.Transparent)
             .clickable(
                 enabled = item.onClick != null,
                 indication = null,
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = interaction,
                 onClick = { item.onClick?.invoke() }
             )
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .heightIn(min = 44.dp)
+            .padding(start = 12.dp, end = 14.dp, top = 11.dp, bottom = 11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         item.icon?.let { icon ->
-            icon()
-            Spacer(modifier = Modifier.width(16.dp))
+            Box(Modifier.width(28.dp), contentAlignment = Alignment.Center) { icon() }
+            Spacer(modifier = Modifier.width(10.dp))
         }
 
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            ProvideTextStyle(MaterialTheme.typography.titleMedium) {
+            ProvideTextStyle(MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp, lineHeight = 21.sp)) {
                 item.title()
             }
 
