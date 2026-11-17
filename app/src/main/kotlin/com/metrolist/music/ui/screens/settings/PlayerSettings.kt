@@ -437,15 +437,7 @@ fun PlayerSettings(
                         },
                         onClick = { onAutomixStyleChange("caihat") }
                     ))
-                    add(Material3SettingsItem(
-                        icon = painterResource(R.drawable.graphic_eq),
-                        title = { Text(stringResource(R.string.automix_style_bitchord)) },
-                        description = { Text(stringResource(R.string.automix_style_bitchord_desc)) },
-                        trailingContent = {
-                            RadioButton(selected = automixStyle == "bitchord", onClick = { onAutomixStyleChange("bitchord") })
-                        },
-                        onClick = { onAutomixStyleChange("bitchord") }
-                    ))
+                    // BitChord style is hidden from the picker for now; the code path stays.
                 }
                 if (automixEnabled && automixStyle == "bitchord") {
                     add(Material3SettingsItem(
