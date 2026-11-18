@@ -12,7 +12,8 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Finds a transparent PNG logo for an artist or album.
  *
- * Flow: MusicBrainz (name -> MBID) -> Fanart.tv (MBID -> logo) -> TheAudioDB (MBID -> logo).
+ * Album: Wikimedia Commons (album-specific logo) -> artist fallback
+ * (MusicBrainz name -> MBID -> Fanart.tv -> TheAudioDB).
  * Returns null when nothing is found, so the UI can show the plain text title.
  *
  * Results, including misses, are cached in memory for the life of the process.
@@ -31,11 +32,35 @@ class LogoService(
 
     suspend fun albumLogo(artist: String, album: String): String? =
         cached("album|${artist.lowercase()}|${album.lowercase()}") {
-            val mbid = musicBrainzReleaseGroupId(artist, album) ?: return@cached null
-            // Fanart.tv has no album-level transparent logos; the artist's logo is the one that exists.
-            val artistMbid = musicBrainzArtistIdFromRelease(mbid) ?: return@cached null
-            artistLogoFromMbid(artistMbid)
+            wikimediaAlbumLogo(artist, album) ?: artistFallbackForAlbum(artist, album)
         }
+
+    /** Album-specific logo from Wikimedia Commons, matched by file name. */
+    private suspend fun wikimediaAlbumLogo(artist: String, album: String): String? {
+        val query = "\"$artist\" \"$album\" logo"
+        val json = getJson(
+            "https://commons.wikimedia.org/w/api.php?action=query&generator=search" +
+                "&gsrsearch=${encode(query)}&gsrnamespace=6&gsrlimit=10" +
+                "&prop=imageinfo&iiprop=url&format=json",
+        ) ?: return null
+        val pages = json.optJSONObject("query")?.optJSONObject("pages") ?: return null
+        val ordered = pages.keys().asSequence().map { pages.getJSONObject(it) }.sortedBy { it.optInt("index") }
+        for (page in ordered) {
+            val title = page.optString("title").lowercase()
+            val url = page.optJSONArray("imageinfo")?.optJSONObject(0)?.optString("url").orEmpty()
+            val isLogoFile = title.contains("logo")
+            val isImage = url.lowercase().let { it.endsWith(".png") || it.endsWith(".svg") }
+            if (isLogoFile && isImage && url.isNotEmpty()) return url
+        }
+        return null
+    }
+
+    /** Fallback: the artist's logo, reached through the album's release group. */
+    private suspend fun artistFallbackForAlbum(artist: String, album: String): String? {
+        val releaseGroup = musicBrainzReleaseGroupId(artist, album) ?: return null
+        val artistMbid = musicBrainzArtistIdFromRelease(releaseGroup) ?: return null
+        return artistLogoFromMbid(artistMbid)
+    }
 
     suspend fun artistLogo(artist: String): String? =
         cached("artist|${artist.lowercase()}") {
