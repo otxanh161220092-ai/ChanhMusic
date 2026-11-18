@@ -112,7 +112,7 @@ fun LibraryHomeLayout(
             albums.forEach {
                 add(
                     RecentCollection(it.album.title, it.album.thumbnailUrl, it.album.bookmarkedAt, "album/${it.id}") { onDismiss ->
-                        AlbumMenu(originalAlbum = it.album, onDismiss = onDismiss)
+                        AlbumMenu(originalAlbum = it, onDismiss = onDismiss)
                     },
                 )
             }
@@ -120,7 +120,7 @@ fun LibraryHomeLayout(
                 add(
                     RecentCollection(it.artist.name, it.artist.thumbnailUrl, it.artist.bookmarkedAt, "artist/${it.id}") { onDismiss ->
                         ArtistMenu(
-                            originalArtist = it.artist,
+                            originalArtist = it,
                             coroutineScope = rememberCoroutineScope(),
                             onDismiss = onDismiss,
                         )
