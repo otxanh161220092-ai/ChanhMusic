@@ -5,8 +5,6 @@
 
 package com.metrolist.music.ui.component
 
-import com.metrolist.music.constants.ReduceBlurEffectsKey
-import com.metrolist.music.utils.rememberPreference
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -63,6 +61,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalFocusManager
@@ -211,8 +211,6 @@ fun BoxScope.BottomSheetMenu(
         val shape = SmoothCornerShape(24.dp)
         val backdrop = remember(state.isVisible) { GlassBackdropOverride.active } ?: LocalGlassBackdrop.current
         val palette = rememberGlassPalette()
-        val stretch = rememberGlassStretch()
-        val (reduceBlur) = rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
 
         if (present) {
             Column(
@@ -249,7 +247,6 @@ fun BoxScope.BottomSheetMenu(
                             translationX = left
                             translationY = top
                         }
-                        .glassStretch(stretch)
                         .clip(shape)
                         .glassSurface(
                             backdrop = backdrop,
@@ -259,8 +256,9 @@ fun BoxScope.BottomSheetMenu(
                             mask = palette.mask,
                             lensDp = 28f,
                             lensAmount = 2.5f,
-                            blurOnly = reduceBlur,
-                        ).padding(vertical = 8.dp),
+                            blurOnly = true,
+                        ).border(0.5.dp, if (isSystemInDarkTheme()) Color.Gray.copy(alpha = 0.6f) else Color.White, shape)
+                        .padding(vertical = 8.dp),
             ) {
                 MaterialTheme(colorScheme = glassScheme(MaterialTheme.colorScheme, palette)) {
                     CompositionLocalProvider(LocalContentColor provides palette.content) {
