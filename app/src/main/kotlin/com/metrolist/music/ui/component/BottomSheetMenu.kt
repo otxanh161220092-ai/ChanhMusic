@@ -61,7 +61,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.matchParentSize
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.toImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -207,12 +216,18 @@ fun BoxScope.BottomSheetMenu(
             openAnchor.point
         }
         var popupHeightPx by remember { mutableFloatStateOf(0f) }
+        // A still picture of the screen, taken once when the menu opens and blurred behind the popup.
+        val screenLayer = LocalScreenLayer.current
+        var snapshot by remember { mutableStateOf<ImageBitmap?>(null) }
+        LaunchedEffect(state.isVisible) {
+            if (state.isVisible) snapshot = screenLayer?.toImageBitmap()
+        }
 
         val shape = SmoothCornerShape(24.dp)
         val palette = rememberGlassPalette()
 
         if (present) {
-            Column(
+            Box(
                 modifier =
                     Modifier
                         .width(popupWidth)
@@ -233,6 +248,8 @@ fun BoxScope.BottomSheetMenu(
                                     marginPx,
                                     (screenHPx - popupHeightPx - marginPx).coerceAtLeast(marginPx),
                                 )
+                            openAnchor.left = left
+                            openAnchor.top = top
                             // Scale pivot is the tapped point, expressed in the popup's own coordinates.
                             transformOrigin =
                                 TransformOrigin(
@@ -247,19 +264,38 @@ fun BoxScope.BottomSheetMenu(
                             translationY = top
                         }
                         .clip(shape)
-                        // Static 70% panel: no live backdrop sampling, so scrolling underneath does not lag.
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f), shape)
-                        .border(0.5.dp, if (isSystemInDarkTheme()) Color.Gray.copy(alpha = 0.6f) else Color.White, shape)
-                        .padding(vertical = 8.dp),
+                        .border(0.5.dp, if (isSystemInDarkTheme()) Color.Gray.copy(alpha = 0.6f) else Color.White, shape),
             ) {
-                MaterialTheme(colorScheme = glassScheme(MaterialTheme.colorScheme, palette)) {
-                    CompositionLocalProvider(LocalContentColor provides palette.content) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 8.dp)
-                        ) {
-                            state.content(this)
+                // Static blur of the screen captured at open: it is drawn once, not re-sampled while scrolling.
+                snapshot?.let { picture ->
+                    Image(
+                        bitmap = picture,
+                        contentDescription = null,
+                        contentScale = ContentScale.FillBounds,
+                        modifier =
+                            Modifier
+                                .requiredSize(with(density) { screenWPx.toDp() }, with(density) { screenHPx.toDp() })
+                                .graphicsLayer {
+                                    translationX = -openAnchor.left
+                                    translationY = -openAnchor.top
+                                }.blur(24.dp),
+                    )
+                }
+                Box(
+                    Modifier
+                        .matchParentSize()
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = if (snapshot != null) 0.45f else 0.85f)),
+                )
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    MaterialTheme(colorScheme = glassScheme(MaterialTheme.colorScheme, palette)) {
+                        CompositionLocalProvider(LocalContentColor provides palette.content) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp)
+                            ) {
+                                state.content(this)
+                            }
                         }
                     }
                 }
@@ -270,4 +306,6 @@ fun BoxScope.BottomSheetMenu(
 
 private class OpenAnchor {
     var point: Offset = Offset.Zero
+    var left: Float = 0f
+    var top: Float = 0f
 }
