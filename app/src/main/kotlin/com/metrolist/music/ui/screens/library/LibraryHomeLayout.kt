@@ -9,6 +9,15 @@ import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.runtime.rememberCoroutineScope
+import com.metrolist.innertube.models.PlaylistItem
+import com.metrolist.innertube.models.WatchEndpoint
+import com.metrolist.music.ui.component.LocalMenuState
+import com.metrolist.music.ui.menu.AlbumMenu
+import com.metrolist.music.ui.menu.ArtistMenu
+import com.metrolist.music.ui.menu.PlaylistMenu
+import com.metrolist.music.ui.menu.YouTubePlaylistMenu
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,6 +79,7 @@ private data class RecentCollection(
     val thumbnail: String?,
     val addedAt: LocalDateTime?,
     val route: String,
+    val menu: @Composable (onDismiss: () -> Unit) -> Unit,
 )
 
 private data class LibraryCategory(
@@ -100,10 +110,22 @@ fun LibraryHomeLayout(
     val recent = remember(albums, artists, playlists) {
         buildList {
             albums.forEach {
-                add(RecentCollection(it.album.title, it.album.thumbnailUrl, it.album.bookmarkedAt, "album/${it.id}"))
+                add(
+                    RecentCollection(it.album.title, it.album.thumbnailUrl, it.album.bookmarkedAt, "album/${it.id}") { onDismiss ->
+                        AlbumMenu(originalAlbum = it.album, onDismiss = onDismiss)
+                    },
+                )
             }
             artists.forEach {
-                add(RecentCollection(it.artist.name, it.artist.thumbnailUrl, it.artist.bookmarkedAt, "artist/${it.id}"))
+                add(
+                    RecentCollection(it.artist.name, it.artist.thumbnailUrl, it.artist.bookmarkedAt, "artist/${it.id}") { onDismiss ->
+                        ArtistMenu(
+                            originalArtist = it.artist,
+                            coroutineScope = rememberCoroutineScope(),
+                            onDismiss = onDismiss,
+                        )
+                    },
+                )
             }
             playlists.forEach {
                 val route =
@@ -113,7 +135,41 @@ fun LibraryHomeLayout(
                         "local_playlist/${it.id}"
                     }
                 val thumbnail = it.playlist.thumbnailUrl ?: it.songThumbnails.firstOrNull { url -> url != null }
-                add(RecentCollection(it.playlist.name, thumbnail, it.playlist.createdAt, route))
+                add(
+                    RecentCollection(it.playlist.name, thumbnail, it.playlist.createdAt, route) { onDismiss ->
+                        val coroutineScope = rememberCoroutineScope()
+                        if (it.playlist.isEditable || it.songCount != 0) {
+                            PlaylistMenu(playlist = it, coroutineScope = coroutineScope, onDismiss = onDismiss)
+                        } else {
+                            it.playlist.browseId?.let { browseId ->
+                                YouTubePlaylistMenu(
+                                    playlist = PlaylistItem(
+                                        id = browseId,
+                                        title = it.playlist.name,
+                                        author = null,
+                                        songCountText = null,
+                                        thumbnail = it.thumbnails.getOrNull(0) ?: "",
+                                        playEndpoint = WatchEndpoint(
+                                            playlistId = browseId,
+                                            params = it.playlist.playEndpointParams,
+                                        ),
+                                        shuffleEndpoint = WatchEndpoint(
+                                            playlistId = browseId,
+                                            params = it.playlist.shuffleEndpointParams,
+                                        ),
+                                        radioEndpoint = WatchEndpoint(
+                                            playlistId = "RDAMPL$browseId",
+                                            params = it.playlist.radioEndpointParams,
+                                        ),
+                                        isEditable = false,
+                                    ),
+                                    coroutineScope = coroutineScope,
+                                    onDismiss = onDismiss,
+                                )
+                            }
+                        }
+                    },
+                )
             }
         }.sortedByDescending { it.addedAt ?: LocalDateTime.MIN }
     }
@@ -259,8 +315,13 @@ private fun RecentTile(
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
+    val menuState = LocalMenuState.current
     Column(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier =
+            modifier.combinedClickable(
+                onClick = onClick,
+                onLongClick = { menuState.show { collection.menu(menuState::dismiss) } },
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
