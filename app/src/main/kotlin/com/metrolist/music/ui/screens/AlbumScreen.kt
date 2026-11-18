@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.AlbumTitle
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -289,14 +290,9 @@ fun AlbumScreen(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     // Album Name
-                    Text(
-                        text = albumWithSongs.album.title,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(horizontal = 32.dp),
+                    AlbumTitle(
+                        title = albumWithSongs.album.title,
+                        artist = albumWithSongs.artists.joinToString(" ") { it.name },
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
