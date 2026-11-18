@@ -69,6 +69,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import com.metrolist.music.ui.icons.SfIcons
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -326,7 +328,7 @@ fun PlayerMenu(
                             NewAction(
                                 icon = {
                                     Icon(
-                                        painter = painterResource(R.drawable.radio),
+                                        painter = rememberVectorPainter(SfIcons.Radio),
                                         contentDescription = null,
                                         modifier = Modifier.size(32.dp),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -345,7 +347,7 @@ fun PlayerMenu(
                         NewAction(
                             icon = {
                                 Icon(
-                                    painter = painterResource(R.drawable.playlist_add),
+                                    painter = rememberVectorPainter(SfIcons.AddToPlaylist),
                                     contentDescription = null,
                                     modifier = Modifier.size(32.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -357,7 +359,7 @@ fun PlayerMenu(
                         NewAction(
                             icon = {
                                 Icon(
-                                    painter = painterResource(R.drawable.link),
+                                    painter = rememberVectorPainter(SfIcons.Share),
                                     contentDescription = null,
                                     modifier = Modifier.size(32.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -418,7 +420,7 @@ fun PlayerMenu(
                                     },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.artist),
+                                            painter = rememberVectorPainter(SfIcons.Artist),
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
@@ -448,7 +450,7 @@ fun PlayerMenu(
                                     },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(if (isPodcast) R.drawable.mic else R.drawable.album),
+                                            painter = rememberVectorPainter(SfIcons.Album),
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
@@ -484,13 +486,7 @@ fun PlayerMenu(
                                 icon = {
                                     Icon(
                                         painter =
-                                            painterResource(
-                                                if (isInLibrary) {
-                                                    R.drawable.library_add_check
-                                                } else {
-                                                    R.drawable.library_add
-                                                },
-                                            ),
+                                            rememberVectorPainter(if (isInLibrary) SfIcons.Check else SfIcons.Add),
                                         contentDescription = null,
                                         modifier = Modifier.size(24.dp),
                                     )
@@ -510,7 +506,7 @@ fun PlayerMenu(
                                 },
                                 icon = {
                                     Icon(
-                                        painter = painterResource(if (isPinned) R.drawable.remove else R.drawable.add),
+                                        painter = rememberVectorPainter(if (isPinned) SfIcons.Close else SfIcons.Pin),
                                         contentDescription = null,
                                         modifier = Modifier.size(24.dp),
                                     )
@@ -547,7 +543,7 @@ fun PlayerMenu(
                                     },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.offline),
+                                            painter = rememberVectorPainter(SfIcons.Downloaded),
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
@@ -588,7 +584,7 @@ fun PlayerMenu(
                                     title = { Text(text = stringResource(R.string.action_download)) },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.download),
+                                            painter = rememberVectorPainter(SfIcons.Download),
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
@@ -616,7 +612,7 @@ fun PlayerMenu(
                                     // Show a small badge when there are pending suggestions
                                     Box {
                                         Icon(
-                                            painter = painterResource(R.drawable.group),
+                                            painter = rememberVectorPainter(SfIcons.Groups),
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
@@ -648,7 +644,7 @@ fun PlayerMenu(
                                     title = { Text(text = stringResource(R.string.resync)) },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.replay),
+                                            painter = rememberVectorPainter(SfIcons.Revert),
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
@@ -676,7 +672,7 @@ fun PlayerMenu(
                                 description = { Text(text = stringResource(R.string.details_desc)) },
                                 icon = {
                                     Icon(
-                                        painter = painterResource(R.drawable.info),
+                                        painter = rememberVectorPainter(SfIcons.Info),
                                         contentDescription = null,
                                         modifier = Modifier.size(24.dp),
                                     )
@@ -695,7 +691,7 @@ fun PlayerMenu(
                                     description = { Text(text = stringResource(R.string.equalizer_desc)) },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.equalizer),
+                                            painter = rememberVectorPainter(SfIcons.Sliders),
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
@@ -712,7 +708,7 @@ fun PlayerMenu(
                                     description = { Text(text = stringResource(R.string.system_equalizer_desc)) },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.graphic_eq),
+                                            painter = rememberVectorPainter(SfIcons.GraphicEq),
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
@@ -739,7 +735,7 @@ fun PlayerMenu(
                                     description = { Text(text = stringResource(R.string.advanced_desc)) },
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.tune),
+                                            painter = rememberVectorPainter(SfIcons.Tune),
                                             contentDescription = null,
                                             modifier = Modifier.size(24.dp),
                                         )
