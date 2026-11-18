@@ -209,7 +209,6 @@ fun BoxScope.BottomSheetMenu(
         var popupHeightPx by remember { mutableFloatStateOf(0f) }
 
         val shape = SmoothCornerShape(24.dp)
-        val backdrop = remember(state.isVisible) { GlassBackdropOverride.active } ?: LocalGlassBackdrop.current
         val palette = rememberGlassPalette()
 
         if (present) {
@@ -248,16 +247,9 @@ fun BoxScope.BottomSheetMenu(
                             translationY = top
                         }
                         .clip(shape)
-                        .glassSurface(
-                            backdrop = backdrop,
-                            shape = shape,
-                            fallbackColor = palette.fallback,
-                            tint = palette.tint,
-                            mask = palette.mask,
-                            lensDp = 28f,
-                            lensAmount = 2.5f,
-                            blurOnly = true,
-                        ).border(0.5.dp, if (isSystemInDarkTheme()) Color.Gray.copy(alpha = 0.6f) else Color.White, shape)
+                        // Static 70% panel: no live backdrop sampling, so scrolling underneath does not lag.
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f), shape)
+                        .border(0.5.dp, if (isSystemInDarkTheme()) Color.Gray.copy(alpha = 0.6f) else Color.White, shape)
                         .padding(vertical = 8.dp),
             ) {
                 MaterialTheme(colorScheme = glassScheme(MaterialTheme.colorScheme, palette)) {
