@@ -210,6 +210,26 @@ fun ArtistScreen(
 
     val artistThumbnail = artistPage?.artist?.thumbnail ?: libraryArtist?.artist?.thumbnailUrl
     val appleStyle = true
+    val browseId = viewModel.artistId
+    // Apple Music's hero, logo, clip and Play colour for this artist, confirmed
+    // against the page's own album and song titles (see AppleArtistArtRepository).
+    var appleArt by remember(browseId) {
+        mutableStateOf(browseId?.let { AppleArtistArtRepository.cached(it) })
+    }
+    val artistTitles = remember(artistPage) {
+        artistPage?.sections?.flatMap { it.items }.orEmpty().mapNotNull { item ->
+            when (item) {
+                is AlbumItem -> item.title
+                is SongItem -> item.title
+                else -> null
+            }
+        }
+    }
+    LaunchedEffect(browseId, displayArtistName, artistTitles, showLocal) {
+        if (browseId != null && artistPage != null && !showLocal && !isGuest) {
+            appleArt = AppleArtistArtRepository.artFor(browseId, displayArtistName.orEmpty(), artistTitles) ?: appleArt
+        }
+    }
     val latestAlbum =
         remember(artistPage?.sections) {
             artistPage?.sections?.flatMap { it.items }?.filterIsInstance<AlbumItem>()?.maxByOrNull { it.year ?: Int.MIN_VALUE }
@@ -242,7 +262,7 @@ fun ArtistScreen(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .aspectRatio(1.1f),
+                                    .aspectRatio(3f / 4f),
                         ) {
                             Spacer(
                                 modifier =
@@ -331,6 +351,7 @@ fun ArtistScreen(
                         latestAlbum = if (isChannel) null else latestAlbum,
                         latestVideo = channelLatestVideo,
                         logoRes = channelLogoFor(viewModel.artistId, displayArtistName),
+                        appleArt = appleArt,
                         onPlay =
                             playEndpoint?.takeIf { !showLocal && !isGuest }?.let { endpoint ->
                                 { playerConnection.playQueue(YouTubeQueue(endpoint)) }

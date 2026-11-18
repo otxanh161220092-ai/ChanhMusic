@@ -9,6 +9,10 @@ import com.metrolist.music.ui.component.smoothCornerShape
 
 import com.metrolist.music.ui.component.GlassAlertDialog
 import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.luminance
+import com.metrolist.music.bcmix.canvas.CanvasArtwork
+import com.metrolist.music.bcmix.canvas.CanvasArtworkPlayer
+import com.metrolist.music.bcmix.canvas.CanvasContentMode
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -80,6 +84,7 @@ fun AppleArtistHeader(
     latestAlbum: AlbumItem?,
     latestVideo: SongItem?,
     logoRes: Int?,
+    appleArt: AppleArtistArt?,
     onPlay: (() -> Unit)?,
     onToggleSubscribe: (() -> Unit)?,
     onLatestAlbumClick: (AlbumItem) -> Unit,
@@ -87,15 +92,13 @@ fun AppleArtistHeader(
     modifier: Modifier = Modifier,
 ) {
     val onColor = LocalAppleCollectionTextColor.current.takeIf { it != Color.Unspecified } ?: Color.White
-    val onPlayColor = if (onColor == Color.Black) Color.White else Color.Black
+    val playBackground = appleArt?.keyColor?.let { Color(it) } ?: onColor
+    val onPlayColor = if (playBackground.luminance() > 0.5f) Color.Black else Color.White
     var showInfo by rememberSaveable { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Box(modifier = Modifier.fillMaxWidth().aspectRatio(1f)) {
-            AsyncImage(
-                model = thumbnailUrl?.resize(1080, 1080),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+        Box(modifier = Modifier.fillMaxWidth().aspectRatio(3f / 4f)) {
+            Box(
                 modifier = Modifier
                     .matchParentSize()
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
@@ -110,7 +113,23 @@ fun AppleArtistHeader(
                             blendMode = BlendMode.DstIn,
                         )
                     },
-            )
+            ) {
+                AsyncImage(
+                    model = (appleArt?.heroUrl ?: thumbnailUrl)?.resize(1080, 1440),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize(),
+                )
+                // Apple's looping clip, when the artist has one, plays where the photograph is.
+                appleArt?.videoUrl?.let { url ->
+                    CanvasArtworkPlayer(
+                        canvas = CanvasArtwork(url = url),
+                        isPlaying = true,
+                        modifier = Modifier.matchParentSize(),
+                        contentMode = CanvasContentMode.CROP,
+                    )
+                }
+            }
 
             Column(
                 modifier = Modifier
@@ -126,6 +145,13 @@ fun AppleArtistHeader(
                         contentDescription = name,
                         colorFilter = ColorFilter.tint(onColor),
                         modifier = Modifier.requiredWidth(if (logoRes == R.drawable.channel_logo_ereus) 520.dp else 300.dp),
+                    )
+                } else if (appleArt?.logoUrl != null) {
+                    AsyncImage(
+                        model = appleArt.logoUrl,
+                        contentDescription = name,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.requiredWidth(260.dp).heightIn(max = 130.dp),
                     )
                 } else {
                 Text(
@@ -161,7 +187,7 @@ fun AppleArtistHeader(
                         Surface(
                             onClick = onPlay,
                             shape = CircleShape,
-                            color = onColor,
+                            color = playBackground,
                             modifier = Modifier.size(64.dp),
                         ) {
                             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
