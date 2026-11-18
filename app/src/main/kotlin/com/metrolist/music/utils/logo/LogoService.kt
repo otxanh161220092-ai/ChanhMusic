@@ -1,19 +1,21 @@
 package com.metrolist.music.utils.logo
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
+import java.net.URL
 import java.net.URLEncoder
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Finds a transparent PNG logo for an artist or album.
+ * Finds a logo image for an album or artist.
  *
- * Album: Wikimedia Commons (album-specific logo) -> artist fallback
- * (MusicBrainz name -> MBID -> Fanart.tv -> TheAudioDB).
+ * Album: Wikimedia Commons (a file named like "<Artist> <Album> logo") first, then the
+ * artist's logo via MusicBrainz -> Fanart.tv -> TheAudioDB.
  * Returns null when nothing is found, so the UI can show the plain text title.
  *
  * Results, including misses, are cached in memory for the life of the process.
@@ -27,40 +29,17 @@ class LogoService(
     private val musicBrainzLock = Mutex()
     private var lastMusicBrainzCall = 0L
 
-    /** Wraps a cached value so that "not found" is also remembered. */
     private class CachedUrl(val url: String?)
 
     suspend fun albumLogo(artist: String, album: String): String? =
         cached("album|${artist.lowercase()}|${album.lowercase()}") {
-            wikimediaAlbumLogo(artist, album) ?: artistFallbackForAlbum(artist, album)
+            wikimediaAlbumLogo(artist, album)
+                ?: run {
+                    val releaseGroup = musicBrainzReleaseGroupId(artist, album) ?: return@run null
+                    val artistMbid = musicBrainzArtistIdFromRelease(releaseGroup) ?: return@run null
+                    artistLogoFromMbid(artistMbid)
+                }
         }
-
-    /** Album-specific logo from Wikimedia Commons, matched by file name. */
-    private suspend fun wikimediaAlbumLogo(artist: String, album: String): String? {
-        val query = "\"$artist\" \"$album\" logo"
-        val json = getJson(
-            "https://commons.wikimedia.org/w/api.php?action=query&generator=search" +
-                "&gsrsearch=${encode(query)}&gsrnamespace=6&gsrlimit=10" +
-                "&prop=imageinfo&iiprop=url&format=json",
-        ) ?: return null
-        val pages = json.optJSONObject("query")?.optJSONObject("pages") ?: return null
-        val ordered = pages.keys().asSequence().map { pages.getJSONObject(it) }.sortedBy { it.optInt("index") }
-        for (page in ordered) {
-            val title = page.optString("title").lowercase()
-            val url = page.optJSONArray("imageinfo")?.optJSONObject(0)?.optString("url").orEmpty()
-            val isLogoFile = title.contains("logo")
-            val isImage = url.lowercase().let { it.endsWith(".png") || it.endsWith(".svg") }
-            if (isLogoFile && isImage && url.isNotEmpty()) return url
-        }
-        return null
-    }
-
-    /** Fallback: the artist's logo, reached through the album's release group. */
-    private suspend fun artistFallbackForAlbum(artist: String, album: String): String? {
-        val releaseGroup = musicBrainzReleaseGroupId(artist, album) ?: return null
-        val artistMbid = musicBrainzArtistIdFromRelease(releaseGroup) ?: return null
-        return artistLogoFromMbid(artistMbid)
-    }
 
     suspend fun artistLogo(artist: String): String? =
         cached("artist|${artist.lowercase()}") {
@@ -83,6 +62,36 @@ class LogoService(
         return value
     }
 
+    // ---- Wikimedia Commons -------------------------------------------------
+
+    /**
+     * Searches file names for "<Artist> <Album> logo" and "<Album> (logo)", keeps only
+     * PNG/SVG files whose name contains "logo", and returns the first original file URL.
+     */
+    private suspend fun wikimediaAlbumLogo(artist: String, album: String): String? {
+        for (term in listOf("$artist $album logo", "$album (logo)")) {
+            val json = getJson(
+                "https://commons.wikimedia.org/w/api.php?action=query&format=json" +
+                    "&generator=search&gsrsearch=${encode(term)}&gsrnamespace=6&gsrlimit=20" +
+                    "&prop=imageinfo&iiprop=url",
+            ) ?: continue
+            val pages = json.optJSONObject("query")?.optJSONObject("pages") ?: continue
+            val candidates = mutableListOf<Pair<Int, String>>()
+            pages.keys().forEach { key ->
+                val page = pages.getJSONObject(key)
+                val title = page.optString("title")
+                val lower = title.lowercase()
+                val isLogoFile = lower.contains("logo") && (lower.endsWith(".png") || lower.endsWith(".svg"))
+                val url = page.optJSONArray("imageinfo")?.optJSONObject(0)?.optString("url")
+                if (isLogoFile && !url.isNullOrEmpty()) {
+                    candidates += page.optInt("index", Int.MAX_VALUE) to url
+                }
+            }
+            candidates.minByOrNull { it.first }?.let { return it.second }
+        }
+        return null
+    }
+
     // ---- MusicBrainz -------------------------------------------------------
 
     private suspend fun musicBrainzArtistId(artist: String): String? {
@@ -97,7 +106,7 @@ class LogoService(
         return json?.optJSONArray("release-groups")?.optJSONObject(0)?.optString("id")?.takeIf { it.isNotEmpty() }
     }
 
-    /** Release-group -> the artist credited on it, which is what Fanart.tv and TheAudioDB key on. */
+    /** Release-group -> the artist credited on it. */
     private suspend fun musicBrainzArtistIdFromRelease(releaseGroupMbid: String): String? {
         val json = getJson("https://musicbrainz.org/ws/2/release-group/$releaseGroupMbid?inc=artist-credits&fmt=json", musicBrainz = true)
         return json?.optJSONArray("artist-credit")?.optJSONObject(0)?.optJSONObject("artist")?.optString("id")?.takeIf { it.isNotEmpty() }
@@ -108,7 +117,7 @@ class LogoService(
     private suspend fun fanartArtistLogo(mbid: String): String? {
         if (fanartApiKey.isBlank()) return null
         val json = getJson("https://webservice.fanart.tv/v3/music/$mbid", headers = mapOf("api-key" to fanartApiKey)) ?: return null
-        // hdmusiclogo is the high-resolution transparent logo; musiclogo is the fallback size.
+        // hdmusiclogo is the high-resolution transparent logo; musiclogo is the smaller one.
         for (key in listOf("hdmusiclogo", "musiclogo")) {
             json.optJSONArray(key)?.optJSONObject(0)?.optString("url")?.takeIf { it.isNotEmpty() }?.let { return it }
         }
@@ -131,7 +140,7 @@ class LogoService(
     ): JSONObject? {
         if (musicBrainz) throttleMusicBrainz()
         return withContext(Dispatchers.IO) {
-            val connection = (java.net.URL(url).openConnection() as HttpURLConnection).apply {
+            val connection = (URL(url).openConnection() as HttpURLConnection).apply {
                 connectTimeout = 8_000
                 readTimeout = 8_000
                 setRequestProperty("User-Agent", userAgent)
@@ -151,13 +160,12 @@ class LogoService(
     private suspend fun throttleMusicBrainz() {
         musicBrainzLock.withLock {
             val wait = 1_100L - (System.currentTimeMillis() - lastMusicBrainzCall)
-            if (wait > 0) kotlinx.coroutines.delay(wait)
+            if (wait > 0) delay(wait)
             lastMusicBrainzCall = System.currentTimeMillis()
         }
     }
 
     private fun encode(value: String) = URLEncoder.encode(value, "UTF-8")
 
-    /** Escapes Lucene special characters used in MusicBrainz queries. */
     private fun escape(value: String) = value.replace("\"", "\\\"")
 }
