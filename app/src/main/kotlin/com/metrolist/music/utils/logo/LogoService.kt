@@ -5,11 +5,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import android.util.Log
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.util.concurrent.ConcurrentHashMap
+
+private const val TAG = "LogoService"
 
 /**
  * Finds a logo image for an album or artist.
@@ -83,8 +86,10 @@ class LogoService(
                     candidates += page.optInt("index", Int.MAX_VALUE) to url
                 }
             }
+            Log.d(TAG, "wikimedia '$term': ${pages.length()} results, ${candidates.size} logo files")
             candidates.minByOrNull { it.first }?.let { return it.second }
         }
+        Log.d(TAG, "wikimedia: no logo for $artist - $album")
         return null
     }
 
