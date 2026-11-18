@@ -35,7 +35,12 @@ class LogoService(
     private class CachedUrl(val url: String?)
 
     /** Only the album's own logo counts; an artist logo is never used in its place. */
-    suspend fun albumLogo(artist: String, album: String): String? =
+    suspend fun albumLogo(artist: String, album: String): String? {
+        Log.d(TAG, "albumLogo: $artist - $album")
+        return albumLogoCached(artist, album)
+    }
+
+    private suspend fun albumLogoCached(artist: String, album: String): String? =
         cached("album|${artist.lowercase()}|${album.lowercase()}") {
             wikimediaAlbumLogo(artist, album)
         }
@@ -55,6 +60,7 @@ class LogoService(
             load()
         } catch (e: Exception) {
             // Network errors are not cached, so a later call can retry.
+            Log.w(TAG, "lookup failed for $key", e)
             return null
         }
         cache[key] = CachedUrl(value)
