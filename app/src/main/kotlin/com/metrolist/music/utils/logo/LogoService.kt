@@ -14,9 +14,9 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Finds a logo image for an album or artist.
  *
- * Album: Wikimedia Commons (a file named like "<Artist> <Album> logo") first, then the
- * artist's logo via MusicBrainz -> Fanart.tv -> TheAudioDB.
- * Returns null when nothing is found, so the UI can show the plain text title.
+ * Album: Wikimedia Commons only (a file named like "<Artist> <Album> logo").
+ * Artist: MusicBrainz -> Fanart.tv -> TheAudioDB.
+ * Returns null when nothing is found, so the UI can show the album title as styled text.
  *
  * Results, including misses, are cached in memory for the life of the process.
  */
@@ -31,14 +31,10 @@ class LogoService(
 
     private class CachedUrl(val url: String?)
 
+    /** Only the album's own logo counts; an artist logo is never used in its place. */
     suspend fun albumLogo(artist: String, album: String): String? =
         cached("album|${artist.lowercase()}|${album.lowercase()}") {
             wikimediaAlbumLogo(artist, album)
-                ?: run {
-                    val releaseGroup = musicBrainzReleaseGroupId(artist, album) ?: return@run null
-                    val artistMbid = musicBrainzArtistIdFromRelease(releaseGroup) ?: return@run null
-                    artistLogoFromMbid(artistMbid)
-                }
         }
 
     suspend fun artistLogo(artist: String): String? =
