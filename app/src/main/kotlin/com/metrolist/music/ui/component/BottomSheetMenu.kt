@@ -63,11 +63,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
