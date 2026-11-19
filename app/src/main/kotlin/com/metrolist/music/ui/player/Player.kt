@@ -114,6 +114,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import android.net.ConnectivityManager
+import com.metrolist.music.bcmix.audio.VocalCancel
+import com.metrolist.music.karaoke.KaraokeCache
+import com.metrolist.music.karaoke.KaraokeSwitch
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -375,6 +379,18 @@ fun BottomSheetPlayer(
     val automixStyle by rememberPreference(AutomixStyleKey, defaultValue = "caihat")
     // BitChord Automix replaces the CaiHat status line, progress bar and mix popup while selected.
     val bcAutomixOn = automixOn && automixStyle == "bitchord"
+    // Karaoke only reads Automix's state here; it never changes Automix.
+    val karaokeOn by VocalCancel.state.collectAsStateWithLifecycle()
+    val karaokeContext = LocalContext.current
+    val karaokeSongId = currentSong?.song?.id
+    LaunchedEffect(karaokeSongId, karaokeOn, bcAutomixOn) {
+        val id = karaokeSongId
+        if (karaokeOn && !bcAutomixOn && id != null && !KaraokeCache.isReady(karaokeContext, id)) {
+            val connectivity = karaokeContext.getSystemService(ConnectivityManager::class.java) ?: return@LaunchedEffect
+            KaraokeSwitch.prepare(karaokeContext, id, connectivity) {}
+        }
+        KaraokeSwitch.sync(playerConnection.player, karaokeContext, karaokeOn, bcAutomixOn)
+    }
     val isMixing by playerConnection.service.isMixing.collectAsStateWithLifecycle()
     val mixVisual by playerConnection.service.mixVisual.collectAsStateWithLifecycle()
     val repeatMode by playerConnection.repeatMode.collectAsStateWithLifecycle()

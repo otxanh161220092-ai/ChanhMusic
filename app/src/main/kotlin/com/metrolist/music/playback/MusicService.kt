@@ -4303,7 +4303,13 @@ class MusicService :
         playerProvider: () -> ExoPlayer?,
     ) =
         DefaultMediaSourceFactory(
-            bcmixPlaybackSource(createDataSourceFactory(normalizationProcessor, playerProvider)),
+            run {
+                val streams = bcmixPlaybackSource(createDataSourceFactory(normalizationProcessor, playerProvider))
+                val local = DefaultDataSource.Factory(this)
+                DataSource.Factory {
+                    com.metrolist.music.karaoke.KaraokeRoutingDataSource(streams.createDataSource(), local.createDataSource())
+                }
+            },
             ExtractorsFactory {
                 arrayOf(MatroskaExtractor(), FragmentedMp4Extractor(), Mp4Extractor())
             },

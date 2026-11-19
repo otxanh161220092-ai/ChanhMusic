@@ -21,6 +21,9 @@ object KaraokeCache {
         return File(context.filesDir, "karaoke/cache/$safe")
     }
 
+    /** The downloaded stream a track is separated from; removed once its stems exist. */
+    fun sourceFile(context: Context, key: String): File = File(dir(context, key).apply { mkdirs() }, "source.bin")
+
     fun instrumentalFile(context: Context, key: String): File = File(dir(context, key), "instrumental.wav")
 
     fun vocalFile(context: Context, key: String): File = File(dir(context, key), "vocals.wav")
