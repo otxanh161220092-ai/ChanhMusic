@@ -440,9 +440,6 @@ fun ExperimentalLyrics(
                 // New line started while nothing was active before
                 previousScrollActiveIndices.isEmpty() && anyStillActive && scrollMax > scrollTargetIndex -> true
 
-                // A newer line has started: scroll to it now, not when the previous one ends.
-                anyStillActive && scrollMax > scrollTargetIndex -> true
-
                 else -> false
             }
 
