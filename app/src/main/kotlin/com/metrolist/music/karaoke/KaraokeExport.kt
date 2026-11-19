@@ -64,13 +64,14 @@ object KaraokeExport {
     private fun writeInstrumental(file: File, left: FloatArray, right: FloatArray, model: String) {
         WavWriter(file, left.size, VocalSeparator.SAMPLE_RATE).use { wav ->
             VocalSeparator(model).use { separator ->
-                separator.separate(left, right) { l, r, n -> wav.write(l, r, n) }
+                separator.separate(left, right) { il, ir, _, _, n -> wav.write(il, ir, n) }
             }
         }
     }
+}
 
-    /** Streams 16-bit stereo PCM into a WAV file whose length is known up front. */
-    private class WavWriter(file: File, frames: Int, sampleRate: Int) : AutoCloseable {
+/** Streams 16-bit stereo PCM into a WAV file whose length is known up front. */
+internal class WavWriter(file: File, frames: Int, sampleRate: Int) : AutoCloseable {
         private val raf = RandomAccessFile(file, "rw").apply { setLength(0) }
         private val bytes = ByteBuffer.allocate(4 * VocalSeparator.BLOCK).order(ByteOrder.LITTLE_ENDIAN)
 
@@ -98,4 +99,3 @@ object KaraokeExport {
 
         private fun toPcm(x: Float): Short = (x.coerceIn(-1f, 1f) * 32767f).toInt().toShort()
     }
-}
