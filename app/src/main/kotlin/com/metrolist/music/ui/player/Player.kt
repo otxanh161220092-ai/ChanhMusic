@@ -1673,7 +1673,7 @@ fun BottomSheetPlayer(
                             tint = if (hasTranslations) textButtonColor else textButtonColor.copy(alpha = 0.6f),
                         )
                     }
-                    KaraokeToggle(tint = textButtonColor)
+                    KaraokeToggle(automixOn = bcAutomixOn, tint = textButtonColor)
                 }
             }
 
