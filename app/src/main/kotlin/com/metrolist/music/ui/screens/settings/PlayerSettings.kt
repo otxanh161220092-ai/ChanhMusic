@@ -121,6 +121,7 @@ fun PlayerSettings(
     // Test path for vocal separation: pick a file, save its instrumental next to the app's files.
     val karaokePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
+            Toast.makeText(context, "Đang tách giọng, có thể mất vài phút…", Toast.LENGTH_LONG).show()
             karaokeScope.launch(Dispatchers.Default) {
                 val location = runCatching { KaraokeExport.export(context, uri, uri.lastPathSegment ?: "track") }.getOrNull()
                 withContext(Dispatchers.Main) {
