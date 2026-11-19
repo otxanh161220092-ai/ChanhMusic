@@ -49,8 +49,13 @@ object KaraokeDecoder {
         var sampleRate = inputFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE)
         var channels = inputFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
         var floatPcm = false
-        val left = GrowableFloats()
-        val right = GrowableFloats()
+        val expected = if (inputFormat.containsKey(MediaFormat.KEY_DURATION)) {
+            (inputFormat.getLong(MediaFormat.KEY_DURATION) * sampleRate / 1_000_000L).toInt() + 1024
+        } else {
+            1 shl 16
+        }
+        val left = GrowableFloats(expected)
+        val right = GrowableFloats(expected)
         val info = MediaCodec.BufferInfo()
         var inputDone = false
         var outputDone = false
@@ -139,8 +144,8 @@ object KaraokeDecoder {
         }
     }
 
-    private class GrowableFloats {
-        private var data = FloatArray(1 shl 16)
+    private class GrowableFloats(capacity: Int) {
+        private var data = FloatArray(capacity.coerceAtLeast(1 shl 10))
         private var size = 0
 
         fun add(value: Float) {

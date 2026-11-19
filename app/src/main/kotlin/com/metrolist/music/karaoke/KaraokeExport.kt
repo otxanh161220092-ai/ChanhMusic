@@ -36,17 +36,17 @@ object KaraokeExport {
     /** Returns a human-readable location of the written WAV, or null when the input has no audio track. */
     fun export(context: Context, uri: Uri, name: String): String? {
         val (left, right) = KaraokeDecoder.decode(context, uri) ?: return null
-        val instrumental = VocalSeparator(modelPath(context)).use { it.instrumental(left, right) }
+        val model = modelPath(context)
         val fileName = "${name.substringBeforeLast('.')}_instrumental.wav"
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             val dir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Metrolist/Karaoke")
             dir.mkdirs()
             val out = File(dir, fileName)
-            writeWav(out, instrumental.first, instrumental.second, VocalSeparator.SAMPLE_RATE)
+            writeInstrumental(out, left, right, model)
             return out.absolutePath
         }
         val temp = File(context.cacheDir, fileName)
-        writeWav(temp, instrumental.first, instrumental.second, VocalSeparator.SAMPLE_RATE)
+        writeInstrumental(temp, left, right, model)
         val values = ContentValues().apply {
             put(MediaStore.Downloads.DISPLAY_NAME, fileName)
             put(MediaStore.Downloads.MIME_TYPE, "audio/wav")
@@ -61,32 +61,41 @@ object KaraokeExport {
         return "Download/Metrolist/Karaoke/$fileName"
     }
 
-    private fun writeWav(file: File, left: FloatArray, right: FloatArray, sampleRate: Int) {
-        val frames = left.size
-        val dataBytes = frames * 2 * 2
-        val header = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN).apply {
-            put("RIFF".toByteArray()); putInt(36 + dataBytes); put("WAVE".toByteArray())
-            put("fmt ".toByteArray()); putInt(16); putShort(1); putShort(2)
-            putInt(sampleRate); putInt(sampleRate * 2 * 2); putShort(4); putShort(16)
-            put("data".toByteArray()); putInt(dataBytes)
-        }
-        RandomAccessFile(file, "rw").use { raf ->
-            raf.setLength(0)
-            raf.write(header.array())
-            val chunk = ByteBuffer.allocate(4 * 8192).order(ByteOrder.LITTLE_ENDIAN)
-            var i = 0
-            while (i < frames) {
-                chunk.clear()
-                val end = minOf(frames, i + 8192)
-                for (f in i until end) {
-                    chunk.putShort(toPcm(left[f]))
-                    chunk.putShort(toPcm(right[f]))
-                }
-                raf.write(chunk.array(), 0, chunk.position())
-                i = end
+    private fun writeInstrumental(file: File, left: FloatArray, right: FloatArray, model: String) {
+        WavWriter(file, left.size, VocalSeparator.SAMPLE_RATE).use { wav ->
+            VocalSeparator(model).use { separator ->
+                separator.separate(left, right) { l, r, n -> wav.write(l, r, n) }
             }
         }
     }
 
-    private fun toPcm(x: Float): Short = (x.coerceIn(-1f, 1f) * 32767f).toInt().toShort()
+    /** Streams 16-bit stereo PCM into a WAV file whose length is known up front. */
+    private class WavWriter(file: File, frames: Int, sampleRate: Int) : AutoCloseable {
+        private val raf = RandomAccessFile(file, "rw").apply { setLength(0) }
+        private val bytes = ByteBuffer.allocate(4 * VocalSeparator.BLOCK).order(ByteOrder.LITTLE_ENDIAN)
+
+        init {
+            val dataBytes = frames * 2 * 2
+            val header = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN).apply {
+                put("RIFF".toByteArray()); putInt(36 + dataBytes); put("WAVE".toByteArray())
+                put("fmt ".toByteArray()); putInt(16); putShort(1); putShort(2)
+                putInt(sampleRate); putInt(sampleRate * 2 * 2); putShort(4); putShort(16)
+                put("data".toByteArray()); putInt(dataBytes)
+            }
+            raf.write(header.array())
+        }
+
+        fun write(left: FloatArray, right: FloatArray, count: Int) {
+            bytes.clear()
+            for (i in 0 until count) {
+                bytes.putShort(toPcm(left[i]))
+                bytes.putShort(toPcm(right[i]))
+            }
+            raf.write(bytes.array(), 0, bytes.position())
+        }
+
+        override fun close() = raf.close()
+
+        private fun toPcm(x: Float): Short = (x.coerceIn(-1f, 1f) * 32767f).toInt().toShort()
+    }
 }
