@@ -671,7 +671,8 @@ private fun ThumbnailItem(
                             Modifier
                         }
                     )
-                    if (canvas != null) {
+                    // Only the page on screen decodes its clip; neighbours in the pager stay on their still.
+                    if (canvas != null && isCurrent) {
                         CanvasArtworkPlayer(
                             canvas = canvas,
                             isPlaying = isPlayingNow,
