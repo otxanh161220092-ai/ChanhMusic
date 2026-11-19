@@ -278,6 +278,8 @@ internal fun LyricsLine(
                         focusedAlpha = { focusedAlpha },
                         alignment = agentTextAlign,
                         textMeasurer = rememberTextMeasurer(),
+                        // Build the glyph masks as the line scrolls into view, not when it starts singing.
+                        prewarmMasks = true,
                     )
                 } else {
                     Text(
