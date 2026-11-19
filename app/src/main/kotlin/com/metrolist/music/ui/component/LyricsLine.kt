@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.component
 
+import com.metrolist.music.ui.component.lyrics.words.BraccatoWordAnimation
+
 import android.graphics.BlurMaskFilter
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -54,6 +56,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -262,19 +265,19 @@ internal fun LyricsLine(
                 } else null
 
                 if (isSynced && effectiveWords != null && (isActiveLine || abs(index - displayedCurrentLineIndex) <= 3) && mainText != null) {
-                    WordLevelLyrics(
+                    BraccatoWordAnimation(
                         mainText = mainText,
                         words = effectiveWords,
                         isActiveLine = isActiveLine,
-                        currentPositionState = currentPositionState,
-                        lyricsOffset = lyricsOffset,
-                        playerConnection = playerConnection,
+                        positionProvider = { currentPositionState + lyricsOffset },
+                        adjustedEndTimeMs = null,
                         lyricStyle = lyricStyle,
-                        lineColor = lineColor,
+                        lineColor = { lineColor },
                         expressiveAccent = expressiveAccent,
                         isBackground = item.isBackground,
-                        focusedAlpha = focusedAlpha,
-                        alignment = agentTextAlign
+                        focusedAlpha = { focusedAlpha },
+                        alignment = agentTextAlign,
+                        textMeasurer = rememberTextMeasurer(),
                     )
                 } else {
                     Text(
