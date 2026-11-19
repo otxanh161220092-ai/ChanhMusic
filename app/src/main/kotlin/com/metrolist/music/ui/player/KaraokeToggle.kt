@@ -133,17 +133,17 @@ fun KaraokeToggle(automixOn: Boolean, tint: Color, modifier: Modifier = Modifier
             contentDescription = "Karaoke",
             tint = if (on) Color.Black.copy(alpha = 0.8f) else tint.copy(alpha = 0.6f),
         )
-    }
-
-    if (hintShown) {
-        KaraokeHint(onDismiss = { hintShown = false })
-    }
-    if (sliderShown) {
-        KaraokeSlider(
-            value = backing,
-            onValueChange = KaraokeMix::setBackingLevel,
-            onDismiss = { sliderShown = false },
-        )
+        // Popups anchor to the button only when they are composed inside it.
+        if (hintShown) {
+            KaraokeHint(onDismiss = { hintShown = false })
+        }
+        if (sliderShown) {
+            KaraokeSlider(
+                value = backing,
+                onValueChange = KaraokeMix::setBackingLevel,
+                onDismiss = { sliderShown = false },
+            )
+        }
     }
 }
 
@@ -180,7 +180,7 @@ private fun KaraokeSlider(value: Float, onValueChange: (Float) -> Unit, onDismis
                 .size(width = lerp(44.dp, 56.dp, morph), height = lerp(44.dp, 180.dp, morph))
                 .clip(shape)
                 .background(Color.White.copy(alpha = 0.16f * morph + 0.1f))
-                .highlightBorder()
+                .border(0.5.dp, Color.White.copy(alpha = 0.3f), shape)
                 .onSizeChanged { trackHeightPx = it.height.toFloat() }
                 .pointerInput(Unit) {
                     detectVerticalDragGestures { change, drag ->
