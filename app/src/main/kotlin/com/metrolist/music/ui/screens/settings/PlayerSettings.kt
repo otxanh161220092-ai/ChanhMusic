@@ -5,6 +5,15 @@
 
 package com.metrolist.music.ui.screens.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import android.widget.Toast
+import com.metrolist.music.karaoke.KaraokeExport
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import androidx.compose.foundation.layout.Column
@@ -107,6 +116,23 @@ import com.metrolist.music.ui.utils.getLoudnessLevelLabel
 fun PlayerSettings(
     navController: NavController
 ) {
+    val context = LocalContext.current
+    val karaokeScope = rememberCoroutineScope()
+    // Test path for vocal separation: pick a file, save its instrumental next to the app's files.
+    val karaokePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            karaokeScope.launch(Dispatchers.Default) {
+                val file = runCatching { KaraokeExport.export(context, uri, uri.lastPathSegment ?: "track") }.getOrNull()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        file?.let { "Đã lưu: ${it.absolutePath}" } ?: "Không đọc được file này",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+            }
+        }
+    }
     val (audioQuality, onAudioQualityChange) = rememberEnumPreference(
         AudioQualityKey,
         defaultValue = AudioQuality.AUTO
@@ -360,6 +386,12 @@ fun PlayerSettings(
         Material3SettingsGroup(
             title = stringResource(R.string.player),
             items = buildList {
+                add(Material3SettingsItem(
+                    icon = painterResource(R.drawable.mic),
+                    title = { Text("Thử tách giọng (karaoke)") },
+                    description = { Text("Chọn một file nhạc để lưu bản instrumental") },
+                    onClick = { karaokePicker.launch(arrayOf("audio/*")) }
+                ))
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.graphic_eq),
                     title = { Text(stringResource(R.string.audio_quality)) },
