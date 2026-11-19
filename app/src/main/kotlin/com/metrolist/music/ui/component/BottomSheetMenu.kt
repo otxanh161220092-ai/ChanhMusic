@@ -61,6 +61,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.matchParentSize
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import kotlin.math.roundToInt
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.requiredSize
@@ -265,19 +271,18 @@ fun BoxScope.BottomSheetMenu(
                         .border(0.5.dp, if (isSystemInDarkTheme()) Color.Gray.copy(alpha = 0.6f) else Color.White, shape),
             ) {
                 // Static blur of the screen captured at open: it is drawn once, not re-sampled while scrolling.
+                // Only the part of the captured screen under the popup is drawn, so it sizes nothing and lines up exactly.
                 snapshot?.let { picture ->
-                    Image(
-                        bitmap = picture,
-                        contentDescription = null,
-                        contentScale = ContentScale.FillBounds,
-                        modifier =
-                            Modifier
-                                .requiredSize(with(density) { screenWPx.toDp() }, with(density) { screenHPx.toDp() })
-                                .graphicsLayer {
-                                    translationX = -openAnchor.left
-                                    translationY = -openAnchor.top
-                                }.blur(24.dp),
-                    )
+                    Canvas(modifier = Modifier.matchParentSize().blur(24.dp)) {
+                        val w = size.width.roundToInt()
+                        val h = size.height.roundToInt()
+                        drawImage(
+                            image = picture,
+                            srcOffset = IntOffset(openAnchor.left.roundToInt(), openAnchor.top.roundToInt()),
+                            srcSize = IntSize(w, h),
+                            dstSize = IntSize(w, h),
+                        )
+                    }
                 }
                 Box(
                     Modifier

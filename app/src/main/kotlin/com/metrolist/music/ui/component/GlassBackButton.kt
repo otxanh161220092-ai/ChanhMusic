@@ -68,10 +68,11 @@ fun FloatingGlassPill(
                 .glassSurface(
                     backdrop = backdrop,
                     shape = shape,
-                    fallbackColor = Color.White.copy(alpha = 0.15f),
+                    fallbackColor = Color.White.copy(alpha = 0.6f),
                     tint = Color.White,
-                    mask = Color.Transparent,
-                    lensDp = 6f,
+                    mask = Color.White.copy(alpha = 0.6f),
+                    lensDp = 14f,
+                    lensAmount = 2f,
                 ),
     ) {
         Row(
@@ -150,11 +151,12 @@ fun GlassBackButton(
                 .glassSurface(
                     backdrop = backdrop,
                     shape = CircleShape,
-                    fallbackColor = Color.White.copy(alpha = 0.15f),
+                    fallbackColor = Color.White.copy(alpha = 0.6f),
                     tint = Color.White,
-                    mask = Color.Transparent,
-                    // A small lens keeps the edge refraction without magnifying the content behind the button.
-                    lensDp = 6f,
+                    // A white veil over the glass, and a stronger lens so the edge bends light visibly.
+                    mask = Color.White.copy(alpha = 0.6f),
+                    lensDp = 14f,
+                    lensAmount = 2f,
                 )
                 .highlightBorder()
                 .clickable(
