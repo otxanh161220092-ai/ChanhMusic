@@ -350,6 +350,11 @@ private fun WordLevelLyrics(
     }
     
     var smoothPosition by remember { mutableLongStateOf(currentPositionState + lyricsOffset) }
+    LaunchedEffect(isActiveLine) {
+        if (isActiveLine) {
+            android.util.Log.d("LyricsDebug", "active='$mainText' pos=$currentPositionState words=" + words.joinToString { "${it.startTime}-${it.endTime}" })
+        }
+    }
     
     LaunchedEffect(isActiveLine) {
         if (isActiveLine) {
