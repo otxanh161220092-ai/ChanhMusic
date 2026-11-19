@@ -9,8 +9,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.metrolist.music.ui.component.lyrics.words.LocalVisualWorkActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 internal val LocalLyricsAnimationVisible = compositionLocalOf { true }
 
@@ -20,8 +20,8 @@ internal fun rememberLyricsAnimationVisibility(): Flow<Boolean> {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val windowVisible = LocalVisualWorkActive.current
     return remember(visible, lifecycle, windowVisible) {
-        combine(lifecycle.currentStateFlow, windowVisible) { state, shown ->
-            visible && shown && state.isAtLeast(Lifecycle.State.STARTED)
+        lifecycle.currentStateFlow.map { state ->
+            visible && windowVisible && state.isAtLeast(Lifecycle.State.STARTED)
         }.distinctUntilChanged()
     }
 }
