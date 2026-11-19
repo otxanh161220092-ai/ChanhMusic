@@ -781,11 +781,6 @@ fun ExperimentalLyrics(
                                                     drawRect(Color.White.copy(alpha = 0.7f), blendMode = BlendMode.SrcAtop)
                                                 }
                                         } else Modifier,
-                                    )
-                                    .then(
-                                        if (liveMeshBackground) {
-                                            Modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen; blendMode = BlendMode.Overlay }
-                                        } else Modifier,
                                     ),
                             ) {
                             when (listItem) {
