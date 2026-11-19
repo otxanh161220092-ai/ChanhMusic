@@ -79,8 +79,6 @@ class DspChain(
 
         spatial.process(block)
         equalizer.process(block)
-        // Karaoke's vocal reduction: a no-op unless karaoke is on, which it never is with Automix.
-        VocalCancel.process(block)
         transition.process(block)
         // The equaliser leaves its overs in place for the stages after it to
         // see; the loudness stage's limiter is what catches whatever survives.
