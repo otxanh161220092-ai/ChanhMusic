@@ -498,6 +498,8 @@ private fun ThumbnailItem(
     val reduceBlur by rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
     val blurOn = !reduceBlur
     val squircleArtwork by rememberPreference(PlayerSquircleArtworkKey, defaultValue = false)
+    // The classic 3:4 frame is filled by the cover, cropped, so the artwork reaches its edges.
+    val fillFrame = !isLandscape && !squircleArtwork
     val isPlayingNow by playerConnection.isPlaying.collectAsState()
     val isCurrentItem = item.mediaId == currentMediaId
     val artworkTarget = when {
@@ -642,7 +644,7 @@ private fun ThumbnailItem(
                 if (isCurrent && visual != null) {
                     MixCoverBlend(
                         visual = visual,
-                        cropArtwork = cropAlbumArt,
+                        cropArtwork = cropAlbumArt || fillFrame,
                         blurEnabled = blurOn,
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -658,7 +660,7 @@ private fun ThumbnailItem(
                     val isPlayingNow by playerConnection.isPlaying.collectAsState()
                     ThumbnailImage(
                         artworkUri = artworkUriToUse,
-                        cropArtwork = cropAlbumArt,
+                        cropArtwork = cropAlbumArt || fillFrame,
                         modifier = if (isCurrent) {
                             Modifier.graphicsLayer {
                                 val p = changeProgress.value
@@ -682,7 +684,7 @@ private fun ThumbnailItem(
                 if (isCurrent && previousArtwork != null && mixVisual == null) {
                     ThumbnailImage(
                         artworkUri = previousArtwork,
-                        cropArtwork = cropAlbumArt,
+                        cropArtwork = cropAlbumArt || fillFrame,
                         modifier = Modifier.graphicsLayer { alpha = 1f - changeProgress.value },
                     )
                 }
