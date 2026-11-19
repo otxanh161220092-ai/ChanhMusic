@@ -61,7 +61,7 @@ object KaraokeExport {
         return "Download/Metrolist/Karaoke/$fileName"
     }
 
-    private fun writeInstrumental(file: File, left: FloatArray, right: FloatArray, model: String) {
+    private fun writeInstrumental(file: File, left: ShortArray, right: ShortArray, model: String) {
         WavWriter(file, left.size, VocalSeparator.SAMPLE_RATE).use { wav ->
             VocalSeparator(model).use { separator ->
                 separator.separate(left, right) { il, ir, _, _, n -> wav.write(il, ir, n) }

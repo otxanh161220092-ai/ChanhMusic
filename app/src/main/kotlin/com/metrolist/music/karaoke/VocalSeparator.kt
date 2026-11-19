@@ -54,7 +54,7 @@ class VocalSeparator(modelPath: String) : AutoCloseable {
      * up to [BLOCK] samples. Both stems have the same length as the input. [onProgress] gets a
      * value from 0 to 1 after each chunk.
      */
-    fun separate(left: FloatArray, right: FloatArray, onProgress: (Float) -> Unit = {}, sink: Sink) {
+    fun separate(left: ShortArray, right: ShortArray, onProgress: (Float) -> Unit = {}, sink: Sink) {
         require(left.size == right.size) { "channels differ in length" }
         val length = left.size
         if (length == 0) return
@@ -188,7 +188,7 @@ class VocalSeparator(modelPath: String) : AutoCloseable {
      * or silence outside the signal.
      */
     private fun frameSpectrum(
-        x: FloatArray,
+        x: ShortArray,
         pad: Int,
         length: Int,
         frame: Int,
@@ -214,11 +214,11 @@ class VocalSeparator(modelPath: String) : AutoCloseable {
     }
 
     /** Sample [index] of the signal, reflected at both ends as torch's reflect padding does. */
-    private fun reflected(x: FloatArray, length: Int, index: Int): Double {
+    private fun reflected(x: ShortArray, length: Int, index: Int): Double {
         var i = index
         if (i < 0) i = -i
         if (i >= length) i = 2 * (length - 1) - i
-        return x[i].toDouble()
+        return x[i] / 32768.0
     }
 
     /** Sum of squared windows of all frames covering padded sample [p]: the overlap-add normaliser. */

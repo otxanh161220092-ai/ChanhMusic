@@ -17,7 +17,7 @@ import kotlin.math.roundToInt
 /** Decodes an audio file to planar stereo float PCM at [VocalSeparator.SAMPLE_RATE]. */
 object KaraokeDecoder {
 
-    fun decode(context: Context, uri: Uri): Pair<FloatArray, FloatArray>? {
+    fun decode(context: Context, uri: Uri): Pair<ShortArray, ShortArray>? {
         val extractor = MediaExtractor()
         try {
             extractor.setDataSource(context, uri, null)
@@ -45,7 +45,7 @@ object KaraokeDecoder {
         extractor: MediaExtractor,
         codec: MediaCodec,
         inputFormat: MediaFormat,
-    ): Pair<FloatArray, FloatArray> {
+    ): Pair<ShortArray, ShortArray> {
         var sampleRate = inputFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE)
         var channels = inputFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
         var floatPcm = false
@@ -123,36 +123,36 @@ object KaraokeDecoder {
         }
     }
 
-    private fun sampleAt(bytes: java.nio.ByteBuffer, index: Int, floatPcm: Boolean): Float =
+    private fun sampleAt(bytes: java.nio.ByteBuffer, index: Int, floatPcm: Boolean): Short =
         if (floatPcm) {
-            bytes.getFloat(index * 4)
+            (bytes.getFloat(index * 4).coerceIn(-1f, 1f) * 32767f).toInt().toShort()
         } else {
-            bytes.getShort(index * 2) / 32768f
+            bytes.getShort(index * 2)
         }
 
     /** Linear resampling; good enough for a test export, not for the playback path. */
-    private fun resample(input: FloatArray, from: Int): FloatArray {
+    private fun resample(input: ShortArray, from: Int): ShortArray {
         if (input.isEmpty() || from <= 0) return input
         val ratio = VocalSeparator.SAMPLE_RATE.toDouble() / from
         val outLength = (input.size * ratio).roundToInt()
-        return FloatArray(outLength) { i ->
+        return ShortArray(outLength) { i ->
             val pos = i / ratio
             val i0 = pos.toInt().coerceAtMost(input.size - 1)
             val i1 = (i0 + 1).coerceAtMost(input.size - 1)
-            val frac = (pos - i0).toFloat()
-            input[i0] * (1 - frac) + input[i1] * frac
+            val frac = pos - i0
+            (input[i0] * (1 - frac) + input[i1] * frac).roundToInt().toShort()
         }
     }
 
     private class GrowableFloats(capacity: Int) {
-        private var data = FloatArray(capacity.coerceAtLeast(1 shl 10))
+        private var data = ShortArray(capacity.coerceAtLeast(1 shl 10))
         private var size = 0
 
-        fun add(value: Float) {
+        fun add(value: Short) {
             if (size == data.size) data = data.copyOf(data.size * 2)
             data[size++] = value
         }
 
-        fun toArray(): FloatArray = data.copyOf(size)
+        fun toArray(): ShortArray = data.copyOf(size)
     }
 }
