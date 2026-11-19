@@ -1651,9 +1651,7 @@ fun BottomSheetPlayer(
                     if (hasLyricsApiKey) IconButton(
                         modifier =
                             Modifier
-                                .size(44.dp)
-                                .clip(CircleShape)
-                                .background(if (hasTranslations) textButtonColor.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.12f))
+                                .playerGlassCircle(hasTranslations)
                                 .vibrant(hasTranslations),
                         onClick = {
                             if (hasTranslations) {

@@ -32,6 +32,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.BlendMode
+import com.metrolist.music.ui.component.highlightBorder
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -56,6 +59,23 @@ import kotlinx.coroutines.delay
  * and off. While Automix is on it does nothing but show a glass hint, because Automix and
  * karaoke cannot run together; turning Automix on also turns karaoke off.
  */
+/**
+ * The glass circle behind the lyrics controls: a white veil blended in Overlay mode, with the
+ * same highlight ring the other glass buttons use. [active] makes the veil stronger.
+ */
+fun Modifier.playerGlassCircle(active: Boolean): Modifier =
+    this
+        .size(44.dp)
+        .clip(CircleShape)
+        .drawBehind {
+            drawRect(Color.White.copy(alpha = 0.14f))
+            drawRect(
+                Color.White.copy(alpha = if (active) 0.55f else 0.3f),
+                blendMode = BlendMode.Overlay,
+            )
+        }
+        .highlightBorder()
+
 @Composable
 fun KaraokeToggle(automixOn: Boolean, tint: Color, modifier: Modifier = Modifier) {
     val on by VocalCancel.state.collectAsStateWithLifecycle()
@@ -84,9 +104,7 @@ fun KaraokeToggle(automixOn: Boolean, tint: Color, modifier: Modifier = Modifier
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .background(if (on) Color.White.copy(alpha = 0.85f) else Color.White.copy(alpha = 0.12f))
+            .playerGlassCircle(on)
             .clickable(onClick = toggle),
     ) {
         Icon(
