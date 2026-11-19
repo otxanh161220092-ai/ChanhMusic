@@ -41,6 +41,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.Stroke
+import com.metrolist.music.karaoke.KaraokeSwitch
 import androidx.compose.ui.graphics.BlendMode
 import com.metrolist.music.ui.component.highlightBorder
 import androidx.compose.ui.geometry.Offset
@@ -93,6 +96,7 @@ fun Modifier.playerGlassCircle(active: Boolean): Modifier =
 fun KaraokeToggle(automixOn: Boolean, tint: Color, modifier: Modifier = Modifier) {
     val on by VocalCancel.state.collectAsStateWithLifecycle()
     val backing by KaraokeMix.backingLevel.collectAsStateWithLifecycle()
+    val separating by KaraokeSwitch.progress.collectAsStateWithLifecycle()
     var hintShown by remember { mutableStateOf(false) }
     var sliderShown by remember { mutableStateOf(false) }
 
@@ -121,6 +125,19 @@ fun KaraokeToggle(automixOn: Boolean, tint: Color, modifier: Modifier = Modifier
         contentAlignment = Alignment.Center,
         modifier = modifier
             .playerGlassCircle(on)
+            .drawWithContent {
+                drawContent()
+                // Ring that fills as the track is separated.
+                if (separating >= 0f) {
+                    drawArc(
+                        color = tint,
+                        startAngle = -90f,
+                        sweepAngle = 360f * separating,
+                        useCenter = false,
+                        style = Stroke(width = 2.dp.toPx()),
+                    )
+                }
+            }
             .pointerInput(on, automixOn) {
                 detectTapGestures(
                     onTap = { toggle() },

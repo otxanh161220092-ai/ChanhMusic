@@ -14,6 +14,7 @@ import com.metrolist.music.constants.AudioQuality
 import com.metrolist.music.utils.InnerTubeXPlayer
 import java.io.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import okhttp3.Request
 
@@ -23,6 +24,9 @@ import okhttp3.Request
  * restored, so Automix's own playback is never given a file.
  */
 object KaraokeSwitch {
+
+    /** Separation progress from 0 to 1 while a track is being split, -1 when idle. */
+    val progress = MutableStateFlow(-1f)
 
     /** The stream item of each track currently playing its instrumental, to restore later. */
     private val streamItems = HashMap<String, MediaItem>()

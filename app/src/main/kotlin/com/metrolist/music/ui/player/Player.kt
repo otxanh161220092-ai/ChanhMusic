@@ -387,7 +387,12 @@ fun BottomSheetPlayer(
         val id = karaokeSongId
         if (karaokeOn && !bcAutomixOn && id != null && !KaraokeCache.isReady(karaokeContext, id)) {
             val connectivity = karaokeContext.getSystemService(ConnectivityManager::class.java) ?: return@LaunchedEffect
-            KaraokeSwitch.prepare(karaokeContext, id, connectivity) {}
+            KaraokeSwitch.progress.value = 0f
+            val ok = KaraokeSwitch.prepare(karaokeContext, id, connectivity) { KaraokeSwitch.progress.value = it }
+            KaraokeSwitch.progress.value = -1f
+            if (!ok) {
+                android.widget.Toast.makeText(karaokeContext, "Không tách được giọng bài này", android.widget.Toast.LENGTH_SHORT).show()
+            }
         }
         KaraokeSwitch.sync(playerConnection.player, karaokeContext, karaokeOn, bcAutomixOn)
     }
