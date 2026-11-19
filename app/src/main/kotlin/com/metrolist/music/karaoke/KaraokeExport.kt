@@ -5,8 +5,12 @@
 
 package com.metrolist.music.karaoke
 
+import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
@@ -29,15 +33,32 @@ object KaraokeExport {
         return target.absolutePath
     }
 
-    /** Returns the written file, or null when the input has no audio track. */
-    fun export(context: Context, uri: Uri, name: String): File? {
+    /** Returns a human-readable location of the written WAV, or null when the input has no audio track. */
+    fun export(context: Context, uri: Uri, name: String): String? {
         val (left, right) = KaraokeDecoder.decode(context, uri) ?: return null
         val instrumental = VocalSeparator(modelPath(context)).use { it.instrumental(left, right) }
-        val dir = context.getExternalFilesDir("Karaoke") ?: context.filesDir
-        dir.mkdirs()
-        val out = File(dir, "${name.substringBeforeLast('.')}_instrumental.wav")
-        writeWav(out, instrumental.first, instrumental.second, VocalSeparator.SAMPLE_RATE)
-        return out
+        val fileName = "${name.substringBeforeLast('.')}_instrumental.wav"
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            val dir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Metrolist/Karaoke")
+            dir.mkdirs()
+            val out = File(dir, fileName)
+            writeWav(out, instrumental.first, instrumental.second, VocalSeparator.SAMPLE_RATE)
+            return out.absolutePath
+        }
+        val temp = File(context.cacheDir, fileName)
+        writeWav(temp, instrumental.first, instrumental.second, VocalSeparator.SAMPLE_RATE)
+        val values = ContentValues().apply {
+            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+            put(MediaStore.Downloads.MIME_TYPE, "audio/wav")
+            put(MediaStore.Downloads.RELATIVE_PATH, "Download/Metrolist/Karaoke")
+            put(MediaStore.Downloads.IS_PENDING, 1)
+        }
+        val resolver = context.contentResolver
+        val target = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return null
+        resolver.openOutputStream(target)?.use { out -> temp.inputStream().use { it.copyTo(out) } }
+        resolver.update(target, ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }, null, null)
+        temp.delete()
+        return "Download/Metrolist/Karaoke/$fileName"
     }
 
     private fun writeWav(file: File, left: FloatArray, right: FloatArray, sampleRate: Int) {

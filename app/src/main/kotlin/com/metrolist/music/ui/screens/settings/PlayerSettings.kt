@@ -122,11 +122,11 @@ fun PlayerSettings(
     val karaokePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             karaokeScope.launch(Dispatchers.Default) {
-                val file = runCatching { KaraokeExport.export(context, uri, uri.lastPathSegment ?: "track") }.getOrNull()
+                val location = runCatching { KaraokeExport.export(context, uri, uri.lastPathSegment ?: "track") }.getOrNull()
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         context,
-                        file?.let { "Đã lưu: ${it.absolutePath}" } ?: "Không đọc được file này",
+                        location?.let { "Đã lưu: $it" } ?: "Không đọc được file này",
                         Toast.LENGTH_LONG,
                     ).show()
                 }
