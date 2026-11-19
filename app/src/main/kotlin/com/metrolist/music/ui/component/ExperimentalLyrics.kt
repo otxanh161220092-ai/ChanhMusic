@@ -621,23 +621,6 @@ fun ExperimentalLyrics(
             }
         }
 
-        // When jumping significantly, we might want to reset isInitialLayout to prevent jumps
-        LaunchedEffect(activeListIndex) {
-            if (mergedLyricsList.isNotEmpty()) {
-                val h = itemHeights.toMap()
-                val windowStart = (activeListIndex - 3).coerceAtLeast(0)
-                val windowEnd = (activeListIndex + 3).coerceAtMost(mergedLyricsList.size - 1)
-                val needsMeasurement = (windowStart..windowEnd).any { !h.containsKey(it) }
-                if (needsMeasurement) {
-                    isInitialLayout = true
-                    snapshotFlow { 
-                        val hh = itemHeights.toMap()
-                        (windowStart..windowEnd).all { hh.containsKey(it) } 
-                    }.first { it }
-                    isInitialLayout = false
-                }
-            }
-        }
 
         val latestResyncLyrics by rememberUpdatedState(
             newValue = {
