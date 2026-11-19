@@ -224,6 +224,7 @@ import com.metrolist.music.constants.SleepTimerFadeOutKey
 import com.metrolist.music.constants.SleepTimerStopAfterCurrentSongKey
 import androidx.compose.material3.IconButton
 import com.metrolist.music.lyrics.LyricsTranslationHelper
+import com.metrolist.music.ui.player.KaraokeToggle
 import com.metrolist.music.constants.AiProviderKey
 import com.metrolist.music.constants.OpenRouterApiKey
 import com.metrolist.music.constants.DeeplApiKey
@@ -1641,12 +1642,13 @@ fun BottomSheetPlayer(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-            if (showInlineLyrics && hasLyricsApiKey) {
+            if (showInlineLyrics) {
                 Row(
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = PlayerHorizontalPadding),
                 ) {
-                    IconButton(
+                    if (hasLyricsApiKey) IconButton(
                         modifier =
                             Modifier
                                 .size(44.dp)
@@ -1671,6 +1673,7 @@ fun BottomSheetPlayer(
                             tint = if (hasTranslations) textButtonColor else textButtonColor.copy(alpha = 0.6f),
                         )
                     }
+                    KaraokeToggle(tint = textButtonColor)
                 }
             }
 
