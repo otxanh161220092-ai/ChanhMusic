@@ -240,7 +240,7 @@ fun AppearanceSettings(
             LyricsAnimationStyleKey,
             defaultValue = LyricsAnimationStyle.FADE,
         )
-    val (lyricsTextSize, onLyricsTextSizeChange) = rememberPreference(LyricsTextSizeKey, defaultValue = 24f)
+    val (lyricsTextSize, onLyricsTextSizeChange) = rememberPreference(LyricsTextSizeKey, defaultValue = 27f)
     val (lyricsLineSpacing, onLyricsLineSpacingChange) = rememberPreference(LyricsLineSpacingKey, defaultValue = 1.2f)
 
     var showExperimentalLyricsBetaDialog by remember { mutableStateOf(false) }

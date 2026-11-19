@@ -181,7 +181,7 @@ fun ExperimentalLyrics(
     val isGuest = listenTogetherManager?.isInRoom == true && !listenTogetherManager.isHost
 
     val lyricsTextPositionPref by rememberEnumPreference(LyricsTextPositionKey, LyricsPosition.CENTER)
-    val lyricsTextSizePref by rememberPreference(LyricsTextSizeKey, 24f)
+    val lyricsTextSizePref by rememberPreference(LyricsTextSizeKey, 27f)
     val reduceBlur by rememberPreference(ReduceBlurEffectsKey, defaultValue = false)
     val (liveMeshBackground) = rememberPreference(PlayerLiveMeshBackgroundKey, defaultValue = false)
     val lyricsTextPosition = textPositionOverride ?: lyricsTextPositionPref
