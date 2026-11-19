@@ -63,6 +63,7 @@ import kotlinx.coroutines.delay
  * The glass circle behind the lyrics controls: a white veil blended in Overlay mode, with the
  * same highlight ring the other glass buttons use. [active] makes the veil stronger.
  */
+@Composable
 fun Modifier.playerGlassCircle(active: Boolean): Modifier =
     this
         .size(44.dp)
