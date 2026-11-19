@@ -29,15 +29,24 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Restore signing keystore
+      - name: Restore signing keystore from secret
+        env:
+          AUTOMIX_KEYSTORE_B64: ${{ secrets.AUTOMIX_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$AUTOMIX_KEYSTORE_B64" ]; then
+            echo "$AUTOMIX_KEYSTORE_B64" | base64 -d > automix-release.keystore
+          fi
+
+      - name: Restore signing keystore cache
         id: keystore_cache
+        if: hashFiles('automix-release.keystore') == ''
         uses: actions/cache/restore@v4
         with:
           path: automix-release.keystore
           key: automix-release-keystore-v1
 
       - name: Create signing keystore if missing
-        if: steps.keystore_cache.outputs.cache-hit != 'true'
+        if: hashFiles('automix-release.keystore') == '' && steps.keystore_cache.outputs.cache-hit != 'true'
         run: |
           keytool -genkeypair -v \
             -keystore automix-release.keystore \
@@ -50,7 +59,7 @@ jobs:
             -dname "CN=Metrolist Automix,O=Personal,C=VN"
 
       - name: Save signing keystore
-        if: steps.keystore_cache.outputs.cache-hit != 'true'
+        if: steps.keystore_cache.outputs.cache-hit == 'false'
         uses: actions/cache/save@v4
         with:
           path: automix-release.keystore
