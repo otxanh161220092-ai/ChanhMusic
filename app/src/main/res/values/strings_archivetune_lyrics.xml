@@ -26,4 +26,10 @@
     <string name="lyrics_share_resolution_value">%1$d x %2$d</string>
     <string name="lyrics_share_show_cover">Show album cover</string>
     <string name="lyrics_share_show_cover_desc">Include the artwork in the header of the exported image.</string>
+    <string name="lyrics_share_style_album_tint">Album tint</string>
+    <string name="lyrics_share_style_clear_glass">Clear glass</string>
+    <string name="lyrics_share_style_deep_blur">Deep blur</string>
+    <string name="lyrics_share_style_frosted_dark">Frosted dark</string>
+    <string name="lyrics_share_style_frosted_light">Frosted light</string>
+    <string name="lyrics_share_style_vivid_glow">Vivid glow</string>
 </resources>

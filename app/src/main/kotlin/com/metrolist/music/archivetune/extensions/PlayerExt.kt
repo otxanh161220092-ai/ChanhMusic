@@ -95,8 +95,6 @@ fun Player.getCurrentQueueIndex(): Int {
     return index
 }
 
-val Player.currentMetadata: MediaMetadata?
-    get() = currentMediaItem?.metadata
 
 val Player.mediaItems: List<MediaItem>
     get() =

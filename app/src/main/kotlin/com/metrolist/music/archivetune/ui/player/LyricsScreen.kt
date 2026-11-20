@@ -143,8 +143,8 @@ import com.metrolist.music.archivetune.constants.LyricsAutoHideControlsKey
 import com.metrolist.music.archivetune.constants.LyricsBackgroundStyleKey
 import com.metrolist.music.archivetune.constants.LyricsMode
 import com.metrolist.music.archivetune.constants.LyricsModeKey
-import com.metrolist.music.constants.PlayerBackgroundStyle
-import com.metrolist.music.constants.PlayerBackgroundStyleKey
+import com.metrolist.music.archivetune.constants.PlayerBackgroundStyle
+import com.metrolist.music.archivetune.constants.PlayerBackgroundStyleKey
 import com.metrolist.music.archivetune.constants.PlayerCustomBlurKey
 import com.metrolist.music.archivetune.constants.PlayerCustomBrightnessKey
 import com.metrolist.music.archivetune.constants.PlayerCustomContrastKey
