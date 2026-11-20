@@ -710,21 +710,12 @@ private fun LyricsScreenBackground(
             LyricsBackgroundStyle.COLORING,
             LyricsBackgroundStyle.CUSTOM,
             -> {
-                PlayerBackground(
-                    playerBackground =
-                        if (style == LyricsBackgroundStyle.CUSTOM) {
-                            PlayerBackgroundStyle.CUSTOM
-                        } else {
-                            PlayerBackgroundStyle.COLORING
-                        },
-                    mediaMetadata = mediaMetadata,
-                    gradientColors = gradientColors,
-                    disableBlur = disableBlur,
-                    blurRadius = blurRadius,
-                    playerCustomImageUri = playerCustomImageUri,
-                    playerCustomBlur = playerCustomBlur,
-                    playerCustomContrast = playerCustomContrast,
-                    playerCustomBrightness = playerCustomBrightness,
+                // ArchiveTune's PlayerBackground (PlayerComponents.kt) is not ported; use a gradient fallback.
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(Brush.verticalGradient(gradientColors.ifEmpty { listOf(Color.Black) })),
                 )
             }
         }

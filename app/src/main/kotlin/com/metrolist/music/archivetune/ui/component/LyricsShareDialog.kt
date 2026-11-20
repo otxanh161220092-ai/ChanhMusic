@@ -87,7 +87,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.metrolist.music.R
 import com.metrolist.music.models.MediaMetadata
-import com.metrolist.music.utils.ComposeToImage
+import com.metrolist.music.archivetune.utils.ComposeToImage
 
 @Immutable
 private data class LyricsGlassStyleOptions(
