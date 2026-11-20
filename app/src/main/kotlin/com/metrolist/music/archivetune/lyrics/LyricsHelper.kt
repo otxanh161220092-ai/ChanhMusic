@@ -49,7 +49,7 @@ import com.metrolist.music.archivetune.constants.EnableUnisonLyricsKey
 import com.metrolist.music.archivetune.constants.EnableYouLyPlusLyricsKey
 import com.metrolist.music.constants.LyricsProviderOrderKey
 import com.metrolist.music.archivetune.constants.PaxsenixApiKeyKey
-import com.metrolist.music.constants.PreferredLyricsProvider
+import com.metrolist.music.archivetune.constants.PreferredLyricsProvider
 import com.metrolist.music.archivetune.constants.deserializeLyricsProviderOrder
 import com.metrolist.music.db.entities.LyricsEntity.Companion.LYRICS_NOT_FOUND
 import com.metrolist.music.models.MediaMetadata

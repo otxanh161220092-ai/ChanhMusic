@@ -9,6 +9,9 @@
 
 package com.metrolist.music.archivetune.ui.player
 
+import com.metrolist.music.archivetune.db.replaceLyrics
+import com.metrolist.music.archivetune.db.saveFetchedLyrics
+import com.metrolist.music.archivetune.db.LyricsEntitySource
 import android.content.res.Configuration
 import android.provider.Settings
 import android.view.HapticFeedbackConstants
@@ -149,6 +152,8 @@ import com.metrolist.music.archivetune.constants.PlayerCustomImageUriKey
 import com.metrolist.music.archivetune.extensions.togglePlayPause
 import com.metrolist.music.db.entities.LyricsEntity
 import com.metrolist.music.archivetune.db.entities.needsRemoteFetch
+import com.metrolist.music.archivetune.db.entities.hasGenericSource
+import com.metrolist.music.archivetune.db.entities.hasTranslationSource
 import com.metrolist.music.models.MediaMetadata
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.archivetune.ui.component.LyricsEnhanced
@@ -231,7 +236,7 @@ fun LyricsScreen(
             ?.takeIf { entity -> entity.lyrics != LyricsEntity.LYRICS_NOT_FOUND }
             ?.let { entity ->
                 when {
-                    entity.source == LyricsEntity.Source.EMBEDDED.value -> {
+                    entity.source == LyricsEntitySource.EMBEDDED.value -> {
                         AnnotatedString(
                             stringResource(R.string.lyrics_source_label, stringResource(R.string.lyrics_source_embedded)),
                         )

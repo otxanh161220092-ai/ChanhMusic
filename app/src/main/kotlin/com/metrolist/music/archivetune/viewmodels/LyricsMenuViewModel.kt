@@ -7,6 +7,9 @@
 
 package com.metrolist.music.archivetune.viewmodels
 
+import com.metrolist.music.archivetune.db.replaceLyrics
+import com.metrolist.music.archivetune.db.saveFetchedLyrics
+import com.metrolist.music.archivetune.db.LyricsEntitySource
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
@@ -192,7 +195,7 @@ class LyricsMenuViewModel
                                     replaceLyrics(
                                         id = mediaMetadata.id,
                                         lyrics = fetched.lyrics,
-                                        source = LyricsEntity.Source.REMOTE.value,
+                                        source = LyricsEntitySource.REMOTE.value,
                                         provider = fetched.providerName,
                                         providerUrl = fetched.providerUrl,
                                         providerAuthor = fetched.author,
@@ -235,7 +238,7 @@ class LyricsMenuViewModel
         fun updateLyrics(
             mediaMetadata: MediaMetadata,
             lyrics: String,
-            source: LyricsEntity.Source = LyricsEntity.Source.USER_EDIT,
+            source: LyricsEntity.Source = LyricsEntitySource.USER_EDIT,
             provider: String? = null,
             providerUrl: String? = null,
             providerAuthor: String? = null,
@@ -244,16 +247,16 @@ class LyricsMenuViewModel
             viewModelScope.launch(Dispatchers.IO) {
                 val lyricsToSave =
                     when (source) {
-                        LyricsEntity.Source.REMOTE,
-                        LyricsEntity.Source.EMBEDDED,
-                        LyricsEntity.Source.USER_SELECTION,
+                        LyricsEntitySource.REMOTE,
+                        LyricsEntitySource.EMBEDDED,
+                        LyricsEntitySource.USER_SELECTION,
                         -> LyricsUtils.lyricsOrNotFound(lyrics)
 
-                        LyricsEntity.Source.USER_EDIT,
+                        LyricsEntitySource.USER_EDIT,
                         -> lyrics
 
-                        LyricsEntity.Source.TRANSLATION,
-                        LyricsEntity.Source.AI_TRANSLATION ->
+                        LyricsEntitySource.TRANSLATION,
+                        LyricsEntitySource.AI_TRANSLATION ->
                             usableTranslatedLyrics(lyrics) ?: return@launch
                     }
                 database.query {
