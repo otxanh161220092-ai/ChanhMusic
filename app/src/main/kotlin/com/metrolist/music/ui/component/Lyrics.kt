@@ -24,6 +24,11 @@ import com.metrolist.music.ui.screens.settings.LyricsPosition
 import com.metrolist.music.utils.rememberPreference
 import androidx.compose.ui.graphics.Color
 import com.metrolist.music.viewmodels.LyricsViewModel
+import com.metrolist.music.archivetune.constants.UseLyricsV2Key
+import com.metrolist.music.archivetune.ui.component.LyricsV2
+import com.metrolist.music.archivetune.viewmodels.LyricsRenderViewModel
+import androidx.compose.runtime.LaunchedEffect
+import androidx.media3.common.C
 
 @Composable
 fun Lyrics(
@@ -36,10 +41,17 @@ fun Lyrics(
     lyricsViewModel: LyricsViewModel = hiltViewModel()
 ) {
     val (experimentalLyrics, _) = rememberPreference(key = ExperimentalLyricsKey, defaultValue = true)
+    val (useArchiveTuneLyrics, _) = rememberPreference(key = UseLyricsV2Key, defaultValue = true)
     val lyricsAnimationStyle by rememberEnumPreference(LyricsAnimationStyleKey, LyricsAnimationStyle.APPLE)
     val lyricsModifier = modifier
 
-    if (experimentalLyrics) {
+    if (useArchiveTuneLyrics) {
+        ArchiveTuneLyricsPanel(
+            sliderPositionProvider = sliderPositionProvider,
+            modifier = lyricsModifier,
+            accentOverride = accentOverride,
+        )
+    } else if (experimentalLyrics) {
         ExperimentalLyrics(
             sliderPositionProvider = sliderPositionProvider,
             modifier = lyricsModifier,
@@ -62,6 +74,37 @@ fun Lyrics(
             showLyrics = showLyrics
         )
     }
+}
+
+/**
+ * In-player lyrics using ArchiveTune's renderer. It replaces ExperimentalLyrics by default;
+ * ExperimentalLyrics stays in the code and is used when UseLyricsV2Key is turned off.
+ */
+@Composable
+private fun ArchiveTuneLyricsPanel(
+    sliderPositionProvider: () -> Long?,
+    modifier: Modifier,
+    accentOverride: Color?,
+    lyricsRenderViewModel: LyricsRenderViewModel = hiltViewModel(),
+) {
+    val playerConnection = LocalPlayerConnection.current ?: return
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
+    val renderState by lyricsRenderViewModel.state.collectAsStateWithLifecycle()
+    val mediaId = mediaMetadata?.id ?: return
+    val durationMs = playerConnection.player.duration.takeIf { it != C.TIME_UNSET } ?: 0L
+
+    LaunchedEffect(mediaId, durationMs) {
+        lyricsRenderViewModel.bind(mediaId, durationMs)
+    }
+
+    LyricsV2(
+        lyricsState = renderState,
+        sliderPositionProvider = sliderPositionProvider,
+        // Per-song sync offset from the ArchiveTune panel is not wired into this view yet.
+        lyricsSyncOffset = 0,
+        modifier = modifier,
+        textColorOverride = accentOverride,
+    )
 }
 
 @Composable
