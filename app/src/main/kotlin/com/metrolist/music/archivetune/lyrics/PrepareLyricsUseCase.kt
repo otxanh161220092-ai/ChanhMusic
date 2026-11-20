@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import com.metrolist.music.archivetune.betterlyrics.QRCParser
-import com.metrolist.music.archivetune.betterlyrics.TTMLParser
+import com.metrolist.music.betterlyrics.TTMLParser
 import com.metrolist.music.archivetune.betterlyrics.TtmlAgent
 import com.metrolist.music.archivetune.betterlyrics.TtmlAgentType
 import com.metrolist.music.archivetune.betterlyrics.TtmlDocument

@@ -14,8 +14,8 @@ import com.atilika.kuromoji.ipadic.Tokenizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.metrolist.music.archivetune.betterlyrics.QRCParser
-import com.metrolist.music.archivetune.betterlyrics.TTMLParser
-import com.metrolist.music.archivetune.db.entities.LyricsEntity
+import com.metrolist.music.betterlyrics.TTMLParser
+import com.metrolist.music.db.entities.LyricsEntity
 import java.lang.Character.UnicodeScript
 
 @Immutable

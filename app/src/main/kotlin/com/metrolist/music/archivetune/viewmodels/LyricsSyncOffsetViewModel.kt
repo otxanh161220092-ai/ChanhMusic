@@ -31,7 +31,7 @@ import com.metrolist.music.archivetune.constants.LyricsGlobalSyncOffsetKey
 import com.metrolist.music.archivetune.constants.LyricsSyncOffsetLimitMs
 import com.metrolist.music.archivetune.constants.LyricsSyncOffsetMode
 import com.metrolist.music.archivetune.constants.LyricsSyncOffsetModeKey
-import com.metrolist.music.archivetune.db.MusicDatabase
+import com.metrolist.music.db.MusicDatabase
 import com.metrolist.music.archivetune.db.entities.LyricsSyncOffsetEntity
 import com.metrolist.music.archivetune.extensions.toEnum
 import com.metrolist.music.archivetune.utils.dataStore

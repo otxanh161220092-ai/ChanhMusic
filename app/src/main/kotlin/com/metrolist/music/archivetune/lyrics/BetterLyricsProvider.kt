@@ -10,7 +10,7 @@ package com.metrolist.music.archivetune.lyrics
 import android.content.Context
 import android.util.Log
 import com.metrolist.music.archivetune.betterlyrics.BetterLyrics
-import com.metrolist.music.archivetune.constants.EnableBetterLyricsKey
+import com.metrolist.music.constants.EnableBetterLyricsKey
 import com.metrolist.music.archivetune.utils.GlobalLog
 import com.metrolist.music.archivetune.utils.dataStore
 import com.metrolist.music.archivetune.utils.get

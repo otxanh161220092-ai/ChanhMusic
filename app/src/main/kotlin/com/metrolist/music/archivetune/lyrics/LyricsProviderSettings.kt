@@ -17,11 +17,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import com.metrolist.music.archivetune.constants.EnableBetterLyricsKey
+import com.metrolist.music.constants.EnableBetterLyricsKey
 import com.metrolist.music.archivetune.constants.EnableBetterLyricsPortatoKey
 import com.metrolist.music.archivetune.constants.EnableBinimumLyricsKey
-import com.metrolist.music.archivetune.constants.EnableKugouKey
-import com.metrolist.music.archivetune.constants.EnableLrcLibKey
+import com.metrolist.music.constants.EnableKugouKey
+import com.metrolist.music.constants.EnableLrcLibKey
 import com.metrolist.music.archivetune.constants.EnableLrcRedLyricsKey
 import com.metrolist.music.archivetune.constants.EnableMegalobizLyricsKey
 import com.metrolist.music.archivetune.constants.EnablePaxsenixAppleMusicLyricsKey
@@ -32,8 +32,8 @@ import com.metrolist.music.archivetune.constants.EnablePaxsenixSpotifyLyricsKey
 import com.metrolist.music.archivetune.constants.EnableSimpMusicLyricsKey
 import com.metrolist.music.archivetune.constants.EnableUnisonLyricsKey
 import com.metrolist.music.archivetune.constants.EnableYouLyPlusLyricsKey
-import com.metrolist.music.archivetune.constants.LyricsProviderOrderKey
-import com.metrolist.music.archivetune.constants.PreferredLyricsProvider
+import com.metrolist.music.constants.LyricsProviderOrderKey
+import com.metrolist.music.constants.PreferredLyricsProvider
 import com.metrolist.music.archivetune.constants.deserializeLyricsProviderOrder
 import com.metrolist.music.archivetune.utils.dataStore
 import javax.inject.Inject

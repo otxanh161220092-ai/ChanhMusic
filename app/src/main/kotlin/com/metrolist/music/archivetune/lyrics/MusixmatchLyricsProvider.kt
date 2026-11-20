@@ -10,7 +10,7 @@ package com.metrolist.music.archivetune.lyrics
 import android.content.Context
 import android.util.Log
 import com.metrolist.music.archivetune.constants.EnableMusixmatchLyricsKey
-import com.metrolist.music.archivetune.musixmatch.Musixmatch
+import com.metrolist.music.bcmix.data.lyrics.Musixmatch
 import com.metrolist.music.archivetune.utils.GlobalLog
 import com.metrolist.music.archivetune.utils.dataStore
 import com.metrolist.music.archivetune.utils.get

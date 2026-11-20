@@ -8,8 +8,8 @@
 package com.metrolist.music.archivetune.lyrics
 
 import android.content.Context
-import com.metrolist.music.archivetune.constants.EnableLrcLibKey
-import com.metrolist.music.archivetune.lrclib.LrcLib
+import com.metrolist.music.constants.EnableLrcLibKey
+import com.metrolist.music.bcmix.data.lyrics.LrcLib
 import com.metrolist.music.archivetune.utils.dataStore
 import com.metrolist.music.archivetune.utils.get
 

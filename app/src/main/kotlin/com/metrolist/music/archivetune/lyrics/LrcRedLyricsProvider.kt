@@ -11,7 +11,7 @@ import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.metrolist.music.archivetune.constants.EnableLrcRedLyricsKey
-import com.metrolist.music.archivetune.lrcred.LrcRed
+import com.metrolist.music.bcmix.data.lyrics.LrcRed
 import com.metrolist.music.archivetune.utils.dataStore
 import com.metrolist.music.archivetune.utils.get
 import java.io.IOException

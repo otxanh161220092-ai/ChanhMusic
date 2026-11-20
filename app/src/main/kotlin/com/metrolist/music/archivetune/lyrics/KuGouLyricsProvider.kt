@@ -8,8 +8,8 @@
 package com.metrolist.music.archivetune.lyrics
 
 import android.content.Context
-import com.metrolist.music.archivetune.constants.EnableKugouKey
-import com.metrolist.music.archivetune.kugou.KuGou
+import com.metrolist.music.constants.EnableKugouKey
+import com.metrolist.music.bcmix.data.lyrics.KuGou
 import com.metrolist.music.archivetune.utils.dataStore
 import com.metrolist.music.archivetune.utils.get
 

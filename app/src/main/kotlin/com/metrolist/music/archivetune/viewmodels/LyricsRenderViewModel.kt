@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import com.metrolist.music.archivetune.lyrics.PrepareLyricsUseCase
 import com.metrolist.music.archivetune.lyrics.PreparedLyrics
-import com.metrolist.music.archivetune.utils.reportException
+import com.metrolist.music.utils.reportException
 import javax.inject.Inject
 
 sealed interface LyricsRenderScreenState {
