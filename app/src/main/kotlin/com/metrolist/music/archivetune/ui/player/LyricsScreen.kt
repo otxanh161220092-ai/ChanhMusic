@@ -161,8 +161,8 @@ import com.metrolist.music.ui.menu.LyricsMenu
 import com.metrolist.music.ui.theme.PlayerColorExtractor
 import com.metrolist.music.archivetune.ui.theme.rememberArchiveTuneLyricsFontFamily
 import com.metrolist.music.utils.makeTimeString
-import com.metrolist.music.archivetune.utils.rememberEnumPreference
-import com.metrolist.music.archivetune.utils.rememberPreference
+import com.metrolist.music.utils.rememberEnumPreference
+import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.archivetune.viewmodels.LyricsRenderScreenState
 import com.metrolist.music.archivetune.viewmodels.LyricsRenderViewModel
 import kotlin.coroutines.cancellation.CancellationException

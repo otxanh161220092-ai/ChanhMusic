@@ -8,8 +8,8 @@
 package com.metrolist.music.archivetune.lyrics
 
 import android.content.Context
-import com.metrolist.music.archivetune.innertube.YouTube
-import com.metrolist.music.archivetune.innertube.models.WatchEndpoint
+import com.metrolist.innertube.YouTube
+import com.metrolist.innertube.models.WatchEndpoint
 
 object YouTubeLyricsProvider : LyricsProvider {
     override val name = "YouTube Music"

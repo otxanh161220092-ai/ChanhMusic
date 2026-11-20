@@ -35,7 +35,7 @@ import com.metrolist.music.archivetune.constants.EnableYouLyPlusLyricsKey
 import com.metrolist.music.constants.LyricsProviderOrderKey
 import com.metrolist.music.constants.PreferredLyricsProvider
 import com.metrolist.music.archivetune.constants.deserializeLyricsProviderOrder
-import com.metrolist.music.archivetune.utils.dataStore
+import com.metrolist.music.utils.dataStore
 import javax.inject.Inject
 import javax.inject.Singleton
 

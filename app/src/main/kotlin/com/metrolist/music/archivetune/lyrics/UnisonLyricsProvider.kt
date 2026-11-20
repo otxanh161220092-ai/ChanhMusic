@@ -13,8 +13,8 @@ import com.metrolist.music.archivetune.constants.EnableUnisonLyricsKey
 import com.metrolist.music.bcmix.data.lyrics.Unison
 import com.metrolist.music.archivetune.unison.models.UnisonLyrics
 import com.metrolist.music.archivetune.utils.GlobalLog
-import com.metrolist.music.archivetune.utils.dataStore
-import com.metrolist.music.archivetune.utils.get
+import com.metrolist.music.utils.dataStore
+import com.metrolist.music.utils.get
 
 object UnisonLyricsProvider : LyricsProvider {
     init {

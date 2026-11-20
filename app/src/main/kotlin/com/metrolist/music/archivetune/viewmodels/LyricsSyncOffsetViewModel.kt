@@ -34,7 +34,7 @@ import com.metrolist.music.archivetune.constants.LyricsSyncOffsetModeKey
 import com.metrolist.music.db.MusicDatabase
 import com.metrolist.music.archivetune.db.entities.LyricsSyncOffsetEntity
 import com.metrolist.music.archivetune.extensions.toEnum
-import com.metrolist.music.archivetune.utils.dataStore
+import com.metrolist.music.utils.dataStore
 import javax.inject.Inject
 
 @Immutable

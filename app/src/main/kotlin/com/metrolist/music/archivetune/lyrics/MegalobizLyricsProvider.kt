@@ -12,8 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.metrolist.music.archivetune.constants.EnableMegalobizLyricsKey
 import com.metrolist.music.archivetune.megalobiz.MegalobizLyrics
-import com.metrolist.music.archivetune.utils.dataStore
-import com.metrolist.music.archivetune.utils.get
+import com.metrolist.music.utils.dataStore
+import com.metrolist.music.utils.get
 
 object MegalobizLyricsProvider : LyricsProvider {
     override val name: String = "Megalobiz"

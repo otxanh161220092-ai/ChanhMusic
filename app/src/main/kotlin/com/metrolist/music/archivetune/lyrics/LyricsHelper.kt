@@ -55,7 +55,7 @@ import com.metrolist.music.db.entities.LyricsEntity.Companion.LYRICS_NOT_FOUND
 import com.metrolist.music.models.MediaMetadata
 import com.metrolist.music.archivetune.utils.GlobalLog
 import com.metrolist.music.utils.NetworkConnectivityObserver
-import com.metrolist.music.archivetune.utils.dataStore
+import com.metrolist.music.utils.dataStore
 import com.metrolist.music.utils.reportException
 import javax.inject.Inject
 import javax.inject.Singleton

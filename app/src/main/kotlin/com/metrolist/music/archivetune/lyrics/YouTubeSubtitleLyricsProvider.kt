@@ -8,7 +8,7 @@
 package com.metrolist.music.archivetune.lyrics
 
 import android.content.Context
-import com.metrolist.music.archivetune.innertube.YouTube
+import com.metrolist.innertube.YouTube
 import com.metrolist.music.archivetune.utils.YTPlayerUtils
 
 object YouTubeSubtitleLyricsProvider : LyricsProvider {

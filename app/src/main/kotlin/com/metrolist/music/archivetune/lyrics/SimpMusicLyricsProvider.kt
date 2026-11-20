@@ -10,8 +10,8 @@ package com.metrolist.music.archivetune.lyrics
 import android.content.Context
 import com.metrolist.music.archivetune.constants.EnableSimpMusicLyricsKey
 import com.metrolist.music.bcmix.data.lyrics.SimpMusicLyrics
-import com.metrolist.music.archivetune.utils.dataStore
-import com.metrolist.music.archivetune.utils.get
+import com.metrolist.music.utils.dataStore
+import com.metrolist.music.utils.get
 
 object SimpMusicLyricsProvider : LyricsProvider {
     override val name: String = "SimpMusic"

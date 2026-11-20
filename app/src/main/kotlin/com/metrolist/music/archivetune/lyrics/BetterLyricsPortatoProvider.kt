@@ -10,8 +10,8 @@ package com.metrolist.music.archivetune.lyrics
 import android.content.Context
 import com.metrolist.music.archivetune.betterlyrics.BetterLyrics
 import com.metrolist.music.archivetune.constants.EnableBetterLyricsPortatoKey
-import com.metrolist.music.archivetune.utils.dataStore
-import com.metrolist.music.archivetune.utils.get
+import com.metrolist.music.utils.dataStore
+import com.metrolist.music.utils.get
 
 object BetterLyricsPortatoProvider : LyricsProvider {
     override val name = "BetterLyrics Portato"

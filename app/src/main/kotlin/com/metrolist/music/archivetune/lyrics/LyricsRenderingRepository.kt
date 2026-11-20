@@ -29,7 +29,7 @@ import com.metrolist.music.archivetune.constants.LyricsV2GlowFactorKey
 import com.metrolist.music.archivetune.constants.LyricsV2LrcBounceEnabledKey
 import com.metrolist.music.archivetune.constants.TranslateLyricsKey
 import com.metrolist.music.db.MusicDatabase
-import com.metrolist.music.archivetune.utils.dataStore
+import com.metrolist.music.utils.dataStore
 import javax.inject.Inject
 import javax.inject.Singleton
 

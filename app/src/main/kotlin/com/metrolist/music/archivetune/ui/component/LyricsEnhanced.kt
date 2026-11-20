@@ -127,7 +127,7 @@ import com.metrolist.music.archivetune.lyrics.PreparedLyricsLine
 import com.metrolist.music.lyrics.WordTimestamp
 import com.metrolist.music.archivetune.lyrics.toLyricsEntries
 import com.metrolist.music.archivetune.ui.theme.rememberArchiveTuneLyricsFontFamily
-import com.metrolist.music.archivetune.utils.rememberEnumPreference
+import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.archivetune.viewmodels.LyricsRenderScreenState
 import com.metrolist.music.archivetune.viewmodels.LyricsRenderViewModel
 import kotlin.math.roundToInt

@@ -11,8 +11,8 @@ import android.content.Context
 import android.util.Log
 import com.metrolist.music.archivetune.constants.EnableYouLyPlusLyricsKey
 import com.metrolist.music.archivetune.utils.GlobalLog
-import com.metrolist.music.archivetune.utils.dataStore
-import com.metrolist.music.archivetune.utils.get
+import com.metrolist.music.utils.dataStore
+import com.metrolist.music.utils.get
 import com.metrolist.music.archivetune.youlyplus.YouLyPlus
 
 object YouLyPlusLyricsProvider : LyricsProvider {
