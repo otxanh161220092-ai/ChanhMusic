@@ -266,6 +266,10 @@ val newPipeExtractorRaw: Configuration by configurations.creating {
 dependencies {
     implementation(libs.accompanist.lyrics.ui)
     implementation(libs.accompanist.lyrics.core)
+    implementation(libs.haze)
+    implementation(libs.haze.blur)
+    implementation(libs.haze.glass)
+    implementation(libs.ktor.client.cio)
     newPipeExtractorRaw("com.github.TeamNewPipe:NewPipeExtractor:v0.26.3")
 }
 val newPipeExtractorStripped = tasks.register<org.gradle.api.tasks.bundling.Jar>(

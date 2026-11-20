@@ -6,6 +6,7 @@
  */
 package com.metrolist.music.archivetune.betterlyrics
 
+import javax.xml.XMLConstants
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node

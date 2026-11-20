@@ -115,3 +115,13 @@ fun deserializeLyricsProviderOrder(orderStr: String?): List<PreferredLyricsProvi
     val missing = DefaultLyricsProviderOrder.filterNot { it in normalized }
     return normalized + missing
 }
+
+val UseLyricsV2Key = booleanPreferencesKey("useLyricsV2")
+
+val LyricsV2BounceFactorKey = floatPreferencesKey("lyricsV2BounceFactor")
+
+val LyricsV2GlowFactorKey = floatPreferencesKey("lyricsV2GlowFactor")
+
+val LyricsV2FillTransitionWidthKey = floatPreferencesKey("lyricsV2FillTransitionWidth")
+
+val LyricsV2LrcBounceEnabledKey = booleanPreferencesKey("lyricsV2LrcBounceEnabled")

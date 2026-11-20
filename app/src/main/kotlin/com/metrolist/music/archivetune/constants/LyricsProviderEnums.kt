@@ -34,3 +34,38 @@ val DefaultLyricsProviderOrder =
         PreferredLyricsProvider.PAXSENIX_MUSIXMATCH,
         PreferredLyricsProvider.MUSIXMATCH,
     )
+
+enum class PlayerBackgroundStyle {
+    DEFAULT,
+    GRADIENT,
+    CUSTOM,
+    BLUR,
+    COLORING,
+    BLUR_GRADIENT,
+    GLOW,
+    GLOW_ANIMATED,
+}
+
+enum class LyricsBackgroundStyle {
+    DEFAULT,
+    FOLLOW_THEME,
+    COLORING,
+    CUSTOM;
+
+    fun resolveFor(playerBackgroundStyle: PlayerBackgroundStyle): LyricsBackgroundStyle =
+        when {
+            playerBackgroundStyle == PlayerBackgroundStyle.CUSTOM -> CUSTOM
+            this == CUSTOM -> DEFAULT
+            else -> this
+        }
+}
+
+
+enum class LyricsAnimationStyle {
+    NONE,
+    FADE,
+    GLOW,
+    SLIDE,
+    KARAOKE,
+    APPLE,
+}
