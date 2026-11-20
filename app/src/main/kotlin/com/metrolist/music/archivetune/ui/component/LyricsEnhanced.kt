@@ -117,14 +117,14 @@ import com.metrolist.music.LocalPlayerConnection
 import com.metrolist.music.archivetune.R
 import com.metrolist.music.constants.PlayerBackgroundStyle
 import com.metrolist.music.constants.PlayerBackgroundStyleKey
-import com.metrolist.music.lyrics.LyricsEntry
+import com.metrolist.music.archivetune.lyrics.LyricsEntry
 import com.metrolist.music.archivetune.lyrics.LyricsLineAlignment
 import com.metrolist.music.archivetune.lyrics.LyricsSourceFormat
 import com.metrolist.music.archivetune.lyrics.LyricsSyncType
 import com.metrolist.music.archivetune.lyrics.LyricsTextDirection
-import com.metrolist.music.lyrics.LyricsUtils.providedTranslationTextForEntry
+import com.metrolist.music.archivetune.lyrics.LyricsUtils.providedTranslationTextForEntry
 import com.metrolist.music.archivetune.lyrics.PreparedLyricsLine
-import com.metrolist.music.lyrics.WordTimestamp
+import com.metrolist.music.archivetune.lyrics.WordTimestamp
 import com.metrolist.music.archivetune.lyrics.toLyricsEntries
 import com.metrolist.music.archivetune.ui.theme.rememberArchiveTuneLyricsFontFamily
 import com.metrolist.music.utils.rememberEnumPreference
