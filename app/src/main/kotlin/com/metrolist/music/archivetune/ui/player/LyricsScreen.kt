@@ -160,7 +160,6 @@ import com.metrolist.music.archivetune.ui.component.LyricsEnhanced
 import com.metrolist.music.archivetune.ui.component.LyricsSearchingIndicator
 import com.metrolist.music.archivetune.ui.component.LyricsV2
 import com.metrolist.music.ui.component.PlayerSliderTrack
-import com.metrolist.music.archivetune.ui.component.buildLyricsSourceLabel
 import com.metrolist.music.archivetune.ui.component.rememberControlledSliderState
 import com.metrolist.music.ui.menu.LyricsMenu
 import com.metrolist.music.ui.theme.PlayerColorExtractor
@@ -231,33 +230,14 @@ fun LyricsScreen(
         }
     val currentLyrics by playerConnection.currentLyrics.collectAsStateWithLifecycle(initialValue = null)
     val lyricsRenderState by lyricsRenderViewModel.state.collectAsStateWithLifecycle()
+    // The app's lyrics table stores only the provider name, so the label shows just that.
     val lyricsSourceLabel =
         currentLyrics
             ?.takeIf { entity -> entity.lyrics != LyricsEntity.LYRICS_NOT_FOUND }
-            ?.let { entity ->
-                when {
-                    entity.source == LyricsEntitySource.EMBEDDED.value -> {
-                        AnnotatedString(
-                            stringResource(R.string.lyrics_source_label, stringResource(R.string.lyrics_source_embedded)),
-                        )
-                    }
-
-                    entity.provider != null -> {
-                        val label = stringResource(R.string.lyrics_source_label, entity.provider)
-                        remember(label, entity.provider, entity.providerUrl, entity.providerAuthor, entity.providerAuthorUrl) {
-                            buildLyricsSourceLabel(
-                                text = label,
-                                providerName = entity.provider,
-                                providerUrl = entity.providerUrl,
-                                author = entity.providerAuthor,
-                                authorUrl = entity.providerAuthorUrl,
-                            )
-                        }
-                    }
-
-                    else -> {
-                        null
-                    }
+            ?.provider
+            ?.let { provider ->
+                AnnotatedString(stringResource(R.string.lyrics_source_label, provider))
+            }
                 }
             }
 
@@ -311,7 +291,7 @@ fun LyricsScreen(
                     context.applicationContext,
                     com.metrolist.music.archivetune.di.LyricsHelperEntryPoint::class.java,
                 ).lyricsHelper()
-    }
+        }
 
     LaunchedEffect(mediaMetadata.id, currentLyrics?.lyrics) {
         if (mediaMetadata.isPodcast) return@LaunchedEffect

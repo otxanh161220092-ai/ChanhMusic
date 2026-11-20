@@ -10,4 +10,20 @@
     </plurals>
     <string name="widget_previous">Previous</string>
     <string name="widget_pause">Pause</string>
+    <string name="lyrics_now_singing">%1$s</string>
+    <string name="lyrics_resume_auto_scroll">Resume</string>
+    <string name="lyrics_searching_lyrics_providers">Searching lyrics providers…</string>
+    <string name="lyrics_share_background_blur">Background blur</string>
+    <string name="lyrics_share_background_blur_value">%1$d px</string>
+    <string name="lyrics_share_background_dim">Background dim</string>
+    <string name="lyrics_share_background_dim_value">%1$d%%</string>
+    <string name="lyrics_share_export_failed">Failed to create image: %1$s</string>
+    <string name="lyrics_share_export_not_supported">Image sharing requires Android 6.0 or newer</string>
+    <string name="lyrics_share_layout">Layout</string>
+    <string name="lyrics_share_layout_portrait">Portrait</string>
+    <string name="lyrics_share_layout_square">Square</string>
+    <string name="lyrics_share_layout_story">Story</string>
+    <string name="lyrics_share_resolution_value">%1$d x %2$d</string>
+    <string name="lyrics_share_show_cover">Show album cover</string>
+    <string name="lyrics_share_show_cover_desc">Include the artwork in the header of the exported image.</string>
 </resources>

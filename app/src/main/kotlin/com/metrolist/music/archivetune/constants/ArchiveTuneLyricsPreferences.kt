@@ -127,3 +127,5 @@ val LyricsV2FillTransitionWidthKey = floatPreferencesKey("lyricsV2FillTransition
 val LyricsV2LrcBounceEnabledKey = booleanPreferencesKey("lyricsV2LrcBounceEnabled")
 
 val PlayerBackgroundStyleKey = stringPreferencesKey("playerBackgroundStyle")
+
+val LyricsPerSongSyncOffsetsKey = stringPreferencesKey("lyricsPerSongSyncOffsets")

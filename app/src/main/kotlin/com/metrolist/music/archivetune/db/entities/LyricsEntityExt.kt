@@ -12,3 +12,7 @@ fun LyricsEntity?.needsRemoteFetch(): Boolean = this == null || lyrics == Lyrics
 fun LyricsEntity.hasGenericSource(): Boolean = true
 
 fun LyricsEntity.hasTranslationSource(): Boolean = false
+
+/** The app's MediaMetadata has no podcast flag, so nothing is treated as a podcast here. */
+val com.metrolist.music.models.MediaMetadata.isPodcast: Boolean
+    get() = false

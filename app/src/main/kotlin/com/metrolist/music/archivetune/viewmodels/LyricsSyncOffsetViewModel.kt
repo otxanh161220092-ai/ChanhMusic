@@ -32,7 +32,8 @@ import com.metrolist.music.archivetune.constants.LyricsSyncOffsetLimitMs
 import com.metrolist.music.archivetune.constants.LyricsSyncOffsetMode
 import com.metrolist.music.archivetune.constants.LyricsSyncOffsetModeKey
 import com.metrolist.music.db.MusicDatabase
-import com.metrolist.music.archivetune.db.entities.LyricsSyncOffsetEntity
+import com.metrolist.music.archivetune.constants.LyricsPerSongSyncOffsetsKey
+import kotlinx.serialization.json.Json
 import com.metrolist.music.extensions.toEnum
 import com.metrolist.music.utils.dataStore
 import javax.inject.Inject
@@ -78,9 +79,8 @@ class LyricsSyncOffsetViewModel
                             flowOf(LyricsSyncOffsetState(offsetMode, null, 0))
 
                         else ->
-                            database
-                                .lyricsSyncOffset(id)
-                                .map { LyricsSyncOffsetState(offsetMode, id, (it ?: 0).coerceToLimit()) }
+                            context.dataStore.data
+                                .map { LyricsSyncOffsetState(offsetMode, id, (perSongOffsets(it)[id] ?: 0).coerceToLimit()) }
                     }
                 }.distinctUntilChanged()
                 .stateIn(
@@ -106,13 +106,26 @@ class LyricsSyncOffsetViewModel
 
                     LyricsSyncOffsetMode.PER_SONG ->
                         if (value == 0) {
-                            database.deleteLyricsSyncOffset(songId)
+                            context.dataStore.edit { prefs ->
+                                val map = perSongOffsets(prefs).toMutableMap()
+                                map.remove(songId)
+                                prefs[LyricsPerSongSyncOffsetsKey] = Json.encodeToString(map)
+                            }
                         } else {
-                            database.upsert(LyricsSyncOffsetEntity(songId = songId, offsetMs = value))
+                            context.dataStore.edit { prefs ->
+                                val map = perSongOffsets(prefs).toMutableMap()
+                                map[songId] = value
+                                prefs[LyricsPerSongSyncOffsetsKey] = Json.encodeToString(map)
+                            }
                         }
                 }
             }
         }
+
+        private fun perSongOffsets(prefs: androidx.datastore.preferences.core.Preferences): Map<String, Int> =
+            prefs[LyricsPerSongSyncOffsetsKey]
+                ?.let { runCatching { Json.decodeFromString<Map<String, Int>>(it) }.getOrNull() }
+                ?: emptyMap()
 
         private fun Int.coerceToLimit(): Int = coerceIn(-LyricsSyncOffsetLimitMs, LyricsSyncOffsetLimitMs)
     }
