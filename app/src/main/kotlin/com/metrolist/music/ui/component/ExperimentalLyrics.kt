@@ -367,7 +367,8 @@ fun ExperimentalLyrics(
         
         var lastPlayerPos = playerConnection.player.currentPosition
         var lastUpdateTime = System.currentTimeMillis()
-        
+        var lastPlaying = playerConnection.player.isPlaying
+
         while (isActive) {
             withFrameNanos { _ -> }
             val now = System.currentTimeMillis()
@@ -377,13 +378,17 @@ fun ExperimentalLyrics(
             val position = if (isSeeking) {
                 sliderPosition!!
             } else {
+                // The player reports its position about every 100 ms; re-anchoring on each report
+                // makes the lyrics step. Only a real seek or play/pause change re-anchors.
                 val playerPos = playerConnection.player.currentPosition
-                if (playerPos != lastPlayerPos) {
+                val playing = playerConnection.player.isPlaying
+                val predicted = lastPlayerPos + (if (lastPlaying) now - lastUpdateTime else 0)
+                if (playing != lastPlaying || kotlin.math.abs(playerPos - predicted) > 300) {
                     lastPlayerPos = playerPos
                     lastUpdateTime = now
                 }
-                val elapsed = now - lastUpdateTime
-                lastPlayerPos + (if (playerConnection.player.isPlaying) elapsed else 0)
+                lastPlaying = playing
+                lastPlayerPos + (if (playing) now - lastUpdateTime else 0)
             }
             
             currentPositionState = position
