@@ -18,15 +18,22 @@ internal fun convertAppWordSyncLines(text: String): String {
         val lineStart = LRC_LINE_START_REGEX.find(line.trim())?.value
         val wordLine = lines.getOrNull(i + 1)?.trim()?.let { APP_WORD_LINE_REGEX.matchEntire(it) }
         if (lineStart != null && wordLine != null) {
-            val words =
+            val parsed =
                 wordLine.groupValues[1].split("|").mapNotNull { item ->
                     val parts = item.split(":")
                     if (parts.size < 3) return@mapNotNull null
                     val wordText = parts.dropLast(2).joinToString(":")
                     val start = parts[parts.size - 2].toDoubleOrNull() ?: return@mapNotNull null
-                    if (wordText.isBlank()) null else "<${formatWordTime(start)}>$wordText"
+                    if (wordText.isBlank()) null else start to wordText
                 }
-            if (words.isNotEmpty()) {
+            if (parsed.isNotEmpty()) {
+                // The app's word texts carry no separating spaces, so add one after each word
+                // that is followed by another word. The last word needs no trailing space.
+                val words =
+                    parsed.mapIndexed { index, (start, wordText) ->
+                        val needsSpace = index < parsed.lastIndex && !wordText.endsWith(' ')
+                        "<${formatWordTime(start)}>" + if (needsSpace) "$wordText " else wordText
+                    }
                 out += lineStart + words.joinToString("")
                 i += 2
                 continue
