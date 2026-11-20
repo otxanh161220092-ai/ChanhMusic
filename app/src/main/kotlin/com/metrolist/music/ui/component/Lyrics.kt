@@ -26,6 +26,9 @@ import androidx.compose.ui.graphics.Color
 import com.metrolist.music.viewmodels.LyricsViewModel
 import com.metrolist.music.archivetune.constants.UseLyricsV2Key
 import com.metrolist.music.archivetune.ui.component.LyricsV2
+import com.metrolist.music.archivetune.ui.component.LyricsEnhanced
+import com.metrolist.music.archivetune.constants.LyricsMode
+import com.metrolist.music.archivetune.constants.LyricsModeKey
 import com.metrolist.music.archivetune.viewmodels.LyricsRenderViewModel
 import androidx.compose.runtime.LaunchedEffect
 import androidx.media3.common.C
@@ -41,7 +44,7 @@ fun Lyrics(
     lyricsViewModel: LyricsViewModel = hiltViewModel()
 ) {
     val (experimentalLyrics, _) = rememberPreference(key = ExperimentalLyricsKey, defaultValue = true)
-    val (useArchiveTuneLyrics, _) = rememberPreference(key = UseLyricsV2Key, defaultValue = false)
+    val (useArchiveTuneLyrics, _) = rememberPreference(key = UseLyricsV2Key, defaultValue = true)
     val lyricsAnimationStyle by rememberEnumPreference(LyricsAnimationStyleKey, LyricsAnimationStyle.APPLE)
     val lyricsModifier = modifier
 
@@ -97,14 +100,25 @@ private fun ArchiveTuneLyricsPanel(
         lyricsRenderViewModel.bind(mediaId, durationMs)
     }
 
-    LyricsV2(
-        lyricsState = renderState,
-        sliderPositionProvider = sliderPositionProvider,
-        // Per-song sync offset from the ArchiveTune panel is not wired into this view yet.
-        lyricsSyncOffset = 0,
-        modifier = modifier,
-        textColorOverride = accentOverride,
-    )
+    val lyricsMode by rememberEnumPreference(LyricsModeKey, LyricsMode.ENHANCED)
+    // Per-song sync offset from the ArchiveTune panel is not wired into this view yet.
+    if (lyricsMode == LyricsMode.ENHANCED) {
+        LyricsEnhanced(
+            lyricsState = renderState,
+            sliderPositionProvider = sliderPositionProvider,
+            lyricsSyncOffset = 0,
+            modifier = modifier,
+            textColorOverride = accentOverride,
+        )
+    } else {
+        LyricsV2(
+            lyricsState = renderState,
+            sliderPositionProvider = sliderPositionProvider,
+            lyricsSyncOffset = 0,
+            modifier = modifier,
+            textColorOverride = accentOverride,
+        )
+    }
 }
 
 @Composable
