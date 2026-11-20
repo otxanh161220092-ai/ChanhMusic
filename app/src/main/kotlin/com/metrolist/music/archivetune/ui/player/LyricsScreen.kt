@@ -138,7 +138,7 @@ import com.metrolist.music.R
 import com.metrolist.music.archivetune.constants.BlurRadiusKey
 import com.metrolist.music.archivetune.constants.DisableBlurKey
 import com.metrolist.music.archivetune.constants.EnableHapticFeedbackKey
-import com.metrolist.music.ui.component.LyricsBackgroundStyle
+import com.metrolist.music.archivetune.constants.LyricsBackgroundStyle
 import com.metrolist.music.archivetune.constants.LyricsAutoHideControlsKey
 import com.metrolist.music.archivetune.constants.LyricsBackgroundStyleKey
 import com.metrolist.music.archivetune.constants.LyricsMode
@@ -162,7 +162,8 @@ import com.metrolist.music.archivetune.ui.component.LyricsV2
 import com.metrolist.music.ui.component.PlayerSliderTrack
 import com.metrolist.music.archivetune.ui.component.rememberControlledSliderState
 import com.metrolist.music.ui.menu.LyricsMenu
-import com.metrolist.music.ui.theme.PlayerColorExtractor
+import com.metrolist.music.archivetune.db.entities.isPodcast
+import com.metrolist.music.archivetune.ui.theme.PlayerColorExtractor
 import com.metrolist.music.archivetune.ui.theme.rememberArchiveTuneLyricsFontFamily
 import com.metrolist.music.utils.makeTimeString
 import com.metrolist.music.utils.rememberEnumPreference
@@ -430,13 +431,10 @@ fun LyricsScreen(
         menuState.show {
             LyricsMenu(
                 lyricsProvider = { currentLyrics },
+                songProvider = { null },
                 mediaMetadataProvider = { mediaMetadata },
-                lyricsSyncOffset = lyricsSyncOffset,
-                onLyricsSyncOffsetChange = onLyricsSyncOffsetChange,
-                autoHideControlsState = autoHideControlsState,
-                onAutoHideControlsChange = onAutoHideControlsChange,
                 onDismiss = menuState::dismiss,
-                lyricsRenderViewModel = lyricsRenderViewModel,
+                onShowOffsetDialog = {},
             )
         }
     }

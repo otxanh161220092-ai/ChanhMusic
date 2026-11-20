@@ -12,7 +12,6 @@ import org.w3c.dom.Node
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
 import java.io.StringReader
-import javax.xml.XMLConstants
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 import kotlin.math.roundToLong
@@ -239,8 +238,8 @@ object TTMLParser {
         factory.setFeatureIfSupported("http://xml.org/sax/features/external-general-entities", false)
         factory.setFeatureIfSupported("http://xml.org/sax/features/external-parameter-entities", false)
         factory.setFeatureIfSupported("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-        factory.setAttributeIfSupported(XMLConstants.ACCESS_EXTERNAL_DTD, "")
-        factory.setAttributeIfSupported(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "")
+        factory.setAttributeIfSupported("http://javax.xml.XMLConstants/property/accessExternalDTD", "")
+        factory.setAttributeIfSupported("http://javax.xml.XMLConstants/property/accessExternalSchema", "")
 
         val builder = factory.newDocumentBuilder()
         builder.setEntityResolver { _, _ -> throw SAXException("External XML entities are not supported") }

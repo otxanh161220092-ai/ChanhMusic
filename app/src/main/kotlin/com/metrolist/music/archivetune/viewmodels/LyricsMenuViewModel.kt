@@ -238,7 +238,7 @@ class LyricsMenuViewModel
         fun updateLyrics(
             mediaMetadata: MediaMetadata,
             lyrics: String,
-            source: LyricsEntity.Source = LyricsEntitySource.USER_EDIT,
+            source: LyricsEntitySource = LyricsEntitySource.USER_EDIT,
             provider: String? = null,
             providerUrl: String? = null,
             providerAuthor: String? = null,
