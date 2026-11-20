@@ -238,8 +238,6 @@ fun LyricsScreen(
             ?.let { provider ->
                 AnnotatedString(stringResource(R.string.lyrics_source_label, provider))
             }
-                }
-            }
 
     val (enableHapticFeedback) = rememberPreference(EnableHapticFeedbackKey, true)
     val lyricsMode by rememberEnumPreference(LyricsModeKey, LyricsMode.ENHANCED)
