@@ -83,7 +83,6 @@ class LyricsHelper
                 PaxsenixSpotifyLyricsProvider,
                 PaxsenixMusixmatchLyricsProvider,
                 MusixmatchLyricsProvider,
-                YouTubeSubtitleLyricsProvider,
                 YouTubeLyricsProvider,
             )
 
