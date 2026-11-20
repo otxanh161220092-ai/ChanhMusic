@@ -1,4 +1,6 @@
 [versions]
+accompanist = "2.0.0-rc.2"
+accompanist-core = "0.5.1"
 androidGradlePlugin = "9.4.1"
 browser = "1.10.0"
 robolectric = "4.17"
@@ -115,3 +117,5 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 protobuf = { id = "com.google.protobuf", version = "0.10.0" }
+accompanist-lyrics-ui = { module = "com.mocharealm.accompanist:lyrics-ui", version.ref = "accompanist" }
+accompanist-lyrics-core = { module = "com.mocharealm.accompanist:lyrics-core", version.ref = "accompanist-core" }
