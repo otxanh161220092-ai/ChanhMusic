@@ -7,6 +7,6 @@ import dagger.hilt.components.SingletonComponent
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
-interface LyricsHelperEntryPoint {
-    fun lyricsHelper(): LyricsHelper
+interface ArchiveTuneLyricsEntryPoint {
+    fun archiveTuneLyricsHelper(): LyricsHelper
 }

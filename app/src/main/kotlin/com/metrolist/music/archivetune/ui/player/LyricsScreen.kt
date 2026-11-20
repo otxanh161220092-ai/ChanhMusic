@@ -288,8 +288,8 @@ fun LyricsScreen(
             EntryPointAccessors
                 .fromApplication(
                     context.applicationContext,
-                    com.metrolist.music.archivetune.di.LyricsHelperEntryPoint::class.java,
-                ).lyricsHelper()
+                    com.metrolist.music.archivetune.di.ArchiveTuneLyricsEntryPoint::class.java,
+                ).archiveTuneLyricsHelper()
         }
 
     LaunchedEffect(mediaMetadata.id, currentLyrics?.lyrics) {
