@@ -41,7 +41,7 @@ fun Lyrics(
     lyricsViewModel: LyricsViewModel = hiltViewModel()
 ) {
     val (experimentalLyrics, _) = rememberPreference(key = ExperimentalLyricsKey, defaultValue = true)
-    val (useArchiveTuneLyrics, _) = rememberPreference(key = UseLyricsV2Key, defaultValue = true)
+    val (useArchiveTuneLyrics, _) = rememberPreference(key = UseLyricsV2Key, defaultValue = false)
     val lyricsAnimationStyle by rememberEnumPreference(LyricsAnimationStyleKey, LyricsAnimationStyle.APPLE)
     val lyricsModifier = modifier
 
