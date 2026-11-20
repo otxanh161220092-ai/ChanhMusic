@@ -114,7 +114,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.isActive
 import com.metrolist.music.LocalPlayerConnection
-import com.metrolist.music.archivetune.R
+import com.metrolist.music.R
 import com.metrolist.music.constants.PlayerBackgroundStyle
 import com.metrolist.music.constants.PlayerBackgroundStyleKey
 import com.metrolist.music.archivetune.lyrics.LyricsEntry

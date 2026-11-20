@@ -18,7 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.metrolist.music.archivetune.R
+import com.metrolist.music.R
 import com.metrolist.music.constants.PreferredLyricsProvider
 import com.metrolist.music.archivetune.lyrics.LyricsProviderSettingsUseCase
 import com.metrolist.music.utils.reportException

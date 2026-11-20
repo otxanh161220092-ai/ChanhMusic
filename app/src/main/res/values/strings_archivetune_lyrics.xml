@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lyrics_source_label">Source: %1$s</string>
+    <string name="minimum_volume">Minimum Volume</string>
+    <string name="maximum_volume">Maximum Volume</string>
+    <string name="lyrics_source_embedded">Embedded in file</string>
+    <plurals name="n_element">
+        <item quantity="one">%d element</item>
+        <item quantity="other">%d elements</item>
+    </plurals>
+    <string name="widget_previous">Previous</string>
+    <string name="widget_pause">Pause</string>
+</resources>

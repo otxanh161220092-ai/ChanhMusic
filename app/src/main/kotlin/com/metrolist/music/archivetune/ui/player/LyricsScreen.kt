@@ -131,7 +131,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import com.metrolist.music.LocalDatabase
 import com.metrolist.music.LocalPlayerConnection
-import com.metrolist.music.archivetune.R
+import com.metrolist.music.R
 import com.metrolist.music.archivetune.constants.BlurRadiusKey
 import com.metrolist.music.archivetune.constants.DisableBlurKey
 import com.metrolist.music.archivetune.constants.EnableHapticFeedbackKey
