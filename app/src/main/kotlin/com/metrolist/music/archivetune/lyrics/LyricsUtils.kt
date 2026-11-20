@@ -455,7 +455,7 @@ object LyricsUtils {
     }
 
     fun parseLyrics(lyrics: String): List<LyricsEntry> {
-        val normalizedLyrics = normalizeLyricsText(lyrics)
+        val normalizedLyrics = convertAppWordSyncLines(normalizeLyricsText(lyrics))
         if (QRCParser.isQrc(normalizedLyrics)) {
             return QRCParser.parseQrc(normalizedLyrics).map { line ->
                 LyricsEntry(
