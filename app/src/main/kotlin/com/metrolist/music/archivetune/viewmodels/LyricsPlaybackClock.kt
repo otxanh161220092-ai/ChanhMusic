@@ -36,7 +36,10 @@ internal class LyricsPlaybackClock {
     ): Long {
         val source = sourcePositionMs.coerceAtLeast(0L)
         val previousTime = previousSampleNanos
-        val advancing = isAdvancing && speed.isFinite() && speed > 0f
+        // ExoPlayer reports isPlaying=false while buffering even though the source position still moves.
+        // Treat a moving source position as playback so the clock keeps interpolating instead of stepping.
+        val sourceMoving = source != previousSourcePositionMs
+        val advancing = (isAdvancing || sourceMoving) && speed.isFinite() && speed > 0f
         if (
             previousTime == Long.MIN_VALUE || sampleTimeNanos <= previousTime ||
             !advancing || !wasAdvancing || speed != previousSpeed ||
