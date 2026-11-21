@@ -4462,16 +4462,21 @@ class MusicService :
                     position = 0,
                 )
 
-            runCatching {
-                filesDir.resolve(PERSISTENT_QUEUE_FILE).outputStream().use { fos ->
-                    ObjectOutputStream(fos).use { oos ->
-                        oos.writeObject(persistQueue)
+            // Queue snapshot is built on the caller thread; the write runs off the main thread so a
+            // slow disk cannot freeze the UI. Automix save below is intentionally left unchanged.
+            val queueSnapshot = persistQueue
+            scope.launch(Dispatchers.IO) {
+                runCatching {
+                    filesDir.resolve(PERSISTENT_QUEUE_FILE).outputStream().use { fos ->
+                        ObjectOutputStream(fos).use { oos ->
+                            oos.writeObject(queueSnapshot)
+                        }
                     }
+                    Timber.tag(TAG).d("Queue saved successfully")
+                }.onFailure {
+                    Timber.tag(TAG).e(it, "Failed to save queue")
+                    reportException(it)
                 }
-                Timber.tag(TAG).d("Queue saved successfully")
-            }.onFailure {
-                Timber.tag(TAG).e(it, "Failed to save queue")
-                reportException(it)
             }
 
             runCatching {
