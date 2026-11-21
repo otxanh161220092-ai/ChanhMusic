@@ -869,8 +869,10 @@ class MusicService :
                     actionFactory: MediaNotification.ActionFactory,
                     onNotificationChangedCallback: MediaNotification.Provider.Callback,
                 ): MediaNotification {
+                    Timber.tag(TAG).d("DBG createNotification taskCleared=%s", taskCleared)
                     val trackingCallback =
                         MediaNotification.Provider.Callback { notification ->
+                            Timber.tag(TAG).d("DBG notificationChanged taskCleared=%s", taskCleared)
                             if (taskCleared) return@Callback
                             latestMediaNotification = notification.notification
                             onNotificationChangedCallback.onNotificationChanged(notification)
@@ -4801,6 +4803,7 @@ class MusicService :
         session: MediaSession,
         startInForegroundRequired: Boolean,
     ) {
+        Timber.tag(TAG).d("DBG onUpdateNotification taskCleared=%s fg=%s", taskCleared, startInForegroundRequired)
         if (taskCleared) return
         try {
             super.onUpdateNotification(session, startInForegroundRequired)
@@ -5076,6 +5079,7 @@ class MusicService :
     }
 
     private fun handleForegroundServiceStartNotAllowed(error: Throwable?) {
+        Timber.tag(TAG).d("DBG handleFgNotAllowed error=%s", error?.javaClass?.simpleName)
         if (error != null) {
             Timber.tag(TAG).w(error, "Foreground service start denied during notification update")
         } else {
