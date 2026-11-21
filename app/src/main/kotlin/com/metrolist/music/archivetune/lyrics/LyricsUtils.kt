@@ -455,7 +455,7 @@ object LyricsUtils {
     }
 
     fun parseLyrics(lyrics: String): List<LyricsEntry> {
-        val normalizedLyrics = convertAppWordSyncLines(normalizeLyricsText(lyrics))
+        val normalizedLyrics = normalizeLyricsText(lyrics)
         if (QRCParser.isQrc(normalizedLyrics)) {
             return QRCParser.parseQrc(normalizedLyrics).map { line ->
                 LyricsEntry(
@@ -476,6 +476,8 @@ object LyricsUtils {
                 )
             }
         }
+
+        parseAppWordSyncLyrics(normalizedLyrics)?.let { return it }
 
         val lines = normalizedLyrics.lines()
         val result = mutableListOf<LyricsEntry>()
@@ -624,6 +626,54 @@ object LyricsUtils {
                 durationMs = outroDurationMs,
             ),
         )
+    }
+
+    private val APP_WORD_SYNC_LINE_REGEX = Regex("""^<(.+)>$""")
+
+    /**
+     * The app stores word-level lyrics as an LRC line followed by one line of `text:start:end|...`
+     * items (seconds). Build the entries directly so the real word start and end times are kept.
+     */
+    private fun parseAppWordSyncLyrics(normalizedLyrics: String): List<LyricsEntry>? {
+        val lines = normalizedLyrics.lines()
+        if (lines.none { APP_WORD_SYNC_LINE_REGEX.matches(it.trim()) }) return null
+        val result = mutableListOf<LyricsEntry>()
+        var index = 0
+        while (index < lines.size) {
+            val line = lines[index]
+            val lineStartMs = firstLineTimestampMs(line)
+            val wordLine = lines.getOrNull(index + 1)?.trim()?.let { APP_WORD_SYNC_LINE_REGEX.matchEntire(it) }
+            val words =
+                wordLine?.groupValues?.get(1)?.split("|")?.mapNotNull { item ->
+                    val parts = item.split(":")
+                    if (parts.size < 3) return@mapNotNull null
+                    val wordText = parts.dropLast(2).joinToString(":")
+                    val start = parts[parts.size - 2].toDoubleOrNull() ?: return@mapNotNull null
+                    val end = parts[parts.size - 1].toDoubleOrNull() ?: start
+                    if (wordText.isBlank()) null else Triple(wordText, start, end)
+                }
+            if (lineStartMs != null && !words.isNullOrEmpty()) {
+                val wordList =
+                    words.mapIndexed { wordIndex, (wordText, start, end) ->
+                        // The app's word texts have no separating spaces; add one unless it is the last word.
+                        val text = if (wordIndex < words.lastIndex && !wordText.endsWith(' ')) "$wordText " else wordText
+                        WordTimestamp(text = text, startTime = start, endTime = end)
+                    }
+                val lineEndMs = (words.maxOf { it.third } * MILLIS_PER_SECOND).toLong()
+                result +=
+                    LyricsEntry(
+                        time = lineStartMs,
+                        text = wordList.joinToString("") { it.text }.trim(),
+                        words = wordList,
+                        durationMs = (lineEndMs - lineStartMs).coerceAtLeast(0L),
+                    )
+                index += 2
+                continue
+            }
+            parseLineSyncedLrcLine(line)?.let { result += it }
+            index++
+        }
+        return mergeLineSyncedTranslations(result).sorted()
     }
 
     private fun parseLineSyncedLrcLine(line: String): List<LyricsEntry>? {
