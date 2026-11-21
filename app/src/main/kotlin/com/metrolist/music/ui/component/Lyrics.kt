@@ -38,6 +38,7 @@ fun Lyrics(
     val (experimentalLyrics, _) = rememberPreference(key = ExperimentalLyricsKey, defaultValue = true)
     val lyricsAnimationStyle by rememberEnumPreference(LyricsAnimationStyleKey, LyricsAnimationStyle.APPLE)
     val lyricsModifier = modifier
+    android.util.Log.w("LyricsPick", "experimental=$experimentalLyrics style=$lyricsAnimationStyle")
 
     if (experimentalLyrics) {
         ExperimentalLyrics(
