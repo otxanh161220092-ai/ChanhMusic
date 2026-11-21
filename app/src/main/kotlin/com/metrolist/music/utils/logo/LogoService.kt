@@ -13,6 +13,8 @@ import java.net.URLEncoder
 import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "LogoService"
+/** Marks a cached URL as a Wikimedia logo; cover art URLs carry no mark. */
+private const val LOGO_MARK = "logo:"
 
 /**
  * Finds a logo image for an album or artist.
@@ -34,16 +36,38 @@ class LogoService(
 
     private class CachedUrl(val url: String?)
 
-    /** Only the album's own logo counts; an artist logo is never used in its place. */
-    suspend fun albumLogo(artist: String, album: String): String? {
-        Log.d(TAG, "albumLogo: $artist - $album")
-        return albumLogoCached(artist, album)
+    /** [url] is a logo (transparent, blended onto the background) or a plain cover image. */
+    data class AlbumImage(val url: String, val isLogo: Boolean)
+
+    /**
+     * The album's own image: a transparent logo from Wikimedia Commons when one exists,
+     * otherwise the front cover from Cover Art Archive. An artist logo is never used.
+     */
+    suspend fun albumImage(artist: String, album: String): AlbumImage? {
+        Log.d(TAG, "albumImage: $artist - $album")
+        return albumImageCached(artist, album)
     }
 
-    private suspend fun albumLogoCached(artist: String, album: String): String? =
-        cached("album|${artist.lowercase()}|${album.lowercase()}") {
-            wikimediaAlbumLogo(artist, album)
+    private suspend fun albumImageCached(artist: String, album: String): AlbumImage? {
+        val key = "album|${artist.lowercase()}|${album.lowercase()}"
+        cache[key]?.let { hit ->
+            return hit.url?.let { u -> AlbumImage(u.removePrefix(LOGO_MARK), isLogo = u.startsWith(LOGO_MARK)) }
         }
+        val value = try {
+            wikimediaAlbumLogo(artist, album)?.let { LOGO_MARK + it }
+                ?: coverArtUrl(artist, album)
+        } catch (e: Exception) {
+            Log.w(TAG, "album lookup failed for $key", e)
+            return null
+        }
+        cache[key] = CachedUrl(value)
+        return value?.let { AlbumImage(it.removePrefix(LOGO_MARK), isLogo = it.startsWith(LOGO_MARK)) }
+    }
+
+    private suspend fun coverArtUrl(artist: String, album: String): String? {
+        val rgMbid = musicBrainzReleaseGroupId(artist, album) ?: return null
+        return "https://coverartarchive.org/release-group/$rgMbid/front-500"
+    }
 
     suspend fun artistLogo(artist: String): String? =
         cached("artist|${artist.lowercase()}") {
@@ -74,7 +98,14 @@ class LogoService(
      * PNG/SVG files whose name contains "logo", and returns the first original file URL.
      */
     private suspend fun wikimediaAlbumLogo(artist: String, album: String): String? {
-        for (term in listOf("$artist $album logo", "$album (logo)")) {
+        val terms = listOf(
+            "$artist $album logo",
+            "$album logo",
+            "$album (logo)",
+            "$album (album logo)",
+            "$artist $album (logo)",
+        )
+        for (term in terms) {
             val json = getJson(
                 "https://commons.wikimedia.org/w/api.php?action=query&format=json" +
                     "&generator=search&gsrsearch=${encode(term)}&gsrnamespace=6&gsrlimit=20" +

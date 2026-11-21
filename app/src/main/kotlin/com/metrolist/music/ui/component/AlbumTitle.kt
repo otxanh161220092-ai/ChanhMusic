@@ -23,6 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
 import coil3.compose.AsyncImage
 import com.metrolist.music.utils.logo.LogoService
 
@@ -30,7 +33,7 @@ import com.metrolist.music.utils.logo.LogoService
 private val albumLogos by lazy { LogoService(fanartApiKey = "") }
 
 /**
- * Shows the album's own logo when one exists, otherwise the title as styled text.
+ * Shows the album's own logo, or its cover art, when one exists; otherwise the title as styled text.
  * Artist logos are never used here.
  */
 @Composable
@@ -39,26 +42,39 @@ fun AlbumTitle(
     artist: String,
     modifier: Modifier = Modifier,
 ) {
-    val logoUrl by produceState<String?>(initialValue = null, title, artist) {
-        value = albumLogos.albumLogo(artist = artist, album = title)
+    val image by produceState<LogoService.AlbumImage?>(initialValue = null, title, artist) {
+        value = albumLogos.albumImage(artist = artist, album = title)
     }
-    var logoFailed by remember(logoUrl) { mutableStateOf(false) }
+    var imageFailed by remember(image) { mutableStateOf(false) }
     val dark = isSystemInDarkTheme()
 
-    val url = logoUrl
-    if (url != null && !logoFailed) {
-        AsyncImage(
-            model = url,
-            contentDescription = title,
-            contentScale = ContentScale.Fit,
-            onError = { logoFailed = true },
-            // Dark theme: a black background drops out under Screen. Light theme: a white one drops out under Multiply.
-            modifier = modifier
-                .fillMaxWidth()
-                .height(96.dp)
-                .padding(horizontal = 32.dp)
-                .graphicsLayer { blendMode = if (dark) BlendMode.Screen else BlendMode.Multiply },
-        )
+    val current = image
+    if (current != null && !imageFailed) {
+        if (current.isLogo) {
+            AsyncImage(
+                model = current.url,
+                contentDescription = title,
+                contentScale = ContentScale.Fit,
+                onError = { imageFailed = true },
+                // Dark theme: a black background drops out under Screen. Light theme: a white one drops out under Multiply.
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(96.dp)
+                    .padding(horizontal = 32.dp)
+                    .graphicsLayer { blendMode = if (dark) BlendMode.Screen else BlendMode.Multiply },
+            )
+        } else {
+            // Cover art is an opaque picture: show it as is, no blend.
+            AsyncImage(
+                model = current.url,
+                contentDescription = title,
+                contentScale = ContentScale.Crop,
+                onError = { imageFailed = true },
+                modifier = modifier
+                    .size(180.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+            )
+        }
     } else {
         Text(
             text = title,
