@@ -31,7 +31,8 @@ data class CanvasSong(
 object CanvasSettings {
     val prioritizeSpotifyCanvas = MutableStateFlow(false)
     val canvasOverCellular = MutableStateFlow(true)
-    val canvasEnabled = MutableStateFlow(true)
+    // Test build: animated canvas off by default to check whether it causes the lyrics stutter.
+    val canvasEnabled = MutableStateFlow(false)
     val spotifySpdcToken = MutableStateFlow<String?>(null)
 }
 
