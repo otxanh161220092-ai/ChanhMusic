@@ -97,7 +97,7 @@ suspend fun sampleLuminanceBelow(
     }
 
 /**
- * True while the pixels just below [bounds] are light. Re-samples about four times a second while
+ * True while the pixels just below [bounds] are light. Re-samples about once a second while
  * [bounds] is known; stays false until the first sample lands.
  */
 @Composable
@@ -112,7 +112,8 @@ fun rememberBackdropIsLight(bounds: Rect?): State<Boolean> {
                 .firstOrNull() ?: return@LaunchedEffect
         while (isActive) {
             sampleLuminanceBelow(activity.window, b)?.let { isLight.value = it > 0.5f }
-            delay(250)
+            // PixelCopy reads the whole window; sampling 4x/s stalls the render thread while the player is open.
+            delay(1000)
         }
     }
     return isLight
