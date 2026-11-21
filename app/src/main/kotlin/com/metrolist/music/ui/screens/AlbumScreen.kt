@@ -224,6 +224,15 @@ fun AlbumScreen(
                 run {
                     AppleCollectionHeader(
                         title = albumWithSongs.album.title,
+                        titleSlot = { fallback ->
+                            AlbumTitle(
+                                title = albumWithSongs.album.title,
+                                artist = albumWithSongs.artists.joinToString(" ") { it.name },
+                                allowCover = false,
+                                blendLogo = false,
+                                fallback = fallback,
+                            )
+                        },
                         thumbnailUrl = albumWithSongs.album.thumbnailUrl,
                         artistText = albumWithSongs.artists.joinToString(", ") { it.name },
                         metaText = metaText,

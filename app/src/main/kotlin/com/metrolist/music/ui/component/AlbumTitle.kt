@@ -4,6 +4,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,8 +14,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
@@ -23,9 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.draw.clip
 import coil3.compose.AsyncImage
 import com.metrolist.music.utils.logo.LogoService
 
@@ -33,14 +32,20 @@ import com.metrolist.music.utils.logo.LogoService
 private val albumLogos by lazy { LogoService(fanartApiKey = "") }
 
 /**
- * Shows the album's own logo, or its cover art, when one exists; otherwise the title as styled text.
- * Artist logos are never used here.
+ * Shows the album's own logo, or its cover art, when one exists; otherwise [fallback]
+ * (or the title as styled text). Artist logos are never used here.
+ *
+ * [allowCover] = false keeps only logos, for layouts that already show the cover.
+ * [blendLogo] = false draws the logo as is, for layouts with a dark or photo background.
  */
 @Composable
 fun AlbumTitle(
     title: String,
     artist: String,
     modifier: Modifier = Modifier,
+    allowCover: Boolean = true,
+    blendLogo: Boolean = true,
+    fallback: (@Composable () -> Unit)? = null,
 ) {
     val image by produceState<LogoService.AlbumImage?>(initialValue = null, title, artist) {
         value = albumLogos.albumImage(artist = artist, album = title)
@@ -49,7 +54,7 @@ fun AlbumTitle(
     val dark = isSystemInDarkTheme()
 
     val current = image
-    if (current != null && !imageFailed) {
+    if (current != null && !imageFailed && (current.isLogo || allowCover)) {
         if (current.isLogo) {
             AsyncImage(
                 model = current.url,
@@ -61,7 +66,13 @@ fun AlbumTitle(
                     .fillMaxWidth()
                     .height(96.dp)
                     .padding(horizontal = 32.dp)
-                    .graphicsLayer { blendMode = if (dark) BlendMode.Screen else BlendMode.Multiply },
+                    .then(
+                        if (blendLogo) {
+                            Modifier.graphicsLayer { blendMode = if (dark) BlendMode.Screen else BlendMode.Multiply }
+                        } else {
+                            Modifier
+                        },
+                    ),
             )
         } else {
             // Cover art is an opaque picture: show it as is, no blend.
@@ -75,6 +86,8 @@ fun AlbumTitle(
                     .clip(RoundedCornerShape(12.dp)),
             )
         }
+    } else if (fallback != null) {
+        fallback()
     } else {
         Text(
             text = title,
