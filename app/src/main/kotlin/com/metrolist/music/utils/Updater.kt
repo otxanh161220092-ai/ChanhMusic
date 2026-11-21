@@ -43,6 +43,10 @@ object Updater {
     private const val KMP_LATEST_RELEASE_URL = "https://api.github.com/repos/MetrolistGroup/Metrolist-KMP/releases/latest"
     private const val KMP_APK_NAME = "Metrolist.apk"
 
+    /** Đã cắt liên kết với Metrolist gốc: không gọi GitHub để kiểm tra bản cập nhật. */
+    private const val UPSTREAM_UPDATES_ENABLED = false
+    private val disabledError get() = Exception("Upstream update checks disabled")
+
     /**
      * Compares two version strings.
      * Returns: 1 if v1 > v2, -1 if v1 < v2, 0 if equal
@@ -125,6 +129,7 @@ object Updater {
     suspend fun getLatestRelease(forceRefresh: Boolean = false): Result<ReleaseInfo> =
         withContext(Dispatchers.IO) {
             runCatching {
+                if (!UPSTREAM_UPDATES_ENABLED) throw disabledError
                 // Return cached if available and not forcing refresh
                 if (cachedReleaseInfo != null && !forceRefresh) {
                     return@runCatching cachedReleaseInfo!!
@@ -154,6 +159,7 @@ object Updater {
     suspend fun getAllReleases(forceRefresh: Boolean = false): Result<List<ReleaseInfo>> =
         withContext(Dispatchers.IO) {
             runCatching {
+                if (!UPSTREAM_UPDATES_ENABLED) throw disabledError
                 if (cachedAllReleases.isNotEmpty() && !forceRefresh) {
                     return@runCatching cachedAllReleases
                 }
@@ -211,6 +217,7 @@ object Updater {
     suspend fun getLatestKmpRelease(): Result<ReleaseInfo?> =
         withContext(Dispatchers.IO) {
             runCatching {
+                if (!UPSTREAM_UPDATES_ENABLED) throw disabledError
                 parseKmpRelease(client.get(KMP_LATEST_RELEASE_URL).bodyAsText())
             }
         }
@@ -232,6 +239,7 @@ object Updater {
     suspend fun checkForUpdate(forceRefresh: Boolean = false): Result<Pair<ReleaseInfo?, Boolean>> =
         withContext(Dispatchers.IO) {
             runCatching {
+                if (!UPSTREAM_UPDATES_ENABLED) throw disabledError
                 // Check if we should fetch (2 hour interval)
                 val shouldFetch = forceRefresh || 
                     (System.currentTimeMillis() - lastCheckTime) > CHECK_INTERVAL_MILLIS
