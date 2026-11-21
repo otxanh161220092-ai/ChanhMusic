@@ -86,9 +86,26 @@ class LyricsRenderViewModel
             isAdvancing: Boolean,
             durationMs: Long,
         ) {
-            _playbackPositionMs.value =
-                playbackClock.update(positionMs, sampleTimeNanos, playbackSpeed, isAdvancing, durationMs)
+            val previousSample = lastPerfSampleNanos
+            lastPerfSampleNanos = sampleTimeNanos
+            val nextPosition = playbackClock.update(positionMs, sampleTimeNanos, playbackSpeed, isAdvancing, durationMs)
+            if (previousSample != 0L) {
+                val gapMs = (sampleTimeNanos - previousSample) / 1_000_000L
+                if (gapMs > 40L) {
+                    android.util.Log.w("LyricsPerf", "frame gap=${gapMs}ms source=$positionMs out=$nextPosition advancing=$isAdvancing")
+                }
+            }
+            if (nextPosition != _playbackPositionMs.value) {
+                perfUpdateCount++
+                if (perfUpdateCount % 50 == 0) {
+                    android.util.Log.d("LyricsPerf", "updates=$perfUpdateCount pos=$nextPosition")
+                }
+            }
+            _playbackPositionMs.value = nextPosition
         }
+
+        private var lastPerfSampleNanos = 0L
+        private var perfUpdateCount = 0
 
         fun bind(
             mediaId: String,
