@@ -925,6 +925,12 @@ class MusicService :
         mediaSession =
             MediaLibrarySession
                 .Builder(this, player, mediaLibrarySessionCallback)
+                .setSessionExtras(
+                    Bundle().apply {
+                        putBoolean(androidx.media3.common.MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_PREV, true)
+                        putBoolean(androidx.media3.common.MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_NEXT, true)
+                    },
+                )
                 .setSessionActivity(
                     PendingIntent.getActivity(
                         this,
@@ -1897,7 +1903,7 @@ class MusicService :
     }
 
     private fun updateNotification(isLiked: Boolean? = currentSong.value?.song?.let { if (it.isEpisode) it.inLibrary != null else it.liked }) {
-        mediaSession?.setCustomLayout(
+        val layout =
             listOf(
                 CommandButton
                     .Builder()
@@ -1953,8 +1959,13 @@ class MusicService :
                     .setSessionCommand(CommandAddToTargetPlaylist)
                     .setEnabled(currentSong.value != null)
                     .build(),
-            ),
-        )
+            )
+        // Publish to the platform session and to the notification controller itself;
+        // System UI reads the notification controller's layout for the media card.
+        mediaSession?.let { session ->
+            session.setCustomLayout(layout)
+            session.getMediaNotificationControllerInfo()?.let { session.setCustomLayout(it, layout) }
+        }
     }
 
     /**
