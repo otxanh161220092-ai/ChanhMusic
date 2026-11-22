@@ -68,7 +68,7 @@ fun LazyListScope.appleHomeSections(
 ) {
     if (topPicks.isNotEmpty()) {
         item(key = "top_picks_shelf") {
-            TopPicksShelf(picks = topPicks, listenerName = listenerName, onClick = onTopPick)
+            TopPicksShelf(picks = topPicks, listenerName = listenerName, onClick = onTopPick, onLongPress = null)
         }
     }
 

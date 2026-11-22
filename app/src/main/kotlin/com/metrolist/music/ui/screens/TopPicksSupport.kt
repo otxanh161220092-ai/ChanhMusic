@@ -91,3 +91,6 @@ data class LibraryGridSpec(val columns: Int)
 
 fun libraryGrid(width: Dp): LibraryGridSpec =
     LibraryGridSpec(columns = maxOf(2, (width / 160.dp).toInt()))
+
+/** Subtitle text as BitChord localizes it; Metrolist shows the YouTube text unchanged. */
+fun localizeCardSubtitle(text: String): String = text
