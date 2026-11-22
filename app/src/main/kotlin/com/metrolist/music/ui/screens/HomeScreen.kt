@@ -1345,7 +1345,7 @@ fun HomeScreen(
                         }
                     }
 
-                appleHomeSections(
+                if (!newHomeStyle) appleHomeSections(
                     topPicks = topPicks,
                     recentlyPlayed = keepListening,
                     onOpenRecent = { showRecentPage = true },
