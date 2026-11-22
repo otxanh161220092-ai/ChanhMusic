@@ -1579,6 +1579,26 @@ object YouTube {
             HomePage(chips, sections, continuation)
         }
 
+    /** Carousel shelves of a YouTube Music category page (used by Top Picks mood stations). */
+    suspend fun categoryShelves(
+        browseId: String,
+        params: String,
+    ): Result<List<HomePage.Section>> =
+        runCatching {
+            val response = innerTube.browse(WEB_REMIX, browseId = browseId, params = params).body<BrowseResponse>()
+            response.contents
+                ?.singleColumnBrowseResultsRenderer
+                ?.tabs
+                ?.firstOrNull()
+                ?.tabRenderer
+                ?.content
+                ?.sectionListRenderer
+                ?.contents
+                ?.mapNotNull { it.musicCarouselShelfRenderer }
+                ?.mapNotNull { HomePage.Section.fromMusicCarouselShelfRenderer(it) }
+                .orEmpty()
+        }
+
     private suspend fun homeContinuation(continuation: String): Result<HomePage> =
         runCatching {
             val response =
