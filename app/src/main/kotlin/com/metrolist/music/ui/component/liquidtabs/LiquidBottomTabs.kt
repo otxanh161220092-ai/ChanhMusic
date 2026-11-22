@@ -248,6 +248,8 @@ fun LiquidBottomTabs(
                     backdrop = backdrop,
                     shape = { SmoothCornerShape(999.dp) },
                     effects = { blur(maxOf(glassBlur * 2.8f, 12f).dp.toPx()) },
+                    highlight = { Highlight.Default },
+                    onDrawSurface = { drawRect(Color.White.copy(alpha = 0.15f)) },
                 )
                 .height(64f.dp)
                 .fillMaxWidth(1f / tabsCount)
