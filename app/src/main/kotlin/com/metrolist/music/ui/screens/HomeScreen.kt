@@ -1352,6 +1352,34 @@ fun HomeScreen(
                     recentlyPlayedItem = { localGridItem(it) },
                 )
 
+                if (newHomeStyle && !homePage?.chips.isNullOrEmpty()) {
+                    item(key = "new_home_chips") {
+                        LazyRow(
+                            contentPadding =
+                                WindowInsets.systemBars
+                                    .only(WindowInsetsSides.Horizontal)
+                                    .asPaddingValues(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(vertical = 8.dp),
+                        ) {
+                            item(key = "new_home_chip_all") {
+                                HomeFilterPill(
+                                    text = "All",
+                                    selected = selectedChip == null,
+                                    onClick = { selectedChip?.let { viewModel.toggleChip(it) } },
+                                )
+                            }
+                            items(homePage?.chips.orEmpty(), key = { "new_home_chip_${it.title}" }) { chip ->
+                                HomeFilterPill(
+                                    text = chip.title,
+                                    selected = selectedChip == chip,
+                                    onClick = { viewModel.toggleChip(chip) },
+                                )
+                            }
+                        }
+                    }
+                }
+
                 if (isLoading && homePage?.chips.isNullOrEmpty()) {
                     item(key = "chips_shimmer") {
                         ShimmerHost(showGradient = false) {
@@ -2849,5 +2877,29 @@ fun HomeScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun HomeFilterPill(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(50))
+                .background(
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
+                ).clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
