@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import androidx.compose.foundation.clickable
+import com.metrolist.music.constants.NewHomeStyleKey
 import com.metrolist.music.ui.theme.subtitleGrayColor
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -688,6 +690,7 @@ fun HomeScreen(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
     val quickPicks by viewModel.quickPicks.collectAsStateWithLifecycle()
+    val (newHomeStyle, _) = rememberPreference(NewHomeStyleKey, defaultValue = false)
     val forgottenFavorites by viewModel.forgottenFavorites.collectAsStateWithLifecycle()
     val keepListening by viewModel.keepListening.collectAsStateWithLifecycle()
     val similarRecommendations by viewModel.similarRecommendations.collectAsStateWithLifecycle()
@@ -1915,7 +1918,61 @@ fun HomeScreen(
                         }
 
                         HomeSection.QuickPicks -> {
-                            quickPicks?.takeIf { it.isNotEmpty() }?.let { quickPicks ->
+                            if (newHomeStyle) {
+                                quickPicks?.takeIf { it.isNotEmpty() }?.let { quickPicks ->
+                                    item(key = "recent_rotation") {
+                                        val tiles = quickPicks.distinctBy { it.id }.take(6)
+                                        Column(
+                                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        ) {
+                                            Text(
+                                                text = "Your recent rotation",
+                                                style = MaterialTheme.typography.titleLarge,
+                                                fontWeight = FontWeight.Bold,
+                                            )
+                                            tiles.chunked(2).forEachIndexed { rowIndex, pair ->
+                                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                                    pair.forEachIndexed { col, song ->
+                                                        val mediaItem = song.toMediaItem()
+                                                        val index = rowIndex * 2 + col
+                                                        Row(
+                                                            modifier =
+                                                                Modifier
+                                                                    .weight(1f)
+                                                                    .clip(RoundedCornerShape(8.dp))
+                                                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                                                    .clickable(enabled = !isListenTogetherGuest) {
+                                                                        playerConnection.playQueue(
+                                                                            ListQueue(
+                                                                                title = "Your recent rotation",
+                                                                                items = tiles.map { it.toMediaItem() },
+                                                                                startIndex = index,
+                                                                            ),
+                                                                        )
+                                                                    },
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                        ) {
+                                                            AsyncImage(
+                                                                model = mediaItem.mediaMetadata.artworkUri,
+                                                                contentDescription = null,
+                                                                modifier = Modifier.size(56.dp).clip(RoundedCornerShape(4.dp)),
+                                                            )
+                                                            Text(
+                                                                text = mediaItem.mediaMetadata.title?.toString().orEmpty(),
+                                                                maxLines = 2,
+                                                                modifier = Modifier.padding(horizontal = 8.dp),
+                                                            )
+                                                        }
+                                                    }
+                                                    if (pair.size == 1) Spacer(Modifier.weight(1f))
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            quickPicks?.takeIf { it.isNotEmpty() && !newHomeStyle }?.let { quickPicks ->
                                 item(key = "quick_picks_title") {
                                     val quickPicksTitle = stringResource(R.string.quick_picks)
                                     NavigationTitle(
