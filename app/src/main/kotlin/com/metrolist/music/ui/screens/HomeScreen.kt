@@ -148,6 +148,8 @@ import com.metrolist.music.db.entities.Song
 import com.metrolist.music.extensions.toMediaItem
 import com.metrolist.music.models.toMediaMetadata
 import com.metrolist.music.playback.queues.ListQueue
+import com.metrolist.music.topPicks.TopPickEngine
+import com.metrolist.music.topPicks.TopPickKind
 import com.metrolist.music.playback.queues.LocalAlbumRadio
 import com.metrolist.music.playback.queues.YouTubeAlbumRadio
 import com.metrolist.music.playback.queues.YouTubeQueue
@@ -691,6 +693,8 @@ fun HomeScreen(
 
     val quickPicks by viewModel.quickPicks.collectAsStateWithLifecycle()
     val (newHomeStyle, _) = rememberPreference(NewHomeStyleKey, defaultValue = false)
+    val topPicksFlow by viewModel.topPicks.collectAsStateWithLifecycle()
+    val topPicksScope = rememberCoroutineScope()
     val forgottenFavorites by viewModel.forgottenFavorites.collectAsStateWithLifecycle()
     val keepListening by viewModel.keepListening.collectAsStateWithLifecycle()
     val similarRecommendations by viewModel.similarRecommendations.collectAsStateWithLifecycle()
@@ -1323,26 +1327,30 @@ fun HomeScreen(
                         }
                     }
                 val topPicks =
-                    serverPicks.ifEmpty {
-                        localPicks.mapIndexed { index, song ->
-                            ApplePick(
-                                id = song.id,
-                                title = song.title,
-                                subtitle = song.artists.joinToString { it.name },
-                                thumbnail = song.thumbnailUrl,
-                                onPlay = {
-                                    if (!isListenTogetherGuest) {
-                                        playerConnection.playQueue(
-                                            ListQueue(
-                                                title = "Lựa chọn hay nè",
-                                                items = localPicks.map { it.toMediaItem() },
-                                                startIndex = index,
-                                            ),
-                                        )
+                    topPicksFlow.orEmpty().map { pick ->
+                        ApplePick(
+                            id = pick.kind.name + (pick.watch?.playlistId ?: pick.browseId ?: pick.title),
+                            title = TopPickEngine.labelOf(pick),
+                            subtitle = TopPickEngine.subtitleOf(pick),
+                            thumbnail = pick.images.firstOrNull(),
+                            onPlay = {
+                                if (pick.kind == TopPickKind.LATEST_RELEASE) {
+                                    pick.browseId?.let { navController.navigate("album/$it") }
+                                } else if (!isListenTogetherGuest) {
+                                    topPicksScope.launch {
+                                        TopPickEngine.queue(pick).onSuccess { songs ->
+                                            playerConnection.playQueue(
+                                                ListQueue(
+                                                    title = TopPickEngine.labelOf(pick),
+                                                    items = songs.map { it.toMediaItem() },
+                                                    startIndex = 0,
+                                                ),
+                                            )
+                                        }
                                     }
-                                },
-                            )
-                        }
+                                }
+                            },
+                        )
                     }
 
                 if (!newHomeStyle) appleHomeSections(

@@ -112,6 +112,7 @@ class HomeViewModel @Inject constructor(
     val similarRecommendations = MutableStateFlow<List<SimilarRecommendation>?>(null)
     val accountPlaylists = MutableStateFlow<List<PlaylistItem>?>(null)
     val homePage = MutableStateFlow<HomePage?>(null)
+    val topPicks = MutableStateFlow<List<com.metrolist.music.topPicks.TopPick>?>(null)
     val explorePage = MutableStateFlow<ExplorePage?>(null)
     val communityPlaylists = MutableStateFlow<List<CommunityPlaylistItem>?>(null)
     val selectedChip = MutableStateFlow<HomePage.Chip?>(null)
@@ -477,6 +478,12 @@ class HomeViewModel @Inject constructor(
                             if (filtered.isEmpty()) null else section.copy(items = filtered)
                         }
                     )
+                    launch(Dispatchers.IO) {
+                        val history = YouTube.musicHistory().getOrNull()?.sections.orEmpty().flatMap { it.songs }
+                        topPicks.value = runCatching {
+                            com.metrolist.music.topPicks.TopPickEngine.build(history, page.sections)
+                        }.getOrNull()
+                    }
                 }.onFailure { reportException(it) }
             }
 

@@ -298,6 +298,24 @@ object TopPickEngine {
         else Result.success(songs)
     }
 
+    /** The card's title line. Stations and moods name themselves; the rest use their own title. */
+    fun labelOf(pick: TopPick): String = when (pick.kind) {
+        TopPickKind.PERSONAL_STATION -> "My Supermix"
+        TopPickKind.DISCOVERY_STATION -> pick.artistName?.let { "$it Discovery" } ?: "Discovery Station"
+        TopPickKind.MOOD -> pick.mood?.name?.lowercase(Locale.ROOT)?.replace('_', ' ')
+            ?.replaceFirstChar { it.uppercase() } ?: "Mood"
+        TopPickKind.NEW_RELEASE_MIX -> pick.title.ifBlank { "New Release Mix" }
+        else -> pick.title
+    }
+
+    /** The card's second line. */
+    fun subtitleOf(pick: TopPick): String = when (pick.kind) {
+        TopPickKind.LATEST_RELEASE -> pick.subtitle.ifBlank { pick.artistName.orEmpty() }
+        TopPickKind.ARTIST_AND_SIMILAR -> "Artist & Similar"
+        TopPickKind.FEATURED_ARTIST -> pick.subtitle.ifBlank { "Featured Artist" }
+        else -> pick.subtitle
+    }
+
     fun moodStation(mood: TopPickMood, hints: List<String> = regionHints()): TopPick =
         TopPick(kind = TopPickKind.MOOD, mood = mood, hints = hints)
 
