@@ -244,13 +244,7 @@ fun LiquidBottomTabs(
                         if (isLtr) dampedDragAnimation.value * tabWidth + panelOffset
                         else size.width - (dampedDragAnimation.value + 1f) * tabWidth + panelOffset
                 }
-                .drawBackdrop(
-                    backdrop = backdrop,
-                    shape = { SmoothCornerShape(999.dp) },
-                    effects = { blur(maxOf(glassBlur * 2.8f, 12f).dp.toPx()) },
-                    highlight = { Highlight.Default },
-                    onDrawSurface = { drawRect(Color.White.copy(alpha = 0.15f)) },
-                )
+                .background(Color.White.copy(alpha = 0.3f), SmoothCornerShape(999.dp))
                 .height(64f.dp)
                 .fillMaxWidth(1f / tabsCount)
         )
