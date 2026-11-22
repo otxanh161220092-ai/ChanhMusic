@@ -836,8 +836,10 @@ class MusicService :
         // enough to miss the window, so we promote before any I/O.
         ensureForegroundChannelExists()
         if (!ensureStartedAsForegroundOrStop()) {
+            Timber.tag("DBG").d("DBG onCreate early return: foreground start failed")
             return
         }
+        Timber.tag("DBG").d("DBG onCreate passed foreground start")
 
         // Read ALL startup preferences in one shot so that subsequent code
         // never calls dataStore.get() (which does runBlocking internally).
