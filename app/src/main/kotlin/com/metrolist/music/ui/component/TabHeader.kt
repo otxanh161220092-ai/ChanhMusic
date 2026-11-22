@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.metrolist.music.BuildConfig
@@ -69,6 +70,7 @@ fun TabHeader(
     title: String,
     modifier: Modifier = Modifier,
     logoRes: Int? = null,
+    logoHeight: Dp = 44.dp,
 ) {
     val navController = LocalNavController.current
     val database = LocalDatabase.current
@@ -88,7 +90,7 @@ fun TabHeader(
                 painter = painterResource(logoRes),
                 contentDescription = title,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground, BlendMode.SrcIn),
-                modifier = Modifier.height(44.dp).weight(1f),
+                modifier = Modifier.height(logoHeight).weight(1f),
                 alignment = Alignment.CenterStart,
             )
         } else {

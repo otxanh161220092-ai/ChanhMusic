@@ -1090,7 +1090,7 @@ fun HomeScreen(
             val list = mutableListOf<HomeSection>()
             val chipActive = selectedChip != null
 
-            if (!chipActive && speedDialItems.isNotEmpty()) list.add(HomeSection.SpeedDial)
+            if (!chipActive && !newHomeStyle && speedDialItems.isNotEmpty()) list.add(HomeSection.SpeedDial)
             if (!chipActive && quickPicks?.isNotEmpty() == true) list.add(HomeSection.QuickPicks)
             if (!chipActive && communityPlaylists?.isNotEmpty() == true) list.add(HomeSection.FromTheCommunity)
             if (!chipActive && dailyDiscover?.isNotEmpty() == true) list.add(HomeSection.DailyDiscover)
@@ -2784,7 +2784,11 @@ fun HomeScreen(
                         ).windowInsetsPadding(WindowInsets.statusBars)
                         .padding(bottom = 24.dp),
             ) {
-                TabHeader(title = stringResource(R.string.home), logoRes = R.drawable.ic_home_logo)
+                TabHeader(
+                    title = stringResource(R.string.home),
+                    logoRes = R.drawable.ic_home_logo,
+                    logoHeight = if (newHomeStyle) 24.dp else 44.dp,
+                )
             }
 
             val homeShuffle: () -> Unit = {
