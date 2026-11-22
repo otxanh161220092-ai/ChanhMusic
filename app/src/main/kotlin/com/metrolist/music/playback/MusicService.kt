@@ -4598,6 +4598,13 @@ class MusicService :
             } else {
                 startForeground(NOTIFICATION_ID, notification)
             }
+            val nm = getSystemService(NotificationManager::class.java)
+            Timber.tag("DBG").d(
+                "DBG fg posted: enabled=%s importance=%s active=%s",
+                nm?.areNotificationsEnabled(),
+                nm?.getNotificationChannel(CHANNEL_ID)?.importance,
+                nm?.activeNotifications?.size,
+            )
             true
         } catch (e: ForegroundServiceStartNotAllowedException) {
             Timber.tag(TAG).w(e, deniedMessage)
