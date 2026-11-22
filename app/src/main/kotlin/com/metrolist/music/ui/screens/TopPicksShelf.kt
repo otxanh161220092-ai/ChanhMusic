@@ -490,7 +490,7 @@ private fun CardMotion(
     if (source == null || !LocalArtworkImages.current) return
     // Looked up whether or not the clip may play yet, so the answer is to hand
     // when it may, and the row knows which cards have one to give the slot to.
-    val disableSpotifyCanvas by PlayerSettings.disableSpotifyCanvas.collectAsStateWithLifecycle()
+    val disableSpotifyCanvas = false
     val resolvedClip by produceState<CanvasArtwork?>(null, source.key, disableSpotifyCanvas) {
         if (disableSpotifyCanvas && value?.source == CanvasSource.SPOTIFY) value = null
         value = source.lookup()

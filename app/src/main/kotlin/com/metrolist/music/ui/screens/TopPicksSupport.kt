@@ -34,7 +34,9 @@ const val BLOCK_RADIUS_DP: Int = 12
 fun artworkAt(px: Int): String? = null
 
 /** A canvas clip. Metrolist has no clip source yet, so every lookup returns null for now. */
-data class CanvasArtwork(val url: String)
+enum class CanvasSource { APPLE, SPOTIFY }
+
+data class CanvasArtwork(val url: String, val source: CanvasSource = CanvasSource.APPLE)
 
 /** Stand-in for BitChord's AppUi host: no clips are looked up until the canvas source is ported. */
 object AppUi {
@@ -71,7 +73,7 @@ fun SectionHeaderSkeleton(index: Int = 0) {
 }
 
 @Composable
-fun SectionHeader(title: String) {
+fun SectionHeader(title: String, subtitle: String = "", onShowAll: (() -> Unit)? = null) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleLarge,
