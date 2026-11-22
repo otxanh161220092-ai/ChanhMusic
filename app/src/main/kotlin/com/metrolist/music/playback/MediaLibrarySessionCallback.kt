@@ -98,7 +98,6 @@ constructor(
         // Media3 1.11 made the default onConnect hand untrusted controllers (System UI media
         // card, Bluetooth, the notification controller) read-only access. Grant the full
         // player commands explicitly, as a media app must for its own transport controls.
-        timber.log.Timber.tag("DBG").d("DBG onConnect pkg=%s thread=%s", controller.packageName, Thread.currentThread().name)
         val sessionCommands =
             MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS
                 .buildUpon()

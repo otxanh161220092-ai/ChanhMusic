@@ -836,10 +836,8 @@ class MusicService :
         // enough to miss the window, so we promote before any I/O.
         ensureForegroundChannelExists()
         if (!ensureStartedAsForegroundOrStop()) {
-            Timber.tag("DBG").d("DBG onCreate early return: foreground start failed")
             return
         }
-        Timber.tag("DBG").d("DBG onCreate passed foreground start")
 
         // Read ALL startup preferences in one shot so that subsequent code
         // never calls dataStore.get() (which does runBlocking internally).
@@ -871,10 +869,8 @@ class MusicService :
                     actionFactory: MediaNotification.ActionFactory,
                     onNotificationChangedCallback: MediaNotification.Provider.Callback,
                 ): MediaNotification {
-                    Timber.tag(TAG).d("DBG createNotification taskCleared=%s", taskCleared)
                     val trackingCallback =
                         MediaNotification.Provider.Callback { notification ->
-                            Timber.tag(TAG).d("DBG notificationChanged taskCleared=%s", taskCleared)
                             if (taskCleared) return@Callback
                             latestMediaNotification = notification.notification
                             onNotificationChangedCallback.onNotificationChanged(notification)
@@ -940,25 +936,6 @@ class MusicService :
                     ),
                 ).setBitmapLoader(CoilBitmapLoader(this, scope))
                 .build()
-        // Post a media-style foreground notification tied to this session, so the system
-        // media controls can be built from it (the provider above never runs on this device).
-        mediaSession?.let { session ->
-            val mediaStyleNotification =
-                NotificationCompat
-                    .Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.small_icon)
-                    .setContentTitle(getString(R.string.music_player))
-                    .setOngoing(true)
-                    .setPriority(NotificationCompat.PRIORITY_LOW)
-                    .setStyle(androidx.media3.session.MediaStyleNotificationHelper.MediaStyle(session))
-                    .build()
-            startForegroundSafely(
-                notification = mediaStyleNotification,
-                deniedMessage = "Media-style foreground promotion denied",
-                failureMessage = "Failed to post media-style foreground notification",
-                stopOnFailure = false,
-            )
-        }
         player.repeatMode = startupPrefs!![RepeatModeKey] ?: REPEAT_MODE_OFF
 
         if (startupPrefs!![RememberShuffleAndRepeatKey] ?: true) {
@@ -971,9 +948,7 @@ class MusicService :
         controllerFuture?.addListener({
             try {
                 controllerFuture?.get()
-                Timber.tag("DBG").d("DBG self-controller connected")
             } catch (e: Exception) {
-                Timber.tag("DBG").d("DBG self-controller failed: %s", e.toString())
                 Timber.tag(TAG).e(e, "Failed to initialize MediaController")
                 controllerFuture = null
                 stopSelf()
@@ -4628,24 +4603,6 @@ class MusicService :
             } else {
                 startForeground(NOTIFICATION_ID, notification)
             }
-            val nm = getSystemService(NotificationManager::class.java)
-            Timber.tag("DBG").d(
-                "DBG fg posted: enabled=%s importance=%s active=%s",
-                nm?.areNotificationsEnabled(),
-                nm?.getNotificationChannel(CHANNEL_ID)?.importance,
-                nm?.activeNotifications?.size,
-            )
-            nm?.activeNotifications?.forEach { sbn ->
-                val n = sbn.notification
-                Timber.tag("DBG").d(
-                    "DBG active key=%s channel=%s flags=%s visibility=%s title=%s",
-                    sbn.key,
-                    n.channelId,
-                    n.flags,
-                    n.visibility,
-                    n.extras?.getCharSequence(android.app.Notification.EXTRA_TITLE),
-                )
-            }
             true
         } catch (e: ForegroundServiceStartNotAllowedException) {
             Timber.tag(TAG).w(e, deniedMessage)
@@ -4848,7 +4805,6 @@ class MusicService :
         // External controllers (Android Auto, Bluetooth, Wear) only connect when the user is using
         // them, and they keep this instance alive after a task clear, so they must lift the guard.
         if (controllerInfo.packageName != packageName) taskCleared = false
-        Timber.tag("DBG").d("DBG onGetSession pkg=%s thread=%s", controllerInfo.packageName, Thread.currentThread().name)
         return mediaSession
     }
 
@@ -4856,7 +4812,6 @@ class MusicService :
         session: MediaSession,
         startInForegroundRequired: Boolean,
     ) {
-        Timber.tag(TAG).d("DBG onUpdateNotification taskCleared=%s fg=%s", taskCleared, startInForegroundRequired)
         if (taskCleared) return
         try {
             super.onUpdateNotification(session, startInForegroundRequired)
@@ -5132,7 +5087,6 @@ class MusicService :
     }
 
     private fun handleForegroundServiceStartNotAllowed(error: Throwable?) {
-        Timber.tag(TAG).d("DBG handleFgNotAllowed error=%s", error?.javaClass?.simpleName)
         if (error != null) {
             Timber.tag(TAG).w(error, "Foreground service start denied during notification update")
         } else {
