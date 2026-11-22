@@ -31,7 +31,7 @@ object TopPickEngine {
     private const val MOOD_PLAYLISTS = 3
     private const val MOOD_QUEUE = 60
 
-    private class ArtistCard(val page: ArtistPage, val browseId: String)
+    private class ArtistCard(val page: ArtistPage, val browseId: String, val photo: String? = null)
 
     /** Mix kinds found on Home's shelves, matched by title. */
     private enum class Mix { SUPERMIX, DISCOVER, NEW_RELEASE }
@@ -53,6 +53,12 @@ object TopPickEngine {
         val artists = ranked.zip(pages).mapNotNull { (ref, page) ->
             page?.let { ArtistCard(it, ref.second) }
         }.distinctBy { it.page.artist.title.lowercase(Locale.ROOT) }
+            .let { cards ->
+                val photos = cards.map { card ->
+                    async { AppleArtistPhotos.photoFor(card.page.artist.title, card.page) }
+                }.awaitAll()
+                cards.zip(photos) { card, photo -> ArtistCard(card.page, card.browseId, photo) }
+            }
 
         val lead = latestRelease(artists)
         val rest = buildList {
@@ -183,7 +189,7 @@ object TopPickEngine {
 
     private fun andSimilar(artist: ArtistCard): TopPick? {
         val radio = artist.page.artist.radioEndpoint ?: return null
-        val face = artist.page.artist.thumbnail ?: return null
+        val face = artist.photo ?: artist.page.artist.thumbnail ?: return null
         val related = relatedArtists(artist).mapNotNull { it.thumbnail }.filter { it != face }.distinct().take(2)
         return TopPick(
             kind = TopPickKind.ARTIST_AND_SIMILAR,
@@ -197,7 +203,7 @@ object TopPickEngine {
 
     private fun featured(artist: ArtistCard): TopPick? {
         val shuffle = artist.page.artist.shuffleEndpoint ?: artist.page.artist.radioEndpoint ?: return null
-        val face = artist.page.artist.thumbnail ?: return null
+        val face = artist.photo ?: artist.page.artist.thumbnail ?: return null
         return TopPick(
             kind = TopPickKind.FEATURED_ARTIST,
             title = artist.page.artist.title,
