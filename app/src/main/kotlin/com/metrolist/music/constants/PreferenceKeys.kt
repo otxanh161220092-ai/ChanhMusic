@@ -488,6 +488,7 @@ CRITICAL RULES:
 5. The "lines" array must contain EXACTLY {lineCount} items
 6. If uncertain, provide best approximation but maintain line count"""
 val LyricsGlowEffectKey = booleanPreferencesKey("lyricsGlowEffect")
+val NewHomeStyleKey = booleanPreferencesKey("newHomeStyle")
 
 val LyricsRomanizeList = stringPreferencesKey("lyricsRomanizeList")
 val LyricsAnimationStyleKey = stringPreferencesKey("lyricsAnimationStyle")

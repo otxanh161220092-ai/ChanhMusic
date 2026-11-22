@@ -10,6 +10,8 @@ import com.metrolist.music.ui.component.GradientTopAppBar
 import com.metrolist.music.ui.component.smoothCornerShape
 import com.metrolist.music.constants.CollectionDominantBackgroundKey
 
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -80,6 +82,7 @@ import com.metrolist.music.constants.LyricsAnimationStyle
 import com.metrolist.music.constants.LyricsAnimationStyleKey
 import com.metrolist.music.constants.LyricsClickKey
 import com.metrolist.music.constants.LyricsGlowEffectKey
+import com.metrolist.music.constants.NewHomeStyleKey
 import com.metrolist.music.constants.LyricsLineSpacingKey
 import com.metrolist.music.constants.LyricsScrollKey
 import com.metrolist.music.constants.LyricsTextPositionKey
@@ -124,6 +127,7 @@ import com.metrolist.music.ui.theme.PlayerSliderColors
 import com.metrolist.music.ui.utils.backToMain
 import com.metrolist.music.utils.IconUtils
 import com.metrolist.music.utils.rememberEnumPreference
+import com.metrolist.music.utils.safeDataStoreEdit
 import com.metrolist.music.utils.rememberPreference
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -235,6 +239,9 @@ fun AppearanceSettings(
     val (experimentalLyrics, onExperimentalLyricsChange) = rememberPreference(ExperimentalLyricsKey, defaultValue = true)
 
     val (lyricsGlowEffect, onLyricsGlowEffectChange) = rememberPreference(LyricsGlowEffectKey, defaultValue = false)
+    val (newHomeStyle, _) = rememberPreference(NewHomeStyleKey, defaultValue = false)
+    val homeStyleScope = rememberCoroutineScope()
+    val homeStyleContext = LocalContext.current
     val (lyricsAnimationStyle, onLyricsAnimationStyleChange) =
         rememberEnumPreference(
             LyricsAnimationStyleKey,
@@ -1573,6 +1580,17 @@ fun AppearanceSettings(
             items =
                 listOf(
                     Material3SettingsItem(
+                        icon = painterResource(R.drawable.tab),
+                        title = { Text("Giao diện mới") },
+                        description = { Text(if (newHomeStyle) "Bật" else "Tắt, bấm để đổi và khởi động lại app") },
+                        onClick = {
+                            homeStyleScope.launch {
+                                homeStyleContext.safeDataStoreEdit { it[NewHomeStyleKey] = !newHomeStyle }
+                                restartApp(homeStyleContext)
+                            }
+                        },
+                    ),
+                    Material3SettingsItem(
                         icon = painterResource(R.drawable.nav_bar),
                         title = { Text(stringResource(R.string.default_open_tab)) },
                         description = {
@@ -1939,4 +1957,14 @@ enum class LyricsPosition {
     LEFT,
     CENTER,
     RIGHT,
+}
+
+/** Relaunches the app from its launcher entry so the new layout is loaded from scratch. */
+private fun restartApp(context: Context) {
+    val intent =
+        context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
+    if (intent != null) context.startActivity(intent)
+    android.os.Process.killProcess(android.os.Process.myPid())
 }
