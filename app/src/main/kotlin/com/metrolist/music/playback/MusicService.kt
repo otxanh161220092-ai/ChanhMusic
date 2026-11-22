@@ -4605,6 +4605,17 @@ class MusicService :
                 nm?.getNotificationChannel(CHANNEL_ID)?.importance,
                 nm?.activeNotifications?.size,
             )
+            nm?.activeNotifications?.forEach { sbn ->
+                val n = sbn.notification
+                Timber.tag("DBG").d(
+                    "DBG active key=%s channel=%s flags=%s visibility=%s title=%s",
+                    sbn.key,
+                    n.channelId,
+                    n.flags,
+                    n.visibility,
+                    n.extras?.getCharSequence(android.app.Notification.EXTRA_TITLE),
+                )
+            }
             true
         } catch (e: ForegroundServiceStartNotAllowedException) {
             Timber.tag(TAG).w(e, deniedMessage)
