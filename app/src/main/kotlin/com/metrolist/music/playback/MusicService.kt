@@ -4796,6 +4796,7 @@ class MusicService :
         // External controllers (Android Auto, Bluetooth, Wear) only connect when the user is using
         // them, and they keep this instance alive after a task clear, so they must lift the guard.
         if (controllerInfo.packageName != packageName) taskCleared = false
+        Timber.tag("DBG").d("DBG onGetSession pkg=%s thread=%s", controllerInfo.packageName, Thread.currentThread().name)
         return mediaSession
     }
 

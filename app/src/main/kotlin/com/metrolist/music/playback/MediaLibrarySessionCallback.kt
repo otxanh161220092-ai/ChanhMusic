@@ -96,6 +96,7 @@ constructor(
         controller: MediaSession.ControllerInfo,
     ): MediaSession.ConnectionResult {
         val connectionResult = super.onConnect(session, controller)
+        timber.log.Timber.tag("DBG").d("DBG onConnect pkg=%s trusted=%s thread=%s", controller.packageName, connectionResult.isAccepted, Thread.currentThread().name)
         return MediaSession.ConnectionResult.accept(
             connectionResult.availableSessionCommands
                 .buildUpon()
