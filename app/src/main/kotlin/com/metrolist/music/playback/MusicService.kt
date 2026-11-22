@@ -944,7 +944,9 @@ class MusicService :
         controllerFuture?.addListener({
             try {
                 controllerFuture?.get()
+                Timber.tag("DBG").d("DBG self-controller connected")
             } catch (e: Exception) {
+                Timber.tag("DBG").d("DBG self-controller failed: %s", e.toString())
                 Timber.tag(TAG).e(e, "Failed to initialize MediaController")
                 controllerFuture = null
                 stopSelf()
