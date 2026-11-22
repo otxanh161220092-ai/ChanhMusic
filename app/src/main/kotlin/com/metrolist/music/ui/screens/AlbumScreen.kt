@@ -5,7 +5,6 @@
 
 package com.metrolist.music.ui.screens
 
-import com.metrolist.music.ui.component.AlbumTitle
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -224,15 +223,6 @@ fun AlbumScreen(
                 run {
                     AppleCollectionHeader(
                         title = albumWithSongs.album.title,
-                        titleSlot = { fallback ->
-                            AlbumTitle(
-                                title = albumWithSongs.album.title,
-                                artist = albumWithSongs.artists.joinToString(" ") { it.name },
-                                allowCover = false,
-                                blendLogo = false,
-                                fallback = fallback,
-                            )
-                        },
                         thumbnailUrl = albumWithSongs.album.thumbnailUrl,
                         artistText = albumWithSongs.artists.joinToString(", ") { it.name },
                         metaText = metaText,
@@ -299,9 +289,14 @@ fun AlbumScreen(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     // Album Name
-                    AlbumTitle(
-                        title = albumWithSongs.album.title,
-                        artist = albumWithSongs.artists.joinToString(" ") { it.name },
+                    Text(
+                        text = albumWithSongs.album.title,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 32.dp),
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))

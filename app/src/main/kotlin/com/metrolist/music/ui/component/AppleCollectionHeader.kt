@@ -312,8 +312,6 @@ fun AppleCollectionHeader(
     description: String? = null,
     onShuffle: (() -> Unit)? = null,
     onArtistClick: (() -> Unit)? = null,
-    /** Replaces the title text; receives the plain text as [fallback] for when there is no logo. */
-    titleSlot: (@Composable (fallback: @Composable () -> Unit) -> Unit)? = null,
 ) {
     val fill = Color.White.copy(alpha = 0.18f)
     Column(
@@ -340,19 +338,16 @@ fun AppleCollectionHeader(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        val titleText: @Composable () -> Unit = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(horizontal = 24.dp),
-            )
-        }
-        if (titleSlot != null) titleSlot(titleText) else titleText()
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
 
         if (!artistText.isNullOrBlank()) {
             Text(

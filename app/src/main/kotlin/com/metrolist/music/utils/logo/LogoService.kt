@@ -13,15 +13,9 @@ import java.net.URLEncoder
 import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "LogoService"
-/** Marks a cached URL as a Wikimedia logo; cover art URLs carry no mark. */
-private const val LOGO_MARK = "logo:"
-
 /**
- * Finds a logo image for an album or artist.
- *
- * Album: Wikimedia Commons only (a file named like "<Artist> <Album> logo").
- * Artist: MusicBrainz -> Fanart.tv -> TheAudioDB.
- * Returns null when nothing is found, so the UI can show the album title as styled text.
+ * Finds a logo image for an artist: MusicBrainz -> Fanart.tv -> TheAudioDB.
+ * Returns null when nothing is found.
  *
  * Results, including misses, are cached in memory for the life of the process.
  */
@@ -35,39 +29,6 @@ class LogoService(
     private var lastMusicBrainzCall = 0L
 
     private class CachedUrl(val url: String?)
-
-    /** [url] is a logo (transparent, blended onto the background) or a plain cover image. */
-    data class AlbumImage(val url: String, val isLogo: Boolean)
-
-    /**
-     * The album's own image: a transparent logo from Wikimedia Commons when one exists,
-     * otherwise the front cover from Cover Art Archive. An artist logo is never used.
-     */
-    suspend fun albumImage(artist: String, album: String): AlbumImage? {
-        Log.d(TAG, "albumImage: $artist - $album")
-        return albumImageCached(artist, album)
-    }
-
-    private suspend fun albumImageCached(artist: String, album: String): AlbumImage? {
-        val key = "album|${artist.lowercase()}|${album.lowercase()}"
-        cache[key]?.let { hit ->
-            return hit.url?.let { u -> AlbumImage(u.removePrefix(LOGO_MARK), isLogo = u.startsWith(LOGO_MARK)) }
-        }
-        val value = try {
-            wikimediaAlbumLogo(artist, album)?.let { LOGO_MARK + it }
-                ?: coverArtUrl(artist, album)
-        } catch (e: Exception) {
-            Log.w(TAG, "album lookup failed for $key", e)
-            return null
-        }
-        cache[key] = CachedUrl(value)
-        return value?.let { AlbumImage(it.removePrefix(LOGO_MARK), isLogo = it.startsWith(LOGO_MARK)) }
-    }
-
-    private suspend fun coverArtUrl(artist: String, album: String): String? {
-        val rgMbid = musicBrainzReleaseGroupId(artist, album) ?: return null
-        return "https://coverartarchive.org/release-group/$rgMbid/front-500"
-    }
 
     suspend fun artistLogo(artist: String): String? =
         cached("artist|${artist.lowercase()}") {
@@ -91,63 +52,12 @@ class LogoService(
         return value
     }
 
-    // ---- Wikimedia Commons -------------------------------------------------
-
-    /**
-     * Searches file names for "<Artist> <Album> logo" and "<Album> (logo)", keeps only
-     * PNG/SVG files whose name contains "logo", and returns the first original file URL.
-     */
-    private suspend fun wikimediaAlbumLogo(artist: String, album: String): String? {
-        val terms = listOf(
-            "$artist $album logo",
-            "$album logo",
-            "$album (logo)",
-            "$album (album logo)",
-            "$artist $album (logo)",
-        )
-        for (term in terms) {
-            val json = getJson(
-                "https://commons.wikimedia.org/w/api.php?action=query&format=json" +
-                    "&generator=search&gsrsearch=${encode(term)}&gsrnamespace=6&gsrlimit=20" +
-                    "&prop=imageinfo&iiprop=url",
-            ) ?: continue
-            val pages = json.optJSONObject("query")?.optJSONObject("pages") ?: continue
-            val candidates = mutableListOf<Pair<Int, String>>()
-            pages.keys().forEach { key ->
-                val page = pages.getJSONObject(key)
-                val title = page.optString("title")
-                val lower = title.lowercase()
-                val isLogoFile = lower.contains("logo") && (lower.endsWith(".png") || lower.endsWith(".svg"))
-                val url = page.optJSONArray("imageinfo")?.optJSONObject(0)?.optString("url")
-                if (isLogoFile && !url.isNullOrEmpty()) {
-                    candidates += page.optInt("index", Int.MAX_VALUE) to url
-                }
-            }
-            Log.d(TAG, "wikimedia '$term': ${pages.length()} results, ${candidates.size} logo files")
-            candidates.minByOrNull { it.first }?.let { return it.second }
-        }
-        Log.d(TAG, "wikimedia: no logo for $artist - $album")
-        return null
-    }
-
     // ---- MusicBrainz -------------------------------------------------------
 
     private suspend fun musicBrainzArtistId(artist: String): String? {
         val query = "artist:\"${escape(artist)}\""
         val json = getJson("https://musicbrainz.org/ws/2/artist/?query=${encode(query)}&fmt=json&limit=1", musicBrainz = true)
         return json?.optJSONArray("artists")?.optJSONObject(0)?.optString("id")?.takeIf { it.isNotEmpty() }
-    }
-
-    private suspend fun musicBrainzReleaseGroupId(artist: String, album: String): String? {
-        val query = "releasegroup:\"${escape(album)}\" AND artist:\"${escape(artist)}\""
-        val json = getJson("https://musicbrainz.org/ws/2/release-group/?query=${encode(query)}&fmt=json&limit=1", musicBrainz = true)
-        return json?.optJSONArray("release-groups")?.optJSONObject(0)?.optString("id")?.takeIf { it.isNotEmpty() }
-    }
-
-    /** Release-group -> the artist credited on it. */
-    private suspend fun musicBrainzArtistIdFromRelease(releaseGroupMbid: String): String? {
-        val json = getJson("https://musicbrainz.org/ws/2/release-group/$releaseGroupMbid?inc=artist-credits&fmt=json", musicBrainz = true)
-        return json?.optJSONArray("artist-credit")?.optJSONObject(0)?.optJSONObject("artist")?.optString("id")?.takeIf { it.isNotEmpty() }
     }
 
     // ---- Fanart.tv ---------------------------------------------------------
