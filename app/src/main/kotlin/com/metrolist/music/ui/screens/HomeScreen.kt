@@ -732,7 +732,7 @@ fun HomeScreen(
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
     val (randomizeHomeOrder) = rememberPreference(RandomizeHomeOrderKey, true)
     val autoRadioQueue by rememberPreference(AutoRadioQueueKey, defaultValue = true)
-    val appleStyle = true
+    val appleStyle = !newHomeStyle
 
     LaunchedEffect(Unit) { viewModel.loadHomeData() }
 
