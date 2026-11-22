@@ -927,8 +927,8 @@ class MusicService :
                 .Builder(this, player, mediaLibrarySessionCallback)
                 .setSessionExtras(
                     Bundle().apply {
-                        putBoolean(androidx.media3.common.MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_PREV, true)
-                        putBoolean(androidx.media3.common.MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_NEXT, true)
+                        putBoolean(androidx.media3.session.MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_PREV, true)
+                        putBoolean(androidx.media3.session.MediaConstants.EXTRAS_KEY_SLOT_RESERVATION_SEEK_TO_NEXT, true)
                     },
                 )
                 .setSessionActivity(
