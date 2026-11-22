@@ -59,28 +59,16 @@ data class ApplePick(
  * with a chevron that expands the tiles into a grid.
  */
 fun LazyListScope.appleHomeSections(
-    topPicks: List<ApplePick>,
+    topPicks: List<com.metrolist.music.topPicks.TopPick>,
+    listenerName: String?,
+    onTopPick: (com.metrolist.music.topPicks.TopPick, String) -> Unit,
     recentlyPlayed: List<LocalItem>?,
     onOpenRecent: () -> Unit,
     recentlyPlayedItem: @Composable (LocalItem) -> Unit,
 ) {
     if (topPicks.isNotEmpty()) {
-        item(key = "apple_top_picks_title") {
-            SectionTitle(title = "Lựa chọn hay nè", onClick = null)
-        }
-        item(key = "apple_top_picks_list") {
-            LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
-                itemsIndexed(
-                    items = topPicks,
-                    key = { _, pick -> "apple_top_pick_${pick.id}" },
-                ) { index, pick ->
-                    TopPickCard(
-                        pick = pick,
-                        colors = if (index % 2 == 0) PickRed else PickBlue,
-                        modifier = Modifier.width(200.dp).height(260.dp).padding(end = 12.dp),
-                    )
-                }
-            }
+        item(key = "top_picks_shelf") {
+            TopPicksShelf(picks = topPicks, listenerName = listenerName, onClick = onTopPick)
         }
     }
 

@@ -149,6 +149,7 @@ import com.metrolist.music.extensions.toMediaItem
 import com.metrolist.music.models.toMediaMetadata
 import com.metrolist.music.playback.queues.ListQueue
 import com.metrolist.music.topPicks.TopPickEngine
+import com.metrolist.music.topPicks.TopPick
 import com.metrolist.music.topPicks.TopPickKind
 import com.metrolist.music.playback.queues.LocalAlbumRadio
 import com.metrolist.music.playback.queues.YouTubeAlbumRadio
@@ -1326,35 +1327,29 @@ fun HomeScreen(
                             else -> null
                         }
                     }
-                val topPicks =
-                    topPicksFlow.orEmpty().map { pick ->
-                        ApplePick(
-                            id = pick.kind.name + (pick.watch?.playlistId ?: pick.browseId ?: pick.title),
-                            title = TopPickEngine.labelOf(pick),
-                            subtitle = TopPickEngine.subtitleOf(pick),
-                            thumbnail = pick.images.firstOrNull(),
-                            onPlay = {
-                                if (pick.kind == TopPickKind.LATEST_RELEASE) {
-                                    pick.browseId?.let { navController.navigate("album/$it") }
-                                } else if (!isListenTogetherGuest) {
-                                    topPicksScope.launch {
-                                        TopPickEngine.queue(pick).onSuccess { songs ->
-                                            playerConnection.playQueue(
-                                                ListQueue(
-                                                    title = TopPickEngine.labelOf(pick),
-                                                    items = songs.map { it.toMediaItem() },
-                                                    startIndex = 0,
-                                                ),
-                                            )
-                                        }
-                                    }
-                                }
-                            },
-                        )
+                val onTopPick: (TopPick, String) -> Unit = { pick, _ ->
+                    if (pick.kind == TopPickKind.LATEST_RELEASE) {
+                        pick.browseId?.let { navController.navigate("album/$it") }
+                    } else if (!isListenTogetherGuest) {
+                        topPicksScope.launch {
+                            TopPickEngine.queue(pick).onSuccess { songs ->
+                                playerConnection.playQueue(
+                                    ListQueue(
+                                        title = TopPickEngine.labelOf(pick),
+                                        items = songs.map { it.toMediaItem() },
+                                        startIndex = 0,
+                                    ),
+                                )
+                            }
+                        }
                     }
+                }
+                val topPicks = topPicksFlow.orEmpty()
 
                 if (!newHomeStyle) appleHomeSections(
                     topPicks = topPicks,
+                    listenerName = accountName,
+                    onTopPick = onTopPick,
                     recentlyPlayed = keepListening,
                     onOpenRecent = { showRecentPage = true },
                     recentlyPlayedItem = { localGridItem(it) },
