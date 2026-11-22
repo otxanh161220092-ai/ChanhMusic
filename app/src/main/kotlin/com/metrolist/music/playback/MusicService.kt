@@ -934,6 +934,25 @@ class MusicService :
                     ),
                 ).setBitmapLoader(CoilBitmapLoader(this, scope))
                 .build()
+        // Post a media-style foreground notification tied to this session, so the system
+        // media controls can be built from it (the provider above never runs on this device).
+        mediaSession?.let { session ->
+            val mediaStyleNotification =
+                NotificationCompat
+                    .Builder(this, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.small_icon)
+                    .setContentTitle(getString(R.string.music_player))
+                    .setOngoing(true)
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setStyle(androidx.media3.session.MediaStyleNotificationHelper.MediaStyle(session))
+                    .build()
+            startForegroundSafely(
+                notification = mediaStyleNotification,
+                deniedMessage = "Media-style foreground promotion denied",
+                failureMessage = "Failed to post media-style foreground notification",
+                stopOnFailure = false,
+            )
+        }
         player.repeatMode = startupPrefs!![RepeatModeKey] ?: REPEAT_MODE_OFF
 
         if (startupPrefs!![RememberShuffleAndRepeatKey] ?: true) {
