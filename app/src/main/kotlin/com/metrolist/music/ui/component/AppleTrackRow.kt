@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import com.metrolist.music.R
 import com.metrolist.music.db.entities.Song
+import com.metrolist.music.ui.player.BcStarFilled
 
 /**
  * Track row for Apple style collections: track number, title with an explicit badge, and a
@@ -51,9 +52,16 @@ fun AppleTrackRow(
             modifier = Modifier.fillMaxWidth().height(60.dp).padding(horizontal = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(modifier = Modifier.width(10.dp), contentAlignment = Alignment.Center) {
-                if (popular) {
-                    Box(
+            // A liked song shows BitChord's filled star here, over the popular dot.
+            Box(modifier = Modifier.width(12.dp), contentAlignment = Alignment.Center) {
+                when {
+                    song.song.liked -> Icon(
+                        imageVector = BcStarFilled,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(12.dp),
+                    )
+                    popular -> Box(
                         modifier = Modifier
                             .size(5.dp)
                             .background(Color.White.copy(alpha = 0.5f), CircleShape),
