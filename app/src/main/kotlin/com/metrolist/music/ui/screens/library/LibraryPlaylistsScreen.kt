@@ -329,6 +329,7 @@ fun LibraryPlaylistsScreen(
     }
 
     val headerContent = @Composable {
+        LibraryBackButton(onClick = { navController.navigateUp() })
         LibrarySearchHeader(
             isSearchActive = isSearchActive,
             searchQuery = searchQuery,

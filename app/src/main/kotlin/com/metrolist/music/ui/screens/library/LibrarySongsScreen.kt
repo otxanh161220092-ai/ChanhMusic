@@ -342,18 +342,7 @@ fun LibrarySongsScreen(
                 key = "filter",
                 contentType = CONTENT_TYPE_HEADER,
             ) {
-                // Back sits on its own line above the filters, as a chevron.
-                IconButton(
-                    onClick = onDeselect,
-                    modifier = Modifier.padding(start = 8.dp),
-                ) {
-                    Icon(
-                        imageVector = BackChevron,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(28.dp),
-                    )
-                }
+                LibraryBackButton(onClick = onDeselect)
                 Row {
                     Spacer(Modifier.width(12.dp))
                     ChipsRow(
@@ -514,24 +503,4 @@ fun LibrarySongsScreen(
             },
         )
     }
-}
-
-/** A "<" chevron for going back, drawn as a stroke like the rest of the library icons. */
-private val BackChevron: ImageVector by lazy {
-    ImageVector.Builder(
-        name = "back_chevron",
-        defaultWidth = 24.dp, defaultHeight = 24.dp,
-        viewportWidth = 24f, viewportHeight = 24f,
-    ).apply {
-        path(
-            stroke = SolidColor(Color.Black),
-            strokeLineWidth = 2.4f,
-            strokeLineCap = StrokeCap.Round,
-            strokeLineJoin = StrokeJoin.Round,
-        ) {
-            moveTo(15f, 5f)
-            lineTo(8f, 12f)
-            lineTo(15f, 19f)
-        }
-    }.build()
 }

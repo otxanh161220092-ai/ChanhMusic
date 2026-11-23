@@ -113,18 +113,9 @@ fun LibraryAlbumsScreen(
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
 
     val filterContent = @Composable {
+        LibraryBackButton(onClick = onDeselect)
         Row {
             Spacer(Modifier.width(12.dp))
-            FilterChip(
-                label = { Text(stringResource(R.string.albums)) },
-                selected = true,
-                colors = FilterChipDefaults.filterChipColors(containerColor = MaterialTheme.colorScheme.surface),
-                onClick = onDeselect,
-                shape = smoothCornerShape(16.dp),
-                leadingIcon = {
-                    Icon(painter = painterResource(R.drawable.close), contentDescription = "")
-                },
-            )
             ChipsRow(
                 chips =
                     listOf(
