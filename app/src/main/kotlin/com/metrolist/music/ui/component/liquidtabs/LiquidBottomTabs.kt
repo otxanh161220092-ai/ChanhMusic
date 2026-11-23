@@ -183,8 +183,7 @@ fun LiquidBottomTabs(
                     shadow = { Shadow(alpha = 0.2f) },
                     innerShadow = { InnerShadow(radius = 10f.dp, alpha = 0.3f) },
                     onDrawSurface = {
-                        drawRect(Color.White.copy(alpha = 0.45f), blendMode = BlendMode.Overlay)
-                        drawRect(Color.White.copy(alpha = 0.5f))
+                        drawRect(Color(0xFFABABAB).copy(alpha = 0.7f))
                     },
                 )
                 .then(interactiveHighlight.modifier)
@@ -249,8 +248,7 @@ fun LiquidBottomTabs(
                     effects = { blur(glassBlur.dp.toPx()) },
                     highlight = { Highlight.Default.copy(alpha = 0f) },
                     onDrawSurface = {
-                        drawRect(Color.White.copy(alpha = 0.45f), blendMode = BlendMode.Overlay)
-                        drawRect(Color.White.copy(alpha = 0.5f))
+                        drawRect(Color(0xFFABABAB).copy(alpha = 0.7f))
                     },
                 )
                 .height(56f.dp)

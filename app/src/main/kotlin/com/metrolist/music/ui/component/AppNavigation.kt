@@ -398,7 +398,7 @@ private fun LiquidNavigationBar(
         .indexOfFirst { isRouteSelected(currentRoute, it.route, navigationItems) }
         .coerceAtLeast(0)
     val tabsCount = navigationItems.size
-    val iconColor = Color.Black
+    val iconColor = Color.White
 
     LiquidBottomTabs(
         selectedTabIndex = { selectedIndex },

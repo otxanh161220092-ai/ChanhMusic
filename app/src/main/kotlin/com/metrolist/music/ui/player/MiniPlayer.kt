@@ -307,9 +307,9 @@ private fun NewMiniPlayer(
 
     val lightGlass = miniPlayerBackground == MiniPlayerBackgroundStyle.DEFAULT ||
         miniPlayerBackground == MiniPlayerBackgroundStyle.TRANSPARENT
-    val primaryColor = if (lightGlass) Color.Black else if (forceLightColors) Color.White else MaterialTheme.colorScheme.primary
+    val primaryColor = if (lightGlass) Color.White else if (forceLightColors) Color.White else MaterialTheme.colorScheme.primary
     val outlineColor = if (lightGlass) Color.White else if (forceLightColors) Color.White else MaterialTheme.colorScheme.outline
-    val onSurfaceColor = if (lightGlass) Color.Black else if (forceLightColors) Color.White else MaterialTheme.colorScheme.onSurface
+    val onSurfaceColor = if (lightGlass) Color.White else if (forceLightColors) Color.White else MaterialTheme.colorScheme.onSurface
     val errorColor = if (forceLightColors) Color(0xFFFF6B6B) else MaterialTheme.colorScheme.error
 
     Box(
@@ -394,8 +394,8 @@ private fun NewMiniPlayer(
                         glassBackdrop,
                         SmoothCornerShape(999.dp),
                         backgroundColor,
-                        if (lightGlass) Color.White.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.45f),
-                        if (lightGlass) Color.White.copy(alpha = 0.45f) else Color.Transparent,
+                        if (lightGlass) Color(0xFFABABAB).copy(alpha = 0.7f) else Color.Black.copy(alpha = 0.45f),
+                        Color.Transparent,
                     )
                     .clickable(
                         interactionSource = interactionSource,
