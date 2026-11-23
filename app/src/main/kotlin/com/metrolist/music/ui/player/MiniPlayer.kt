@@ -7,6 +7,8 @@
 
 package com.metrolist.music.ui.player
 
+import androidx.compose.foundation.layout.matchParentSize
+import androidx.compose.foundation.Image
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import android.content.res.Configuration
@@ -394,7 +396,7 @@ private fun NewMiniPlayer(
                         glassBackdrop,
                         SmoothCornerShape(999.dp),
                         backgroundColor,
-                        if (lightGlass) Color(0xFFABABAB).copy(alpha = 0.7f) else Color.Black.copy(alpha = 0.45f),
+                        if (lightGlass) Color.Transparent else Color.Black.copy(alpha = 0.45f),
                         Color.Transparent,
                     )
                     .clickable(
@@ -403,6 +405,14 @@ private fun NewMiniPlayer(
                         onClick = onClick
                     ),
         ) {
+            if (lightGlass) {
+                Image(
+                    painter = painterResource(R.drawable.liquid_mini_player_fill),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.matchParentSize(),
+                )
+            }
             when (miniPlayerBackground) {
                 MiniPlayerBackgroundStyle.BLUR -> {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {

@@ -1,5 +1,9 @@
 package com.metrolist.music.ui.component.liquidtabs
 
+import com.metrolist.music.R
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.graphics.ImageBitmap
 import com.metrolist.music.ui.component.SmoothCornerShape
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
@@ -72,6 +76,7 @@ fun LiquidBottomTabs(
 ) {
     val isLightTheme = !isSystemInDarkTheme()
     val accentColor = Color(0xFFFA233B)
+    val barFill = ImageBitmap.imageResource(R.drawable.liquid_bottom_bar_fill)
     val containerColor = Color.Transparent
 
     val tabsBackdrop = rememberLayerBackdrop()
@@ -183,7 +188,7 @@ fun LiquidBottomTabs(
                     shadow = { Shadow(alpha = 0.2f) },
                     innerShadow = { InnerShadow(radius = 10f.dp, alpha = 0.3f) },
                     onDrawSurface = {
-                        drawRect(Color(0xFFABABAB).copy(alpha = 0.7f))
+                        drawImage(barFill, dstSize = IntSize(size.width.toInt(), size.height.toInt()))
                     },
                 )
                 .then(interactiveHighlight.modifier)
@@ -248,7 +253,7 @@ fun LiquidBottomTabs(
                     effects = { blur(glassBlur.dp.toPx()) },
                     highlight = { Highlight.Default.copy(alpha = 0f) },
                     onDrawSurface = {
-                        drawRect(Color(0xFFABABAB).copy(alpha = 0.7f))
+                        drawImage(barFill, dstSize = IntSize(size.width.toInt(), size.height.toInt()))
                     },
                 )
                 .height(56f.dp)
