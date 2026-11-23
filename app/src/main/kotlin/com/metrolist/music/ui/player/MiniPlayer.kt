@@ -395,7 +395,7 @@ private fun NewMiniPlayer(
                         SmoothCornerShape(27.dp),
                         backgroundColor,
                         if (lightGlass) Color.White.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.45f),
-                        Color.Transparent,
+                        if (lightGlass) Color.White.copy(alpha = 0.45f) else Color.Transparent,
                     )
                     .clickable(
                         interactionSource = interactionSource,
