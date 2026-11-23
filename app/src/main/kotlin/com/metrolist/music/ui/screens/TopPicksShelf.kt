@@ -2,6 +2,7 @@ package com.metrolist.music.ui.screens
 
 import androidx.compose.ui.res.stringResource
 import com.metrolist.music.R
+import com.metrolist.music.bcmix.canvas.CanvasArtworkPlayer
 import com.metrolist.music.topPicks.CanvasArtwork
 import com.metrolist.music.topPicks.CanvasSource
 import com.metrolist.music.topPicks.TopPick
@@ -536,7 +537,7 @@ private fun CardMotion(
     // fetching, decoding and fading the clip back in for. Read here, so it is
     // this card alone that recomposes as a scroll starts and ends.
     CanvasArtworkPlayer(
-        canvas = canvas,
+        canvas = canvas.toPlayerClip(),
         isPlaying = true,
         modifier = modifier,
         bottomFade = bottomFade,

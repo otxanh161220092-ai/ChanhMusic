@@ -53,17 +53,25 @@ object AppUiHost {
     suspend fun artistMotion(browseId: String, artistName: String): CanvasArtwork? = null
 }
 
-@Composable
-fun CanvasArtworkPlayer(
-    canvas: CanvasArtwork,
-    isPlaying: Boolean,
-    modifier: Modifier,
-    bottomFade: Any?,
-    onCoverChanged: Any?,
-    pausedForTransition: Boolean,
-) {
-    // Video playback of canvas clips is not ported yet.
-}
+/**
+ * The Top Picks clip in the player's own type. Metrolist's canvas player (the one
+ * the Now Playing and artist header already use) takes its own CanvasArtwork and a
+ * CanvasSource with only SPOTIFY and OTHER, so an Apple clip is passed as OTHER.
+ */
+fun CanvasArtwork.toPlayerClip(): com.metrolist.music.bcmix.canvas.CanvasArtwork =
+    com.metrolist.music.bcmix.canvas.CanvasArtwork(
+        url = url,
+        fallbackUrl = fallbackUrl,
+        title = title,
+        artist = artist,
+        album = album,
+        source = if (source == CanvasSource.SPOTIFY) {
+            com.metrolist.music.bcmix.canvas.CanvasSource.SPOTIFY
+        } else {
+            com.metrolist.music.bcmix.canvas.CanvasSource.OTHER
+        },
+        portraitUrl = portraitUrl,
+    )
 
 @Composable
 fun ShimmerBox(modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(8.dp)) {
