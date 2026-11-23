@@ -135,8 +135,24 @@ object AppleAlbumCanvas {
             ?.takeIf { it.isNotBlank() }
         val artistId = best.second["relationships"]?.jsonObject?.get("artists")?.jsonObject
             ?.get("data")?.jsonArray?.firstOrNull()?.jsonObject?.get("id")?.jsonPrimitive?.contentOrNull
+            ?: artistIdByName(splitArtists(artist).firstOrNull().orEmpty(), bearer)
+        Timber.tag(TAG).d("popular: artistId=%s for %s", artistId, artist)
         val popular = artistId?.let { topSongKeys(it) }.orEmpty()
+        Timber.tag(TAG).d("popular: %d top songs matched for %s", popular.size, album)
         return AppleAlbumDetails(genre, year, lossless, description, popular)
+    }
+
+    /** The Apple artist id whose name matches [name], found by search when the album does not carry it. */
+    private fun artistIdByName(name: String, bearer: String): String? {
+        if (name.isBlank()) return null
+        val url = "$AMP/$storefront/search?term=${URLEncoder.encode(name, "UTF-8")}&types=artists&limit=5"
+        val body = get(url, bearer) ?: return null
+        val root = runCatching { json.parseToJsonElement(body).jsonObject }.getOrNull() ?: return null
+        val rows = root["results"]?.jsonObject?.get("artists")?.jsonObject?.get("data")?.jsonArray ?: return null
+        return rows.firstOrNull { row ->
+            row.jsonObject["attributes"]?.jsonObject?.get("name")?.jsonPrimitive?.contentOrNull
+                ?.normalizeForMatch() == name.normalizeForMatch()
+        }?.jsonObject?.get("id")?.jsonPrimitive?.contentOrNull
     }
 
     /**
