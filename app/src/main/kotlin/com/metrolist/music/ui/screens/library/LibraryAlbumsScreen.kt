@@ -11,6 +11,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -113,6 +115,7 @@ fun LibraryAlbumsScreen(
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
 
     val filterContent = @Composable {
+            Column(modifier = Modifier.fillMaxWidth()) {
         LibraryBackButton(onClick = onDeselect)
         Row {
             Spacer(Modifier.width(12.dp))
@@ -131,6 +134,7 @@ fun LibraryAlbumsScreen(
             )
         }
     }
+        }
 
     LaunchedEffect(Unit) {
         if (ytmSync) {
@@ -249,7 +253,7 @@ fun LibraryAlbumsScreen(
             LibraryViewType.LIST -> {
                 LazyColumn(
                     state = lazyListState,
-                    contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
+                    contentPadding = libraryPagePadding(),
                 ) {
                     item(
                         key = "filter",
@@ -305,7 +309,7 @@ fun LibraryAlbumsScreen(
                         GridCells.Adaptive(
                             minSize = GridThumbnailHeight + if (gridItemSize == GridItemSize.BIG) 24.dp else (-24).dp,
                         ),
-                    contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
+                    contentPadding = libraryPagePadding(),
                 ) {
                     item(
                         key = "filter",

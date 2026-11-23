@@ -1,6 +1,11 @@
 package com.metrolist.music.ui.screens.library
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -8,6 +13,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
+import com.metrolist.music.LocalPlayerAwareWindowInsets
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -48,4 +55,21 @@ internal val LibraryBackChevron: ImageVector by lazy {
             lineTo(15f, 19f)
         }
     }.build()
+}
+
+/**
+ * Content padding for the library pages: the status bar and the side and bottom
+ * insets, without the app bar's height. These pages show no app bar, so reserving
+ * that space left an empty band above the back button.
+ */
+@Composable
+internal fun libraryPagePadding(): PaddingValues {
+    val insets = LocalPlayerAwareWindowInsets.current.asPaddingValues()
+    val layout = LocalLayoutDirection.current
+    return PaddingValues(
+        start = insets.calculateStartPadding(layout),
+        end = insets.calculateEndPadding(layout),
+        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+        bottom = insets.calculateBottomPadding(),
+    )
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -329,6 +330,7 @@ fun LibraryPlaylistsScreen(
     }
 
     val headerContent = @Composable {
+            Column(modifier = Modifier.fillMaxWidth()) {
         LibraryBackButton(onClick = { navController.navigateUp() })
         LibrarySearchHeader(
             isSearchActive = isSearchActive,
@@ -402,6 +404,7 @@ fun LibraryPlaylistsScreen(
             }
         }
     }
+        }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -410,7 +413,7 @@ fun LibraryPlaylistsScreen(
             LibraryViewType.LIST -> {
                 LazyColumn(
                     state = lazyListState,
-                    contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
+                    contentPadding = libraryPagePadding(),
                 ) {
                     item(
                         key = "filter",
@@ -476,7 +479,7 @@ fun LibraryPlaylistsScreen(
                     GridCells.Adaptive(
                         minSize = GridThumbnailHeight + if (gridItemSize == GridItemSize.BIG) 24.dp else (-24).dp,
                     ),
-                    contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
+                    contentPadding = libraryPagePadding(),
                 ) {
                     item(
                         key = "filter",
