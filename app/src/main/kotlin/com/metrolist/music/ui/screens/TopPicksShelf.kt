@@ -2,6 +2,8 @@ package com.metrolist.music.ui.screens
 
 import androidx.compose.ui.res.stringResource
 import com.metrolist.music.R
+import com.metrolist.music.topPicks.CanvasArtwork
+import com.metrolist.music.topPicks.CanvasSource
 import com.metrolist.music.topPicks.TopPick
 import com.metrolist.music.topPicks.TopPickKind
 import com.metrolist.music.topPicks.TopPickMood
