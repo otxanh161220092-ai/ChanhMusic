@@ -18,7 +18,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.metrolist.music.topPicks.AppleAlbumCanvas
+import com.metrolist.music.topPicks.CanvasArtwork
+import com.metrolist.music.topPicks.CanvasSource
 import com.metrolist.music.topPicks.TopPick
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.metrolist.music.ui.component.topshelf.ShelfRow
 
 /** Support pieces for the Top Picks shelf, replacing BitChord's shared UI and data layers. */
@@ -34,17 +39,17 @@ const val BLOCK_RADIUS_DP: Int = 12
 fun artworkAt(px: Int): String? = null
 
 /** A canvas clip. Metrolist has no clip source yet, so every lookup returns null for now. */
-enum class CanvasSource { APPLE, SPOTIFY }
-
-data class CanvasArtwork(val url: String, val source: CanvasSource = CanvasSource.APPLE)
-
 /** Stand-in for BitChord's AppUi host: no clips are looked up until the canvas source is ported. */
 object AppUi {
     val host: AppUiHost = AppUiHost
 }
 
 object AppUiHost {
-    suspend fun releaseMotion(album: String, artist: String): CanvasArtwork? = null
+    /** Apple motion artwork for a release, looked up off the main thread. Null when none. */
+    suspend fun releaseMotion(album: String, artist: String): CanvasArtwork? =
+        withContext(Dispatchers.IO) { AppleAlbumCanvas.searchAlbum(album, artist) }
+
+    /** Artist clips are not ported yet. */
     suspend fun artistMotion(browseId: String, artistName: String): CanvasArtwork? = null
 }
 
