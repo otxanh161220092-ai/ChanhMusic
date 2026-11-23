@@ -67,8 +67,8 @@ internal fun libraryPagePadding(): PaddingValues {
     val insets = LocalPlayerAwareWindowInsets.current.asPaddingValues()
     val layout = LocalLayoutDirection.current
     return PaddingValues(
-        start = insets.calculateStartPadding(layout),
-        end = insets.calculateEndPadding(layout),
+        start = insets.calculateLeftPadding(layout),
+        end = insets.calculateRightPadding(layout),
         top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
         bottom = insets.calculateBottomPadding(),
     )
