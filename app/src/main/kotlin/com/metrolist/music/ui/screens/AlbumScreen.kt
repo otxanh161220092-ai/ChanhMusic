@@ -81,6 +81,11 @@ import androidx.media3.exoplayer.offline.Download
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.metrolist.music.LocalDatabase
+import com.metrolist.music.bcmix.canvas.CanvasArtwork
+import com.metrolist.music.topPicks.AppleAlbumCanvas
+import androidx.compose.runtime.produceState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.metrolist.music.LocalDownloadUtil
 import com.metrolist.music.LocalListenTogetherManager
 import com.metrolist.music.LocalPlayerAwareWindowInsets
@@ -204,6 +209,21 @@ fun AlbumScreen(
         }
     }
 
+    // Apple's album motion artwork, looked up once per album. Its 3:4 rendition
+    // fills the same portrait frame the still cover does; null keeps the still.
+    val albumMotion by produceState<CanvasArtwork?>(null, albumWithSongs?.album?.title, appleStyle) {
+        value = null
+        val current = albumWithSongs ?: return@produceState
+        if (!appleStyle) return@produceState
+        val artist = current.artists.joinToString(", ") { it.name }
+        val clip = withContext(Dispatchers.IO) {
+            AppleAlbumCanvas.searchAlbum(current.album.title, artist)
+        } ?: return@produceState
+        value = clip.toPlayerClip().let { player ->
+            clip.portraitUrl?.let { player.copy(url = it, fallbackUrl = clip.url) } ?: player
+        }
+    }
+
     AppleCollectionContainer(thumbnailUrl = albumWithSongs?.album?.thumbnailUrl, enabled = appleStyle) {
     LazyColumn(
         contentPadding = appleCollectionContentPadding(LocalPlayerAwareWindowInsets.current.asPaddingValues(), appleStyle),
@@ -224,6 +244,7 @@ fun AlbumScreen(
                     AppleCollectionHeader(
                         title = albumWithSongs.album.title,
                         thumbnailUrl = albumWithSongs.album.thumbnailUrl,
+                        motion = albumMotion,
                         artistText = albumWithSongs.artists.joinToString(", ") { it.name },
                         metaText = metaText,
                         onPlay = {

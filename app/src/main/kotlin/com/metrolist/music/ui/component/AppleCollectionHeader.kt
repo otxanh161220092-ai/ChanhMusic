@@ -7,6 +7,10 @@ package com.metrolist.music.ui.component
 import androidx.compose.ui.graphics.lerp
 import com.metrolist.music.constants.CollectionDominantBackgroundKey
 import com.metrolist.music.utils.rememberPreference
+import androidx.compose.foundation.layout.Box
+import com.metrolist.music.bcmix.canvas.CanvasArtwork
+import com.metrolist.music.bcmix.canvas.CanvasArtworkPlayer
+import com.metrolist.music.bcmix.canvas.CanvasContentMode
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -312,16 +316,15 @@ fun AppleCollectionHeader(
     description: String? = null,
     onShuffle: (() -> Unit)? = null,
     onArtistClick: (() -> Unit)? = null,
+    /** Apple's motion artwork for the album, played in place of the still cover when found. */
+    motion: CanvasArtwork? = null,
 ) {
     val fill = Color.White.copy(alpha = 0.18f)
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        AsyncImage(
-            model = thumbnailUrl?.resize(900, 1200),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+        Box(
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -334,7 +337,22 @@ fun AppleCollectionHeader(
                             blendMode = BlendMode.DstIn,
                         )
                     },
-        )
+        ) {
+            AsyncImage(
+                model = thumbnailUrl?.resize(900, 1200),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize(),
+            )
+            motion?.let { clip ->
+                CanvasArtworkPlayer(
+                    canvas = clip,
+                    isPlaying = true,
+                    modifier = Modifier.matchParentSize(),
+                    contentMode = CanvasContentMode.CROP,
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
