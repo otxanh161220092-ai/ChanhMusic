@@ -7,7 +7,6 @@
 
 package com.metrolist.music.ui.player
 
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.Image
 import com.metrolist.music.ui.component.smoothCornerShape
 
@@ -410,7 +409,7 @@ private fun NewMiniPlayer(
                     painter = painterResource(R.drawable.liquid_mini_player_fill),
                     contentDescription = null,
                     contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.matchParentSize(),
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
             when (miniPlayerBackground) {
