@@ -26,6 +26,8 @@ data class AppleAlbumDetails(
     val year: String?,
     val lossless: Boolean,
     val description: String?,
+    /** [AppleAlbumCanvas.trackKey] of the artist's top songs that the album may carry. */
+    val popular: Set<String> = emptySet(),
 )
 
 /**
@@ -131,8 +133,29 @@ object AppleAlbumCanvas {
         val notes = attributes["editorialNotes"]?.jsonObject
         val description = (notes?.get("standard") ?: notes?.get("short"))?.jsonPrimitive?.contentOrNull
             ?.takeIf { it.isNotBlank() }
-        return AppleAlbumDetails(genre, year, lossless, description)
+        val artistId = best.second["relationships"]?.jsonObject?.get("artists")?.jsonObject
+            ?.get("data")?.jsonArray?.firstOrNull()?.jsonObject?.get("id")?.jsonPrimitive?.contentOrNull
+        val popular = artistId?.let { topSongKeys(it) }.orEmpty()
+        return AppleAlbumDetails(genre, year, lossless, description, popular)
     }
+
+    /**
+     * Titles of the artist's top songs on Apple. This is the closest public stand-in
+     * for Apple's popular-track marks on an album: those marks are not in the API.
+     */
+    private fun topSongKeys(artistId: String): Set<String> {
+        val bearer = token() ?: return emptySet()
+        val body = get("$AMP/$storefront/artists/$artistId/view/top-songs?limit=10", bearer) ?: return emptySet()
+        val rows = runCatching { json.parseToJsonElement(body).jsonObject["data"]?.jsonArray }
+            .getOrNull() ?: return emptySet()
+        return rows.mapNotNullTo(HashSet()) { row ->
+            row.jsonObject["attributes"]?.jsonObject?.get("name")?.jsonPrimitive?.contentOrNull?.let(::trackKey)
+        }
+    }
+
+    /** A track title as both services spell it: without a "(…)" or "[…]" tail, folded for case and accents. */
+    fun trackKey(title: String): String =
+        title.substringBefore(" (").substringBefore(" [").normalizeForMatch()
 
     private val LOSSLESS_TRAITS = setOf("lossless", "hi-res-lossless")
 

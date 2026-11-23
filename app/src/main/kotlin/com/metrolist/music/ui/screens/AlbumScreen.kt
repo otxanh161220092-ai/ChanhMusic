@@ -566,6 +566,7 @@ fun AlbumScreen(
                             index = index + 1,
                             song = song,
                             isActive = song.id == mediaMetadata?.id,
+                            popular = albumDetails?.popular?.contains(AppleAlbumCanvas.trackKey(song.song.title)) == true,
                             modifier = rowModifier,
                             trailingContent = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {

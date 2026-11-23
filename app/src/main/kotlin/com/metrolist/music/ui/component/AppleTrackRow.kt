@@ -6,6 +6,8 @@
 package com.metrolist.music.ui.component
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,6 +41,8 @@ fun AppleTrackRow(
     index: Int,
     song: Song,
     isActive: Boolean,
+    /** Apple's grey dot to the left of a popular track. */
+    popular: Boolean = false,
     modifier: Modifier = Modifier,
     trailingContent: @Composable () -> Unit,
 ) {
@@ -47,6 +51,15 @@ fun AppleTrackRow(
             modifier = Modifier.fillMaxWidth().height(60.dp).padding(horizontal = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            Box(modifier = Modifier.width(10.dp), contentAlignment = Alignment.Center) {
+                if (popular) {
+                    Box(
+                        modifier = Modifier
+                            .size(5.dp)
+                            .background(Color.White.copy(alpha = 0.5f), CircleShape),
+                    )
+                }
+            }
             Text(
                 text = index.toString(),
                 style = MaterialTheme.typography.titleMedium,
