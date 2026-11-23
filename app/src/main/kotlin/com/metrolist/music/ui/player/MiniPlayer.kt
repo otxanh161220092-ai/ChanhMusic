@@ -389,10 +389,10 @@ private fun NewMiniPlayer(
                     .then(if (isTabletLandscape) Modifier.width(500.dp).align(Alignment.Center) else Modifier.fillMaxWidth())
                     .height(54.dp)
                     .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                    .clip(SmoothCornerShape(27.dp))
+                    .clip(SmoothCornerShape(999.dp))
                     .glassSurface(
                         glassBackdrop,
-                        SmoothCornerShape(27.dp),
+                        SmoothCornerShape(999.dp),
                         backgroundColor,
                         if (lightGlass) Color.White.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.45f),
                         if (lightGlass) Color.White.copy(alpha = 0.45f) else Color.Transparent,
