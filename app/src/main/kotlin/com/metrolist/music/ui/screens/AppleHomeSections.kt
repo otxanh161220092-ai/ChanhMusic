@@ -78,7 +78,7 @@ fun LazyListScope.appleHomeSections(
             SectionTitle(title = "Recently Played", onClick = onOpenRecent, expanded = false)
         }
         item(key = "apple_recent_list") {
-            LazyRow(contentPadding = PaddingValues(horizontal = 4.dp)) {
+            LazyRow(contentPadding = PaddingValues(horizontal = 12.dp)) {
                 items(
                     items = recent,
                     key = { "apple_recent_${it.id}" },
@@ -86,8 +86,9 @@ fun LazyListScope.appleHomeSections(
                     Box(
                         modifier =
                             Modifier
-                                .width(150.dp)
-                                .padding(horizontal = 4.dp)
+                                // Apple's row: tiles near 40% of the width, almost touching.
+                                .fillParentMaxWidth(0.4f)
+                                .padding(horizontal = 2.dp)
                                 .clip(smoothCornerShape(18.dp)),
                     ) {
                         recentlyPlayedItem(item)

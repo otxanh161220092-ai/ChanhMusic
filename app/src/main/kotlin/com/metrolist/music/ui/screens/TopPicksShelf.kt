@@ -561,9 +561,7 @@ private const val CLIP_START_DELAY_MS = 400L
 private const val CLIP_RELEASE_DELAY_MS = 1_000L
 
 /** The cover size the backdrop is cut from: it ends up 48px wide, so a small copy is plenty. */
-// Small on purpose: the backdrop is stretched to the card's width, and a 64px
-// source upscaled that far comes out soft like BitChord's blurred band.
-private const val BACKDROP_SOURCE_PX = 64
+private const val BACKDROP_SOURCE_PX = 160
 
 // ---- Made for You stations ---------------------------------------------------
 
