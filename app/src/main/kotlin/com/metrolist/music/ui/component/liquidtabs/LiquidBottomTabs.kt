@@ -179,7 +179,7 @@ fun LiquidBottomTabs(
                             chromaticAberration = true,
                         )
                     },
-                    highlight = { Highlight.Default },
+                    highlight = { Highlight.Default.copy(alpha = 0f) },
                     shadow = { Shadow(alpha = 0.2f) },
                     innerShadow = { InnerShadow(radius = 10f.dp, alpha = 0.3f) },
                     onDrawSurface = {
@@ -222,7 +222,7 @@ fun LiquidBottomTabs(
                         },
                         highlight = {
                             val progress = dampedDragAnimation.pressProgress
-                            Highlight.Default.copy(alpha = progress)
+                            Highlight.Default.copy(alpha = 0f)
                         },
                         onDrawSurface = { drawRect(containerColor) }
                     )
@@ -248,13 +248,13 @@ fun LiquidBottomTabs(
                     backdrop = backdrop,
                     shape = { SmoothCornerShape(999.dp) },
                     effects = { blur(glassBlur.dp.toPx()) },
-                    highlight = { Highlight.Default },
+                    highlight = { Highlight.Default.copy(alpha = 0f) },
                     onDrawSurface = {
                         drawRect(Color.White.copy(alpha = 0.45f), blendMode = BlendMode.Overlay)
                         drawRect(Color.White.copy(alpha = 0.5f))
                     },
                 )
-                .height(64f.dp)
+                .height(56f.dp)
                 .fillMaxWidth(1f / tabsCount)
         )
 
@@ -281,7 +281,7 @@ fun LiquidBottomTabs(
                     },
                     highlight = {
                         val progress = dampedDragAnimation.pressProgress
-                        Highlight.Default.copy(alpha = progress)
+                        Highlight.Default.copy(alpha = 0f)
                     },
                     shadow = {
                         val progress = dampedDragAnimation.pressProgress
@@ -310,7 +310,7 @@ fun LiquidBottomTabs(
                         drawRect(Color.Black.copy(alpha = 0.03f * progress))
                     }
                 )
-                .height(64f.dp)
+                .height(56f.dp)
                 .fillMaxWidth(1f / tabsCount)
         )
     }
