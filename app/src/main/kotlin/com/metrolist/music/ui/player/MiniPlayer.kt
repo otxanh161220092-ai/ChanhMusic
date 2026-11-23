@@ -478,32 +478,41 @@ private fun NewMiniPlayer(
                     Spacer(modifier = Modifier.width(12.dp))
                 }
 
+                // Transport in the full player's style: bare white-on-surface glyphs, no
+                // container, with the favorite star on the left of play/pause.
+                val currentSong by playerConnection.currentSong.collectAsStateWithLifecycle(initialValue = null)
+                val isEpisodeNow = currentSong?.song?.isEpisode == true
+                val likedNow = if (isEpisodeNow) currentSong?.song?.inLibrary != null else currentSong?.song?.liked == true
                 val isPlayingNow by playerConnection.isPlaying.collectAsState()
-                IconButton(
-                    onClick = { if (isPlayingNow) playerConnection.player.pause() else playerConnection.player.play() },
-                    modifier = Modifier.size(40.dp),
-                    colors = IconButtonDefaults.iconButtonColors(containerColor = onSurfaceColor.copy(alpha = 0.18f)),
-                ) {
-                    Icon(
-                        painter = painterResource(if (isPlayingNow) R.drawable.pause else R.drawable.play),
-                        contentDescription = null,
-                        tint = onSurfaceColor,
-                        modifier = Modifier.size(28.dp),
-                    )
-                }
-                IconButton(
-                    onClick = { playerConnection.player.seekToNext() },
-                    enabled = canSkipNext,
-                    modifier = Modifier.size(40.dp),
-                    colors = IconButtonDefaults.iconButtonColors(containerColor = onSurfaceColor.copy(alpha = 0.18f)),
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.skip_next),
-                        contentDescription = null,
-                        tint = onSurfaceColor,
-                        modifier = Modifier.size(28.dp),
-                    )
-                }
+                Icon(
+                    imageVector = if (likedNow) BcStarFilled else BcStar,
+                    contentDescription = null,
+                    tint = onSurfaceColor,
+                    modifier =
+                        Modifier
+                            .size(26.dp)
+                            .clickable { playerConnection.service.toggleLike() },
+                )
+                Spacer(modifier = Modifier.width(14.dp))
+                Icon(
+                    painter = painterResource(if (isPlayingNow) R.drawable.bc_player_pause else R.drawable.bc_player_play),
+                    contentDescription = null,
+                    tint = onSurfaceColor,
+                    modifier =
+                        Modifier
+                            .size(30.dp)
+                            .clickable { if (isPlayingNow) playerConnection.player.pause() else playerConnection.player.play() },
+                )
+                Spacer(modifier = Modifier.width(14.dp))
+                Icon(
+                    painter = painterResource(R.drawable.bc_player_next),
+                    contentDescription = null,
+                    tint = if (canSkipNext) onSurfaceColor else onSurfaceColor.copy(alpha = 0.3f),
+                    modifier =
+                        Modifier
+                            .size(30.dp)
+                            .clickable(enabled = canSkipNext) { playerConnection.player.seekToNext() },
+                )
             }
         }
     }
