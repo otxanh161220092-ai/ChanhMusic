@@ -11,14 +11,12 @@ import androidx.compose.foundation.layout.Box
 import com.metrolist.music.bcmix.canvas.CanvasArtwork
 import com.metrolist.music.bcmix.canvas.CanvasArtworkPlayer
 import com.metrolist.music.bcmix.canvas.CanvasContentMode
-import androidx.compose.foundation.Canvas
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -60,7 +58,6 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
@@ -518,24 +515,17 @@ fun AppleTopBarActionButtons(
     }
 }
 
-/** The lossless mark: a small row of rounded bars and the word "Lossless". */
+/** The lossless mark, tinted like the text beside it: the logo, then the word "Lossless". */
 @Composable
 private fun LosslessMark() {
     val tint = Color.White.copy(alpha = 0.7f)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Canvas(modifier = Modifier.size(width = 12.dp, height = 10.dp)) {
-            val slot = size.width / 5f
-            val heights = listOf(0.45f, 0.9f, 1f, 0.7f, 0.35f)
-            heights.forEachIndexed { i, h ->
-                val barHeight = size.height * h
-                drawRoundRect(
-                    color = tint,
-                    topLeft = Offset(i * slot + slot * 0.2f, (size.height - barHeight) / 2f),
-                    size = Size(slot * 0.6f, barHeight),
-                    cornerRadius = CornerRadius(slot * 0.3f),
-                )
-            }
-        }
+        Image(
+            painter = painterResource(R.drawable.ic_lossless),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(tint),
+            modifier = Modifier.height(10.dp),
+        )
         Spacer(modifier = Modifier.width(4.dp))
         Text(text = "Lossless", style = MaterialTheme.typography.labelSmall, color = tint)
     }
