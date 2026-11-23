@@ -11,6 +11,14 @@ import androidx.compose.foundation.layout.Box
 import com.metrolist.music.bcmix.canvas.CanvasArtwork
 import com.metrolist.music.bcmix.canvas.CanvasArtworkPlayer
 import com.metrolist.music.bcmix.canvas.CanvasContentMode
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -318,6 +326,10 @@ fun AppleCollectionHeader(
     onArtistClick: (() -> Unit)? = null,
     /** Apple's motion artwork for the album, played in place of the still cover when found. */
     motion: CanvasArtwork? = null,
+    /** "Genre • Year", shown above the song count and duration line. */
+    detailsText: String? = null,
+    /** Shows the lossless mark next to [detailsText]. */
+    lossless: Boolean = false,
 ) {
     val fill = Color.White.copy(alpha = 0.18f)
     Column(
@@ -375,6 +387,27 @@ fun AppleCollectionHeader(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 24.dp).then(if (onArtistClick != null) Modifier.clickable(onClick = onArtistClick) else Modifier),
             )
+        }
+
+        if (!detailsText.isNullOrBlank() || lossless) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            ) {
+                if (!detailsText.isNullOrBlank()) {
+                    Text(
+                        text = detailsText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center,
+                    )
+                }
+                if (lossless) {
+                    if (!detailsText.isNullOrBlank()) Spacer(modifier = Modifier.width(8.dp))
+                    LosslessMark()
+                }
+            }
         }
 
         if (!metaText.isNullOrBlank()) {
@@ -482,5 +515,28 @@ fun AppleTopBarActionButtons(
                 modifier = Modifier.size(26.dp),
             )
         }
+    }
+}
+
+/** The lossless mark: a small row of rounded bars and the word "Lossless". */
+@Composable
+private fun LosslessMark() {
+    val tint = Color.White.copy(alpha = 0.7f)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Canvas(modifier = Modifier.size(width = 12.dp, height = 10.dp)) {
+            val slot = size.width / 5f
+            val heights = listOf(0.45f, 0.9f, 1f, 0.7f, 0.35f)
+            heights.forEachIndexed { i, h ->
+                val barHeight = size.height * h
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(i * slot + slot * 0.2f, (size.height - barHeight) / 2f),
+                    size = Size(slot * 0.6f, barHeight),
+                    cornerRadius = CornerRadius(slot * 0.3f),
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text = "Lossless", style = MaterialTheme.typography.labelSmall, color = tint)
     }
 }

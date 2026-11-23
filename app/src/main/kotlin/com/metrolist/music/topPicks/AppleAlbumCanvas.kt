@@ -18,6 +18,17 @@ import java.util.Locale
 enum class CanvasSource { SPOTIFY, APPLE, OTHER }
 
 /**
+ * What Apple Music says about an album, for the header: its genre and year, whether
+ * it has a lossless version, and its editorial description. Every field is optional.
+ */
+data class AppleAlbumDetails(
+    val genre: String?,
+    val year: String?,
+    val lossless: Boolean,
+    val description: String?,
+)
+
+/**
  * A short looping clip for a card. [url] is the square rendition; [portraitUrl] is
  * the 3:4 one the phone player runs full screen. Ported from BitChord's CanvasArtwork.
  */
@@ -91,6 +102,39 @@ object AppleAlbumCanvas {
         }
         return null
     }
+
+    /** Genre, year, lossless and description of [album] by [artist] from Apple, or null when no clean match. */
+    fun albumDetails(album: String, artist: String): AppleAlbumDetails? {
+        val bearer = token() ?: return null
+        val term = if (album.contains(artist, ignoreCase = true)) album else "$artist $album"
+        val url = "$AMP/$storefront/search?term=${URLEncoder.encode(term, "UTF-8")}" +
+            "&types=albums&limit=10&extend=editorialNotes"
+        val body = get(url, bearer) ?: return null
+        val root = runCatching { json.parseToJsonElement(body).jsonObject }.getOrNull() ?: return null
+        val hits = root["results"]?.jsonObject?.get("albums")?.jsonObject?.get("data")?.jsonArray ?: return null
+
+        val best = hits.mapNotNull { hit ->
+            val record = hit as? JsonObject ?: return@mapNotNull null
+            val score = score(record, album, artist, album) ?: return@mapNotNull null
+            score to record
+        }.maxByOrNull { it.first } ?: return null
+        if (best.first < MIN_SCORE) return null
+
+        val attributes = best.second["attributes"]?.jsonObject ?: return null
+        val genre = attributes["genreNames"]?.jsonArray
+            ?.mapNotNull { it.jsonPrimitive.contentOrNull }
+            ?.firstOrNull { !it.equals("Music", ignoreCase = true) }
+        val year = attributes["releaseDate"]?.jsonPrimitive?.contentOrNull?.take(4)?.takeIf { it.length == 4 }
+        val lossless = attributes["audioTraits"]?.jsonArray?.any {
+            it.jsonPrimitive.contentOrNull in LOSSLESS_TRAITS
+        } == true
+        val notes = attributes["editorialNotes"]?.jsonObject
+        val description = (notes?.get("standard") ?: notes?.get("short"))?.jsonPrimitive?.contentOrNull
+            ?.takeIf { it.isNotBlank() }
+        return AppleAlbumDetails(genre, year, lossless, description)
+    }
+
+    private val LOSSLESS_TRAITS = setOf("lossless", "hi-res-lossless")
 
     private fun score(record: JsonObject, title: String, artist: String, album: String): Int? {
         val attributes = record["attributes"]?.jsonObject ?: return null

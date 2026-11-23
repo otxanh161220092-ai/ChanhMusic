@@ -83,6 +83,7 @@ import coil3.compose.AsyncImage
 import com.metrolist.music.LocalDatabase
 import com.metrolist.music.bcmix.canvas.CanvasArtwork
 import com.metrolist.music.topPicks.AppleAlbumCanvas
+import com.metrolist.music.topPicks.AppleAlbumDetails
 import androidx.compose.runtime.produceState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -224,6 +225,15 @@ fun AlbumScreen(
         }
     }
 
+    // Genre, year, lossless and the editorial description from Apple, looked up once per album.
+    val albumDetails by produceState<AppleAlbumDetails?>(null, albumWithSongs?.album?.title, appleStyle) {
+        value = null
+        val current = albumWithSongs ?: return@produceState
+        if (!appleStyle) return@produceState
+        val artist = current.artists.joinToString(", ") { it.name }
+        value = withContext(Dispatchers.IO) { AppleAlbumCanvas.albumDetails(current.album.title, artist) }
+    }
+
     AppleCollectionContainer(thumbnailUrl = albumWithSongs?.album?.thumbnailUrl, enabled = appleStyle) {
     LazyColumn(
         contentPadding = appleCollectionContentPadding(LocalPlayerAwareWindowInsets.current.asPaddingValues(), appleStyle),
@@ -247,6 +257,12 @@ fun AlbumScreen(
                         motion = albumMotion,
                         artistText = albumWithSongs.artists.joinToString(", ") { it.name },
                         metaText = metaText,
+                        detailsText =
+                            listOfNotNull(albumDetails?.genre, albumDetails?.year ?: albumWithSongs.album.year?.toString())
+                                .joinToString(" • ")
+                                .ifBlank { null },
+                        lossless = albumDetails?.lossless == true,
+                        description = albumDetails?.description,
                         onPlay = {
                             if (!isListenTogetherGuest) {
                                 playerConnection.service.getAutomix(playlistId)
