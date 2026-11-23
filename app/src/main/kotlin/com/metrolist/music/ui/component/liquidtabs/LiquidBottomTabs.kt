@@ -85,7 +85,7 @@ fun LiquidBottomTabs(
         val tabWidth = with(density) {
             (constraints.maxWidth.toFloat() - 8f.dp.toPx()) / tabsCount
         }
-        val barHeight = 72f.dp
+        val barHeight = 60f.dp
 
         val offsetAnimation = remember { Animatable(0f) }
         val panelOffset by remember(density) {
@@ -190,7 +190,6 @@ fun LiquidBottomTabs(
                 .then(interactiveHighlight.modifier)
                 .height(barHeight)
                 .fillMaxWidth()
-                .highlightPill()
                 .padding(4f.dp),
             verticalAlignment = Alignment.CenterVertically,
             content = content
