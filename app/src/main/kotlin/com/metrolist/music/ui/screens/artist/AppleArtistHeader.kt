@@ -201,7 +201,7 @@ fun AppleArtistHeader(
                                     painter = painterResource(R.drawable.bc_player_play),
                                     contentDescription = null,
                                     tint = LocalAppleHeroColor.current ?: onPlayColor,
-                                    modifier = Modifier.size(28.dp),
+                                    modifier = Modifier.size(40.dp),
                                 )
                             }
                         }

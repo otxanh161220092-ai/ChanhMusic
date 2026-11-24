@@ -894,6 +894,7 @@ fun HomeScreen(
                             ),
                     isActive = it.id == mediaMetadata?.id,
                     isPlaying = isPlaying,
+                    fillMaxWidth = true,
                 )
             }
 

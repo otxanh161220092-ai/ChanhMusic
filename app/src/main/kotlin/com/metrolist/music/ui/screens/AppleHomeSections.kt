@@ -89,7 +89,7 @@ fun LazyListScope.appleHomeSections(
                                 // Apple's row: tiles near 40% of the width, almost touching.
                                 .fillParentMaxWidth(0.4f)
                                 .padding(horizontal = 2.dp)
-                                .clip(smoothCornerShape(18.dp)),
+                                .clip(smoothCornerShape(10.dp)),
                     ) {
                         recentlyPlayedItem(item)
                     }

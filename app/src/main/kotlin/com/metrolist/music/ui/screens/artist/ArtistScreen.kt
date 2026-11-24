@@ -760,7 +760,7 @@ fun ArtistScreen(
                                     libraryAlbums
                                 }
                             LazyRow(
-                                contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues(),
+                                contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).add(WindowInsets(left = 14.dp, right = 14.dp)).asPaddingValues(),
                             ) {
                                 items(
                                     items = filteredLibraryAlbums,
@@ -898,7 +898,7 @@ fun ArtistScreen(
                         } else {
                             item(key = "section_list_${section.title}") {
                                 LazyRow(
-                                    contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues(),
+                                    contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).add(WindowInsets(left = 14.dp, right = 14.dp)).asPaddingValues(),
                                 ) {
                                     items(
                                         items = distinctItemsBySection.getOrNull(index) ?: section.items,

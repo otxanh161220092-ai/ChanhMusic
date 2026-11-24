@@ -71,6 +71,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -242,6 +243,7 @@ fun AlbumScreen(
     // Apple-style footer: the artist's music videos and more albums by the same artist.
     val footerArtistId = albumWithSongs?.artists?.firstOrNull()?.id
     val footerArtistName = albumWithSongs?.artists?.firstOrNull()?.name
+    val footerVideoThumbHeight = ((LocalConfiguration.current.screenWidthDp * 0.82f).dp - 12.dp) / (16f / 9f)
     val artistPage by produceState<com.metrolist.innertube.pages.ArtistPage?>(null, footerArtistId, appleStyle) {
         value = null
         val artistId = footerArtistId ?: return@produceState
@@ -672,7 +674,7 @@ fun AlbumScreen(
                                 modifier = Modifier.padding(horizontal = 24.dp),
                             )
                             LazyRow(
-    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
     horizontalArrangement = Arrangement.spacedBy(0.dp),
 ) {
                                 items(items = videos, key = { "footer_video_${it.id}" }) { video ->
@@ -681,10 +683,9 @@ fun AlbumScreen(
                                         isActive = false,
                                         isPlaying = false,
                                         thumbnailRatio = 16f / 9f,
-                                        fillMaxWidth = true,
+                                        thumbnailHeight = footerVideoThumbHeight,
                                         modifier = Modifier
-                                            .fillParentMaxWidth(0.82f)
-                                            .clickable {
+                                                                                        .clickable {
                                                 run {
                                                     playerConnection.playQueue(
                                                         com.metrolist.music.playback.queues.YouTubeQueue(
@@ -711,7 +712,7 @@ fun AlbumScreen(
                                 modifier = Modifier.padding(horizontal = 24.dp),
                             )
                             LazyRow(
-    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
     horizontalArrangement = Arrangement.spacedBy(0.dp),
 ) {
                                 items(items = moreAlbums, key = { "footer_album_${it.id}" }) { other ->
@@ -738,7 +739,7 @@ fun AlbumScreen(
                 }
                 item(key = "other_versions_list") {
                     LazyRow(
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues(),
+                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).add(WindowInsets(left = 14.dp, right = 14.dp)).asPaddingValues(),
                     ) {
                         items(
                             items = otherVersions.distinctBy { it.id },

@@ -651,7 +651,7 @@ fun SongGridItem(
             thumbnailUrl = song.song.thumbnailUrl,
             isActive = isActive,
             isPlaying = isPlaying,
-            shape = smoothCornerShape(ThumbnailCornerRadius),
+            shape = smoothCornerShape(LocalGridThumbnailCornerRadius.current),
             modifier = Modifier.size(gridHeight)
         )
         if (!isActive) {

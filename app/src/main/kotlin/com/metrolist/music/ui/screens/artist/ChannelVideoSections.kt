@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -69,17 +70,19 @@ fun ChannelVideoCarousel(
     onPlay: (SongItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val tileWidth = (androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp * 0.82f).dp
     LazyRow(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
     ) {
         items(videos, key = { "channel_video_${it.id}" }) { video ->
-            Column(modifier = Modifier.width(160.dp).padding(end = 12.dp).clickable { onPlay(video) }) {
+            Column(modifier = Modifier.width(tileWidth).clickable { onPlay(video) }) {
                 AsyncImage(
                     model = video.thumbnail.resize(320, 320),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(160.dp).clip(smoothCornerShape(12.dp)),
+                    modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(smoothCornerShape(10.dp)),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
