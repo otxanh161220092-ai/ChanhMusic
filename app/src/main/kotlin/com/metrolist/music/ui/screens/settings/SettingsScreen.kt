@@ -240,3 +240,41 @@ private object SettingsTints {
     val Grey = Color(0xFFD6D6DE)       // about / updates: silver
     val Slate = Color(0xFFC9D3E6)      // privacy: slate
 }
+
+/** One rounded card holding rows, separated by a neutral grey divider, with an optional title above it. */
+@Composable
+private fun SettingsCard(
+    title: String?,
+    items: List<Material3SettingsItem>,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        title?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
+            )
+        }
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                items.forEachIndexed { index, item ->
+                    Material3SettingsItemRow(item = item)
+                    if (index < items.lastIndex) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 64.dp),
+                            color = Color.Gray.copy(alpha = 0.3f),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
