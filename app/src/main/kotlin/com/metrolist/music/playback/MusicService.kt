@@ -858,7 +858,7 @@ class MusicService :
                 CHANNEL_ID,
                 R.string.music_player,
             ).apply {
-                setSmallIcon(R.drawable.small_icon)
+                setSmallIcon(R.drawable.chanh_logo)
             }
 
         setMediaNotificationProvider(
@@ -1883,7 +1883,7 @@ class MusicService :
                 CommandButton
                     .Builder()
                     .setDisplayName(getString(if (player.shuffleModeEnabled) R.string.action_shuffle_off else R.string.action_shuffle_on))
-                    .setIconResId(if (player.shuffleModeEnabled) R.drawable.shuffle_on else R.drawable.shuffle)
+                    .setIconResId(R.drawable.ic_shuffle_bc)
                     .setSessionCommand(CommandToggleShuffle)
                     .build(),
                 CommandButton
@@ -1896,7 +1896,7 @@ class MusicService :
                                 R.string.action_like
                             },
                         ),
-                    ).setIconResId(if (isLiked == true) R.drawable.ic_heart else R.drawable.ic_heart_outline)
+                    ).setIconResId(if (isLiked == true) R.drawable.ic_star_filled_bc else R.drawable.ic_star_outline_bc)
                     .setSessionCommand(CommandToggleLike)
                     .setEnabled(currentSong.value != null)
                     .build(),
@@ -4581,7 +4581,7 @@ class MusicService :
             .Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.music_player))
             .setContentText("")
-            .setSmallIcon(R.drawable.small_icon)
+            .setSmallIcon(R.drawable.chanh_logo)
             .setContentIntent(pending)
             .setOngoing(true)
             .build()

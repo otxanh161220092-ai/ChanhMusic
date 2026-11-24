@@ -135,7 +135,7 @@ fun SettingsScreen(
         )
 
         Image(
-            painter = painterResource(R.drawable.app_logo),
+            painter = painterResource(R.drawable.chanh_logo),
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
