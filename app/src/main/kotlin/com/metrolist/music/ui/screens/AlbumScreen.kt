@@ -671,7 +671,10 @@ fun AlbumScreen(
                                 color = LocalContentColor.current,
                                 modifier = Modifier.padding(horizontal = 24.dp),
                             )
-                            LazyRow(contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)) {
+                            LazyRow(
+    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+) {
                                 items(items = videos, key = { "footer_video_${it.id}" }) { video ->
                                     YouTubeGridItem(
                                         item = video,
@@ -706,7 +709,10 @@ fun AlbumScreen(
                                 color = LocalContentColor.current,
                                 modifier = Modifier.padding(horizontal = 24.dp),
                             )
-                            LazyRow(contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)) {
+                            LazyRow(
+    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+) {
                                 items(items = moreAlbums, key = { "footer_album_${it.id}" }) { other ->
                                     YouTubeGridItem(
                                         item = other,
