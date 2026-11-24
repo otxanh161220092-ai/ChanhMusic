@@ -677,8 +677,9 @@ fun AlbumScreen(
                                         item = video,
                                         isActive = false,
                                         isPlaying = false,
+                                        thumbnailRatio = 16f / 9f,
                                         modifier = Modifier
-                                            .width(220.dp)
+                                            .width(240.dp)
                                             .clickable {
                                                 run {
                                                     playerConnection.playQueue(
