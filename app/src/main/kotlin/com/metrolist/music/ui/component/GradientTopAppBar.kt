@@ -35,20 +35,20 @@ fun GradientTopAppBar(
     colors: TopAppBarColors? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
+    val background = MaterialTheme.colorScheme.background
     val resolvedColors = colors ?: TopAppBarDefaults.topAppBarColors(
         containerColor = Color.Transparent,
         scrolledContainerColor = Color.Transparent,
     )
     val resolvedModifier = if (colors == null) {
-        // Fixed black fade, the same in light and dark themes, eased over more stops so it has no visible band.
+        // Theme background, so it is black in dark mode and white in light mode. Stronger and eased over more stops.
         modifier.background(
             Brush.verticalGradient(
-                0f to Color.Black.copy(alpha = 0.92f),
-                0.2f to Color.Black.copy(alpha = 0.82f),
-                0.4f to Color.Black.copy(alpha = 0.66f),
-                0.6f to Color.Black.copy(alpha = 0.46f),
-                0.8f to Color.Black.copy(alpha = 0.22f),
-                1f to Color.Black.copy(alpha = 0f),
+                0f to background,
+                0.45f to background.copy(alpha = 0.95f),
+                0.7f to background.copy(alpha = 0.7f),
+                0.85f to background.copy(alpha = 0.35f),
+                1f to background.copy(alpha = 0f),
             ),
         )
     } else {

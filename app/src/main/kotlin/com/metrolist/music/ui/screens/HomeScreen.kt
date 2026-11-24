@@ -2783,11 +2783,10 @@ fun HomeScreen(
                         .onSizeChanged { homeHeaderHeightPx = it.height }
                         .background(
                             Brush.verticalGradient(
-                                0f to Color.Black.copy(alpha = 0.92f),
-                                0.2f to Color.Black.copy(alpha = 0.82f),
-                                0.4f to Color.Black.copy(alpha = 0.66f),
-                                0.6f to Color.Black.copy(alpha = 0.46f),
-                                0.8f to Color.Black.copy(alpha = 0.22f),
+                                0f to MaterialTheme.colorScheme.background,
+                                0.45f to MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
+                                0.7f to MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                                0.85f to MaterialTheme.colorScheme.background.copy(alpha = 0.35f),
                                 1f to Color.Transparent,
                             ),
                         ).windowInsetsPadding(WindowInsets.statusBars)
