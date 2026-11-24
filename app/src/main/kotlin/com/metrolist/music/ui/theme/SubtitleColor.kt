@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.luminance
  * (whiter than grey); on a light background it is a dark grey (blacker than grey).
  */
 @Composable
-@ReadOnlyComposable
 fun subtitleGrayColor(): Color {
     // Inside Apple collections the secondary text follows the page's background color instead.
     if (com.metrolist.music.ui.component.LocalAppleCollectionTextColor.current != Color.Unspecified) {
