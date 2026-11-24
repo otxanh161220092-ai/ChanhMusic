@@ -1,6 +1,5 @@
 package com.metrolist.music.ui.component.liquidtabs
 
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import com.metrolist.music.R
@@ -287,8 +286,6 @@ fun LiquidBottomTabs(
                 .fillMaxWidth(1f / tabsCount)
         )
 
-        val combinedBackdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop)
-        val isPressed = dampedDragAnimation.pressProgress > 0.01f
         Box(
             Modifier
                 .padding(horizontal = 4f.dp)
@@ -299,14 +296,8 @@ fun LiquidBottomTabs(
                 }
                 .then(interactiveHighlight.gestureModifier)
                 .then(dampedDragAnimation.modifier)
-                .drawBehind {
-                    // Idle: the glass image sits under the selected label, so no artwork shows through.
-                    if (!isPressed) {
-                        drawImage(barFill, dstSize = IntSize(size.width.toInt(), size.height.toInt()))
-                    }
-                }
                 .drawBackdrop(
-                    backdrop = if (isPressed) combinedBackdrop else tabsBackdrop,
+                    backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
                     shape = { SmoothCornerShape(999.dp) },
                     effects = {
                         val progress = dampedDragAnimation.pressProgress
@@ -339,14 +330,12 @@ fun LiquidBottomTabs(
                         scaleY *= 1f - (velocity * 0.25f).fastCoerceIn(-0.2f, 0.2f)
                     },
                     onDrawSurface = {
-                        if (isPressed) {
-                            val progress = dampedDragAnimation.pressProgress
-                            drawRect(
-                                accentColor.copy(0.16f),
-                                alpha = 1f - progress
-                            )
-                            drawRect(Color.Black.copy(alpha = 0.03f * progress))
-                        }
+                        val progress = dampedDragAnimation.pressProgress
+                        drawRect(
+                            accentColor.copy(0.16f),
+                            alpha = 1f - progress
+                        )
+                        drawRect(Color.Black.copy(alpha = 0.03f * progress))
                     }
                 )
                 .height(56f.dp)
