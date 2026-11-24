@@ -485,7 +485,7 @@ fun GridItem(
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = appleSubtitleColor(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -548,7 +548,7 @@ fun SongListItem(
                               makeTimeString(song.song.duration * 1000L)
                           ),
                           style = MaterialTheme.typography.bodySmall,
-                          color = MaterialTheme.colorScheme.secondary,
+                          color = appleSubtitleColor(),
                           maxLines = 1,
                           overflow = TextOverflow.Ellipsis,
                       )
@@ -556,7 +556,7 @@ fun SongListItem(
                      Text(
                          text = subtitleOverride,
                          style = MaterialTheme.typography.bodySmall,
-                         color = MaterialTheme.colorScheme.secondary,
+                         color = appleSubtitleColor(),
                          maxLines = 1,
                          overflow = TextOverflow.Ellipsis,
                      )
@@ -638,7 +638,7 @@ fun SongGridItem(
                 makeTimeString(song.song.duration * 1000L)
             ),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = appleSubtitleColor(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -788,7 +788,7 @@ fun AlbumListItem(
                 album.album.year?.toString()
             ),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary,
+            color = appleSubtitleColor(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -863,7 +863,7 @@ fun AlbumGridItem(
          Text(
              text = album.artists.joinToArtistString(" ${stringResource(R.string.and)} ") { it.name },
              style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = appleSubtitleColor(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1047,7 +1047,7 @@ fun PlaylistGridItem(
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = appleSubtitleColor(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1116,7 +1116,7 @@ fun MediaMetadataListItem(
                         }
                     }
                 },
-                style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.secondary),
+                style = MaterialTheme.typography.bodyMedium.copy(color = appleSubtitleColor()),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -1319,7 +1319,7 @@ fun YouTubeGridItem(
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary,
+                color = appleSubtitleColor(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -1385,7 +1385,7 @@ fun LocalSongsGrid(
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = appleSubtitleColor(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.basicMarquee(
@@ -1427,7 +1427,7 @@ fun LocalArtistsGrid(
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = appleSubtitleColor(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.basicMarquee(
@@ -1469,7 +1469,7 @@ fun LocalAlbumsGrid(
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = appleSubtitleColor(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.basicMarquee(
@@ -1626,9 +1626,9 @@ fun LocalThumbnail(
                     )
                 } else {
                     Icon(
-                        painter = painterResource(R.drawable.play),
+                        painter = applePlayPainter(),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = applePlayTint()
                     )
                 }
             }
@@ -1651,9 +1651,9 @@ fun LocalThumbnail(
                         .background(Color.Black.copy(alpha = 0.6f))
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.play),
+                        painter = applePlayPainter(),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = applePlayTint()
                     )
                 }
             }
@@ -1676,9 +1676,9 @@ fun LocalThumbnail(
                         .background(Color.Black.copy(alpha = ActiveBoxAlpha))
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.play),
+                        painter = applePlayPainter(),
                         contentDescription = null,
-                        tint = Color.White
+                        tint = applePlayTint()
                     )
                 }
             }
@@ -1773,9 +1773,9 @@ fun BoxScope.OverlayPlayButton(
                 .background(Color.Black.copy(alpha = ActiveBoxAlpha))
         ) {
             Icon(
-                painter = painterResource(R.drawable.play),
+                painter = applePlayPainter(),
                 contentDescription = null,
-                tint = Color.White,
+                tint = applePlayTint(),
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -1837,9 +1837,9 @@ fun BoxScope.AlbumPlayButton(
                 .clickable(onClick = onClick)
         ) {
             Icon(
-                painter = painterResource(R.drawable.play),
+                painter = applePlayPainter(),
                 contentDescription = null,
-                tint = Color.White
+                tint = applePlayTint()
             )
         }
     }
@@ -2016,3 +2016,12 @@ object Icon {
         )
     }
 }
+
+/** Play glyph: BitChord's rounded triangle inside Apple collections, the stock glyph elsewhere. */
+@Composable
+fun applePlayPainter(): androidx.compose.ui.graphics.painter.Painter =
+    painterResource(if (LocalAppleHeroColor.current != null) R.drawable.bc_player_play else R.drawable.play)
+
+/** Tint for the play glyph: the page background color inside Apple collections, white elsewhere. */
+@Composable
+fun applePlayTint(): Color = LocalAppleHeroColor.current ?: Color.White

@@ -83,7 +83,7 @@ fun AppleTrackRow(
                 Text(
                     text = song.song.title,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White,
+                    color = LocalAppleCollectionTextColor.current.takeIf { it != Color.Unspecified } ?: Color.White,
                     fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

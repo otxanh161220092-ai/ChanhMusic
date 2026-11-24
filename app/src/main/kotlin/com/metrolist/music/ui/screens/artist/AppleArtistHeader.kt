@@ -314,14 +314,14 @@ private fun LatestCard(
         modifier = modifier,
     ) {
         Row(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 22.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AsyncImage(
                 model = thumbnail?.resize(200, 200),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(64.dp).clip(smoothCornerShape(10.dp)),
+                modifier = Modifier.size(72.dp).clip(smoothCornerShape(10.dp)),
             )
             Spacer(modifier = Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {

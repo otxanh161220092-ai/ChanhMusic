@@ -108,22 +108,27 @@ val LocalAppleCollectionTextColor = compositionLocalOf { Color.Unspecified }
 /** Shared "is the backdrop behind the collection light?" flag, written by the header's buttons and read by list rows. */
 val LocalAppleBackdropIsLight = compositionLocalOf<androidx.compose.runtime.MutableState<Boolean>?> { null }
 
-/** Dominant color of the current collection's artwork, provided by [AppleCollectionContainer]. */
-val LocalAppleDominantColor = compositionLocalOf<Color?> { null }
+/** Page background color of the current Apple collection (artwork hero color), provided by [AppleCollectionContainer]. */
+val LocalAppleHeroColor = compositionLocalOf<Color?> { null }
 
 /** Black over bright artwork, white over dark, so text and icons stay readable on the backdrop. */
 @Composable
-fun rememberAppleTextColor(thumbnailUrl: String?): Color = Color.White
+fun rememberAppleTextColor(thumbnailUrl: String?): Color {
+    val pageIsDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    if (pageIsDark) return Color.White
+    // Light pages: the background color pushed 80% toward black.
+    return lerp(rememberAppleHeroColor(thumbnailUrl), Color.Black, 0.8f)
+}
 
 /** Secondary text color: the theme's secondary outside Apple collections, a softened text color inside. */
 @Composable
 fun appleSubtitleColor(): Color {
     val text = LocalAppleCollectionTextColor.current
     if (text == Color.Unspecified) return MaterialTheme.colorScheme.secondary
-    // Small text takes the artwork's dominant color pushed 90% toward white on dark pages, black on light ones.
-    LocalAppleDominantColor.current?.let { dominant ->
+    // Small text takes the background color: pushed 90% toward white on dark pages, 80% toward black on light ones.
+    LocalAppleHeroColor.current?.let { hero ->
         val pageIsDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
-        return if (pageIsDark) lerp(dominant, Color.White, 0.9f) else lerp(dominant, Color.Black, 0.9f)
+        return if (pageIsDark) lerp(hero, Color.White, 0.9f) else lerp(hero, Color.Black, 0.8f)
     }
     // Black on light backdrop, warm ivory on dark, sampled from the real pixels behind the list.
     val backdropIsLight = LocalAppleBackdropIsLight.current?.value ?: (text == Color.Black)
@@ -157,20 +162,26 @@ fun appleCollectionContentPadding(base: PaddingValues, enabled: Boolean): Paddin
 }
 
 /** Page background for Apple style collections: artwork color fading into the page background. */
+/** Hero (page background) color for an Apple collection, derived from its artwork. */
 @Composable
-fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
+fun rememberAppleHeroColor(artworkUrl: String?): Color {
     val artColor by rememberArtworkColor(artworkUrl?.resize(100, 100))
     val (dominant) = rememberPreference(CollectionDominantBackgroundKey, defaultValue = false)
     val pageColor = MaterialTheme.colorScheme.background
     // Dark pages pull the cover colour toward black and light pages toward white, so it sits comfortably.
     val pageIsDark = pageColor.luminance() < 0.5f
-    val heroColor =
-        when {
-            artColor == null -> MaterialTheme.colorScheme.surfaceVariant
-            !dominant -> if (pageIsDark) lerp(artColor!!, Color.White, 0.2f) else artColor!!
-            pageIsDark -> lerp(artColor!!, Color.Black, 0.5f)
-            else -> lerp(artColor!!, Color.White, 0.35f)
-        }
+    return when {
+        artColor == null -> MaterialTheme.colorScheme.surfaceVariant
+        !dominant -> if (pageIsDark) lerp(artColor!!, Color.White, 0.2f) else artColor!!
+        pageIsDark -> lerp(artColor!!, Color.Black, 0.5f)
+        else -> lerp(artColor!!, Color.White, 0.35f)
+    }
+}
+
+@Composable
+fun rememberAppleCollectionBrush(artworkUrl: String?): Brush {
+    val heroColor = rememberAppleHeroColor(artworkUrl)
+    val pageColor = MaterialTheme.colorScheme.background
     return remember(heroColor, pageColor) {
         Brush.verticalGradient(
             0f to heroColor,
@@ -198,9 +209,9 @@ fun AppleCollectionContainer(
         if (enabled) {
             val textColor = rememberAppleTextColor(thumbnailUrl)
             val backdropIsLight = remember { mutableStateOf(false) }
-            val artColor by rememberArtworkColor(thumbnailUrl?.resize(100, 100))
+            val heroColor = rememberAppleHeroColor(thumbnailUrl)
             CompositionLocalProvider(
-                LocalAppleDominantColor provides artColor,
+                LocalAppleHeroColor provides heroColor,
                 LocalAppleCollectionTextColor provides textColor,
                 LocalContentColor provides textColor,
                 LocalAppleBackdropIsLight provides backdropIsLight,
