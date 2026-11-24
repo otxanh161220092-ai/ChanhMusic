@@ -412,7 +412,6 @@ private fun LiquidNavigationBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 36.dp)
-            .paint(painterResource(R.drawable.bottom_bar_glass), contentScale = ContentScale.FillBounds)
             .pointerInput(tabsCount, navigationItems, selectedIndex, onItemClick) {
                 detectTapGestures { offset ->
                     val index = (offset.x / (size.width.toFloat() / tabsCount))

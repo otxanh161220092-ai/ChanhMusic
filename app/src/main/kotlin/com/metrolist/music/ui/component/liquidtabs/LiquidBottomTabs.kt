@@ -76,7 +76,7 @@ fun LiquidBottomTabs(
 ) {
     val isLightTheme = !isSystemInDarkTheme()
     val accentColor = Color(0xFF0A84FF)
-    val barFill = ImageBitmap.imageResource(R.drawable.liquid_bottom_bar_fill)
+    val barFill = ImageBitmap.imageResource(R.drawable.bottom_bar_glass)
     val containerColor = Color.Transparent
 
     val tabsBackdrop = rememberLayerBackdrop()
