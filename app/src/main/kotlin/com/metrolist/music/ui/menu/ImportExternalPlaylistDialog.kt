@@ -244,7 +244,7 @@ fun ImportExternalPlaylistDialog(
                     horizontalArrangement = Arrangement.End,
                 ) {
                     if (finished != null) {
-                        TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.done)) }
+                        TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.import_link_done)) }
                     } else {
                         TextButton(onClick = onDismiss, enabled = !working) {
                             Text(text = stringResource(R.string.cancel))
