@@ -62,6 +62,8 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
+import kotlinx.coroutines.Dispatchers
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -247,6 +249,15 @@ fun ArtistScreen(
             allSectionItems.filterIsInstance<SongItem>().all { it.musicVideoType == "MUSIC_VIDEO_TYPE_UGC" }
     val channelLatestVideo = if (isChannel) allSectionItems.filterIsInstance<SongItem>().firstOrNull() else null
     val channelHasPlaylists = isChannel && artistPage?.sections?.any { it.items.firstOrNull() is PlaylistItem } == true
+    val latestAlbumDetails by produceState<com.metrolist.music.topPicks.AppleAlbumDetails?>(null, latestAlbum?.id, appleStyle, isChannel) {
+        value = null
+        val album = latestAlbum ?: return@produceState
+        if (!appleStyle || isChannel) return@produceState
+        val artist = album.artists?.firstOrNull()?.name ?: displayArtistName.orEmpty()
+        value = withContext(Dispatchers.IO) {
+            com.metrolist.music.topPicks.AppleAlbumCanvas.albumDetails(album.title, artist)
+        }
+    }
     val playEndpoint = artistPage?.artist?.let { it.shuffleEndpoint ?: it.radioEndpoint }
 
     AppleCollectionContainer(thumbnailUrl = artistThumbnail, enabled = appleStyle) {
@@ -363,6 +374,7 @@ fun ArtistScreen(
                                 { playerConnection.playQueue(YouTubeQueue(endpoint)) }
                             },
                         onToggleSubscribe = if (showLocal) null else ({ viewModel.toggleChannelSubscription() }),
+                        latestAlbumDetails = latestAlbumDetails,
                         latestAlbumSaved = latestAlbumInLibrary?.album?.bookmarkedAt != null,
                         onToggleLatestAlbumSave =
                             latestAlbum?.takeIf { !isChannel && !showLocal && !isGuest }?.let { album ->

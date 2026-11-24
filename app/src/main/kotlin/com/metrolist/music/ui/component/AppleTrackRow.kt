@@ -71,7 +71,7 @@ fun AppleTrackRow(
             Text(
                 text = index.toString(),
                 style = MaterialTheme.typography.titleMedium,
-                color = Color.White.copy(alpha = 0.6f),
+                color = appleSubtitleColor(),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(32.dp),
             )

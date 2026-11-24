@@ -28,6 +28,10 @@ data class AppleAlbumDetails(
     val description: String?,
     /** [AppleAlbumCanvas.trackKey] of the artist's top songs that the album may carry. */
     val popular: Set<String> = emptySet(),
+    /** Full release date as dd/MM/yyyy, when Apple has one. */
+    val releaseDate: String? = null,
+    val trackCount: Int? = null,
+    val explicit: Boolean = false,
 )
 
 /**
@@ -139,7 +143,12 @@ object AppleAlbumCanvas {
         Timber.tag(TAG).d("popular: artistId=%s for %s", artistId, artist)
         val popular = artistId?.let { topSongKeys(it) }.orEmpty()
         Timber.tag(TAG).d("popular: %d top songs matched for %s", popular.size, album)
-        return AppleAlbumDetails(genre, year, lossless, description, popular)
+        val releaseDate = attributes["releaseDate"]?.jsonPrimitive?.contentOrNull
+            ?.let { Regex("""(\d{4})-(\d{2})-(\d{2})""").find(it) }
+            ?.let { "${it.groupValues[3]}/${it.groupValues[2]}/${it.groupValues[1]}" }
+        val trackCount = attributes["trackCount"]?.jsonPrimitive?.intOrNull
+        val explicit = attributes["contentRating"]?.jsonPrimitive?.contentOrNull == "explicit"
+        return AppleAlbumDetails(genre, year, lossless, description, popular, releaseDate, trackCount, explicit)
     }
 
     /** The Apple artist id whose name matches [name], found by search when the album does not carry it. */

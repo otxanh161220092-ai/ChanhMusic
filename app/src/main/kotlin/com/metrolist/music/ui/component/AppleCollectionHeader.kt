@@ -108,6 +108,9 @@ val LocalAppleCollectionTextColor = compositionLocalOf { Color.Unspecified }
 /** Shared "is the backdrop behind the collection light?" flag, written by the header's buttons and read by list rows. */
 val LocalAppleBackdropIsLight = compositionLocalOf<androidx.compose.runtime.MutableState<Boolean>?> { null }
 
+/** Dominant color of the current collection's artwork, provided by [AppleCollectionContainer]. */
+val LocalAppleDominantColor = compositionLocalOf<Color?> { null }
+
 /** Black over bright artwork, white over dark, so text and icons stay readable on the backdrop. */
 @Composable
 fun rememberAppleTextColor(thumbnailUrl: String?): Color = Color.White
@@ -117,6 +120,11 @@ fun rememberAppleTextColor(thumbnailUrl: String?): Color = Color.White
 fun appleSubtitleColor(): Color {
     val text = LocalAppleCollectionTextColor.current
     if (text == Color.Unspecified) return MaterialTheme.colorScheme.secondary
+    // Small text takes the artwork's dominant color pushed 90% toward white on dark pages, black on light ones.
+    LocalAppleDominantColor.current?.let { dominant ->
+        val pageIsDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+        return if (pageIsDark) lerp(dominant, Color.White, 0.9f) else lerp(dominant, Color.Black, 0.9f)
+    }
     // Black on light backdrop, warm ivory on dark, sampled from the real pixels behind the list.
     val backdropIsLight = LocalAppleBackdropIsLight.current?.value ?: (text == Color.Black)
     return if (backdropIsLight) Color.Black else Color(0xFFF7F0E1)
@@ -190,7 +198,9 @@ fun AppleCollectionContainer(
         if (enabled) {
             val textColor = rememberAppleTextColor(thumbnailUrl)
             val backdropIsLight = remember { mutableStateOf(false) }
+            val artColor by rememberArtworkColor(thumbnailUrl?.resize(100, 100))
             CompositionLocalProvider(
+                LocalAppleDominantColor provides artColor,
                 LocalAppleCollectionTextColor provides textColor,
                 LocalContentColor provides textColor,
                 LocalAppleBackdropIsLight provides backdropIsLight,
@@ -380,7 +390,7 @@ fun AppleCollectionHeader(
             Text(
                 text = artistText,
                 style = MaterialTheme.typography.titleMedium,
-                color = Color.White.copy(alpha = 0.85f),
+                color = appleSubtitleColor(),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 24.dp).then(if (onArtistClick != null) Modifier.clickable(onClick = onArtistClick) else Modifier),
             )
@@ -396,7 +406,7 @@ fun AppleCollectionHeader(
                     Text(
                         text = detailsText,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.7f),
+                        color = appleSubtitleColor(),
                         textAlign = TextAlign.Center,
                     )
                 }
@@ -411,7 +421,7 @@ fun AppleCollectionHeader(
             Text(
                 text = metaText,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.7f),
+                color = appleSubtitleColor(),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )

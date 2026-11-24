@@ -70,6 +70,7 @@ import com.metrolist.innertube.models.SongItem
 import com.metrolist.innertube.pages.ArtistSection
 import com.metrolist.music.R
 import com.metrolist.music.ui.component.LocalAppleCollectionTextColor
+import com.metrolist.music.ui.component.appleSubtitleColor
 import com.metrolist.music.ui.utils.resize
 
 /**
@@ -90,6 +91,7 @@ fun AppleArtistHeader(
     onToggleSubscribe: (() -> Unit)?,
     onLatestAlbumClick: (AlbumItem) -> Unit,
     onLatestVideoClick: (SongItem) -> Unit,
+    latestAlbumDetails: com.metrolist.music.topPicks.AppleAlbumDetails? = null,
     latestAlbumSaved: Boolean = false,
     onToggleLatestAlbumSave: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
@@ -225,9 +227,10 @@ fun AppleArtistHeader(
         val cardModifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp)
         if (latestAlbum != null) {
             LatestCard(
-                label = latestAlbum.year?.toString(),
+                label = latestAlbumDetails?.releaseDate ?: latestAlbum.year?.toString(),
                 title = latestAlbum.title,
-                subtitle = "Recent Album",
+                explicit = latestAlbum.explicit || latestAlbumDetails?.explicit == true,
+                subtitle = latestAlbumDetails?.trackCount?.let { "$it songs" },
                 thumbnail = latestAlbum.thumbnail,
                 onColor = onColor,
                 saved = latestAlbumSaved,
@@ -239,6 +242,7 @@ fun AppleArtistHeader(
             LatestCard(
                 label = "Video mới nhất",
                 title = latestVideo.title,
+                explicit = latestVideo.explicit,
                 subtitle = null,
                 thumbnail = latestVideo.thumbnail,
                 onColor = onColor,
@@ -293,6 +297,7 @@ private fun RoundControl(
 private fun LatestCard(
     label: String?,
     title: String,
+    explicit: Boolean,
     subtitle: String?,
     thumbnail: String?,
     onColor: Color,
@@ -324,22 +329,34 @@ private fun LatestCard(
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodySmall,
-                        color = onColor.copy(alpha = 0.6f),
+                        color = appleSubtitleColor(),
                     )
                 }
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = onColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = onColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (explicit) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Icon(
+                            painter = painterResource(R.drawable.ic_explicit),
+                            contentDescription = null,
+                            tint = onColor,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                }
                 subtitle?.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = onColor.copy(alpha = 0.6f),
+                        color = appleSubtitleColor(),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
