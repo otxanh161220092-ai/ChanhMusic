@@ -28,6 +28,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 import timber.log.Timber
 import java.net.HttpURLConnection
+import java.time.LocalDateTime
 import java.net.URL
 import java.net.URLEncoder
 import java.util.concurrent.atomic.AtomicInteger
@@ -115,7 +116,11 @@ object ExternalPlaylistImport {
         }
         if (songIds.isEmpty()) return null
 
-        val entity = PlaylistEntity(name = source.name.ifBlank { "Imported playlist" })
+        val entity = PlaylistEntity(
+            name = source.name.ifBlank { "Imported playlist" },
+            bookmarkedAt = LocalDateTime.now(),
+            isEditable = true,
+        )
         withContext(Dispatchers.IO) {
             database.query { insert(entity) }
             val playlist = database.playlist(entity.id).firstOrNull()
