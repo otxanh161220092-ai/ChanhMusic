@@ -37,6 +37,8 @@ import com.metrolist.music.BuildConfig
 import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
 import com.metrolist.music.ui.component.IconButton
+import com.metrolist.music.ui.component.SettingsIconTile
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import com.metrolist.music.ui.component.Material3SettingsItemRow
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.CardDefaults
@@ -89,7 +91,7 @@ fun SettingsScreen(
         tint: Color,
         path: String,
     ) = Material3SettingsItem(
-        leadingContent = { SettingsIconTile(icon = icon, tint = tint) },
+        leadingContent = { SettingsIconTile(icon = rememberVectorPainter(icon), tint = tint) },
         title = { Text(label) },
         onClick = { navController.navigate(path) },
     )
@@ -99,7 +101,7 @@ fun SettingsScreen(
         val downloadUrl = releaseInfo?.let { Updater.getDownloadUrlForCurrentVariant(it) }
         if (downloadUrl != null) {
             Material3SettingsItem(
-                leadingContent = { SettingsIconTile(icon = SfIcons.Upgrade, tint = SettingsTints.Grey) },
+                leadingContent = { SettingsIconTile(icon = rememberVectorPainter(SfIcons.Upgrade), tint = SettingsTints.Grey) },
                 title = { Text(text = stringResource(R.string.new_version_available)) },
                 description = {
                     Text(
@@ -133,12 +135,12 @@ fun SettingsScreen(
         )
 
         Image(
-            painter = painterResource(R.drawable.bitchord_logo),
+            painter = painterResource(R.drawable.app_logo),
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 16.dp, bottom = 8.dp)
-                .height(44.dp),
+                .size(72.dp),
         )
 
         SettingsCard(
@@ -153,9 +155,9 @@ fun SettingsScreen(
         SettingsCard(
             title = stringResource(R.string.settings_section_player_content),
             items = listOf(
-                route(stringResource(R.string.player_and_audio), SfIcons.GraphicEq, SettingsTints.Red, "settings/player"),
-                route(stringResource(R.string.content), SfIcons.Language, SettingsTints.Green, "settings/content"),
-                route(stringResource(R.string.ai_lyrics_translation), SfIcons.Translate, SettingsTints.Orange, "settings/ai"),
+                route(stringResource(R.string.player_and_audio), SfIcons.GraphicEq, SettingsTints.Pink, "settings/player"),
+                route(stringResource(R.string.content), SfIcons.Language, SettingsTints.Mint, "settings/content"),
+                route(stringResource(R.string.ai_lyrics_translation), SfIcons.Translate, SettingsTints.Peach, "settings/ai"),
             )
         )
 
@@ -165,7 +167,7 @@ fun SettingsScreen(
             SettingsCard(
                 title = "Android Auto",
                 items = listOf(
-                    route(stringResource(R.string.android_auto), SfIcons.Phone, SettingsTints.Blue, "settings/android_auto")
+                    route(stringResource(R.string.android_auto), SfIcons.Phone, SettingsTints.Sky, "settings/android_auto")
                 )
             )
 
@@ -175,7 +177,7 @@ fun SettingsScreen(
         SettingsCard(
             title = stringResource(R.string.settings_section_privacy),
             items = listOf(
-                route(stringResource(R.string.privacy), SfIcons.Lock, SettingsTints.Grey, "settings/privacy")
+                route(stringResource(R.string.privacy), SfIcons.Lock, SettingsTints.Slate, "settings/privacy")
             )
         )
 
@@ -185,7 +187,7 @@ fun SettingsScreen(
             title = stringResource(R.string.settings_section_storage),
             items = listOf(
                 route(stringResource(R.string.storage), SfIcons.Storage, SettingsTints.Teal, "settings/storage"),
-                route(stringResource(R.string.backup_restore), SfIcons.CloudUpload, SettingsTints.Indigo, "settings/backup_restore"),
+                route(stringResource(R.string.backup_restore), SfIcons.CloudUpload, SettingsTints.Periwinkle, "settings/backup_restore"),
             )
         )
 
@@ -228,73 +230,13 @@ fun SettingsScreen(
 }
 
 private object SettingsTints {
-    val Purple = Color(0xFF6E5BFF)
-    val Red = Color(0xFFFF3B5C)
-    val Green = Color(0xFF2DBE6C)
-    val Orange = Color(0xFFFF9F0A)
-    val Blue = Color(0xFF0A84FF)
-    val Teal = Color(0xFF30B0C7)
-    val Indigo = Color(0xFF5E5CE6)
-    val Grey = Color(0xFF636366)
-}
-
-/** A rounded icon tile: [tint] at the top, fading to black by half the tile's height. */
-@Composable
-private fun SettingsIconTile(icon: ImageVector, tint: Color) {
-    Box(
-        modifier = Modifier
-            .size(36.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(
-                Brush.verticalGradient(
-                    colorStops = arrayOf(0f to tint, 0.5f to Color.Black, 1f to Color.Black),
-                )
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(20.dp),
-        )
-    }
-}
-
-/** One rounded card holding rows, separated by a neutral grey divider, with an optional title above it. */
-@Composable
-private fun SettingsCard(
-    title: String?,
-    items: List<Material3SettingsItem>,
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        title?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
-            )
-        }
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                items.forEachIndexed { index, item ->
-                    Material3SettingsItemRow(item = item)
-                    if (index < items.lastIndex) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(start = 64.dp),
-                            color = Color.Gray.copy(alpha = 0.3f),
-                        )
-                    }
-                }
-            }
-        }
-    }
+    val Purple = Color(0xFFC9B8FF)     // appearance: lavender
+    val Pink = Color(0xFFFFB8C8)       // playback: rose
+    val Mint = Color(0xFFB8F0D2)       // content: mint
+    val Peach = Color(0xFFFFD9A8)      // translation: peach
+    val Sky = Color(0xFFAEDCFF)        // Android Auto: sky
+    val Teal = Color(0xFFA8ECE6)       // storage: aqua
+    val Periwinkle = Color(0xFFC8CCFF) // backup: periwinkle
+    val Grey = Color(0xFFD6D6DE)       // about / updates: silver
+    val Slate = Color(0xFFC9D3E6)      // privacy: slate
 }

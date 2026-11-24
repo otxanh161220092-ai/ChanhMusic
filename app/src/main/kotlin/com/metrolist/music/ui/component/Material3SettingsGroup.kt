@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.component
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -115,51 +117,12 @@ internal fun Material3SettingsItemRow(
             item.leadingContent.invoke()
             Spacer(modifier = Modifier.width(16.dp))
         } else if (item.icon != null) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(smoothCornerShape(12.dp))
-                    .background(
-                        MaterialTheme.colorScheme.primary.copy(
-                            alpha = if (item.isHighlighted) 0.15f else 0.1f
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (item.showBadge) {
-                    BadgedBox(
-                        badge = {
-                            Badge(
-                                containerColor = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    ) {
-                        Icon(
-                            painter = item.icon,
-                            contentDescription = null,
-                            tint = if (!item.enabled)
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            else if (item.isHighlighted)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                } else {
-                    Icon(
-                        painter = item.icon,
-                        contentDescription = null,
-                        tint = if (!item.enabled)
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        else if (item.isHighlighted)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
+            SettingsIconTile(
+                icon = item.icon,
+                tint = item.tint ?: SettingsTileDefaultTint,
+                showBadge = item.showBadge,
+                enabled = item.enabled,
+            )
 
             Spacer(modifier = Modifier.width(16.dp))
         }
@@ -216,5 +179,52 @@ data class Material3SettingsItem(
     val showBadge: Boolean = false,
     val isHighlighted: Boolean = false,
     val enabled: Boolean = true,
-    val onClick: (() -> Unit)? = null
+    val onClick: (() -> Unit)? = null,
+    /** Pastel base colour of the icon tile; the tile fades to half this colour. */
+    val tint: Color? = null,
 )
+
+
+/** Default pastel for icon tiles that do not name their own colour. */
+internal val SettingsTileDefaultTint = Color(0xFFB8C4D9)
+
+/** Dark glyph on a pastel tile, like Apple's pastel settings icons. */
+private val SettingsGlyph = Color(0xFF1C1C1E)
+
+private fun Color.halfBrightness(): Color = Color(red * 0.5f, green * 0.5f, blue * 0.5f, alpha)
+
+/** Rounded icon tile: [tint] at the top, fading to half its brightness at the bottom. */
+@Composable
+internal fun SettingsIconTile(
+    icon: Painter,
+    tint: Color,
+    showBadge: Boolean = false,
+    enabled: Boolean = true,
+) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(smoothCornerShape(12.dp))
+            .background(Brush.verticalGradient(listOf(tint, tint.halfBrightness()))),
+        contentAlignment = Alignment.Center
+    ) {
+        SettingsGlyphIcon(icon, showBadge, enabled)
+    }
+}
+
+@Composable
+private fun SettingsGlyphIcon(icon: Painter, showBadge: Boolean, enabled: Boolean) {
+    val glyph: @Composable () -> Unit = {
+        Icon(
+            painter = icon,
+            contentDescription = null,
+            tint = if (enabled) SettingsGlyph else SettingsGlyph.copy(alpha = 0.38f),
+            modifier = Modifier.size(24.dp)
+        )
+    }
+    if (showBadge) {
+        BadgedBox(badge = { Badge(containerColor = MaterialTheme.colorScheme.error) }) { glyph() }
+    } else {
+        glyph()
+    }
+}
