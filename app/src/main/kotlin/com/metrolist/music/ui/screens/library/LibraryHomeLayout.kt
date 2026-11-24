@@ -10,11 +10,13 @@ import com.metrolist.music.ui.component.smoothCornerShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import com.metrolist.innertube.models.PlaylistItem
 import com.metrolist.innertube.models.WatchEndpoint
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.menu.AlbumMenu
+import com.metrolist.music.ui.menu.ImportExternalPlaylistDialog
 import com.metrolist.music.ui.menu.ArtistMenu
 import com.metrolist.music.ui.menu.PlaylistMenu
 import com.metrolist.music.ui.menu.YouTubePlaylistMenu
@@ -174,6 +176,14 @@ fun LibraryHomeLayout(
         }.sortedByDescending { it.addedAt ?: LocalDateTime.MIN }
     }
 
+    var showImportLinkDialog by remember { mutableStateOf(false) }
+    if (showImportLinkDialog) {
+        ImportExternalPlaylistDialog(
+            onDismiss = { showImportLinkDialog = false },
+            onImported = { playlistId -> navController.navigate("local_playlist/$playlistId") },
+        )
+    }
+
     val density = LocalDensity.current
     var headerHeightPx by remember { mutableIntStateOf(0) }
     val basePadding = tabScreenContentPadding()
@@ -213,6 +223,15 @@ fun LibraryHomeLayout(
 
         item(key = "categories") {
             Spacer(Modifier.height(24.dp))
+            LibraryCategoryRow(
+                label = R.string.import_from_link,
+                icon = R.drawable.download,
+                onClick = { showImportLinkDialog = true },
+            )
+            HorizontalDivider(
+                modifier = Modifier.padding(start = 56.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
             libraryCategories.forEachIndexed { index, category ->
                 LibraryCategoryRow(
                     label = category.label,
