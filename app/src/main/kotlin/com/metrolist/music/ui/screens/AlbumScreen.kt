@@ -673,11 +673,11 @@ fun AlbumScreen(
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = LocalContentColor.current,
-                                modifier = Modifier.padding(horizontal = 24.dp),
+                                modifier = Modifier.padding(horizontal = 20.dp),
                             )
                             LazyRow(
-    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
-    horizontalArrangement = Arrangement.spacedBy(0.dp),
+    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
 ) {
                                 items(items = videos, key = { "footer_video_${it.id}" }) { video ->
                                     Column(
@@ -730,10 +730,10 @@ fun AlbumScreen(
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = LocalContentColor.current,
-                                modifier = Modifier.padding(horizontal = 24.dp),
+                                modifier = Modifier.padding(horizontal = 20.dp),
                             )
                             LazyRow(
-    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
+    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
     horizontalArrangement = Arrangement.spacedBy(0.dp),
 ) {
                                 items(items = moreAlbums, key = { "footer_album_${it.id}" }) { other ->
@@ -751,7 +751,7 @@ fun AlbumScreen(
                     }
                 }
             }
-            if (otherVersions.isNotEmpty()) {
+            if (otherVersions.any { v -> !appleStyle || v.artists?.any { a -> a.id == footerArtistId } == true }) {
                 item(key = "other_versions_title") {
                     NavigationTitle(
                         title = stringResource(R.string.other_versions),
@@ -760,10 +760,10 @@ fun AlbumScreen(
                 }
                 item(key = "other_versions_list") {
                     LazyRow(
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues(),
+                        contentPadding = PaddingValues(horizontal = 14.dp),
                     ) {
                         items(
-                            items = otherVersions.distinctBy { it.id },
+                            items = otherVersions.filter { v -> !appleStyle || v.artists?.any { a -> a.id == footerArtistId } == true }.distinctBy { it.id },
                             key = { "album_other_${it.id}" },
                         ) { item ->
                             YouTubeGridItem(
