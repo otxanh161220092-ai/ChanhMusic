@@ -32,7 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -194,7 +194,7 @@ fun AppNavigationBar(
             if (floating) {
                 modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .shadow(12.dp, CircleShape, clip = false)
+                    .outerShadow(blur = 12.dp)
                     .clip(CircleShape)
             } else {
                 modifier
@@ -310,7 +310,7 @@ private fun AppleStyleNavigationBar(
                 Modifier
                     .fillMaxWidth()
                     .height(80.dp)
-                    .shadow(8.dp, CircleShape, clip = false)
+                    .outerShadow(blur = 8.dp)
                     .clip(CircleShape)
                     .glassSurface(glassBackdrop, CircleShape, pillColor, Color.White.copy(alpha = 0.2f)),
             verticalAlignment = Alignment.CenterVertically,
