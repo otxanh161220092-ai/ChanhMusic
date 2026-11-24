@@ -5,6 +5,10 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.models.toMediaMetadata
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.clickable
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -232,6 +236,16 @@ fun AlbumScreen(
         if (!appleStyle) return@produceState
         val artist = current.artists.joinToString(", ") { it.name }
         value = withContext(Dispatchers.IO) { AppleAlbumCanvas.albumDetails(current.album.title, artist) }
+    }
+
+    // Apple-style footer: the artist's music videos and more albums by the same artist.
+    val footerArtistId = albumWithSongs?.artists?.firstOrNull()?.id
+    val footerArtistName = albumWithSongs?.artists?.firstOrNull()?.name
+    val artistPage by produceState<com.metrolist.innertube.pages.ArtistPage?>(null, footerArtistId, appleStyle) {
+        value = null
+        val artistId = footerArtistId ?: return@produceState
+        if (!appleStyle) return@produceState
+        value = withContext(Dispatchers.IO) { com.metrolist.innertube.YouTube.artist(artistId).getOrNull() }
     }
 
     AppleCollectionContainer(thumbnailUrl = albumWithSongs?.album?.thumbnailUrl, enabled = appleStyle) {
@@ -595,6 +609,75 @@ fun AlbumScreen(
                 }
             }
 
+            if (appleStyle && albumWithSongs != null) {
+                val pageItems = artistPage?.sections?.flatMap { it.items }.orEmpty()
+                val videos = pageItems.filterIsInstance<com.metrolist.innertube.models.SongItem>()
+                    .filter { it.musicVideoType != null }
+                    .distinctBy { it.id }
+                val moreAlbums = pageItems.filterIsInstance<com.metrolist.innertube.models.AlbumItem>()
+                    .filter { it.id != albumWithSongs.album.id }
+                    .distinctBy { it.id }
+                if (videos.isNotEmpty()) {
+                    item(key = "apple_footer_videos") {
+                        Column(modifier = Modifier.padding(top = 24.dp)) {
+                            Text(
+                                text = "Music Videos",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = LocalContentColor.current,
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                            )
+                            LazyRow(contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)) {
+                                items(items = videos, key = { "footer_video_${it.id}" }) { video ->
+                                    YouTubeGridItem(
+                                        item = video,
+                                        isActive = false,
+                                        isPlaying = false,
+                                        modifier = Modifier
+                                            .width(220.dp)
+                                            .clickable {
+                                                run {
+                                                    playerConnection.playQueue(
+                                                        com.metrolist.music.playback.queues.YouTubeQueue(
+                                                            com.metrolist.innertube.models.WatchEndpoint(videoId = video.id),
+                                                            video.toMediaMetadata(),
+                                                        ),
+                                                    )
+                                                }
+                                            },
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                if (moreAlbums.isNotEmpty()) {
+                    item(key = "apple_footer_more") {
+                        Column(modifier = Modifier.padding(top = 24.dp)) {
+                            Text(
+                                text = "More by ${footerArtistName.orEmpty()}",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = LocalContentColor.current,
+                                modifier = Modifier.padding(horizontal = 24.dp),
+                            )
+                            LazyRow(contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)) {
+                                items(items = moreAlbums, key = { "footer_album_${it.id}" }) { other ->
+                                    YouTubeGridItem(
+                                        item = other,
+                                        isActive = false,
+                                        isPlaying = false,
+                                        thumbnailRatio = 1f,
+                                        modifier = Modifier
+                                            .width(160.dp)
+                                            .clickable { navController.navigate("album/${other.id}") },
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if (otherVersions.isNotEmpty()) {
                 item(key = "other_versions_title") {
                     NavigationTitle(
