@@ -250,7 +250,14 @@ fun LiquidBottomTabs(
                 .drawBackdrop(
                     backdrop = backdrop,
                     shape = { SmoothCornerShape(999.dp) },
-                    effects = { blur(glassBlur.dp.toPx()) },
+                    effects = {
+                        blur(glassBlur.dp.toPx())
+                        lens(
+                            32f.dp.toPx(),
+                            36f.dp.toPx(),
+                            chromaticAberration = true,
+                        )
+                    },
                     highlight = { Highlight.Default.copy(alpha = 0f) },
                     onDrawSurface = {
                         drawImage(barFill, dstSize = IntSize(size.width.toInt(), size.height.toInt()))
