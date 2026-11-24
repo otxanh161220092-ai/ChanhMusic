@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -45,7 +46,9 @@ fun ExpandableText(
     var hasOverflow by rememberSaveable { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     val linkColor = MaterialTheme.colorScheme.primary
-    val bodyColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val bodyColor =
+        if (LocalAppleCollectionTextColor.current != Color.Unspecified) appleSubtitleColor()
+        else MaterialTheme.colorScheme.onSurfaceVariant
 
     val annotatedText: AnnotatedString = remember(text, runs, linkColor) {
         if (runs.isNullOrEmpty()) {

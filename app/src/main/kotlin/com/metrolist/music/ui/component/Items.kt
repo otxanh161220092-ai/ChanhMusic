@@ -1634,7 +1634,7 @@ fun LocalThumbnail(
             }
         }
 
-        if (showCenterPlay) {
+        if (showCenterPlay && LocalAppleHeroColor.current == null) {
             AnimatedVisibility(
                 visible = !(isActive && isPlaying),
                 enter = fadeIn(),
@@ -1659,7 +1659,7 @@ fun LocalThumbnail(
             }
         }
 
-        if (playButtonVisible) {
+        if (playButtonVisible && LocalAppleHeroColor.current == null) {
             AnimatedVisibility(
                 visible = true,
                 enter = fadeIn(),
@@ -1759,7 +1759,7 @@ fun BoxScope.OverlayPlayButton(
     visible: Boolean
 ) {
     AnimatedVisibility(
-        visible = visible,
+        visible = visible && LocalAppleHeroColor.current == null,
         enter = fadeIn(),
         exit = fadeOut(),
         modifier = Modifier
@@ -1821,7 +1821,7 @@ fun BoxScope.AlbumPlayButton(
     onClick: () -> Unit,
 ) {
     AnimatedVisibility(
-        visible = visible,
+        visible = visible && LocalAppleHeroColor.current == null,
         enter = fadeIn(),
         exit = fadeOut(),
         modifier = Modifier

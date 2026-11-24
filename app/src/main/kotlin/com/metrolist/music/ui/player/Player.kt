@@ -231,9 +231,30 @@ import com.metrolist.music.constants.DeeplApiKey
 import com.metrolist.music.ui.screens.settings.LyricsPosition
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** The player always uses the dark look, whatever the app theme is. */
 @Composable
 fun BottomSheetPlayer(
+    state: BottomSheetState,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    pureBlack: Boolean,
+) {
+    val base = MaterialTheme.colorScheme
+    MaterialTheme(
+        colorScheme = base.copy(
+            background = Color(0xFF121212),
+            onBackground = Color.White,
+            surface = Color(0xFF1E1E1E),
+            onSurface = Color.White,
+        ),
+    ) {
+        BottomSheetPlayerContent(state = state, navController = navController, modifier = modifier, pureBlack = pureBlack)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BottomSheetPlayerContent(
     state: BottomSheetState,
     navController: NavController,
     modifier: Modifier = Modifier,

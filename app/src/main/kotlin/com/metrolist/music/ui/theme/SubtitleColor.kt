@@ -18,6 +18,10 @@ import androidx.compose.ui.graphics.luminance
 @Composable
 @ReadOnlyComposable
 fun subtitleGrayColor(): Color {
+    // Inside Apple collections the secondary text follows the page's background color instead.
+    if (com.metrolist.music.ui.component.LocalAppleCollectionTextColor.current != Color.Unspecified) {
+        return com.metrolist.music.ui.component.appleSubtitleColor()
+    }
     val background = MaterialTheme.colorScheme.background
     return if (background.luminance() < 0.5f) Color(0xFFBDBDBD) else Color(0xFF4A4A4A)
 }

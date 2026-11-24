@@ -70,6 +70,7 @@ import com.metrolist.innertube.models.SongItem
 import com.metrolist.innertube.pages.ArtistSection
 import com.metrolist.music.R
 import com.metrolist.music.ui.component.LocalAppleCollectionTextColor
+import com.metrolist.music.ui.component.LocalAppleHeroColor
 import com.metrolist.music.ui.component.appleSubtitleColor
 import com.metrolist.music.ui.utils.resize
 
@@ -197,9 +198,9 @@ fun AppleArtistHeader(
                         ) {
                             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                                 Icon(
-                                    painter = painterResource(R.drawable.play),
+                                    painter = painterResource(R.drawable.bc_player_play),
                                     contentDescription = null,
-                                    tint = onPlayColor,
+                                    tint = LocalAppleHeroColor.current ?: onPlayColor,
                                     modifier = Modifier.size(28.dp),
                                 )
                             }
@@ -308,20 +309,20 @@ private fun LatestCard(
 ) {
     Surface(
         onClick = onClick,
-        shape = smoothCornerShape(18.dp),
+        shape = smoothCornerShape(26.dp),
         color = onColor.copy(alpha = 0.12f),
         border = BorderStroke(1.dp, onColor.copy(alpha = 0.12f)),
         modifier = modifier,
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 22.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AsyncImage(
                 model = thumbnail?.resize(200, 200),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(72.dp).clip(smoothCornerShape(10.dp)),
+                modifier = Modifier.size(104.dp).clip(smoothCornerShape(18.dp)),
             )
             Spacer(modifier = Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
