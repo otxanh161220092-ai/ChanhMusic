@@ -67,8 +67,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Painter
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.painter.Painter
+import com.metrolist.music.ui.component.Material3SettingsItemRow
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -265,23 +267,25 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Row(
+            Box(
                 modifier = Modifier
                     .weight(1f)
                     .height(52.dp)
                     .clip(searchBarShape)
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .background(MaterialTheme.colorScheme.surface),
             ) {
                 Image(
                     painter = painterResource(R.drawable.settings_search_glass),
                     contentDescription = null,
                     contentScale = ContentScale.FillBounds,
-                    modifier = Modifier
-                        .matchParentSize()
-                        .clip(searchBarShape),
+                    modifier = Modifier.matchParentSize(),
                 )
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Icon(
                     painter = painterResource(R.drawable.search),
                     contentDescription = null,
@@ -319,6 +323,7 @@ fun SettingsScreen(
                             .clickable { query = "" },
                     )
                 }
+            }
             }
             if (searchFocused || query.isNotEmpty()) {
                 Box(
