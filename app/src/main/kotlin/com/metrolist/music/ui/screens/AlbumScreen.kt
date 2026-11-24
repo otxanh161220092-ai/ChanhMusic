@@ -739,7 +739,7 @@ fun AlbumScreen(
                 }
                 item(key = "other_versions_list") {
                     LazyRow(
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).add(WindowInsets(left = 14.dp, right = 14.dp)).asPaddingValues(),
+                        contentPadding = PaddingValues(horizontal = 14.dp),
                     ) {
                         items(
                             items = otherVersions.distinctBy { it.id },

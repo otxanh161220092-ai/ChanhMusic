@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -760,7 +761,7 @@ fun ArtistScreen(
                                     libraryAlbums
                                 }
                             LazyRow(
-                                contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).add(WindowInsets(left = 14.dp, right = 14.dp)).asPaddingValues(),
+                                contentPadding = PaddingValues(horizontal = 14.dp),
                             ) {
                                 items(
                                     items = filteredLibraryAlbums,
@@ -898,7 +899,7 @@ fun ArtistScreen(
                         } else {
                             item(key = "section_list_${section.title}") {
                                 LazyRow(
-                                    contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).add(WindowInsets(left = 14.dp, right = 14.dp)).asPaddingValues(),
+                                    contentPadding = PaddingValues(horizontal = 14.dp),
                                 ) {
                                     items(
                                         items = distinctItemsBySection.getOrNull(index) ?: section.items,
