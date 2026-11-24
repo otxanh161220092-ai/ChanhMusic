@@ -251,17 +251,22 @@ fun LiquidBottomTabs(
                     backdrop = backdrop,
                     shape = { SmoothCornerShape(999.dp) },
                     effects = {
+                        // Idle: a flat, opaque pill. Pressed: the glass lens fades in with the press.
+                        val progress = dampedDragAnimation.pressProgress
                         blur(glassBlur.dp.toPx())
-                        lens(
-                            32f.dp.toPx(),
-                            36f.dp.toPx(),
-                            chromaticAberration = true,
-                        )
+                        if (progress > 0f) {
+                            lens(
+                                32f.dp.toPx() * progress,
+                                36f.dp.toPx() * progress,
+                                chromaticAberration = true,
+                            )
+                        }
                     },
                     highlight = { Highlight.Default.copy(alpha = 0f) },
                     onDrawSurface = {
-                        // Opaque base under the glass image, so the artwork behind never shows through the pill.
-                        drawRect(Color.White.copy(alpha = 0.92f))
+                        if (dampedDragAnimation.pressProgress < 0.5f) {
+                            drawRect(Color.White.copy(alpha = 0.92f))
+                        }
                         drawImage(barFill, dstSize = IntSize(size.width.toInt(), size.height.toInt()))
                     },
                 )
