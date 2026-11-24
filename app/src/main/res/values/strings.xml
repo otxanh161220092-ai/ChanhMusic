@@ -115,6 +115,8 @@
     <string name="import_link_unmatched">Not found on YouTube Music</string>
     <string name="import_link_button">Import</string>
     <string name="import_link_done">Done</string>
+    <string name="settings_search_hint">Tìm kiếm cài đặt</string>
+    <string name="settings_search_empty">Không tìm thấy cài đặt nào</string>
     <string name="import_link_failed">Could not import this playlist</string>
     <string name="import_link_result">Imported %1$d of %2$d songs</string>
     <string name="add_to_playlist">Add to playlist</string>

@@ -97,7 +97,7 @@ fun Material3SettingsGroup(
  * Individual settings item row with Material 3 styling
  */
 @Composable
-private fun Material3SettingsItemRow(
+internal fun Material3SettingsItemRow(
     item: Material3SettingsItem
 ) {
     Row(
