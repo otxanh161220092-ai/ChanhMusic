@@ -260,6 +260,8 @@ fun LiquidBottomTabs(
                     },
                     highlight = { Highlight.Default.copy(alpha = 0f) },
                     onDrawSurface = {
+                        // Opaque base under the glass image, so the artwork behind never shows through the pill.
+                        drawRect(Color.White.copy(alpha = 0.92f))
                         drawImage(barFill, dstSize = IntSize(size.width.toInt(), size.height.toInt()))
                     },
                 )
