@@ -250,7 +250,9 @@ fun LiquidBottomTabs(
         // Touch glow: masked to the bar capsule, drawn above the tabs.
         Box(
             Modifier
-                .matchParentSize()
+                .graphicsLayer { translationX = panelOffset }
+                .height(barHeight)
+                .fillMaxWidth()
                 .clip(SmoothCornerShape(999.dp))
                 .drawWithContent {
                     drawContent()
