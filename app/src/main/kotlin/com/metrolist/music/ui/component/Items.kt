@@ -81,6 +81,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
 import androidx.media3.common.MediaItem
@@ -426,11 +427,11 @@ fun GridItem(
     Column(
         modifier = if (fillMaxWidth) {
             modifier
-                .padding(12.dp)
+                .padding(horizontal = 6.dp, vertical = 12.dp)
                 .fillMaxWidth()
         } else {
             modifier
-                .padding(12.dp)
+                .padding(horizontal = 6.dp, vertical = 12.dp)
                 .width(gridHeight * thumbnailRatio)
         }
     ) {
@@ -1255,7 +1256,7 @@ fun YouTubeListItem(
     }
 }
 
-val LocalGridThumbnailCornerRadius = compositionLocalOf { ThumbnailCornerRadius }
+val LocalGridThumbnailCornerRadius = compositionLocalOf { 10.dp }
 
 @Composable
 fun YouTubeGridItem(
@@ -1296,7 +1297,7 @@ fun YouTubeGridItem(
             } else {
                 item.title
             },
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp, lineHeight = 22.sp),
             fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -1318,7 +1319,7 @@ fun YouTubeGridItem(
         if (subtitle != null) {
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
                 color = appleSubtitleColor(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

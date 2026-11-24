@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.fillParentMaxWidth
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -673,7 +674,7 @@ fun AlbumScreen(
                             )
                             LazyRow(
     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-    horizontalArrangement = Arrangement.spacedBy(12.dp),
+    horizontalArrangement = Arrangement.spacedBy(0.dp),
 ) {
                                 items(items = videos, key = { "footer_video_${it.id}" }) { video ->
                                     YouTubeGridItem(
@@ -681,8 +682,9 @@ fun AlbumScreen(
                                         isActive = false,
                                         isPlaying = false,
                                         thumbnailRatio = 16f / 9f,
+                                        fillMaxWidth = true,
                                         modifier = Modifier
-                                            .width(240.dp)
+                                            .fillParentMaxWidth(0.82f)
                                             .clickable {
                                                 run {
                                                     playerConnection.playQueue(
@@ -711,7 +713,7 @@ fun AlbumScreen(
                             )
                             LazyRow(
     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-    horizontalArrangement = Arrangement.spacedBy(12.dp),
+    horizontalArrangement = Arrangement.spacedBy(0.dp),
 ) {
                                 items(items = moreAlbums, key = { "footer_album_${it.id}" }) { other ->
                                     YouTubeGridItem(
@@ -720,7 +722,6 @@ fun AlbumScreen(
                                         isPlaying = false,
                                         thumbnailRatio = 1f,
                                         modifier = Modifier
-                                            .width(160.dp)
                                             .clickable { navController.navigate("album/${other.id}") },
                                     )
                                 }
