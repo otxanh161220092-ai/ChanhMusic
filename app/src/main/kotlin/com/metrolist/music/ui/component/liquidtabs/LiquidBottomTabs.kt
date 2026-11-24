@@ -54,12 +54,8 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.foundation.layout.matchParentSize
 
 
 import com.kyant.backdrop.drawBackdrop
@@ -209,33 +205,6 @@ fun LiquidBottomTabs(
                         }
                     }
                 }
-                .drawWithContent {
-                    drawContent()
-                    val a = touchGlowAlpha.value
-                    if (a > 0f) {
-                        val capsule = Path().apply {
-                            addRoundRect(
-                                RoundRect(
-                                    Rect(Offset.Zero, size),
-                                    CornerRadius(size.height / 2f)
-                                )
-                            )
-                        }
-                        val radius = size.height * 1.2f
-                        clipPath(capsule) {
-                            drawCircle(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(Color.White.copy(0.8f * a), Color.Transparent),
-                                    center = touchPos,
-                                    radius = radius
-                                ),
-                                radius = radius,
-                                center = touchPos,
-                                blendMode = BlendMode.Overlay
-                            )
-                        }
-                    }
-                }
                 .height(barHeight)
                 .fillMaxWidth()
                 .padding(4f.dp),
@@ -271,9 +240,37 @@ fun LiquidBottomTabs(
                     .padding(4f.dp)
                     .graphicsLayer(colorFilter = ColorFilter.tint(accentColor)),
                 verticalAlignment = Alignment.CenterVertically,
-                content = content
+                content = {
+                    CompositionLocalProvider(LocalLiquidBottomTabScale provides { 1f }) {
+                        content()
+                    }
+                }
             )
         }
+
+        // Touch glow: masked to the bar capsule, drawn above the tabs.
+        Box(
+            Modifier
+                .matchParentSize()
+                .clip(SmoothCornerShape(999.dp))
+                .drawWithContent {
+                    drawContent()
+                    val a = touchGlowAlpha.value
+                    if (a > 0f) {
+                        val radius = size.height * 1.2f
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                colors = listOf(Color.White.copy(0.8f * a), Color.Transparent),
+                                center = touchPos,
+                                radius = radius
+                            ),
+                            radius = radius,
+                            center = touchPos,
+                            blendMode = BlendMode.Overlay
+                        )
+                    }
+                }
+        )
 
     }
 }
