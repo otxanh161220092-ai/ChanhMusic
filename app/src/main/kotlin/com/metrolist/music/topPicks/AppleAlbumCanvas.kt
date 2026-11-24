@@ -65,7 +65,7 @@ data class CanvasArtwork(
  */
 object AppleAlbumCanvas {
     private const val TAG = "AppleAlbumCanvas"
-    private const val AMP = "https://amp-api.music.apple.com/v1/catalog"
+    internal const val AMP = "https://amp-api.music.apple.com/v1/catalog"
     private const val WEB_PLAYER = "https://music.apple.com/us/browse"
     private const val CANVAS_UA =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
@@ -75,7 +75,7 @@ object AppleAlbumCanvas {
 
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
-    private val storefront: String by lazy {
+    internal val storefront: String by lazy {
         Locale.getDefault().country.takeIf { it.length == 2 }?.lowercase(Locale.ROOT) ?: "us"
     }
 
@@ -264,7 +264,7 @@ object AppleAlbumCanvas {
     private val rejected = mutableSetOf<String>()
 
     @Synchronized
-    private fun token(): String? {
+    internal fun token(): String? {
         val now = System.currentTimeMillis()
         cachedToken?.let { if (now < tokenExpiresAtMs - 60_000) return it }
         if (now < retryTokenAfterMs) return null

@@ -90,6 +90,7 @@ import com.metrolist.music.ui.component.AlbumListItem
 import com.metrolist.music.ui.component.ArtistGridItem
 import com.metrolist.music.ui.component.ArtistListItem
 import com.metrolist.music.ui.component.CreatePlaylistDialog
+import com.metrolist.music.ui.menu.ImportExternalPlaylistDialog
 import com.metrolist.music.ui.component.LibrarySearchEmptyPlaceholder
 import com.metrolist.music.ui.component.LibrarySearchHeader
 import com.metrolist.music.ui.component.LocalMenuState
@@ -142,6 +143,14 @@ fun LibraryMixScreen(
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val debouncedSearchQuery by viewModel.debouncedSearchQuery.collectAsStateWithLifecycle()
     var showCreatePlaylistDialog by rememberSaveable { mutableStateOf(false) }
+    var showImportLinkDialog by rememberSaveable { mutableStateOf(false) }
+
+    if (showImportLinkDialog) {
+        ImportExternalPlaylistDialog(
+            onDismiss = { showImportLinkDialog = false },
+            onImported = { playlistId -> navController.navigate("local_playlist/$playlistId") },
+        )
+    }
     
     if (showCreatePlaylistDialog) {
         CreatePlaylistDialog(
@@ -1050,6 +1059,22 @@ fun LibraryMixScreen(
                     }
                 }
             }
+        }
+
+        FloatingActionButton(
+            onClick = { showImportLinkDialog = true },
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .windowInsetsPadding(
+                    LocalPlayerAwareWindowInsets.current
+                        .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
+                )
+                .padding(16.dp)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.download),
+                contentDescription = stringResource(R.string.import_from_link),
+            )
         }
 
         // Always visible + button (no scroll hiding)
