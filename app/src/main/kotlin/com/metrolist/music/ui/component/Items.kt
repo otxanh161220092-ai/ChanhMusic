@@ -1297,7 +1297,7 @@ fun YouTubeGridItem(
             } else {
                 item.title
             },
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp, lineHeight = 22.sp),
+            style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -1319,7 +1319,7 @@ fun YouTubeGridItem(
         if (subtitle != null) {
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
+                style = MaterialTheme.typography.bodyMedium,
                 color = appleSubtitleColor(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
