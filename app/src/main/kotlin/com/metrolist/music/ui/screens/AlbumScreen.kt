@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens
 
+import com.metrolist.music.ui.component.appleSubtitleColor
 import com.metrolist.music.models.toMediaMetadata
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.foundation.layout.PaddingValues
@@ -609,6 +610,49 @@ fun AlbumScreen(
                 }
             }
 
+            if (appleStyle && albumWithSongs != null && albumDetails != null) {
+                val details = albumDetails!!
+                val totalSeconds = albumWithSongs.songs.sumOf { it.song.duration }
+                val hours = totalSeconds / 3600
+                val minutes = (totalSeconds % 3600) / 60
+                val durationText = if (hours > 0) "$hours hour${if (hours > 1) "s" else ""} $minutes minutes" else "$minutes minutes"
+                val dateText = details.releaseDateIso?.let { iso ->
+                    runCatching {
+                        java.time.LocalDate.parse(iso).format(
+                            java.time.format.DateTimeFormatter.ofPattern("MMMM d, yyyy", java.util.Locale.ENGLISH),
+                        )
+                    }.getOrNull()
+                }
+                item(key = "apple_album_info") {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        if (details.masteredForItunes) {
+                            Text(
+                                text = "Apple Digital Master",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = appleSubtitleColor(),
+                            )
+                        }
+                        dateText?.let {
+                            Text(text = it, style = MaterialTheme.typography.bodyMedium, color = appleSubtitleColor())
+                        }
+                        Text(
+                            text = "${albumWithSongs.songs.size} songs, $durationText",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = appleSubtitleColor(),
+                        )
+                        details.copyright?.let { line ->
+                            Text(
+                                text = if (line.startsWith("℗") || line.startsWith("©")) line else "℗ $line",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = appleSubtitleColor(),
+                            )
+                        }
+                    }
+                }
+            }
             if (appleStyle && albumWithSongs != null) {
                 val pageItems = artistPage?.sections?.flatMap { it.items }.orEmpty()
                 val videos = pageItems.filterIsInstance<com.metrolist.innertube.models.SongItem>()

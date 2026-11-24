@@ -3,6 +3,7 @@ package com.metrolist.music.topPicks
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -33,6 +34,11 @@ data class AppleAlbumDetails(
     val releaseDate: String? = null,
     val trackCount: Int? = null,
     val explicit: Boolean = false,
+    /** Raw release date (yyyy-MM-dd) from Apple. */
+    val releaseDateIso: String? = null,
+    /** Apple's copyright line, e.g. "℗ 2026 Atlantic Recording Corporation". */
+    val copyright: String? = null,
+    val masteredForItunes: Boolean = false,
 )
 
 /**
@@ -149,7 +155,13 @@ object AppleAlbumCanvas {
             ?.let { "${it.groupValues[3]}/${it.groupValues[2]}/${it.groupValues[1]}" }
         val trackCount = attributes["trackCount"]?.jsonPrimitive?.intOrNull
         val explicit = attributes["contentRating"]?.jsonPrimitive?.contentOrNull == "explicit"
-        return AppleAlbumDetails(genre, year, lossless, description, popular, releaseDate, trackCount, explicit)
+        val releaseDateIso = attributes["releaseDate"]?.jsonPrimitive?.contentOrNull?.take(10)
+        val copyright = attributes["copyright"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }
+        val masteredForItunes = attributes["isMasteredForItunes"]?.jsonPrimitive?.booleanOrNull == true
+        return AppleAlbumDetails(
+            genre, year, lossless, description, popular, releaseDate, trackCount, explicit,
+            releaseDateIso, copyright, masteredForItunes,
+        )
     }
 
     /** The Apple artist id whose name matches [name], found by search when the album does not carry it. */
