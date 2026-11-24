@@ -94,6 +94,8 @@ import com.metrolist.innertube.models.PodcastItem
 import com.metrolist.innertube.models.SongItem
 import com.metrolist.innertube.models.WatchEndpoint
 import com.metrolist.music.LocalDatabase
+import com.metrolist.music.db.entities.AlbumEntity
+import kotlinx.coroutines.flow.flowOf
 import com.metrolist.music.LocalArtistNameAliases
 import com.metrolist.music.LocalListenTogetherManager
 import com.metrolist.music.LocalPlayerAwareWindowInsets
@@ -234,6 +236,10 @@ fun ArtistScreen(
         remember(artistPage?.sections) {
             artistPage?.sections?.flatMap { it.items }?.filterIsInstance<AlbumItem>()?.maxByOrNull { it.year ?: Int.MIN_VALUE }
         }
+    val latestAlbumFlow = remember(latestAlbum?.id) {
+        latestAlbum?.id?.let { database.album(it) } ?: flowOf(null)
+    }
+    val latestAlbumInLibrary by latestAlbumFlow.collectAsStateWithLifecycle(initialValue = null)
     val allSectionItems = artistPage?.sections?.flatMap { it.items }.orEmpty()
     val isChannel =
         allSectionItems.isNotEmpty() &&
@@ -357,6 +363,29 @@ fun ArtistScreen(
                                 { playerConnection.playQueue(YouTubeQueue(endpoint)) }
                             },
                         onToggleSubscribe = if (showLocal) null else ({ viewModel.toggleChannelSubscription() }),
+                        latestAlbumSaved = latestAlbumInLibrary?.album?.bookmarkedAt != null,
+                        onToggleLatestAlbumSave =
+                            latestAlbum?.takeIf { !isChannel && !showLocal && !isGuest }?.let { album ->
+                                {
+                                    database.transaction {
+                                        val existing = latestAlbumInLibrary?.album
+                                        if (existing != null) {
+                                            update(existing.toggleLike())
+                                        } else {
+                                            insert(
+                                                AlbumEntity(
+                                                    id = album.id,
+                                                    title = album.title,
+                                                    year = album.year,
+                                                    thumbnailUrl = album.thumbnail,
+                                                    songCount = 0,
+                                                    duration = 0,
+                                                ).toggleLike(),
+                                            )
+                                        }
+                                    }
+                                }
+                            },
                         onLatestAlbumClick = { navController.navigate("album/${it.id}") },
                         onLatestVideoClick = { video ->
                             if (!isGuest) {

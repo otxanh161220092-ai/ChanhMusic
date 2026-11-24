@@ -9,6 +9,7 @@ import com.metrolist.music.ui.component.smoothCornerShape
 
 import com.metrolist.music.ui.component.GlassAlertDialog
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.graphics.luminance
 import com.metrolist.music.bcmix.canvas.CanvasArtwork
 import com.metrolist.music.bcmix.canvas.CanvasArtworkPlayer
@@ -89,6 +90,8 @@ fun AppleArtistHeader(
     onToggleSubscribe: (() -> Unit)?,
     onLatestAlbumClick: (AlbumItem) -> Unit,
     onLatestVideoClick: (SongItem) -> Unit,
+    latestAlbumSaved: Boolean = false,
+    onToggleLatestAlbumSave: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val onColor = LocalAppleCollectionTextColor.current.takeIf { it != Color.Unspecified } ?: Color.White
@@ -224,8 +227,11 @@ fun AppleArtistHeader(
             LatestCard(
                 label = latestAlbum.year?.toString(),
                 title = latestAlbum.title,
+                subtitle = "Recent Album",
                 thumbnail = latestAlbum.thumbnail,
                 onColor = onColor,
+                saved = latestAlbumSaved,
+                onToggleSave = onToggleLatestAlbumSave,
                 onClick = { onLatestAlbumClick(latestAlbum) },
                 modifier = cardModifier,
             )
@@ -233,8 +239,11 @@ fun AppleArtistHeader(
             LatestCard(
                 label = "Video mới nhất",
                 title = latestVideo.title,
+                subtitle = null,
                 thumbnail = latestVideo.thumbnail,
                 onColor = onColor,
+                saved = false,
+                onToggleSave = null,
                 onClick = { onLatestVideoClick(latestVideo) },
                 modifier = cardModifier,
             )
@@ -284,34 +293,38 @@ private fun RoundControl(
 private fun LatestCard(
     label: String?,
     title: String,
+    subtitle: String?,
     thumbnail: String?,
     onColor: Color,
+    saved: Boolean,
+    onToggleSave: (() -> Unit)?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         onClick = onClick,
-        shape = smoothCornerShape(14.dp),
+        shape = smoothCornerShape(18.dp),
         color = onColor.copy(alpha = 0.12f),
+        border = BorderStroke(1.dp, onColor.copy(alpha = 0.12f)),
         modifier = modifier,
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AsyncImage(
-                model = thumbnail?.resize(160, 160),
+                model = thumbnail?.resize(200, 200),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(56.dp).clip(smoothCornerShape(6.dp)),
+                modifier = Modifier.size(64.dp).clip(smoothCornerShape(10.dp)),
             )
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 label?.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodySmall,
-                        color = onColor.copy(alpha = 0.7f),
+                        color = onColor.copy(alpha = 0.6f),
                     )
                 }
                 Text(
@@ -322,20 +335,49 @@ private fun LatestCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                subtitle?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = onColor.copy(alpha = 0.6f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(12.dp))
-            Surface(
-                shape = CircleShape,
-                color = onColor.copy(alpha = 0.15f),
-                modifier = Modifier.size(36.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Icon(
-                        painter = painterResource(R.drawable.download),
-                        contentDescription = null,
-                        tint = onColor,
-                        modifier = Modifier.size(18.dp),
-                    )
+            if (onToggleSave != null) {
+                // BitChord's round button: "+" to add the album to the library, a check once it is saved.
+                Surface(
+                    onClick = onToggleSave,
+                    shape = CircleShape,
+                    color = onColor.copy(alpha = 0.15f),
+                    border = BorderStroke(1.dp, onColor.copy(alpha = 0.2f)),
+                    modifier = Modifier.size(40.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Icon(
+                            painter = painterResource(if (saved) R.drawable.check else R.drawable.add),
+                            contentDescription = null,
+                            tint = onColor,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+            } else {
+                Surface(
+                    shape = CircleShape,
+                    color = onColor.copy(alpha = 0.15f),
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Icon(
+                            painter = painterResource(R.drawable.download),
+                            contentDescription = null,
+                            tint = onColor,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
                 }
             }
         }
