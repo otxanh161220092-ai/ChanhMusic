@@ -55,7 +55,6 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.foundation.layout.matchParentSize
 
 
 import com.kyant.backdrop.drawBackdrop
