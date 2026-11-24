@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.component
 
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.paint
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Spacer
@@ -398,7 +400,7 @@ private fun LiquidNavigationBar(
         .indexOfFirst { isRouteSelected(currentRoute, it.route, navigationItems) }
         .coerceAtLeast(0)
     val tabsCount = navigationItems.size
-    val iconColor = Color.White
+    val iconColor = Color.Black
 
     LiquidBottomTabs(
         selectedTabIndex = { selectedIndex },
@@ -410,6 +412,7 @@ private fun LiquidNavigationBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 36.dp)
+            .paint(painterResource(R.drawable.bottom_bar_glass), contentScale = ContentScale.FillBounds)
             .pointerInput(tabsCount, navigationItems, selectedIndex, onItemClick) {
                 detectTapGestures { offset ->
                     val index = (offset.x / (size.width.toFloat() / tabsCount))

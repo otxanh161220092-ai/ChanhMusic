@@ -308,10 +308,10 @@ private fun NewMiniPlayer(
 
     val lightGlass = miniPlayerBackground == MiniPlayerBackgroundStyle.DEFAULT ||
         miniPlayerBackground == MiniPlayerBackgroundStyle.TRANSPARENT
-    val primaryColor = if (lightGlass) Color.White else if (forceLightColors) Color.White else MaterialTheme.colorScheme.primary
-    val outlineColor = if (lightGlass) Color.White else if (forceLightColors) Color.White else MaterialTheme.colorScheme.outline
-    val onSurfaceColor = if (lightGlass) Color.White else if (forceLightColors) Color.White else MaterialTheme.colorScheme.onSurface
-    val errorColor = if (forceLightColors) Color(0xFFFF6B6B) else MaterialTheme.colorScheme.error
+    val primaryColor = if (lightGlass) Color.Black else if (forceLightColors) Color.White else MaterialTheme.colorScheme.primary
+    val outlineColor = if (lightGlass) Color.Black else if (forceLightColors) Color.White else MaterialTheme.colorScheme.outline
+    val onSurfaceColor = if (lightGlass) Color.Black else if (forceLightColors) Color.White else MaterialTheme.colorScheme.onSurface
+    val errorColor = if (lightGlass) Color(0xFF0A84FF) else if (forceLightColors) Color(0xFFFF6B6B) else MaterialTheme.colorScheme.error
 
     Box(
         modifier =
@@ -406,7 +406,7 @@ private fun NewMiniPlayer(
         ) {
             if (lightGlass) {
                 Image(
-                    painter = painterResource(R.drawable.liquid_mini_player_fill),
+                    painter = painterResource(R.drawable.mini_player_glass),
                     contentDescription = null,
                     contentScale = ContentScale.FillBounds,
                     modifier = Modifier.fillMaxSize(),
@@ -539,6 +539,7 @@ private fun NewMiniPlayerPlayButton(
     primaryColor: Color,
     outlineColor: Color,
     listenTogetherManager: ListenTogetherManager?,
+    lightGlass: Boolean = false,
 ) {
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val castIsPlaying by castHandler?.castIsPlaying?.collectAsState() ?: remember { mutableStateOf(false) }
@@ -596,7 +597,7 @@ private fun NewMiniPlayerPlayButton(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.4f), CircleShape),
+                            .background(if (lightGlass) Color.White.copy(alpha = 0.5f) else Color.Black.copy(alpha = 0.4f), CircleShape),
                 )
                 Icon(
                     painter =
@@ -610,7 +611,7 @@ private fun NewMiniPlayerPlayButton(
                             },
                         ),
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = if (lightGlass) Color.Black else Color.White,
                     modifier = Modifier.size(20.dp),
                 )
             }
