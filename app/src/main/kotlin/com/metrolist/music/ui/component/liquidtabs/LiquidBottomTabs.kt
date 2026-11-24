@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -49,9 +50,15 @@ import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.clipPath
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 
 
 import com.kyant.backdrop.drawBackdrop
@@ -81,7 +88,8 @@ fun LiquidBottomTabs(
     val barFill = ImageBitmap.imageResource(R.drawable.bottom_bar_glass)
     val containerColor = Color.Transparent
 
-    val tabsBackdrop = rememberLayerBackdrop()
+    val touchGlowAlpha = remember { Animatable(0f) }
+    var touchPos by remember { mutableStateOf(Offset.Zero) }
     val glassBlur = com.metrolist.music.ui.component.LocalGlassBlur.current
 
     BoxWithConstraints(
@@ -157,19 +165,6 @@ fun LiquidBottomTabs(
                 }
         }
 
-        val interactiveHighlight = remember(animationScope) {
-            InteractiveHighlight(
-                animationScope = animationScope,
-                position = { size, offset ->
-                    Offset(
-                        if (isLtr) (dampedDragAnimation.value + 0.5f) * tabWidth + panelOffset
-                        else size.width - (dampedDragAnimation.value + 0.5f) * tabWidth + panelOffset,
-                        size.height / 2f
-                    )
-                }
-            )
-        }
-
         Row(
             Modifier
                 .graphicsLayer {
@@ -193,7 +188,53 @@ fun LiquidBottomTabs(
                         drawImage(barFill, dstSize = IntSize(size.width.toInt(), size.height.toInt()))
                     },
                 )
-                .then(interactiveHighlight.modifier)
+                .then(dampedDragAnimation.modifier)
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        touchPos = down.position
+                        animationScope.launch {
+                            touchGlowAlpha.animateTo(1f, spring(1f, 400f, 0.001f))
+                        }
+                        var pressed = true
+                        while (pressed) {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                            touchPos = change.position
+                            pressed = change.pressed
+                        }
+                        animationScope.launch {
+                            touchGlowAlpha.animateTo(0f, spring(1f, 400f, 0.001f))
+                        }
+                    }
+                }
+                .drawWithContent {
+                    drawContent()
+                    val a = touchGlowAlpha.value
+                    if (a > 0f) {
+                        val capsule = Path().apply {
+                            addRoundRect(
+                                RoundRect(
+                                    Rect(Offset.Zero, size),
+                                    CornerRadius(size.height / 2f)
+                                )
+                            )
+                        }
+                        val radius = size.height * 1.2f
+                        clipPath(capsule) {
+                            drawCircle(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(Color.White.copy(0.8f * a), Color.Transparent),
+                                    center = touchPos,
+                                    radius = radius
+                                ),
+                                radius = radius,
+                                center = touchPos,
+                                blendMode = BlendMode.Overlay
+                            )
+                        }
+                    }
+                }
                 .height(barHeight)
                 .fillMaxWidth()
                 .padding(4f.dp),
@@ -206,32 +247,24 @@ fun LiquidBottomTabs(
                 lerp(1f, 1.2f, dampedDragAnimation.pressProgress)
             }
         ) {
+            // Selected-tab overlay: same content tinted blue, clipped to the cell
+            // under the (continuously dragged) selection position.
             Row(
                 Modifier
                     .clearAndSetSemantics {}
-                    .alpha(0f)
-                    .layerBackdrop(tabsBackdrop)
                     .graphicsLayer {
                         translationX = panelOffset
                     }
-                    .drawBackdrop(
-                        backdrop = backdrop,
-                        shape = { SmoothCornerShape(999.dp) },
-                        effects = {
-                            val progress = dampedDragAnimation.pressProgress
-                            vibrancy()
-                            lens(
-                                24f.dp.toPx() * progress,
-                                24f.dp.toPx() * progress
-                            )
-                        },
-                        highlight = {
-                            val progress = dampedDragAnimation.pressProgress
-                            Highlight.Default.copy(alpha = 0f)
-                        },
-                        onDrawSurface = { drawRect(containerColor) }
-                    )
-                    .then(interactiveHighlight.modifier)
+                    .drawWithContent {
+                        val pad = 4.dp.toPx()
+                        val tabW = (size.width - 2 * pad) / tabsCount
+                        val v = dampedDragAnimation.value
+                        val left = if (isLtr) pad + v * tabW
+                        else size.width - pad - (v + 1f) * tabW
+                        clipRect(left, 0f, left + tabW, size.height) {
+                            this@drawWithContent.drawContent()
+                        }
+                    }
                     .height(barHeight)
                     .fillMaxWidth()
                     .padding(4f.dp)
