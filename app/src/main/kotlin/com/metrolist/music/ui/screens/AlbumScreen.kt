@@ -71,6 +71,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -243,7 +245,7 @@ fun AlbumScreen(
     // Apple-style footer: the artist's music videos and more albums by the same artist.
     val footerArtistId = albumWithSongs?.artists?.firstOrNull()?.id
     val footerArtistName = albumWithSongs?.artists?.firstOrNull()?.name
-    val footerVideoThumbHeight = ((LocalConfiguration.current.screenWidthDp * 0.82f).dp - 12.dp) / (16f / 9f)
+    val footerVideoTileWidth = (LocalConfiguration.current.screenWidthDp * 0.82f).dp
     val artistPage by produceState<com.metrolist.innertube.pages.ArtistPage?>(null, footerArtistId, appleStyle) {
         value = null
         val artistId = footerArtistId ?: return@produceState
@@ -678,24 +680,43 @@ fun AlbumScreen(
     horizontalArrangement = Arrangement.spacedBy(0.dp),
 ) {
                                 items(items = videos, key = { "footer_video_${it.id}" }) { video ->
-                                    YouTubeGridItem(
-                                        item = video,
-                                        isActive = false,
-                                        isPlaying = false,
-                                        thumbnailRatio = 16f / 9f,
-                                        thumbnailHeight = footerVideoThumbHeight,
+                                    Column(
                                         modifier = Modifier
-                                                                                        .clickable {
-                                                run {
-                                                    playerConnection.playQueue(
-                                                        com.metrolist.music.playback.queues.YouTubeQueue(
-                                                            com.metrolist.innertube.models.WatchEndpoint(videoId = video.id),
-                                                            video.toMediaMetadata(),
-                                                        ),
-                                                    )
-                                                }
+                                            .width(footerVideoTileWidth)
+                                            .clickable {
+                                                playerConnection.playQueue(
+                                                    com.metrolist.music.playback.queues.YouTubeQueue(
+                                                        com.metrolist.innertube.models.WatchEndpoint(videoId = video.id),
+                                                        video.toMediaMetadata(),
+                                                    ),
+                                                )
                                             },
-                                    )
+                                    ) {
+                                        AsyncImage(
+                                            model = video.thumbnail,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .aspectRatio(16f / 9f)
+                                                .clip(smoothCornerShape(10.dp)),
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = video.title,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                        Text(
+                                            text = video.artists.joinToString(" & ") { it.name },
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = appleSubtitleColor(),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -739,7 +760,7 @@ fun AlbumScreen(
                 }
                 item(key = "other_versions_list") {
                     LazyRow(
-                        contentPadding = PaddingValues(horizontal = 14.dp),
+                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues(),
                     ) {
                         items(
                             items = otherVersions.distinctBy { it.id },

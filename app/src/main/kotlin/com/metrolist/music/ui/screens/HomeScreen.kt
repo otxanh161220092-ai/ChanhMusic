@@ -901,6 +901,7 @@ fun HomeScreen(
             is Album -> {
                 AlbumGridItem(
                     album = it,
+                    fillMaxWidth = true,
                     isActive = it.id == mediaMetadata?.album?.id,
                     isPlaying = isPlaying,
                     coroutineScope = scope,
@@ -927,6 +928,7 @@ fun HomeScreen(
             is Artist -> {
                 ArtistGridItem(
                     artist = it,
+                    fillMaxWidth = true,
                     modifier =
                         Modifier
                             .fillMaxWidth()

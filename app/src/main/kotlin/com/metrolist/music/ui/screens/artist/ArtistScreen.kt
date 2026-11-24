@@ -18,7 +18,6 @@ import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -761,7 +760,7 @@ fun ArtistScreen(
                                     libraryAlbums
                                 }
                             LazyRow(
-                                contentPadding = PaddingValues(horizontal = 14.dp),
+                                contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues(),
                             ) {
                                 items(
                                     items = filteredLibraryAlbums,
@@ -899,7 +898,7 @@ fun ArtistScreen(
                         } else {
                             item(key = "section_list_${section.title}") {
                                 LazyRow(
-                                    contentPadding = PaddingValues(horizontal = 14.dp),
+                                    contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues(),
                                 ) {
                                     items(
                                         items = distinctItemsBySection.getOrNull(index) ?: section.items,
@@ -1026,7 +1025,7 @@ fun ArtistScreen(
 
         // Library/Local Toggle FAB
         HideOnScrollFAB(
-            visible = showLocalFab,
+            visible = showLocalFab && !appleStyle,
             lazyListState = lazyListState,
             icon = if (showLocal) R.drawable.language else R.drawable.library_music,
             onClick = {
@@ -1136,7 +1135,7 @@ fun ArtistScreen(
                     }
                 }
 
-                if (showLocalFab) {
+                if (!appleStyle && showLocalFab) {
                     androidx.compose.material3.SmallFloatingActionButton(
                         modifier = Modifier.padding(16.dp).offset(x = (-4).dp), // Align center with standard FAB (56dp vs 48dp)
                         onClick = onPlayAllClick,
@@ -1146,7 +1145,7 @@ fun ArtistScreen(
                             contentDescription = "Play All",
                         )
                     }
-                } else {
+                } else if (!appleStyle) {
                     androidx.compose.material3.FloatingActionButton(
                         modifier = Modifier.padding(16.dp),
                         onClick = onPlayAllClick,
