@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.component.liquidtabs
 
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import com.metrolist.music.R
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.res.imageResource
@@ -247,7 +249,9 @@ fun LiquidBottomTabs(
                         if (isLtr) dampedDragAnimation.value * tabWidth + panelOffset
                         else size.width - (dampedDragAnimation.value + 1f) * tabWidth + panelOffset
                 }
-                .drawBackdrop(
+                .then(
+                    if (dampedDragAnimation.pressProgress > 0.01f) {
+                        Modifier.drawBackdrop(
                     backdrop = backdrop,
                     shape = { SmoothCornerShape(999.dp) },
                     effects = {
@@ -264,11 +268,19 @@ fun LiquidBottomTabs(
                     },
                     highlight = { Highlight.Default.copy(alpha = 0f) },
                     onDrawSurface = {
-                        if (dampedDragAnimation.pressProgress < 0.5f) {
-                            drawRect(Color.White.copy(alpha = 0.92f))
-                        }
                         drawImage(barFill, dstSize = IntSize(size.width.toInt(), size.height.toInt()))
                     },
+                )
+                
+                    } else {
+                        // Idle: a flat pill with no backdrop at all, so nothing behind can show through.
+                        Modifier
+                            .clip(SmoothCornerShape(999.dp))
+                            .drawWithContent {
+                                drawRect(Color.White.copy(alpha = 0.92f))
+                                drawImage(barFill, dstSize = IntSize(size.width.toInt(), size.height.toInt()))
+                            }
+                    }
                 )
                 .height(56f.dp)
                 .fillMaxWidth(1f / tabsCount)
