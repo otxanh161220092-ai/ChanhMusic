@@ -1023,18 +1023,6 @@ private fun BottomSheetPlayerContent(
                                             )
                                         }
                                     }
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxSize()
-                                                .background(
-                                                    Brush.verticalGradient(
-                                                        0f to Color.Black.copy(alpha = 0.1f),
-                                                        0.55f to Color.Black.copy(alpha = 0.25f),
-                                                        1f to Color.Black.copy(alpha = 0.5f),
-                                                    ),
-                                                ),
-                                    )
                                 }
                             }
                         }
