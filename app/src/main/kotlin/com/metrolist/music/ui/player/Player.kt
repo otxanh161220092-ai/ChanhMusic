@@ -999,41 +999,28 @@ private fun BottomSheetPlayerContent(
                                     .allowHardware(false)
                                     .build()
                                 Box(modifier = Modifier.alpha(backgroundAlpha)) {
-                                    // Cover fitted to the full height; its top half is shown
-                                    // unchanged on top and mirrored top-to-bottom on the bottom.
-                                    Box(
+                                    // Cover fitted to the width, repeated as an original + mirrored pair down the screen.
+                                    Column(
                                         modifier =
                                             Modifier
                                                 .fillMaxSize()
+                                                .clipToBounds()
                                                 .blur((if (useDarkTheme) 150.dp else 100.dp) * 0.7f),
                                     ) {
-                                        AsyncImage(
-                                            model = thumbRequest,
-                                            contentDescription = null,
-                                            contentScale = ContentScale.FillHeight,
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxSize()
-                                                    .drawWithContent {
-                                                        clipRect(0f, 0f, size.width, size.height / 2f) {
-                                                            this@drawWithContent.drawContent()
-                                                        }
-                                                    },
-                                        )
-                                        AsyncImage(
-                                            model = thumbRequest,
-                                            contentDescription = null,
-                                            contentScale = ContentScale.FillHeight,
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxSize()
-                                                    .graphicsLayer { scaleY = -1f }
-                                                    .drawWithContent {
-                                                        clipRect(0f, 0f, size.width, size.height / 2f) {
-                                                            this@drawWithContent.drawContent()
-                                                        }
-                                                    },
-                                        )
+                                        repeat(2) {
+                                            AsyncImage(
+                                                model = thumbRequest,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.FillWidth,
+                                                modifier = Modifier.fillMaxWidth(),
+                                            )
+                                            AsyncImage(
+                                                model = thumbRequest,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.FillWidth,
+                                                modifier = Modifier.fillMaxWidth().graphicsLayer { scaleY = -1f },
+                                            )
+                                        }
                                     }
                                     Box(
                                         modifier =
