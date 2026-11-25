@@ -112,17 +112,24 @@ object LyricsTranslationHelper {
      * This allows updating the UI progressively during streaming.
      */
     private fun tryParsePartialTranslation(content: String, expectedLines: Int): List<String> {
-        // The prompt asks for a JSON array of strings: take only the completed quoted items,
-        // so brackets, keys and the still-streaming last item never reach the lyric rows.
-        val stringRegex = Regex("\"((?:[^\"\\\\]|\\\\.)*)\"")
-        return stringRegex.findAll(content)
-            .map { match ->
-                match.groupValues[1]
-                    .replace("\\\"", "\"")
-                    .replace("\\n", " ")
-                    .replace("\\\\", "\\")
-            }
-            .toList()
+        // The prompt asks for a JSON array of strings: ["line1", "line2", ...].
+        // Only complete quoted strings inside the array are taken, so JSON
+        // punctuation and the unfinished last string are never shown.
+        val keyIdx = content.indexOf("\"lines\"")
+        val start = content.indexOf('[', if (keyIdx >= 0) keyIdx else 0)
+        if (start < 0) return emptyList()
+        val body = content.substring(start + 1)
+        val result = mutableListOf<String>()
+        val regex = Regex("\"((?:[^\"\\\\]|\\\\.)*)\"")
+        for (match in regex.findAll(body)) {
+            val raw = match.groupValues[1]
+            val unescaped = raw
+                .replace("\\\"", "\"")
+                .replace("\\n", " ")
+                .replace("\\\\", "\\")
+            result.add(unescaped)
+        }
+        return result
     }
 
     fun loadTranslationsFromDatabase(
