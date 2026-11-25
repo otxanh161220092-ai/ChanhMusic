@@ -98,12 +98,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -990,22 +992,49 @@ private fun BottomSheetPlayerContent(
                             label = "blurBackground",
                         ) { thumbnailUrl ->
                             if (thumbnailUrl != null) {
+                                val thumbRequest = ImageRequest
+                                    .Builder(context)
+                                    .data(thumbnailUrl)
+                                    .size(100, 100)
+                                    .allowHardware(false)
+                                    .build()
                                 Box(modifier = Modifier.alpha(backgroundAlpha)) {
-                                    AsyncImage(
-                                        model =
-                                            ImageRequest
-                                                .Builder(context)
-                                                .data(thumbnailUrl)
-                                                .size(100, 100)
-                                                .allowHardware(false)
-                                                .build(),
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop,
+                                    // Cover fitted to the full height; its top half is shown
+                                    // unchanged on top and mirrored top-to-bottom on the bottom.
+                                    Box(
                                         modifier =
                                             Modifier
                                                 .fillMaxSize()
-                                                .blur(if (useDarkTheme) 150.dp else 100.dp),
-                                    )
+                                                .blur((if (useDarkTheme) 150.dp else 100.dp) * 0.7f),
+                                    ) {
+                                        AsyncImage(
+                                            model = thumbRequest,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.FillHeight,
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxSize()
+                                                    .drawWithContent {
+                                                        clipRect(0f, 0f, size.width, size.height / 2f) {
+                                                            this@drawWithContent.drawContent()
+                                                        }
+                                                    },
+                                        )
+                                        AsyncImage(
+                                            model = thumbRequest,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.FillHeight,
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxSize()
+                                                    .graphicsLayer { scaleY = -1f }
+                                                    .drawWithContent {
+                                                        clipRect(0f, 0f, size.width, size.height / 2f) {
+                                                            this@drawWithContent.drawContent()
+                                                        }
+                                                    },
+                                        )
+                                    }
                                     Box(
                                         modifier =
                                             Modifier
