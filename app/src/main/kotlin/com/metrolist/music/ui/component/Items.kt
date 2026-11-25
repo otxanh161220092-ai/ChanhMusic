@@ -1997,10 +1997,14 @@ object Icon {
     }
 
     @Composable
-    fun Explicit(blendOverlay: Boolean = false) {
+    fun Explicit(
+        blendOverlay: Boolean = false,
+        tint: androidx.compose.ui.graphics.Color = androidx.compose.material3.LocalContentColor.current,
+    ) {
         Icon(
             painter = painterResource(R.drawable.ic_explicit),
             contentDescription = null,
+            tint = tint,
             modifier = Modifier
                 .size(18.dp)
                 .padding(end = 2.dp)

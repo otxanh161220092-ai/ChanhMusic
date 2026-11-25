@@ -638,7 +638,7 @@ private fun NewMiniPlayerSongInfo(
         mediaMetadata?.let { metadata ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (metadata.explicit) {
-                    MIcon.Explicit()
+                    MIcon.Explicit(tint = androidx.compose.ui.graphics.Color.Black)
                     Spacer(Modifier.width(4.dp))
                 }
                 Text(

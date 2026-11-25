@@ -1191,7 +1191,7 @@ private fun BottomSheetPlayerContent(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        if (mediaMetadata.explicit) MIcon.Explicit(blendOverlay = true)
+                        if (mediaMetadata.explicit) MIcon.Explicit(tint = androidx.compose.ui.graphics.Color.Unspecified)
 
                         if (mediaMetadata.artists.any { it.name.isNotBlank() }) {
                             val annotatedString =
