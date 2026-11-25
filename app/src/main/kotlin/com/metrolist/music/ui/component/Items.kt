@@ -2005,7 +2005,7 @@ object Icon {
             .size(18.dp)
             .padding(end = 2.dp)
         if (tint == androidx.compose.ui.graphics.Color.Unspecified) {
-            // Original artwork, with the white E scaled to a light grey (the black square stays black).
+            // Original artwork inverted: the black square becomes light grey-white, the white E becomes dark.
             androidx.compose.foundation.Image(
                 painter = painterResource(R.drawable.ic_explicit),
                 contentDescription = null,
@@ -2013,9 +2013,9 @@ object Icon {
                 colorFilter = androidx.compose.ui.graphics.ColorFilter.colorMatrix(
                     androidx.compose.ui.graphics.ColorMatrix(
                         floatArrayOf(
-                            0.85f, 0f, 0f, 0f, 0f,
-                            0f, 0.85f, 0f, 0f, 0f,
-                            0f, 0f, 0.85f, 0f, 0f,
+                            -0.85f, 0f, 0f, 0f, 0.85f,
+                            0f, -0.85f, 0f, 0f, 0.85f,
+                            0f, 0f, -0.85f, 0f, 0.85f,
                             0f, 0f, 0f, 1f, 0f,
                         )
                     )
