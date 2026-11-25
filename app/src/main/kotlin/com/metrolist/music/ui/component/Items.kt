@@ -2001,14 +2001,32 @@ object Icon {
         blendOverlay: Boolean = false,
         tint: androidx.compose.ui.graphics.Color = androidx.compose.material3.LocalContentColor.current,
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_explicit),
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier
-                .size(18.dp)
-                .padding(end = 2.dp)
-                .then(
+        val iconModifier = Modifier
+            .size(18.dp)
+            .padding(end = 2.dp)
+        if (tint == androidx.compose.ui.graphics.Color.Unspecified) {
+            // Original artwork, with the white E scaled to a light grey (the black square stays black).
+            androidx.compose.foundation.Image(
+                painter = painterResource(R.drawable.ic_explicit),
+                contentDescription = null,
+                modifier = iconModifier,
+                colorFilter = androidx.compose.ui.graphics.ColorFilter.colorMatrix(
+                    androidx.compose.ui.graphics.ColorMatrix(
+                        floatArrayOf(
+                            0.85f, 0f, 0f, 0f, 0f,
+                            0f, 0.85f, 0f, 0f, 0f,
+                            0f, 0f, 0.85f, 0f, 0f,
+                            0f, 0f, 0f, 1f, 0f,
+                        )
+                    )
+                ),
+            )
+        } else {
+            Icon(
+                painter = painterResource(R.drawable.ic_explicit),
+                contentDescription = null,
+                tint = tint,
+                modifier = iconModifier.then(
                     if (blendOverlay) {
                         Modifier.graphicsLayer {
                             compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
@@ -2017,8 +2035,9 @@ object Icon {
                     } else {
                         Modifier
                     }
-                )
-        )
+                ),
+            )
+        }
     }
 }
 
