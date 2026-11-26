@@ -682,7 +682,7 @@ fun AlbumScreen(
                             LazyRow(
                                 state = snapState1,
                                 flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState1, snapPosition = SnapPosition.Start),
-    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
+    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
     horizontalArrangement = Arrangement.spacedBy(12.dp),
 ) {
                                 items(items = videos, key = { "footer_video_${it.id}" }) { video ->

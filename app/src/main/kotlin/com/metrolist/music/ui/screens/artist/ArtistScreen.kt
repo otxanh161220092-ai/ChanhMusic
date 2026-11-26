@@ -909,7 +909,7 @@ fun ArtistScreen(
                                     state = snapState34,
                                     flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState34, snapPosition = SnapPosition.Start),
                                     
-                                    contentPadding = PaddingValues(horizontal = 14.dp),
+                                    contentPadding = PaddingValues(horizontal = 20.dp),
                                 ) {
                                     items(
                                         items = distinctItemsBySection.getOrNull(index) ?: section.items,
