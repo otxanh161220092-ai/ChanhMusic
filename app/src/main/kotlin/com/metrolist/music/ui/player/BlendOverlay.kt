@@ -83,3 +83,33 @@ fun Modifier.fadeVerticalEdges(fraction: Float = 0.12f): Modifier =
                 blendMode = BlendMode.DstIn,
             )
         }
+
+/** Like [fadeBottomEdge], but the bottom edge is a smile curve: higher at the sides, lower in the middle. */
+fun Modifier.fadeBottomEdgeCurved(fraction: Float = 0.2f, sideCut: Float = 0.06f): Modifier =
+    this
+        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            val w = size.width
+            val h = size.height
+            drawRect(
+                brush =
+                    Brush.verticalGradient(
+                        0f to Color.Black,
+                        (1f - fraction) to Color.Black,
+                        1f to Color.Transparent,
+                    ),
+                blendMode = BlendMode.DstIn,
+            )
+            val yLeft = h * (1f - sideCut)
+            val controlY = 2f * h - yLeft
+            val below =
+                androidx.compose.ui.graphics.Path().apply {
+                    moveTo(0f, yLeft)
+                    quadraticTo(w / 2f, controlY, w, yLeft)
+                    lineTo(w, h)
+                    lineTo(0f, h)
+                    close()
+                }
+            drawPath(path = below, color = Color.Black, blendMode = BlendMode.DstOut)
+        }

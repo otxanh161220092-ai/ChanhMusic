@@ -628,7 +628,7 @@ private fun ThumbnailItem(
                     },
                 )
                 .clip(if (squircleArtwork) SmoothCornerShape(20.dp) else smoothCornerShape(dimensions.cornerRadius))
-                .then(if (isLandscape || squircleArtwork) Modifier else Modifier.fadeBottomEdge(0.2f))
+                .then(if (isLandscape || squircleArtwork) Modifier else Modifier.fadeBottomEdgeCurved(0.2f))
         ) {
             if (hidePlayerThumbnail) {
                 HiddenThumbnailPlaceholder(textBackgroundColor = textBackgroundColor)
