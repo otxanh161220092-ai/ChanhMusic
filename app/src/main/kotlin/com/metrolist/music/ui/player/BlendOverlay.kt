@@ -84,6 +84,16 @@ fun Modifier.fadeVerticalEdges(fraction: Float = 0.12f): Modifier =
             )
         }
 
+/** Area below a smile curve whose sides sit at [sideY] and whose middle reaches the bottom edge. */
+private fun smileRegion(w: Float, h: Float, sideY: Float): androidx.compose.ui.graphics.Path =
+    androidx.compose.ui.graphics.Path().apply {
+        moveTo(0f, sideY)
+        quadraticTo(w / 2f, 2f * h - sideY, w, sideY)
+        lineTo(w, h)
+        lineTo(0f, h)
+        close()
+    }
+
 /** Like [fadeBottomEdge], but the bottom edge is a smile curve: higher at the sides, lower in the middle. */
 fun Modifier.fadeBottomEdgeCurved(fraction: Float = 0.3f, sideCut: Float = 0.1f): Modifier =
     this
@@ -92,35 +102,22 @@ fun Modifier.fadeBottomEdgeCurved(fraction: Float = 0.3f, sideCut: Float = 0.1f)
             drawContent()
             val w = size.width
             val h = size.height
-            drawRect(
-                brush =
-                    Brush.verticalGradient(
-                        *Array(9) { i ->
-                            val t = i / 8f
-                            // Eased (smoothstep) fade from fully visible to transparent over the bottom [fraction].
-                            val k = ((t - (1f - fraction)) / fraction).coerceIn(0f, 1f)
-                            val eased = 1f - (k * k * (3f - 2f * k))
-                            t to Color.Black.copy(alpha = eased)
-                        },
-                    ),
-                blendMode = BlendMode.DstIn,
-            )
-            // The smile-shaped cut is feathered: several stacked, partly transparent cuts,
-            // each a little higher than the last, so the curve dissolves instead of stopping hard.
             val yLeft = h * (1f - sideCut)
-            val band = h * 0.1f
-            val steps = 8
-            for (i in 0 until steps) {
-                val yl = yLeft - band * (i / steps.toFloat())
-                val controlY = 2f * h - yl
-                val cut =
-                    androidx.compose.ui.graphics.Path().apply {
-                        moveTo(0f, yl)
-                        quadraticTo(w / 2f, controlY, w, yl)
-                        lineTo(w, h)
-                        lineTo(0f, h)
-                        close()
-                    }
-                drawPath(path = cut, color = Color.Black.copy(alpha = 0.35f), blendMode = BlendMode.DstOut)
+            // Depth of the feathered zone above the curve.
+            val band = h * fraction
+            // Layers of the same smile-shaped region, each lifted higher by a step of the band.
+            // Each layer removes a little alpha, so the visible amount ramps smoothly up across the band
+            // and follows the curve, instead of a straight gradient or a single hard cut.
+            val layers = 8
+            val layerAlpha = 0.4f
+            for (j in 0 until layers) {
+                val lift = band * (j / layers.toFloat())
+                drawPath(
+                    path = smileRegion(w, h, yLeft - lift),
+                    color = Color.Black.copy(alpha = layerAlpha),
+                    blendMode = BlendMode.DstOut,
+                )
             }
+            // Solid cut at the curve itself, so nothing below it remains.
+            drawPath(path = smileRegion(w, h, yLeft), color = Color.Black, blendMode = BlendMode.DstOut)
         }
