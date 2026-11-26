@@ -1,5 +1,6 @@
 package com.metrolist.music.ui.screens
 
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.ui.res.stringResource
 import com.metrolist.music.R
 import com.metrolist.music.bcmix.canvas.CanvasArtworkPlayer
@@ -191,7 +192,11 @@ fun LazyListScope.topPicksSkeleton() {
             SectionHeaderSkeleton()
             BoxWithConstraints {
                 val cardWidth = topPickWidth(maxWidth)
+                val snapState32 = rememberLazyListState()
                 LazyRow(
+                    state = snapState32,
+                    flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState32),
+                    
                     contentPadding = PaddingValues(horizontal = PAGE_GUTTER),
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     userScrollEnabled = false,

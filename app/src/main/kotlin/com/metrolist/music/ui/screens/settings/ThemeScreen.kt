@@ -1,5 +1,7 @@
 package com.metrolist.music.ui.screens.settings
 
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -385,7 +387,11 @@ fun ThemeControls(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 
+                val snapState37 = rememberLazyListState()
                 LazyRow(
+                    state = snapState37,
+                    flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState37),
+                    
                     horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
                     contentPadding = PaddingValues(horizontal = 4.dp)
                 ) {

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.compose.foundation.background
@@ -78,7 +80,11 @@ fun LazyListScope.appleHomeSections(
             SectionTitle(title = "Recently Played", onClick = onOpenRecent, expanded = false)
         }
         item(key = "apple_recent_list") {
-            LazyRow(contentPadding = PaddingValues(horizontal = 12.dp)) {
+            val snapState11 = rememberLazyListState()
+            LazyRow(
+                state = snapState11,
+                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState11),
+                contentPadding = PaddingValues(horizontal = 12.dp)) {
                 items(
                     items = recent,
                     key = { "apple_recent_${it.id}" },

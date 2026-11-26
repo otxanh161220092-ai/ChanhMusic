@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens.library
 
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import com.metrolist.music.ui.component.smoothCornerShape
 
 import androidx.compose.foundation.background
@@ -257,7 +259,11 @@ fun LibraryHomeLayout(
         }
 
         item(key = "recent_row") {
+            val snapState36 = rememberLazyListState()
             LazyRow(
+                state = snapState36,
+                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState36),
+                
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {

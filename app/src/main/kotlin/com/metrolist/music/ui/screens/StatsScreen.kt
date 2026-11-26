@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens
 
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import androidx.activity.compose.BackHandler
@@ -407,7 +408,11 @@ fun StatsScreen(
                 }
 
                 item(key = "mostPeriodPlaylists") {
+                    val snapState28 = rememberLazyListState()
                     LazyRow(
+                        state = snapState28,
+                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState28),
+                        
                         contentPadding = PaddingValues(horizontal = 4.dp),
                         modifier = Modifier.animateItem(),
                     ) {
@@ -451,7 +456,11 @@ fun StatsScreen(
                         modifier = Modifier.animateItem(),
                     )
 
+                    val snapState29 = rememberLazyListState()
                     LazyRow(
+                        state = snapState29,
+                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState29),
+                        
                         modifier = Modifier.animateItem(),
                     ) {
                         itemsIndexed(
@@ -517,7 +526,11 @@ fun StatsScreen(
                         modifier = Modifier.animateItem(),
                     )
 
+                    val snapState30 = rememberLazyListState()
                     LazyRow(
+                        state = snapState30,
+                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState30),
+                        
                         modifier = Modifier.animateItem(),
                     ) {
                         itemsIndexed(
@@ -567,7 +580,11 @@ fun StatsScreen(
                     )
 
                     if (mostPlayedAlbums.isNotEmpty()) {
+                        val snapState31 = rememberLazyListState()
                         LazyRow(
+                            state = snapState31,
+                            flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState31),
+                            
                             modifier = Modifier.animateItem(),
                         ) {
                             itemsIndexed(

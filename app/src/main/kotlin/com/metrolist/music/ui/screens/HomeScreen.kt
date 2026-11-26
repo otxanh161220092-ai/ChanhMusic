@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens
 
+import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import androidx.compose.foundation.clickable
 import com.metrolist.music.constants.NewHomeStyleKey
 import com.metrolist.music.ui.theme.subtitleGrayColor
@@ -1365,7 +1366,11 @@ fun HomeScreen(
 
                 if (newHomeStyle && !homePage?.chips.isNullOrEmpty()) {
                     item(key = "new_home_chips") {
+                        val snapState14 = rememberLazyListState()
                         LazyRow(
+                            state = snapState14,
+                            flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState14),
+                            
                             contentPadding =
                                 WindowInsets.systemBars
                                     .only(WindowInsetsSides.Horizontal)
@@ -1394,7 +1399,11 @@ fun HomeScreen(
                 if (isLoading && homePage?.chips.isNullOrEmpty()) {
                     item(key = "chips_shimmer") {
                         ShimmerHost(showGradient = false) {
+                            val snapState15 = rememberLazyListState()
                             LazyRow(
+                                state = snapState15,
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState15),
+                                
                                 contentPadding =
                                     WindowInsets.systemBars
                                         .only(WindowInsetsSides.Horizontal)
@@ -1428,7 +1437,11 @@ fun HomeScreen(
                         }
 
                         item(key = "00_your_shows_list") {
+                            val snapState16 = rememberLazyListState()
                             LazyRow(
+                                state = snapState16,
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState16),
+                                
                                 contentPadding =
                                     WindowInsets.systemBars
                                         .only(WindowInsetsSides.Horizontal)
@@ -1453,7 +1466,11 @@ fun HomeScreen(
                         }
 
                         item(key = "00_episodes_for_later_list") {
+                            val snapState17 = rememberLazyListState()
                             LazyRow(
+                                state = snapState17,
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState17),
+                                
                                 contentPadding =
                                     WindowInsets.systemBars
                                         .only(WindowInsetsSides.Horizontal)
@@ -1476,7 +1493,11 @@ fun HomeScreen(
                         }
 
                         item(key = "0_podcast_channels_list") {
+                            val snapState18 = rememberLazyListState()
                             LazyRow(
+                                state = snapState18,
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState18),
+                                
                                 contentPadding =
                                     WindowInsets.systemBars
                                         .only(WindowInsetsSides.Horizontal)
@@ -1549,7 +1570,11 @@ fun HomeScreen(
                             }
 
                             item(key = "1_chip_section_list_${section.index}") {
+                                val snapState19 = rememberLazyListState()
                                 LazyRow(
+                                    state = snapState19,
+                                    flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState19),
+                                    
                                     contentPadding =
                                         WindowInsets.systemBars
                                             .only(WindowInsetsSides.Horizontal)
@@ -2139,7 +2164,11 @@ fun HomeScreen(
                                 }
 
                                 item(key = "community_playlists_content") {
+                                    val snapState20 = rememberLazyListState()
                                     LazyRow(
+                                        state = snapState20,
+                                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState20),
+                                        
                                         contentPadding = PaddingValues(horizontal = 16.dp),
                                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                                     ) {
@@ -2251,8 +2280,10 @@ fun HomeScreen(
 
                                 item(key = "keep_listening_list") {
                                     val rows = if (keepListening.size > 6) 2 else 1
+                                    val snapState21 = remember("keep_listening_grid") { LazyGridState() }
                                     LazyHorizontalGrid(
-                                        state = remember("keep_listening_grid") { LazyGridState() },
+                                        state = snapState21,
+                                        flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState21)),
                                         rows = GridCells.Fixed(rows),
                                         contentPadding =
                                             WindowInsets.systemBars
@@ -2322,7 +2353,11 @@ fun HomeScreen(
                                 }
 
                                 item(key = "account_playlists_list") {
+                                    val snapState22 = rememberLazyListState()
                                     LazyRow(
+                                        state = snapState22,
+                                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState22),
+                                        
                                         contentPadding =
                                             WindowInsets.systemBars
                                                 .only(WindowInsetsSides.Horizontal)
@@ -2502,7 +2537,11 @@ fun HomeScreen(
                                 }
 
                                 item(key = "similar_to_list_${section.index}") {
+                                    val snapState23 = rememberLazyListState()
                                     LazyRow(
+                                        state = snapState23,
+                                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState23),
+                                        
                                         contentPadding =
                                             WindowInsets.systemBars
                                                 .only(WindowInsetsSides.Horizontal)
@@ -2602,8 +2641,10 @@ fun HomeScreen(
                                 if (isSongsOnlySection) {
                                     // Render songs as a horizontal scrollable list (like Quick picks in YouTube Music)
                                     item(key = "home_section_list_${section.index}") {
+                                        val snapState24 = remember("section_${section.index}_grid") { LazyGridState() }
                                         LazyHorizontalGrid(
-                                            state = remember("section_${section.index}_grid") { LazyGridState() },
+                                            state = snapState24,
+                                            flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState24)),
                                             rows = GridCells.Fixed(4),
                                             contentPadding =
                                                 WindowInsets.systemBars
@@ -2678,7 +2719,11 @@ fun HomeScreen(
                                 } else {
                                     // Render mixed content as horizontal grid items (albums, playlists, artists, etc.)
                                     item(key = "home_section_list_${section.index}") {
+                                        val snapState25 = rememberLazyListState()
                                         LazyRow(
+                                            state = snapState25,
+                                            flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState25),
+                                            
                                             contentPadding =
                                                 WindowInsets.systemBars
                                                     .only(WindowInsetsSides.Horizontal)
@@ -2711,7 +2756,11 @@ fun HomeScreen(
                                     )
                                 }
                                 item(key = "mood_and_genres_list") {
+                                    val snapState26 = rememberLazyGridState()
                                     LazyHorizontalGrid(
+                                        state = snapState26,
+                                        flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState26)),
+                                        
                                         rows = GridCells.Fixed(4),
                                         contentPadding = PaddingValues(6.dp),
                                         modifier =
@@ -2752,7 +2801,11 @@ fun HomeScreen(
                                             .padding(12.dp)
                                             .width(250.dp),
                                 )
+                                val snapState27 = rememberLazyListState()
                                 LazyRow(
+                                    state = snapState27,
+                                    flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState27),
+                                    
                                     contentPadding =
                                         WindowInsets.systemBars
                                             .only(WindowInsetsSides.Horizontal)

@@ -5,6 +5,8 @@
 
 package com.metrolist.music.ui.screens
 
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import com.metrolist.music.ui.component.appleSubtitleColor
 import com.metrolist.music.models.toMediaMetadata
 import androidx.compose.material3.LocalContentColor
@@ -675,7 +677,10 @@ fun AlbumScreen(
                                 color = LocalContentColor.current,
                                 modifier = Modifier.padding(horizontal = 20.dp),
                             )
+                            val snapState1 = rememberLazyListState()
                             LazyRow(
+                                state = snapState1,
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState1),
     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
     horizontalArrangement = Arrangement.spacedBy(12.dp),
 ) {
@@ -732,7 +737,10 @@ fun AlbumScreen(
                                 color = LocalContentColor.current,
                                 modifier = Modifier.padding(horizontal = 20.dp),
                             )
+                            val snapState2 = rememberLazyListState()
                             LazyRow(
+                                state = snapState2,
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState2),
     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
     horizontalArrangement = Arrangement.spacedBy(0.dp),
 ) {
@@ -759,7 +767,10 @@ fun AlbumScreen(
                     )
                 }
                 item(key = "other_versions_list") {
+                    val snapState3 = rememberLazyListState()
                     LazyRow(
+                        state = snapState3,
+                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState3),
                         contentPadding = PaddingValues(horizontal = 14.dp),
                     ) {
                         items(

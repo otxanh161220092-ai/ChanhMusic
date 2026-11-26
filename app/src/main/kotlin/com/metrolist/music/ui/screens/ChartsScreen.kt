@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens
 
+import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import com.metrolist.music.ui.component.GradientTopAppBar
 
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -153,7 +154,11 @@ fun ChartsScreen(
                             val horizontalLazyGridItemWidthFactor = if (maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
                             val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
 
+                            val snapState12 = rememberLazyGridState()
                             LazyHorizontalGrid(
+                                state = snapState12,
+                                flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState12)),
+                                
                                 rows = GridCells.Fixed(4),
                                 contentPadding = PaddingValues(start = 4.dp),
                                 modifier =
@@ -331,7 +336,11 @@ fun ChartsScreen(
                             )
                         }
                         item(key = "top_videos_content") {
+                            val snapState13 = rememberLazyListState()
                             LazyRow(
+                                state = snapState13,
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState13),
+                                
                                 contentPadding =
                                     WindowInsets.systemBars
                                         .only(WindowInsetsSides.Horizontal)

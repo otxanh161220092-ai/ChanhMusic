@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.artist
 
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import com.metrolist.music.ui.theme.subtitleGrayColor
 
 import com.metrolist.music.ui.component.GradientTopAppBar
@@ -760,7 +761,11 @@ fun ArtistScreen(
                                 } else {
                                     libraryAlbums
                                 }
+                            val snapState33 = rememberLazyListState()
                             LazyRow(
+                                state = snapState33,
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState33),
+                                
                                 contentPadding = PaddingValues(horizontal = 14.dp),
                             ) {
                                 items(
@@ -898,7 +903,11 @@ fun ArtistScreen(
                             }
                         } else {
                             item(key = "section_list_${section.title}") {
+                                val snapState34 = rememberLazyListState()
                                 LazyRow(
+                                    state = snapState34,
+                                    flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState34),
+                                    
                                     contentPadding = PaddingValues(horizontal = 14.dp),
                                 ) {
                                     items(
