@@ -855,7 +855,6 @@ fun ArtistScreen(
                                 YouTubeListItem(
                                     item = song as SongItem,
                                     isActive = mediaMetadata?.id == song.id,
-                                    modifier = Modifier.padding(horizontal = 6.dp),
                                     isPlaying = isPlaying,
                                     trailingContent = {
                                         IconButton(
@@ -876,6 +875,7 @@ fun ArtistScreen(
                                     },
                                     modifier =
                                         Modifier
+                                            .padding(horizontal = 6.dp)
                                             .combinedClickable(
                                                 onClick = {
                                                     if (!isGuest) {
