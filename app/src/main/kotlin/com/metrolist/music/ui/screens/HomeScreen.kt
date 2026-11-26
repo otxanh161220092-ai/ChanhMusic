@@ -51,6 +51,8 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerSnapDistance
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -167,6 +169,7 @@ import com.metrolist.music.ui.component.RandomizeGridItem
 import com.metrolist.music.ui.component.SongGridItem
 import com.metrolist.music.ui.component.SongListItem
 import com.metrolist.music.ui.component.SpeedDialGridItem
+import com.metrolist.music.ui.component.SpeedDialListItem
 import com.metrolist.music.ui.component.LocalGridThumbnailCornerRadius
 import com.metrolist.music.ui.component.YouTubeGridItem
 import com.metrolist.music.ui.component.YouTubeListItem
@@ -1636,21 +1639,14 @@ fun HomeScreen(
                                 }
 
                                 item(key = "speed_dial_list") {
-                                    val targetItemSize = 160.dp
                                     val availableWidth = maxWidth - 32.dp
-                                    val columns = (availableWidth / targetItemSize).toInt().coerceAtLeast(3)
-                                    val rows =
-                                        if (columns >= 6) {
-                                            1
-                                        } else if (columns >= 4) {
-                                            2
-                                        } else {
-                                            3
-                                        }
+                                    val columns = 1
+                                    val rows = 9 // 8 songs + the shuffle row
+                                    val songsPerPage = 8
                                     val itemsPerPage = columns * rows
                                     val itemWidth = availableWidth / columns
 
-                                    val pagerState = rememberPagerState(pageCount = { (items.size + itemsPerPage - 1) / itemsPerPage })
+                                    val pagerState = rememberPagerState(pageCount = { (items.size + songsPerPage - 1) / songsPerPage })
 
                                     Column(
                                         modifier =
@@ -1661,13 +1657,19 @@ fun HomeScreen(
                                             state = pagerState,
                                             contentPadding = PaddingValues(horizontal = 16.dp),
                                             pageSpacing = 16.dp,
+                                            // Fast flings skip several pages, slow drags snap to the nearest one.
+                                            flingBehavior =
+                                                PagerDefaults.flingBehavior(
+                                                    state = pagerState,
+                                                    pagerSnapDistance = PagerSnapDistance.atMost(6),
+                                                ),
                                             modifier =
                                                 Modifier
                                                     .fillMaxWidth()
-                                                    .height(itemWidth * rows),
+                                                    .height(ListItemHeight * rows),
                                         ) { page ->
-                                            val pageStartIndex = page * itemsPerPage
-                                            val pageItems = items.drop(pageStartIndex).take(itemsPerPage)
+                                            val pageStartIndex = page * songsPerPage
+                                            val pageItems = items.drop(pageStartIndex).take(songsPerPage)
 
                                             Column(modifier = Modifier.fillMaxSize()) {
                                                 for (row in 0 until rows) {
@@ -1675,14 +1677,14 @@ fun HomeScreen(
                                                         for (col in 0 until columns) {
                                                             val itemIndex = row * columns + col
 
-                                                            val isRandomizeSlot = (page == 0 && itemIndex == itemsPerPage - 1)
+                                                            val isRandomizeSlot = itemIndex == itemsPerPage - 1
 
                                                             if (isRandomizeSlot) {
                                                                 Box(
                                                                     modifier =
                                                                         Modifier
                                                                             .width(itemWidth)
-                                                                            .height(itemWidth)
+                                                                            .height(ListItemHeight)
                                                                             .padding(4.dp),
                                                                 ) {
                                                                     RandomizeGridItem(
@@ -1770,10 +1772,10 @@ fun HomeScreen(
                                                                     modifier =
                                                                         Modifier
                                                                             .width(itemWidth)
-                                                                            .height(itemWidth)
-                                                                            .padding(4.dp),
+                                                                            .height(ListItemHeight)
+                                                                            .padding(horizontal = 4.dp),
                                                                 ) {
-                                                                    SpeedDialGridItem(
+                                                                    SpeedDialListItem(
                                                                         item = item,
                                                                         isPinned = isPinned,
                                                                         isActive =
