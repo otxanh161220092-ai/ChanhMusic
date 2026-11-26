@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens
 
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import androidx.compose.foundation.clickable
 import com.metrolist.music.constants.NewHomeStyleKey
@@ -2283,7 +2284,7 @@ fun HomeScreen(
                                     val snapState21 = remember("keep_listening_grid") { LazyGridState() }
                                     LazyHorizontalGrid(
                                         state = snapState21,
-                                        flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState21)),
+                                        flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState21, snapPosition = SnapPosition.Start)),
                                         rows = GridCells.Fixed(rows),
                                         contentPadding =
                                             WindowInsets.systemBars
@@ -2644,7 +2645,7 @@ fun HomeScreen(
                                         val snapState24 = remember("section_${section.index}_grid") { LazyGridState() }
                                         LazyHorizontalGrid(
                                             state = snapState24,
-                                            flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState24)),
+                                            flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState24, snapPosition = SnapPosition.Start)),
                                             rows = GridCells.Fixed(4),
                                             contentPadding =
                                                 WindowInsets.systemBars
@@ -2759,7 +2760,7 @@ fun HomeScreen(
                                     val snapState26 = rememberLazyGridState()
                                     LazyHorizontalGrid(
                                         state = snapState26,
-                                        flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState26)),
+                                        flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState26, snapPosition = SnapPosition.Start)),
                                         
                                         rows = GridCells.Fixed(4),
                                         contentPadding = PaddingValues(6.dp),

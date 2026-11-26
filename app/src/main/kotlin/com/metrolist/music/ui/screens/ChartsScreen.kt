@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens
 
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import com.metrolist.music.ui.component.GradientTopAppBar
 
@@ -157,7 +158,7 @@ fun ChartsScreen(
                             val snapState12 = rememberLazyGridState()
                             LazyHorizontalGrid(
                                 state = snapState12,
-                                flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState12)),
+                                flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = snapState12, snapPosition = SnapPosition.Start)),
                                 
                                 rows = GridCells.Fixed(4),
                                 contentPadding = PaddingValues(start = 4.dp),
