@@ -105,15 +105,22 @@ fun Modifier.fadeBottomEdgeCurved(fraction: Float = 0.3f, sideCut: Float = 0.1f)
                     ),
                 blendMode = BlendMode.DstIn,
             )
+            // The smile-shaped cut is feathered: several stacked, partly transparent cuts,
+            // each a little higher than the last, so the curve dissolves instead of stopping hard.
             val yLeft = h * (1f - sideCut)
-            val controlY = 2f * h - yLeft
-            val below =
-                androidx.compose.ui.graphics.Path().apply {
-                    moveTo(0f, yLeft)
-                    quadraticTo(w / 2f, controlY, w, yLeft)
-                    lineTo(w, h)
-                    lineTo(0f, h)
-                    close()
-                }
-            drawPath(path = below, color = Color.Black, blendMode = BlendMode.DstOut)
+            val band = h * 0.1f
+            val steps = 8
+            for (i in 0 until steps) {
+                val yl = yLeft - band * (i / steps.toFloat())
+                val controlY = 2f * h - yl
+                val cut =
+                    androidx.compose.ui.graphics.Path().apply {
+                        moveTo(0f, yl)
+                        quadraticTo(w / 2f, controlY, w, yl)
+                        lineTo(w, h)
+                        lineTo(0f, h)
+                        close()
+                    }
+                drawPath(path = cut, color = Color.Black.copy(alpha = 0.35f), blendMode = BlendMode.DstOut)
+            }
         }
