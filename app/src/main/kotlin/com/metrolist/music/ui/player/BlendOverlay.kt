@@ -85,7 +85,7 @@ fun Modifier.fadeVerticalEdges(fraction: Float = 0.12f): Modifier =
         }
 
 /** Like [fadeBottomEdge], but the bottom edge is a smile curve: higher at the sides, lower in the middle. */
-fun Modifier.fadeBottomEdgeCurved(fraction: Float = 0.2f, sideCut: Float = 0.06f): Modifier =
+fun Modifier.fadeBottomEdgeCurved(fraction: Float = 0.3f, sideCut: Float = 0.1f): Modifier =
     this
         .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
         .drawWithContent {
@@ -95,9 +95,13 @@ fun Modifier.fadeBottomEdgeCurved(fraction: Float = 0.2f, sideCut: Float = 0.06f
             drawRect(
                 brush =
                     Brush.verticalGradient(
-                        0f to Color.Black,
-                        (1f - fraction) to Color.Black,
-                        1f to Color.Transparent,
+                        *Array(9) { i ->
+                            val t = i / 8f
+                            // Eased (smoothstep) fade from fully visible to transparent over the bottom [fraction].
+                            val k = ((t - (1f - fraction)) / fraction).coerceIn(0f, 1f)
+                            val eased = 1f - (k * k * (3f - 2f * k))
+                            t to Color.Black.copy(alpha = eased)
+                        },
                     ),
                 blendMode = BlendMode.DstIn,
             )
