@@ -50,6 +50,8 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerSnapDistance
@@ -1640,10 +1642,10 @@ fun HomeScreen(
 
                                 item(key = "speed_dial_list") {
                                     val availableWidth = maxWidth - 32.dp
-                                    val columns = 1
-                                    val rows = 9 // 8 songs + the shuffle row
-                                    val songsPerPage = 8
-                                    val itemsPerPage = columns * rows
+                                    val columns = 2
+                                    val rows = 4
+                                    val songsPerPage = columns * rows
+                                    val itemsPerPage = songsPerPage
                                     val itemWidth = availableWidth / columns
 
                                     val pagerState = rememberPagerState(pageCount = { (items.size + songsPerPage - 1) / songsPerPage })
@@ -1677,91 +1679,7 @@ fun HomeScreen(
                                                         for (col in 0 until columns) {
                                                             val itemIndex = row * columns + col
 
-                                                            val isRandomizeSlot = itemIndex == itemsPerPage - 1
-
-                                                            if (isRandomizeSlot) {
-                                                                Box(
-                                                                    modifier =
-                                                                        Modifier
-                                                                            .width(itemWidth)
-                                                                            .height(ListItemHeight)
-                                                                            .padding(4.dp),
-                                                                ) {
-                                                                    RandomizeGridItem(
-                                                                        isLoading = isRandomizing,
-                                                                        onClick = {
-                                                                            if (isRandomizing) {
-                                                                                randomizeJob?.cancel()
-                                                                            } else if (!isListenTogetherGuest) {
-                                                                                randomizeJob =
-                                                                                    scope.launch {
-                                                                                        val randomItem = viewModel.getRandomItem()
-                                                                                        if (randomItem != null) {
-                                                                                            when (randomItem) {
-                                                                                                is SongItem -> {
-                                                                                                    playerConnection.playQueue(
-                                                                                                        if (autoRadioQueue) {
-                                                                                                            YouTubeQueue(
-                                                                                                                randomItem.endpoint
-                                                                                                                    ?: WatchEndpoint(
-                                                                                                                        videoId = randomItem.id,
-                                                                                                                    ),
-                                                                                                                randomItem.toMediaMetadata(),
-                                                                                                            )
-                                                                                                        } else {
-                                                                                                            ListQueue(
-                                                                                                                title = randomItem.title,
-                                                                                                                items = listOf(randomItem.toMediaItem())
-                                                                                                            )
-                                                                                                        }
-                                                                                                    )
-                                                                                                }
-
-                                                                                                is AlbumItem -> {
-                                                                                                    navController.navigate(
-                                                                                                        "album/${randomItem.id}",
-                                                                                                    )
-                                                                                                }
-
-                                                                                                is ArtistItem -> {
-                                                                                                    navController.navigate(
-                                                                                                        "artist/${randomItem.id}",
-                                                                                                    )
-                                                                                                }
-
-                                                                                                is PlaylistItem -> {
-                                                                                                    navController.navigate(
-                                                                                                        "online_playlist/${randomItem.id}",
-                                                                                                    )
-                                                                                                }
-
-                                                                                                is PodcastItem -> {
-                                                                                                    navController.navigate(
-                                                                                                        "online_podcast/${randomItem.id}",
-                                                                                                    )
-                                                                                                }
-
-                                                                                                is EpisodeItem -> {
-                                                                                                    playerConnection.playQueue(
-                                                                                                        ListQueue(
-                                                                                                            title = randomItem.title,
-                                                                                                            items =
-                                                                                                                listOf(
-                                                                                                                    randomItem
-                                                                                                                        .toMediaMetadata()
-                                                                                                                        .toMediaItem(),
-                                                                                                                ),
-                                                                                                        ),
-                                                                                                    )
-                                                                                                }
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                            }
-                                                                        },
-                                                                    )
-                                                                }
-                                                            } else if (itemIndex < pageItems.size) {
+                                                            if (itemIndex < pageItems.size) {
                                                                 val item = pageItems[itemIndex]
                                                                 val isPinned by database.speedDialDao
                                                                     .isPinned(
@@ -1948,6 +1866,102 @@ fun HomeScreen(
                                                 }
                                             }
                                         }
+                                    }
+                                }
+                                item(key = "speed_dial_shuffle") {
+                                    Row(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                                .heightIn(min = 64.dp)
+                                                .clip(RoundedCornerShape(16.dp))
+                                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+                                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Box(modifier = Modifier.size(36.dp)) {
+                                            RandomizeGridItem(
+                                                                                                                isLoading = isRandomizing,
+                                                                                                                onClick = {
+                                                                                                                    if (isRandomizing) {
+                                                                                                                        randomizeJob?.cancel()
+                                                                                                                    } else if (!isListenTogetherGuest) {
+                                                                                                                        randomizeJob =
+                                                                                                                            scope.launch {
+                                                                                                                                val randomItem = viewModel.getRandomItem()
+                                                                                                                                if (randomItem != null) {
+                                                                                                                                    when (randomItem) {
+                                                                                                                                        is SongItem -> {
+                                                                                                                                            playerConnection.playQueue(
+                                                                                                                                                if (autoRadioQueue) {
+                                                                                                                                                    YouTubeQueue(
+                                                                                                                                                        randomItem.endpoint
+                                                                                                                                                            ?: WatchEndpoint(
+                                                                                                                                                                videoId = randomItem.id,
+                                                                                                                                                            ),
+                                                                                                                                                        randomItem.toMediaMetadata(),
+                                                                                                                                                    )
+                                                                                                                                                } else {
+                                                                                                                                                    ListQueue(
+                                                                                                                                                        title = randomItem.title,
+                                                                                                                                                        items = listOf(randomItem.toMediaItem())
+                                                                                                                                                    )
+                                                                                                                                                }
+                                                                                                                                            )
+                                                                                                                                        }
+                                        
+                                                                                                                                        is AlbumItem -> {
+                                                                                                                                            navController.navigate(
+                                                                                                                                                "album/${randomItem.id}",
+                                                                                                                                            )
+                                                                                                                                        }
+                                        
+                                                                                                                                        is ArtistItem -> {
+                                                                                                                                            navController.navigate(
+                                                                                                                                                "artist/${randomItem.id}",
+                                                                                                                                            )
+                                                                                                                                        }
+                                        
+                                                                                                                                        is PlaylistItem -> {
+                                                                                                                                            navController.navigate(
+                                                                                                                                                "online_playlist/${randomItem.id}",
+                                                                                                                                            )
+                                                                                                                                        }
+                                        
+                                                                                                                                        is PodcastItem -> {
+                                                                                                                                            navController.navigate(
+                                                                                                                                                "online_podcast/${randomItem.id}",
+                                                                                                                                            )
+                                                                                                                                        }
+                                        
+                                                                                                                                        is EpisodeItem -> {
+                                                                                                                                            playerConnection.playQueue(
+                                                                                                                                                ListQueue(
+                                                                                                                                                    title = randomItem.title,
+                                                                                                                                                    items =
+                                                                                                                                                        listOf(
+                                                                                                                                                            randomItem
+                                                                                                                                                                .toMediaMetadata()
+                                                                                                                                                                .toMediaItem(),
+                                                                                                                                                        ),
+                                                                                                                                                ),
+                                                                                                                                            )
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                    }
+                                                                                                                },
+                                                                                                            )
+                                        }
+                                        Text(
+                                            text = stringResource(R.string.shuffle),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(start = 12.dp),
+                                        )
                                     }
                                 }
                             }
