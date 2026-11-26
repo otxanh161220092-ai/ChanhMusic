@@ -1277,19 +1277,13 @@ fun HomeScreen(
                 remember(quickPicksLazyGridState) {
                     SnapLayoutInfoProvider(
                         lazyGridState = quickPicksLazyGridState,
-                        positionInLayout = { layoutSize, itemSize ->
-                            (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
-                        },
-                    )
+                        snapPosition = SnapPosition.Start, )
                 }
             val forgottenFavoritesSnapLayoutInfoProvider =
                 remember(forgottenFavoritesLazyGridState) {
                     SnapLayoutInfoProvider(
                         lazyGridState = forgottenFavoritesLazyGridState,
-                        positionInLayout = { layoutSize, itemSize ->
-                            (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
-                        },
-                    )
+                        snapPosition = SnapPosition.Start, )
                 }
 
             val density = LocalDensity.current
@@ -1370,7 +1364,7 @@ fun HomeScreen(
                         val snapState14 = rememberLazyListState()
                         LazyRow(
                             state = snapState14,
-                            flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState14),
+                            flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState14, snapPosition = SnapPosition.Start),
                             
                             contentPadding =
                                 WindowInsets.systemBars
@@ -1403,7 +1397,7 @@ fun HomeScreen(
                             val snapState15 = rememberLazyListState()
                             LazyRow(
                                 state = snapState15,
-                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState15),
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState15, snapPosition = SnapPosition.Start),
                                 
                                 contentPadding =
                                     WindowInsets.systemBars
@@ -1441,7 +1435,7 @@ fun HomeScreen(
                             val snapState16 = rememberLazyListState()
                             LazyRow(
                                 state = snapState16,
-                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState16),
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState16, snapPosition = SnapPosition.Start),
                                 
                                 contentPadding =
                                     WindowInsets.systemBars
@@ -1470,7 +1464,7 @@ fun HomeScreen(
                             val snapState17 = rememberLazyListState()
                             LazyRow(
                                 state = snapState17,
-                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState17),
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState17, snapPosition = SnapPosition.Start),
                                 
                                 contentPadding =
                                     WindowInsets.systemBars
@@ -1497,7 +1491,7 @@ fun HomeScreen(
                             val snapState18 = rememberLazyListState()
                             LazyRow(
                                 state = snapState18,
-                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState18),
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState18, snapPosition = SnapPosition.Start),
                                 
                                 contentPadding =
                                     WindowInsets.systemBars
@@ -1574,7 +1568,7 @@ fun HomeScreen(
                                 val snapState19 = rememberLazyListState()
                                 LazyRow(
                                     state = snapState19,
-                                    flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState19),
+                                    flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState19, snapPosition = SnapPosition.Start),
                                     
                                     contentPadding =
                                         WindowInsets.systemBars
@@ -2168,7 +2162,7 @@ fun HomeScreen(
                                     val snapState20 = rememberLazyListState()
                                     LazyRow(
                                         state = snapState20,
-                                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState20),
+                                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState20, snapPosition = SnapPosition.Start),
                                         
                                         contentPadding = PaddingValues(horizontal = 16.dp),
                                         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -2357,7 +2351,7 @@ fun HomeScreen(
                                     val snapState22 = rememberLazyListState()
                                     LazyRow(
                                         state = snapState22,
-                                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState22),
+                                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState22, snapPosition = SnapPosition.Start),
                                         
                                         contentPadding =
                                             WindowInsets.systemBars
@@ -2541,7 +2535,7 @@ fun HomeScreen(
                                     val snapState23 = rememberLazyListState()
                                     LazyRow(
                                         state = snapState23,
-                                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState23),
+                                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState23, snapPosition = SnapPosition.Start),
                                         
                                         contentPadding =
                                             WindowInsets.systemBars
@@ -2723,7 +2717,7 @@ fun HomeScreen(
                                         val snapState25 = rememberLazyListState()
                                         LazyRow(
                                             state = snapState25,
-                                            flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState25),
+                                            flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState25, snapPosition = SnapPosition.Start),
                                             
                                             contentPadding =
                                                 WindowInsets.systemBars
@@ -2805,7 +2799,7 @@ fun HomeScreen(
                                 val snapState27 = rememberLazyListState()
                                 LazyRow(
                                     state = snapState27,
-                                    flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState27),
+                                    flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState27, snapPosition = SnapPosition.Start),
                                     
                                     contentPadding =
                                         WindowInsets.systemBars

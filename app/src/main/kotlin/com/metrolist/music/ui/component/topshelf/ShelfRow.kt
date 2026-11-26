@@ -1,5 +1,6 @@
 package com.metrolist.music.ui.component.topshelf
 
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
@@ -44,7 +45,7 @@ fun ShelfRow(
     horizontalArrangement: Arrangement.Horizontal,
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
-    flingBehavior: FlingBehavior = rememberSnapFlingBehavior(lazyListState = state),
+    flingBehavior: FlingBehavior = rememberSnapFlingBehavior(lazyListState = state, snapPosition = SnapPosition.Start),
     content: LazyListScope.() -> Unit,
 ) {
     LocalShelfRowChrome.current.Wrap(state) {

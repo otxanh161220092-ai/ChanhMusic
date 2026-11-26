@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens.artist
 
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import com.metrolist.music.ui.component.smoothCornerShape
@@ -76,7 +77,7 @@ fun ChannelVideoCarousel(
     val snapState35 = rememberLazyListState()
     LazyRow(
         state = snapState35,
-        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState35),
+        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState35, snapPosition = SnapPosition.Start),
         
         modifier = modifier.fillMaxWidth(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp),

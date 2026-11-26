@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens
 
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import com.metrolist.music.ui.component.appleSubtitleColor
@@ -680,7 +681,7 @@ fun AlbumScreen(
                             val snapState1 = rememberLazyListState()
                             LazyRow(
                                 state = snapState1,
-                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState1),
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState1, snapPosition = SnapPosition.Start),
     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
     horizontalArrangement = Arrangement.spacedBy(12.dp),
 ) {
@@ -740,7 +741,7 @@ fun AlbumScreen(
                             val snapState2 = rememberLazyListState()
                             LazyRow(
                                 state = snapState2,
-                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState2),
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState2, snapPosition = SnapPosition.Start),
     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
     horizontalArrangement = Arrangement.spacedBy(0.dp),
 ) {
@@ -770,7 +771,7 @@ fun AlbumScreen(
                     val snapState3 = rememberLazyListState()
                     LazyRow(
                         state = snapState3,
-                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState3),
+                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState3, snapPosition = SnapPosition.Start),
                         contentPadding = PaddingValues(horizontal = 14.dp),
                     ) {
                         items(

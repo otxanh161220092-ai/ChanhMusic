@@ -5,6 +5,7 @@
 
 package com.metrolist.music.ui.screens
 
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import com.metrolist.music.ui.component.GradientTopAppBar
 
@@ -411,7 +412,7 @@ fun StatsScreen(
                     val snapState28 = rememberLazyListState()
                     LazyRow(
                         state = snapState28,
-                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState28),
+                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState28, snapPosition = SnapPosition.Start),
                         
                         contentPadding = PaddingValues(horizontal = 4.dp),
                         modifier = Modifier.animateItem(),
@@ -459,7 +460,7 @@ fun StatsScreen(
                     val snapState29 = rememberLazyListState()
                     LazyRow(
                         state = snapState29,
-                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState29),
+                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState29, snapPosition = SnapPosition.Start),
                         
                         modifier = Modifier.animateItem(),
                     ) {
@@ -529,7 +530,7 @@ fun StatsScreen(
                     val snapState30 = rememberLazyListState()
                     LazyRow(
                         state = snapState30,
-                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState30),
+                        flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState30, snapPosition = SnapPosition.Start),
                         
                         modifier = Modifier.animateItem(),
                     ) {
@@ -583,7 +584,7 @@ fun StatsScreen(
                         val snapState31 = rememberLazyListState()
                         LazyRow(
                             state = snapState31,
-                            flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState31),
+                            flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState31, snapPosition = SnapPosition.Start),
                             
                             modifier = Modifier.animateItem(),
                         ) {

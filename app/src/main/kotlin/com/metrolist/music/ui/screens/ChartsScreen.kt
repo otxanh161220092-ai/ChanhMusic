@@ -250,10 +250,7 @@ fun ChartsScreen(
                                     remember(lazyGridState) {
                                         SnapLayoutInfoProvider(
                                             lazyGridState = lazyGridState,
-                                            positionInLayout = { layoutSize, itemSize ->
-                                                (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
-                                            },
-                                        )
+                                            snapPosition = SnapPosition.Start, )
                                     }
 
                                 LazyHorizontalGrid(
@@ -340,7 +337,7 @@ fun ChartsScreen(
                             val snapState13 = rememberLazyListState()
                             LazyRow(
                                 state = snapState13,
-                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState13),
+                                flingBehavior = rememberSnapFlingBehavior(lazyListState = snapState13, snapPosition = SnapPosition.Start),
                                 
                                 contentPadding =
                                     WindowInsets.systemBars
